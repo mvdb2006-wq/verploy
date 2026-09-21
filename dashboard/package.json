@@ -20,7 +20,7 @@
     "tailwind-merge": "^2.4.0",
     "lucide-react": "^0.408.0",
     "recharts": "^2.12.7",
-    "stripe": "^16.0.0"
+    "stripe": "^17.0.0"
   },
   "devDependencies": {
     "typescript": "^5.5.3",
