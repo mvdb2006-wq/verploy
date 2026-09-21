@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatDate } from '@/lib/utils'
-import { Settings, Key, Globe, Bell, Copy } from 'lucide-react'
+import { Settings, Key, Globe, Copy } from 'lucide-react'
 
 export const metadata = { title: 'Instellingen' }
 
@@ -16,9 +16,10 @@ export default async function SettingsPage() {
     .eq('user_id', user.id)
     .single()
 
-  const agency = membership?.agencies as {
+  const agenciesRaw = membership?.agencies
+  const agency = (Array.isArray(agenciesRaw) ? agenciesRaw[0] : agenciesRaw) as {
     id: string; name: string; slug: string; plan: string; created_at: string
-  } | null
+  } | null ?? null
 
   const { data: sites } = await supabase
     .from('sites')
