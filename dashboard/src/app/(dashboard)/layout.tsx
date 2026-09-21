@@ -17,7 +17,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq('user_id', user.id)
     .single()
 
-  const agency = membership?.agencies as { id: string; name: string; slug: string } | null
+  const agenciesRaw = membership?.agencies
+  const agency = (Array.isArray(agenciesRaw) ? agenciesRaw[0] : agenciesRaw) as { id: string; name: string; slug: string } | null ?? null
 
   return (
     <div className="flex h-screen bg-bg overflow-hidden">
