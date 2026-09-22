@@ -1,13 +1,28 @@
 'use client'
 
-import { ArrowLeft, Globe, Plus } from 'lucide-react'
+import { useFormState, useFormStatus } from 'react-dom'
+import { ArrowLeft, Globe, Plus, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+
+type State = { error?: string } | null
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button type="submit" disabled={pending} className="btn btn-primary w-full">
+      {pending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
+      {pending ? 'Aanmaken…' : 'Site aanmaken'}
+    </button>
+  )
+}
 
 export default function NewSiteForm({
   addSite,
 }: {
-  addSite: (formData: FormData) => Promise<void>
+  addSite: (prevState: State, formData: FormData) => Promise<State>
 }) {
+  const [state, formAction] = useFormState(addSite, null)
+
   return (
     <div className="p-6 max-w-xl mx-auto">
       {/* Header */}
@@ -27,7 +42,13 @@ export default function NewSiteForm({
           <h2 className="font-bold text-text">Sitegegevens</h2>
         </div>
 
-        <form action={addSite} className="space-y-4">
+        {state?.error && (
+          <div className="bg-danger/10 border border-danger/20 text-danger text-sm rounded-lg px-4 py-3 mb-4">
+            {state.error}
+          </div>
+        )}
+
+        <form action={formAction} className="space-y-4">
           <div>
             <label htmlFor="name" className="label block mb-1.5">
               Sitenaam <span className="text-danger">*</span>
@@ -75,10 +96,7 @@ export default function NewSiteForm({
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="btn btn-primary w-full">
-              <Plus size={15} />
-              Site aanmaken
-            </button>
+            <SubmitButton />
           </div>
         </form>
       </div>

@@ -1,5 +1,3 @@
-'use server'
-
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -20,7 +18,10 @@ export default async function NewSitePage() {
 
   if (!membership) redirect('/dashboard')
 
-  async function addSite(formData: FormData) {
+  async function addSite(
+    prevState: { error?: string } | null,
+    formData: FormData,
+  ): Promise<{ error?: string } | null> {
     'use server'
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -32,27 +33,33 @@ export default async function NewSitePage() {
       .eq('user_id', user.id)
       .single()
 
-    if (!membership) return
+    if (!membership) {
+      return { error: 'Geen bureau-lidmaatschap gevonden. Neem contact op met support.' }
+    }
 
-    const name = formData.get('name') as string
-    const url = (formData.get('url') as string).replace(/\/$/, '') // strip trailing slash
-    const clientName = (formData.get('client_name') as string) || null
+    const name       = (formData.get('name')        as string | null) ?? ''
+    const rawUrl     = (formData.get('url')          as string | null) ?? ''
+    const clientName = (formData.get('client_name') as string | null) ?? ''
+    const url        = rawUrl.replace(/\/$/, '').trim()
+
+    if (!name.trim())  return { error: 'Vul een sitenaam in.' }
+    if (!url)          return { error: 'Vul een geldige website-URL in.' }
 
     const { data: site, error } = await supabase
       .from('sites')
       .insert({
-        agency_id: membership.agency_id,
-        name: name.trim(),
-        url: url.trim(),
-        client_name: clientName?.trim() || null,
-        status: 'unknown',
+        agency_id:   membership.agency_id,
+        name:        name.trim(),
+        url,
+        client_name: clientName.trim() || null,
+        status:      'unknown',
       })
       .select('id, api_key')
       .single()
 
     if (error || !site) {
-      console.error('Fout bij aanmaken site:', error)
-      return
+      console.error('[verploy] Fout bij aanmaken site:', error)
+      return { error: error?.message ?? 'Onbekende fout bij aanmaken site. Probeer het opnieuw.' }
     }
 
     revalidatePath('/settings')
