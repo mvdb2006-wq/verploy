@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -11,11 +11,36 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Fetch agency for this user
-  const { data: membership } = await supabase
+  let { data: membership } = await supabase
     .from('agency_members')
     .select('agency_id, role, agencies(id, name, slug)')
     .eq('user_id', user.id)
     .single()
+
+  // Auto-provision agency + member if this user has none yet
+  if (!membership) {
+    const service = createServiceClient()
+    const emailPrefix = (user.email?.split('@')[0] ?? 'user')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .slice(0, 20)
+    const slug = `${emailPrefix}-${Math.random().toString(36).slice(2, 6)}`
+    const { data: newAgency } = await service
+      .from('agencies')
+      .insert({ owner_id: user.id, name: emailPrefix, slug })
+      .select('id, name, slug')
+      .single()
+    if (newAgency) {
+      // Trigger inserts agency_members automatically; re-fetch membership
+      const { data: m } = await service
+        .from('agency_members')
+        .select('agency_id, role, agencies(id, name, slug)')
+        .eq('user_id', user.id)
+        .single()
+      membership = m
+    }
+  }
 
   const agenciesRaw = membership?.agencies
   const agency = (Array.isArray(agenciesRaw) ? agenciesRaw[0] : agenciesRaw) as { id: string; name: string; slug: string } | null ?? null

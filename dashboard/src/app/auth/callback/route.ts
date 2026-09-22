@@ -1,19 +1,51 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+
+/** Provision agency + member row for a brand-new user (idempotent). */
+async function provisionAgency(userId: string, userEmail: string) {
+  const service = createServiceClient()
+
+  // Already has a membership? Nothing to do.
+  const { data: existing } = await service
+    .from('agency_members')
+    .select('agency_id')
+    .eq('user_id', userId)
+    .limit(1)
+    .single()
+
+  if (existing) return
+
+  // Generate a URL-safe slug from the email prefix + short random suffix
+  const emailPrefix = (userEmail.split('@')[0] ?? 'user')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 20)
+  const suffix = Math.random().toString(36).slice(2, 6)
+  const slug = `${emailPrefix}-${suffix}`
+
+  await service.from('agencies').insert({
+    owner_id:    userId,
+    name:        emailPrefix,   // user can rename later in settings
+    slug,
+  })
+  // The DB trigger `agency_owner_member` automatically adds the agency_members row.
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
+  const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type') as string | null
-  const next = searchParams.get('next') ?? '/dashboard'
+  const type       = searchParams.get('type') as string | null
+  const next       = searchParams.get('next') ?? '/dashboard'
 
   const supabase = createClient()
 
   // PKCE flow: exchange authorization code for session
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error && data.user) {
+      await provisionAgency(data.user.id, data.user.email ?? '')
       if (type === 'recovery') {
         return NextResponse.redirect(`${origin}/auth/update-password`)
       }
@@ -23,11 +55,12 @@ export async function GET(request: Request) {
 
   // OTP / token_hash flow (invite, recovery via email link)
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       token_hash,
       type: type as 'recovery' | 'invite' | 'email' | 'signup' | 'magiclink',
     })
-    if (!error) {
+    if (!error && data.user) {
+      await provisionAgency(data.user.id, data.user.email ?? '')
       if (type === 'recovery') {
         return NextResponse.redirect(`${origin}/auth/update-password`)
       }
