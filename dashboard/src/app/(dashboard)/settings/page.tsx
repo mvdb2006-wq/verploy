@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatDate } from '@/lib/utils'
-import { Settings, Key, Globe, Copy } from 'lucide-react'
+import { Settings, Key, Globe, Copy, ChevronRight, Plus } from 'lucide-react'
 
 export const metadata = { title: 'Instellingen' }
 
@@ -76,38 +76,42 @@ export default async function SettingsPage() {
 
       {/* Sites + API keys */}
       <div className="card p-0 overflow-hidden">
-        <div className="px-5 py-4 border-b border-border flex items-center gap-2">
-          <Globe size={15} className="text-accent" />
-          <h2 className="font-bold text-text">Sites & API-sleutels</h2>
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Globe size={15} className="text-accent" />
+            <h2 className="font-bold text-text">Sites & API-sleutels</h2>
+          </div>
+          <Link href="/settings/sites/new" className="btn btn-ghost btn-sm flex items-center gap-1 text-xs">
+            <Plus size={13} /> Site toevoegen
+          </Link>
         </div>
 
         {(sites ?? []).length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted">Geen sites gevonden.</p>
+          <div className="px-5 py-8 text-center">
+            <p className="text-sm text-muted mb-3">Nog geen sites toegevoegd.</p>
+            <Link href="/settings/sites/new" className="btn btn-primary btn-sm">
+              <Plus size={13} /> Eerste site toevoegen
+            </Link>
+          </div>
         ) : (
           <div className="divide-y divide-border">
             {(sites ?? []).map(site => (
-              <div key={site.id} className="px-5 py-4">
+              <Link key={site.id} href={`/settings/sites/${site.id}`} className="block px-5 py-4 hover:bg-surface2/50 transition-colors group">
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-semibold text-text">{site.name}</p>
-                    <p className="text-xs text-subtle">{site.url}</p>
+                    <p className="text-xs text-subtle truncate">{site.url}</p>
                   </div>
-                  <span className="badge badge-muted capitalize text-[10px]">{site.status}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="badge badge-muted capitalize text-[10px]">{site.status}</span>
+                    <ChevronRight size={14} className="text-subtle group-hover:text-muted transition-colors" />
+                  </div>
                 </div>
                 <div className="bg-surface2 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                   <code className="text-xs font-mono text-muted truncate">{site.api_key}</code>
-                  <button
-                    className="text-subtle hover:text-text flex-shrink-0 transition-colors"
-                    title="Kopieer API-sleutel"
-                    data-copy={site.api_key}
-                  >
-                    <Copy size={13} />
-                  </button>
+                  <Copy size={13} className="text-subtle flex-shrink-0" />
                 </div>
-                <p className="text-[10px] text-subtle mt-1.5">
-                  Gebruik deze sleutel in de Verploy connector plugin op deze site.
-                </p>
-              </div>
+              </Link>
             ))}
           </div>
         )}
