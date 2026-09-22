@@ -476,41 +476,64 @@ ALTER TABLE alerts         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports        ENABLE ROW LEVEL SECURITY;
 
 -- Helper: is current user a member of an agency?
+-- SECURITY DEFINER + SET search_path ensures it runs as postgres (BYPASSRLS) to avoid RLS recursion
 CREATE OR REPLACE FUNCTION is_agency_member(p_agency_id uuid)
-RETURNS boolean AS $$
+RETURNS boolean
+LANGUAGE sql SECURITY DEFINER STABLE
+SET search_path = public
+AS $$
   SELECT EXISTS (
     SELECT 1 FROM agency_members
     WHERE agency_id = p_agency_id AND user_id = auth.uid()
   );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$;
+
+-- Helper: is current user an owner of an agency?
+CREATE OR REPLACE FUNCTION is_agency_owner(p_agency_id uuid)
+RETURNS boolean
+LANGUAGE sql SECURITY DEFINER STABLE
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM agency_members
+    WHERE agency_id = p_agency_id AND user_id = auth.uid() AND role = 'owner'
+  );
+$$;
 
 -- Helper: current user's agency_id (for members with one agency)
 CREATE OR REPLACE FUNCTION my_agency_id()
-RETURNS uuid AS $$
+RETURNS uuid
+LANGUAGE sql SECURITY DEFINER STABLE
+SET search_path = public
+AS $$
   SELECT agency_id FROM agency_members
   WHERE user_id = auth.uid()
   ORDER BY joined_at LIMIT 1;
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$;
 
 -- AGENCIES
 CREATE POLICY "members can see their agency" ON agencies
   FOR SELECT USING (is_agency_member(id));
 
+-- Note: agencies UPDATE policy uses is_agency_owner which is SECURITY DEFINER (no recursion)
 CREATE POLICY "owners can update their agency" ON agencies
-  FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM agency_members
-      WHERE agency_id = id AND user_id = auth.uid() AND role = 'owner')
-  );
+  FOR UPDATE USING (is_agency_owner(id));
 
 -- AGENCY MEMBERS
+-- SELECT: direct user_id check (avoids any recursion — no function call needed)
 CREATE POLICY "members can see their agency members" ON agency_members
-  FOR SELECT USING (is_agency_member(agency_id));
+  FOR SELECT USING (user_id = auth.uid());
 
-CREATE POLICY "owners can manage members" ON agency_members
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM agency_members am2
-      WHERE am2.agency_id = agency_id AND am2.user_id = auth.uid() AND am2.role = 'owner')
-  );
+-- Write policies use is_agency_owner (SECURITY DEFINER, bypasses RLS — no recursion)
+-- Split from ALL to avoid SELECT recursion
+CREATE POLICY "owners can insert members" ON agency_members
+  FOR INSERT WITH CHECK (is_agency_owner(agency_id));
+
+CREATE POLICY "owners can update members" ON agency_members
+  FOR UPDATE USING (is_agency_owner(agency_id));
+
+CREATE POLICY "owners can delete members" ON agency_members
+  FOR DELETE USING (is_agency_owner(agency_id));
 
 -- SITES
 CREATE POLICY "agency members can see their sites" ON sites
@@ -557,6 +580,24 @@ CREATE POLICY "agency members can update alerts" ON alerts
 -- REPORTS
 CREATE POLICY "agency members can view reports" ON reports
   FOR SELECT USING (is_agency_member(agency_id));
+
+-- ============================================================
+-- GRANT AUTHENTICATED ROLE (for logged-in users via Supabase client)
+-- RLS policies handle row-level access; these grants enable table access
+-- ============================================================
+
+GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT SELECT ON public.agencies TO authenticated;
+GRANT SELECT ON public.agency_members TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.agency_members TO authenticated;
+GRANT UPDATE ON public.agencies TO authenticated;
+GRANT SELECT ON public.sites TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.sites TO authenticated;
+GRANT SELECT ON public.health_snapshots TO authenticated;
+GRANT SELECT ON public.site_plugins TO authenticated;
+GRANT SELECT, INSERT ON public.update_runs TO authenticated;
+GRANT SELECT, UPDATE ON public.alerts TO authenticated;
+GRANT SELECT ON public.reports TO authenticated;
 
 -- ============================================================
 -- GRANT SERVICE ROLE (for API routes using service key)
