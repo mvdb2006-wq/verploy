@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { CheckCircle2, Copy, ArrowRight } from 'lucide-react'
 import CopyButton from './CopyButton'
 
 export const metadata = { title: 'Site toegevoegd' }
@@ -13,6 +13,7 @@ export default function SuccessPage({
 
   return (
     <div className="p-6 max-w-xl mx-auto">
+      {/* Succes header */}
       <div className="flex flex-col items-center text-center mb-8 pt-4">
         <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
           <CheckCircle2 size={28} className="text-accent" />
@@ -23,6 +24,7 @@ export default function SuccessPage({
         </p>
       </div>
 
+      {/* API key */}
       <div className="card mb-5">
         <p className="label mb-3">Jouw API-sleutel</p>
         <div className="bg-surface2 rounded-lg px-4 py-3 flex items-center justify-between gap-3 mb-3">
@@ -35,6 +37,7 @@ export default function SuccessPage({
         </p>
       </div>
 
+      {/* Stappen */}
       <div className="card mb-5">
         <p className="text-sm font-bold text-text mb-4">Volgende stappen</p>
         <ol className="space-y-4">
@@ -68,6 +71,7 @@ export default function SuccessPage({
         </ol>
       </div>
 
+      {/* Acties */}
       <div className="flex gap-3">
         <Link href="/dashboard" className="btn btn-primary flex-1 justify-center">
           Naar dashboard

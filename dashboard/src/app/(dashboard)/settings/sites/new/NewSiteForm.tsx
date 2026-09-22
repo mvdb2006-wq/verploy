@@ -10,6 +10,7 @@ export default function NewSiteForm({
 }) {
   return (
     <div className="p-6 max-w-xl mx-auto">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/settings" className="text-muted hover:text-text transition-colors">
           <ArrowLeft size={18} />
@@ -82,6 +83,7 @@ export default function NewSiteForm({
         </form>
       </div>
 
+      {/* Uitleg */}
       <div className="card bg-surface2/50">
         <p className="text-sm font-semibold text-text mb-2">Hoe werkt het?</p>
         <ol className="text-sm text-muted space-y-2 list-none">
