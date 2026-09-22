@@ -19,21 +19,21 @@ export function formatDate(date: string | null): string {
 }
 
 export function statusColor(status: SiteStatus): string {
-  return {
-    online:      'text-accent',
-    offline:     'text-danger',
-    pending:     'text-warn',
-    maintenance: 'text-muted',
-  }[status]
+  return ({
+    online:   'text-accent',
+    offline:  'text-danger',
+    degraded: 'text-warn',
+    unknown:  'text-muted',
+  } as Record<string, string>)[status] ?? 'text-muted'
 }
 
 export function statusDot(status: SiteStatus): string {
-  return {
-    online:      'bg-accent',
-    offline:     'bg-danger',
-    pending:     'bg-warn',
-    maintenance: 'bg-muted',
-  }[status]
+  return ({
+    online:   'bg-accent',
+    offline:  'bg-danger',
+    degraded: 'bg-warn',
+    unknown:  'bg-muted',
+  } as Record<string, string>)[status] ?? 'bg-muted'
 }
 
 export function severityColor(severity: AlertSeverity): string {

@@ -29,8 +29,8 @@ export default async function AlertsPage() {
 
   const rows = (alerts ?? []) as (Alert & { sites: { id: string; name: string; url: string } | null })[]
 
-  const open = rows.filter(a => !a.resolved_at)
-  const resolved = rows.filter(a => a.resolved_at)
+  const open = rows.filter(a => a.status === 'open')
+  const resolved = rows.filter(a => a.status === 'resolved' || a.status === 'dismissed')
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -100,7 +100,10 @@ function AlertRow({
     <div className={cn('px-5 py-3.5 flex items-start gap-3', resolved && 'opacity-50')}>
       {icons[alert.severity] ?? icons.info}
       <div className="flex-1 min-w-0">
-        <p className={cn('text-sm font-medium', resolved ? 'text-muted' : 'text-text')}>{alert.message}</p>
+        <p className={cn('text-sm font-medium', resolved ? 'text-muted' : 'text-text')}>{alert.title}</p>
+        {alert.message && (
+          <p className="text-xs text-subtle mt-0.5">{alert.message}</p>
+        )}
         {alert.sites && (
           <Link
             href={`/sites/${alert.sites.id}`}
@@ -112,8 +115,11 @@ function AlertRow({
       </div>
       <div className="text-right flex-shrink-0">
         <p className="text-xs text-muted">{timeAgo(alert.triggered_at)}</p>
-        {resolved && alert.resolved_at && (
-          <p className="text-[10px] text-subtle">Opgelost {timeAgo(alert.resolved_at)}</p>
+        {resolved && (alert.resolved_at || alert.dismissed_at) && (
+          <p className="text-[10px] text-subtle">
+            {alert.status === 'dismissed' ? 'Afgewezen' : 'Opgelost'}{' '}
+            {timeAgo(alert.resolved_at ?? alert.dismissed_at)}
+          </p>
         )}
       </div>
     </div>

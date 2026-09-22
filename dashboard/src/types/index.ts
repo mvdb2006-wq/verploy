@@ -1,6 +1,6 @@
 // ─── Database types (generated from Supabase schema) ─────────────────────────
 
-export type SiteStatus = 'pending' | 'online' | 'offline' | 'maintenance'
+export type SiteStatus = 'online' | 'offline' | 'degraded' | 'unknown'
 export type UpdateType = 'plugin' | 'theme' | 'core'
 export type UpdateRunStatus = 'queued' | 'staging' | 'testing' | 'applying' | 'completed' | 'failed' | 'blocked'
 export type AlertSeverity = 'info' | 'warning' | 'critical'
@@ -97,19 +97,21 @@ export interface UpdateRun {
   created_at: string
 }
 
+export type AlertStatus = 'open' | 'resolved' | 'dismissed'
+
 export interface Alert {
   id: string
   site_id: string
   agency_id: string
-  type: AlertType
+  type: string
   severity: AlertSeverity
-  message: string
-  metadata: Record<string, unknown>
-  resolved: boolean
-  resolved_at: string | null
-  notified_at: string | null
+  status: AlertStatus
+  title: string
+  message: string | null
+  metadata: Record<string, unknown> | null
   triggered_at: string
-  created_at: string
+  resolved_at: string | null
+  dismissed_at: string | null
 }
 
 // ─── View types ───────────────────────────────────────────────────────────────

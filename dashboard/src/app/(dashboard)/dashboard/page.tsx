@@ -142,17 +142,17 @@ function SiteRow({ site }: { site: SiteOverview }) {
   const gradeColor = vitalsColor(site.performance_score)
 
   const statusColors: Record<string, string> = {
-    online:      'bg-accent',
-    offline:     'bg-danger',
-    pending:     'bg-warn',
-    maintenance: 'bg-muted',
+    online:   'bg-accent',
+    offline:  'bg-danger',
+    degraded: 'bg-warn',
+    unknown:  'bg-muted',
   }
 
   const statusLabels: Record<string, string> = {
-    online:      'Online',
-    offline:     'Offline',
-    pending:     'In afwachting',
-    maintenance: 'Onderhoud',
+    online:   'Online',
+    offline:  'Offline',
+    degraded: 'Verslechterd',
+    unknown:  'Onbekend',
   }
 
   return (
@@ -165,8 +165,8 @@ function SiteRow({ site }: { site: SiteOverview }) {
       </td>
       <td className="px-4 py-3.5">
         <span className="status-dot">
-          <span className={cn('w-1.5 h-1.5 rounded-full inline-block', statusColors[site.status ?? 'pending'])} />
-          <span className="text-text">{statusLabels[site.status ?? 'pending']}</span>
+          <span className={cn('w-1.5 h-1.5 rounded-full inline-block', statusColors[site.status ?? 'unknown'])} />
+          <span className="text-text">{statusLabels[site.status ?? 'unknown']}</span>
         </span>
       </td>
       <td className="px-4 py-3.5 text-right">

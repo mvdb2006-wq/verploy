@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'VERPLOY_VERSION',    '1.0.0' );
 define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VERPLOY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'VERPLOY_API_BASE',   'https://api.verploy.com/v1' );
+define( 'VERPLOY_API_BASE',   'https://app.verploy.com/api/v1' );
 
 // ─── Autoload ─────────────────────────────────────────────────────────────────
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-api-client.php';
