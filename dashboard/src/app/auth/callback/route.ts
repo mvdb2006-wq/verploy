@@ -1,21 +1,20 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-/** Provision agency + member row for a brand-new user (idempotent). */
 async function provisionAgency(userId: string, userEmail: string) {
   const service = createServiceClient()
 
-  // Already has a membership? Nothing to do.
+  // Check if already provisioned
   const { data: existing } = await service
     .from('agency_members')
     .select('agency_id')
     .eq('user_id', userId)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (existing) return
 
-  // Generate a URL-safe slug from the email prefix + short random suffix
+  // Build a URL-safe slug from the email prefix
   const emailPrefix = (userEmail.split('@')[0] ?? 'user')
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '-')
@@ -24,20 +23,23 @@ async function provisionAgency(userId: string, userEmail: string) {
   const suffix = Math.random().toString(36).slice(2, 6)
   const slug = `${emailPrefix}-${suffix}`
 
-  await service.from('agencies').insert({
-    owner_id:    userId,
-    name:        emailPrefix,   // user can rename later in settings
-    slug,
-  })
-  // The DB trigger `agency_owner_member` automatically adds the agency_members row.
+  // Insert the agency — the DB trigger `agency_owner_member` auto-inserts
+  // the agency_members row so we don't need to do it manually.
+  const { error } = await service
+    .from('agencies')
+    .insert({ owner_id: userId, name: emailPrefix, slug })
+
+  if (error) {
+    console.error('[verploy] provisionAgency failed:', error)
+  }
 }
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const code       = searchParams.get('code')
+  const code = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
-  const type       = searchParams.get('type') as string | null
-  const next       = searchParams.get('next') ?? '/dashboard'
+  const type = searchParams.get('type') as string | null
+  const next = searchParams.get('next') ?? '/dashboard'
 
   const supabase = createClient()
 

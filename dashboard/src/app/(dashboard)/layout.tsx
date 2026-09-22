@@ -10,14 +10,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect('/login')
   }
 
-  // Fetch agency for this user
+  // Fetch agency membership for this user
   let { data: membership } = await supabase
     .from('agency_members')
     .select('agency_id, role, agencies(id, name, slug)')
     .eq('user_id', user.id)
     .single()
 
-  // Auto-provision agency + member if this user has none yet
+  // Auto-provision agency for existing accounts that pre-date the auth callback fix
   if (!membership) {
     const service = createServiceClient()
     const emailPrefix = (user.email?.split('@')[0] ?? 'user')
@@ -26,19 +26,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
       .replace(/-+/g, '-')
       .slice(0, 20)
     const slug = `${emailPrefix}-${Math.random().toString(36).slice(2, 6)}`
-    const { data: newAgency } = await service
+
+    const { error: agencyError } = await service
       .from('agencies')
       .insert({ owner_id: user.id, name: emailPrefix, slug })
-      .select('id, name, slug')
-      .single()
-    if (newAgency) {
-      // Trigger inserts agency_members automatically; re-fetch membership
-      const { data: m } = await service
+
+    if (!agencyError) {
+      // Re-fetch now that the trigger has created the agency_members row
+      const { data: m } = await supabase
         .from('agency_members')
         .select('agency_id, role, agencies(id, name, slug)')
         .eq('user_id', user.id)
         .single()
       membership = m
+    } else {
+      console.error('[verploy] auto-provision agency failed:', agencyError)
     }
   }
 
