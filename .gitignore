@@ -40,3 +40,5 @@ next-env.d.ts
 
 # Misc
 *.zip
+
+!dashboard/public/downloads/*.zip
