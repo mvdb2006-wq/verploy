@@ -38,8 +38,7 @@ export async function POST(
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
     }
 
-    // @ts-expect-error — Supabase join typing
-    if (job.sites?.api_key !== api_key) {
+    if ((job.sites as { api_key: string })?.api_key !== api_key) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
