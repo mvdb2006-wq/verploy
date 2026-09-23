@@ -281,11 +281,23 @@
       },
       "core_update": {
         "title": "WordPress {version} está disponible",
-        "body": "Hay una nueva versión de WordPress. La actualización segura se realiza en el flujo de actualización de Verploy."
+        "body": "Hay una nueva versión de WordPress. Inicia una actualización segura en la página del sitio."
       },
       "plugin_updates": {
         "title": "{count, plural, one {# actualización de plugin o tema disponible} other {# actualizaciones de plugins y temas disponibles}}",
         "body": "Consulta la lista en la página del sitio."
+      },
+      "update_blocked": {
+        "title": "Actualización bloqueada: {items}",
+        "body": "{reason} No se ha publicado nada."
+      },
+      "update_rolled_back": {
+        "title": "Actualización revertida: {items}",
+        "body": "{reason} El sitio se ha restaurado automáticamente al estado anterior a la actualización."
+      },
+      "update_failed": {
+        "title": "Actualización fallida: {items}",
+        "body": "{reason}"
       }
     },
     "sslError": {
@@ -310,5 +322,172 @@
     "disk": "Espacio libre en disco",
     "noHttps": "sin HTTPS",
     "openAlerts": "Alertas abiertas"
+  },
+  "runs": {
+    "errorActive": "Ya hay una actualización en curso en este sitio. Espera a que termine.",
+    "errorNoUpdate": "Uno de los elementos seleccionados ya no tiene una actualización disponible. Actualiza la página.",
+    "errorConnector": "Las actualizaciones seguras requieren Verploy Connector 2.1 o posterior. Actualiza el plugin en el sitio.",
+    "errorNotConnected": "Este sitio no está conectado.",
+    "errorReadOnly": "Tu prueba o suscripción ha terminado. La monitorización continúa, pero no puedes iniciar actualizaciones.",
+    "errorNotCancellable": "Esta actualización ya no se puede cancelar: el sitio en producción ya se está actualizando.",
+    "errorNoItems": "Selecciona al menos una actualización (20 como máximo).",
+    "panel": {
+      "hint": "Marca lo que quieres actualizar. Verploy prueba primero en una copia del sitio y solo publica cuando todo funciona.",
+      "start": "{count, plural, =0 {Elige una actualización} one {Ejecutar # actualización segura} other {Ejecutar # actualizaciones seguras}}",
+      "starting": "Iniciando…",
+      "active": "Hay una actualización en curso en este sitio.",
+      "view": "Ver progreso",
+      "connectorOutdated": "Las actualizaciones seguras requieren Verploy Connector 2.1 o posterior (ahora: {version}). Actualiza el plugin en el sitio."
+    },
+    "settings": {
+      "title": "Ajustes de prueba",
+      "intro": "Verploy prueba la página de inicio, las páginas del menú, las páginas de la tienda y la página de acceso, en escritorio y móvil.",
+      "paths": "Páginas adicionales para probar (una por línea, máx. 5)",
+      "pathsHelp": "Ruta desde la raíz, por ejemplo /contacto/.",
+      "masks": "Partes que pueden cambiar (selectores CSS, uno por línea, máx. 10)",
+      "masksHelp": "Por ejemplo, sliders, avisos de cookies o bloques con la fecha. Se ignoran al comparar las capturas de pantalla.",
+      "threshold": "Diferencia visual permitida (%)",
+      "thresholdHelp": "Si una página difiere más de este porcentaje después de la actualización, la prueba falla. Por defecto: 2 %.",
+      "errorPaths": "Usa como máximo 5 rutas que empiecen por /, sin espacios.",
+      "errorMasks": "Usa como máximo 10 selectores CSS válidos.",
+      "errorThreshold": "Elige un porcentaje entre 0,1 y 50."
+    },
+    "history": {
+      "title": "Historial de actualizaciones"
+    },
+    "status": {
+      "queued": "En cola",
+      "running": "En curso"
+    },
+    "verdict": {
+      "deployed": "Publicada",
+      "blocked": "Bloqueada",
+      "rolled_back": "Revertida",
+      "error": "Fallida",
+      "cancelled": "Cancelada"
+    },
+    "outcome": {
+      "deployed": "Todas las actualizaciones están publicadas y la comprobación posterior ha sido correcta.",
+      "blocked": "No se ha publicado nada: la actualización dio problemas en la copia de prueba.",
+      "rolled_back": "La comprobación tras la publicación falló. El sitio se ha restaurado automáticamente al estado anterior a la actualización.",
+      "error": "No se ha podido completar la actualización.",
+      "cancelled": "Cancelada. No se ha publicado nada."
+    },
+    "steps": {
+      "preparing": "Preparación",
+      "baseline": "Medición de referencia en el sitio en producción",
+      "staging_create": "Creación de la copia de prueba (staging)",
+      "staging_baseline": "Medición de la copia antes de la actualización",
+      "staging_update": "Actualizaciones en la copia de prueba",
+      "staging_test": "Prueba de la copia tras la actualización",
+      "deploy_snapshot": "Modo mantenimiento y copia de seguridad",
+      "deploy_apply": "Publicación",
+      "postcheck": "Comprobación tras la publicación",
+      "rollback": "Reversión",
+      "cleanup": "Limpieza",
+      "queued": "En cola",
+      "done": "Terminado"
+    },
+    "viewport": {
+      "desktop": "Escritorio",
+      "mobile": "Móvil"
+    },
+    "itemStatus": {
+      "updated": "Actualizado",
+      "already_current": "Ya actualizado",
+      "update_failed": "Actualización fallida",
+      "not_installed": "No instalado",
+      "no_update_available": "No hay actualización disponible",
+      "filesystem_not_writable": "Sin permisos de escritura en el servidor",
+      "unknown_type": "Tipo desconocido",
+      "crashed": "El sitio falló tras la actualización"
+    },
+    "phpError": {
+      "wp_critical_error": "WordPress muestra un error crítico",
+      "php_fatal": "PHP da un error fatal",
+      "db_connection": "la base de datos no está disponible",
+      "maintenance": "el sitio está en modo mantenimiento"
+    },
+    "reason": {
+      "cancelled": "Cancelada a petición.",
+      "site_missing": "El sitio ya no existe.",
+      "not_connected": "El sitio no está (o ya no está) conectado.",
+      "connector_outdated": "El plugin del sitio es demasiado antiguo para actualizaciones seguras. Actualiza Verploy Connector a la 2.1 o posterior.",
+      "no_pages": "No se han encontrado páginas para probar.",
+      "site_unreachable": "El sitio en producción no estaba disponible, así que no se pudo hacer la medición de referencia.",
+      "staging_unusable": "La copia de prueba no funciona bien en este servidor (estado {status}), así que las pruebas no son fiables. No se ha cambiado nada.",
+      "update_failed": "No se pudo actualizar {name} en la copia de prueba ({status}).",
+      "update_failed_production": "No se pudo actualizar {name} en el sitio en producción ({status}).",
+      "rollback_failed": "La reversión falló o el sitio sigue sin funcionar después. Revisa el sitio de inmediato.",
+      "step_failed": "El paso «{step}» falló tras varios intentos.",
+      "site_rejected": "El sitio rechazó una orden durante «{step}» (HTTP {status}). Vuelve a conectar el sitio si es necesario.",
+      "unknown": "Causa desconocida.",
+      "check": {
+        "reachable": "{page} ({viewport}) ya no carga.",
+        "http": "{page} ({viewport}) devolvió HTTP {after} (antes {before}).",
+        "php_error": "{page} ({viewport}): {error}.",
+        "js_errors": "{page} ({viewport}) tiene nuevos errores de JavaScript: {errors}",
+        "resources": "{page} ({viewport}): hay archivos que ya no cargan: {resources}",
+        "landmarks": "{page} ({viewport}): han desaparecido partes de la página ({missing}).",
+        "content": "{page} ({viewport}) muestra mucho menos contenido que antes.",
+        "visual": "{page} ({viewport}) se ve un {percent} % distinta (permitido: {limit} %).",
+        "login": "El formulario de acceso de WordPress ya no funciona."
+      }
+    },
+    "detail": {
+      "title": "Actualización segura",
+      "startedAt": "Iniciada el {date}",
+      "duration": "duración {time}",
+      "cancel": "Cancelar",
+      "cancelling": "Cancelando… Se está limpiando la copia de prueba.",
+      "items": "Actualizaciones",
+      "component": "Elemento",
+      "version": "Versión",
+      "staging": "Copia de prueba",
+      "production": "Sitio en producción",
+      "steps": "Pasos",
+      "skipped": "omitido",
+      "stagingTests": "Pruebas en la copia de prueba",
+      "stagingTestsIntro": "Las mismas páginas antes y después de la actualización, en una copia del sitio.",
+      "productionTests": "Comprobación en el sitio en producción",
+      "productionTestsIntro": "Justo antes y justo después de publicar.",
+      "beforeUpdate": "Antes",
+      "afterUpdate": "Después",
+      "diff": "Diferencia",
+      "passed": "Superada",
+      "failed": "Fallida",
+      "loginPage": "Página de acceso",
+      "timeline": "Cronología"
+    },
+    "events": {
+      "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",
+      "cancel_requested": "Cancelación solicitada.",
+      "step_started": "{step}.",
+      "step_failed": "«{step}» falló.",
+      "retry": "«{step}» no se completó (intento {attempt}); Verploy lo reintentará en breve.",
+      "pages": "{count, plural, one {# página seleccionada} other {# páginas seleccionadas}} para las pruebas: {pages}.",
+      "baseline_done": "Medición de referencia lista: {healthy} de {total} mediciones correctas.",
+      "staging_ready": "Copia de prueba lista ({files} archivos, {tables} tablas).",
+      "staging_failed": "Pruebas fallidas en la copia de prueba: {page} ({viewport}).",
+      "staging_passed": "Todas las pruebas en la copia de prueba superadas.",
+      "maintenance_on": "Modo mantenimiento activado: los visitantes ven brevemente un aviso de mantenimiento.",
+      "snapshot_ready": "Copia de seguridad de archivos y base de datos creada.",
+      "item_updated": "{name}: {from} → {to}.",
+      "item_failed": "{name}: {status}.",
+      "item_crashed": "{name}: el sitio dejó de responder tras la actualización.",
+      "postcheck_failed": "Comprobación tras la publicación fallida: {page} ({viewport}). Revirtiendo…",
+      "postcheck_passed": "Comprobación tras la publicación superada.",
+      "rollback_done": "Archivos y base de datos restaurados.",
+      "rollback_verified": "El sitio vuelve a funcionar como antes de la actualización.",
+      "rollback_still_broken": "Tras la reversión, el sitio sigue sin funcionar (HTTP {status}).",
+      "cleanup_done": "Copia de prueba eliminada y modo mantenimiento desactivado.",
+      "cleanup_failed": "La limpieza en el servidor falló; la copia de prueba se eliminará más tarde.",
+      "verdict_deployed": "Terminado: publicada.",
+      "verdict_blocked": "Terminado: bloqueada, no se publicó nada.",
+      "verdict_rolled_back": "Terminado: revertida.",
+      "verdict_error": "Terminado: fallida.",
+      "verdict_cancelled": "Terminado: cancelada.",
+      "done": "Terminado."
+    }
   }
 }

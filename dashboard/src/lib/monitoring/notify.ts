@@ -1,7 +1,7 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
-import { createTranslator, isLocale, type MessageKey } from '@/lib/i18n/core'
+import { DEFAULT_LOCALE, createTranslator, isLocale, type MessageKey } from '@/lib/i18n/core'
 import { formatDate } from '@/lib/format'
 import { env } from '@/lib/env'
 import { renderEmail, sendEmail, type OutgoingEmail } from '@/lib/email'
@@ -31,7 +31,7 @@ export async function dispatchNotifications(
   let sent = 0
   let failed = 0
   for (const n of rows ?? []) {
-    const locale = isLocale(n.locale) ? n.locale : 'nl'
+    const locale = isLocale(n.locale) ? n.locale : DEFAULT_LOCALE
     const t = createTranslator(locale)
     const siteVars = { site: n.site_name, url: n.site_url.replace(/^https?:\/\//, ''), agency: n.agency_name }
     let subject: string
@@ -48,7 +48,9 @@ export async function dispatchNotifications(
       heading = title
       body = `${t('email.alertIntro', siteVars)} ${explanation}`
     }
-    const mail = renderEmail({ heading, body, cta: t('email.alertCta'), url: `${appUrl}/sites/${n.site_id}`, footer: t('email.alertFooter', siteVars) })
+    const runId = (n.params as { run_id?: unknown } | null)?.run_id
+    const url = typeof runId === 'string' ? `${appUrl}/sites/${n.site_id}/runs/${runId}` : `${appUrl}/sites/${n.site_id}`
+    const mail = renderEmail({ heading, body, cta: t('email.alertCta'), url, footer: t('email.alertFooter', siteVars) })
     const results = await Promise.all(n.recipients.map(to => send({ to, subject, ...mail })))
     const ok = results.every(Boolean)
     await admin.rpc('complete_alert_notification', { p_alert: n.alert_id, p_kind: n.kind, p_sent: ok })

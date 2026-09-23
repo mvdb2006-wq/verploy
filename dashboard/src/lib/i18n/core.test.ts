@@ -28,9 +28,11 @@ describe('i18n: alle vijf talen volledig', () => {
   it('vertalingen zijn niet stiekem Nederlands gebleven', () => {
     const nl = flatten(MESSAGES.nl)
     // Teksten die in die taal écht identiek zijn aan het Nederlands.
+    // Alleen variabelen en leestekens: in elke taal hetzelfde.
+    const placeholdersOnly = ['runs.reason.check.php_error', 'runs.events.item_updated', 'runs.events.item_failed']
     const identicalOk: Partial<Record<string, string[]>> = {
-      en: ['dashboard.summary', 'email.alertSubject', 'alerts.types.site_offline.title'],
-      de: ['email.alertSubject'], fr: ['email.alertSubject'], es: ['email.alertSubject'],
+      en: ['dashboard.summary', 'email.alertSubject', 'alerts.types.site_offline.title', ...placeholdersOnly],
+      de: ['email.alertSubject', ...placeholdersOnly], fr: ['email.alertSubject', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
     }
     for (const locale of LOCALES.filter(l => l !== 'nl')) {
       const m = flatten(MESSAGES[locale])
@@ -59,7 +61,7 @@ describe('i18n: vertalen', () => {
   it('kiest taal uit Accept-Language', () => {
     expect(negotiateLocale('fr-BE,fr;q=0.9,en;q=0.8')).toBe('fr')
     expect(negotiateLocale('pt-BR,en;q=0.5')).toBe('en')
-    expect(negotiateLocale('ja')).toBe('nl')
-    expect(negotiateLocale(null)).toBe('nl')
+    expect(negotiateLocale('ja')).toBe('en')
+    expect(negotiateLocale(null)).toBe('en')
   })
 })

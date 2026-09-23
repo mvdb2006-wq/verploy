@@ -6,7 +6,8 @@ import es from '@/locales/es.json'
 
 export const LOCALES = ['nl', 'en', 'de', 'fr', 'es'] as const
 export type Locale = (typeof LOCALES)[number]
-export const DEFAULT_LOCALE: Locale = 'nl'
+// Terugval voor onbekende browsertalen: Engels (internationale verkoop, zie DECISIONS.md).
+export const DEFAULT_LOCALE: Locale = 'en'
 export const DATE_LOCALE_TAG: Record<Locale, string> = { nl: 'nl-NL', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', es: 'es-ES' }
 
 export type Messages = typeof nl

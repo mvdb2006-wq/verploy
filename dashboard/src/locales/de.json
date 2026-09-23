@@ -281,11 +281,23 @@
       },
       "core_update": {
         "title": "WordPress {version} ist verfügbar",
-        "body": "Eine neue WordPress-Version ist verfügbar. Sicheres Aktualisieren folgt im Update-Ablauf von Verploy."
+        "body": "Eine neue WordPress-Version ist verfügbar. Starte ein sicheres Update auf der Seite der Website."
       },
       "plugin_updates": {
         "title": "{count, plural, one {# Plugin- oder Theme-Update verfügbar} other {# Plugin- und Theme-Updates verfügbar}}",
         "body": "Die Liste steht auf der Seite der Website."
+      },
+      "update_blocked": {
+        "title": "Update gestoppt: {items}",
+        "body": "{reason} Es ging nichts live."
+      },
+      "update_rolled_back": {
+        "title": "Update zurückgesetzt: {items}",
+        "body": "{reason} Die Website wurde automatisch auf den Stand vor dem Update zurückgesetzt."
+      },
+      "update_failed": {
+        "title": "Update fehlgeschlagen: {items}",
+        "body": "{reason}"
       }
     },
     "sslError": {
@@ -310,5 +322,172 @@
     "disk": "Freier Speicherplatz",
     "noHttps": "kein HTTPS",
     "openAlerts": "Offene Meldungen"
+  },
+  "runs": {
+    "errorActive": "Auf dieser Website läuft bereits ein Update. Warte, bis es abgeschlossen ist.",
+    "errorNoUpdate": "Für eines der ausgewählten Elemente ist kein Update (mehr) verfügbar. Lade die Seite neu.",
+    "errorConnector": "Sichere Updates erfordern Verploy Connector 2.1 oder neuer. Aktualisiere das Plugin auf der Website.",
+    "errorNotConnected": "Diese Website ist nicht verbunden.",
+    "errorReadOnly": "Deine Testphase oder dein Abo ist abgelaufen. Das Monitoring läuft weiter, Updates kannst du aber nicht starten.",
+    "errorNotCancellable": "Dieses Update kann nicht mehr abgebrochen werden: Die Live-Website wird bereits aktualisiert.",
+    "errorNoItems": "Wähle mindestens ein Update (höchstens 20).",
+    "panel": {
+      "hint": "Markiere, was aktualisiert werden soll. Verploy testet zuerst auf einer Kopie der Website und geht erst live, wenn alles funktioniert.",
+      "start": "{count, plural, =0 {Update auswählen} one {# Update sicher ausführen} other {# Updates sicher ausführen}}",
+      "starting": "Wird gestartet…",
+      "active": "Auf dieser Website läuft ein Update.",
+      "view": "Fortschritt ansehen",
+      "connectorOutdated": "Sichere Updates erfordern Verploy Connector 2.1 oder neuer (aktuell: {version}). Aktualisiere das Plugin auf der Website."
+    },
+    "settings": {
+      "title": "Testeinstellungen",
+      "intro": "Verploy testet die Startseite, die Seiten aus dem Menü, Shopseiten und die Anmeldeseite – auf Desktop und Mobilgeräten.",
+      "paths": "Zusätzliche Seiten zum Testen (eine pro Zeile, max. 5)",
+      "pathsHelp": "Pfad ab dem Stammverzeichnis, zum Beispiel /kontakt/.",
+      "masks": "Bereiche, die sich ändern dürfen (CSS-Selektoren, einer pro Zeile, max. 10)",
+      "masksHelp": "Zum Beispiel Slider, Cookie-Hinweise oder Blöcke mit dem Datum. Sie werden beim Vergleich der Screenshots ignoriert.",
+      "threshold": "Zulässige Bildabweichung (%)",
+      "thresholdHelp": "Weicht eine Seite nach dem Update um mehr als diesen Prozentsatz ab, gilt der Test als nicht bestanden. Standard: 2 %.",
+      "errorPaths": "Verwende höchstens 5 Pfade, die mit / beginnen, ohne Leerzeichen.",
+      "errorMasks": "Verwende höchstens 10 gültige CSS-Selektoren.",
+      "errorThreshold": "Wähle einen Prozentsatz zwischen 0,1 und 50."
+    },
+    "history": {
+      "title": "Update-Verlauf"
+    },
+    "status": {
+      "queued": "In der Warteschlange",
+      "running": "Läuft"
+    },
+    "verdict": {
+      "deployed": "Live",
+      "blocked": "Gestoppt",
+      "rolled_back": "Zurückgesetzt",
+      "error": "Fehlgeschlagen",
+      "cancelled": "Abgebrochen"
+    },
+    "outcome": {
+      "deployed": "Alle Updates sind live und die Prüfung nach dem Livegang war erfolgreich.",
+      "blocked": "Nichts ging live: Das Update verursachte Probleme auf der Testkopie.",
+      "rolled_back": "Die Prüfung nach dem Livegang ist fehlgeschlagen. Die Website wurde automatisch auf den Stand vor dem Update zurückgesetzt.",
+      "error": "Das Update konnte nicht abgeschlossen werden.",
+      "cancelled": "Abgebrochen. Nichts ging live."
+    },
+    "steps": {
+      "preparing": "Vorbereitung",
+      "baseline": "Referenzmessung auf der Live-Website",
+      "staging_create": "Testkopie (Staging) erstellen",
+      "staging_baseline": "Testkopie vor dem Update messen",
+      "staging_update": "Updates auf der Testkopie",
+      "staging_test": "Testkopie nach dem Update testen",
+      "deploy_snapshot": "Wartungsmodus und Backup",
+      "deploy_apply": "Updates live schalten",
+      "postcheck": "Prüfung nach dem Livegang",
+      "rollback": "Zurücksetzen",
+      "cleanup": "Aufräumen",
+      "queued": "In der Warteschlange",
+      "done": "Fertig"
+    },
+    "viewport": {
+      "desktop": "Desktop",
+      "mobile": "Mobil"
+    },
+    "itemStatus": {
+      "updated": "Aktualisiert",
+      "already_current": "Bereits aktuell",
+      "update_failed": "Update fehlgeschlagen",
+      "not_installed": "Nicht installiert",
+      "no_update_available": "Kein Update verfügbar",
+      "filesystem_not_writable": "Keine Schreibrechte auf dem Server",
+      "unknown_type": "Unbekannter Typ",
+      "crashed": "Website nach dem Update abgestürzt"
+    },
+    "phpError": {
+      "wp_critical_error": "WordPress meldet einen kritischen Fehler",
+      "php_fatal": "PHP meldet einen fatalen Fehler",
+      "db_connection": "die Datenbank ist nicht erreichbar",
+      "maintenance": "die Website ist im Wartungsmodus"
+    },
+    "reason": {
+      "cancelled": "Auf Wunsch abgebrochen.",
+      "site_missing": "Die Website existiert nicht mehr.",
+      "not_connected": "Die Website ist nicht (mehr) verbunden.",
+      "connector_outdated": "Das Plugin auf der Website ist zu alt für sichere Updates. Aktualisiere Verploy Connector auf 2.1 oder neuer.",
+      "no_pages": "Es wurden keine Seiten zum Testen gefunden.",
+      "site_unreachable": "Die Live-Website war nicht erreichbar, daher konnte keine Referenzmessung erfolgen.",
+      "staging_unusable": "Die Testkopie funktioniert auf diesem Server nicht richtig (Status {status}), daher ist das Testen nicht zuverlässig. Es wurde nichts geändert.",
+      "update_failed": "{name} konnte auf der Testkopie nicht aktualisiert werden ({status}).",
+      "update_failed_production": "{name} konnte auf der Live-Website nicht aktualisiert werden ({status}).",
+      "rollback_failed": "Das Zurücksetzen ist fehlgeschlagen oder die Website funktioniert danach noch nicht. Prüfe die Website sofort.",
+      "step_failed": "Der Schritt „{step}“ ist nach mehreren Versuchen fehlgeschlagen.",
+      "site_rejected": "Die Website hat bei „{step}“ einen Befehl abgelehnt (HTTP {status}). Verbinde die Website gegebenenfalls neu.",
+      "unknown": "Unbekannte Ursache.",
+      "check": {
+        "reachable": "{page} ({viewport}) lädt nicht mehr.",
+        "http": "{page} ({viewport}) lieferte HTTP {after} (vorher {before}).",
+        "php_error": "{page} ({viewport}): {error}.",
+        "js_errors": "{page} ({viewport}) hat neue JavaScript-Fehler: {errors}",
+        "resources": "{page} ({viewport}): Dateien laden nicht mehr: {resources}",
+        "landmarks": "{page} ({viewport}): Teile der Seite sind verschwunden ({missing}).",
+        "content": "{page} ({viewport}) zeigt deutlich weniger Inhalt als vorher.",
+        "visual": "{page} ({viewport}) sieht zu {percent} % anders aus (zulässig: {limit} %).",
+        "login": "Das WordPress-Anmeldeformular funktioniert nicht mehr."
+      }
+    },
+    "detail": {
+      "title": "Sicheres Update",
+      "startedAt": "Gestartet am {date}",
+      "duration": "Dauer {time}",
+      "cancel": "Abbrechen",
+      "cancelling": "Wird abgebrochen… Die Testkopie wird aufgeräumt.",
+      "items": "Updates",
+      "component": "Element",
+      "version": "Version",
+      "staging": "Testkopie",
+      "production": "Live-Website",
+      "steps": "Schritte",
+      "skipped": "übersprungen",
+      "stagingTests": "Tests auf der Testkopie",
+      "stagingTestsIntro": "Dieselben Seiten vor und nach dem Update, auf einer Kopie der Website.",
+      "productionTests": "Prüfung auf der Live-Website",
+      "productionTestsIntro": "Kurz vor und direkt nach dem Livegang.",
+      "beforeUpdate": "Vorher",
+      "afterUpdate": "Nachher",
+      "diff": "Unterschied",
+      "passed": "Bestanden",
+      "failed": "Nicht bestanden",
+      "loginPage": "Anmeldeseite",
+      "timeline": "Zeitverlauf"
+    },
+    "events": {
+      "queued": "{count, plural, one {Update eingeplant} other {# Updates eingeplant}}.",
+      "cancel_requested": "Abbruch angefordert.",
+      "step_started": "{step}.",
+      "step_failed": "„{step}“ ist fehlgeschlagen.",
+      "retry": "„{step}“ hat nicht geklappt (Versuch {attempt}); Verploy versucht es gleich erneut.",
+      "pages": "{count, plural, one {# Seite} other {# Seiten}} zum Testen ausgewählt: {pages}.",
+      "baseline_done": "Referenzmessung fertig: {healthy} von {total} Messungen in Ordnung.",
+      "staging_ready": "Testkopie bereit ({files} Dateien, {tables} Tabellen).",
+      "staging_failed": "Tests auf der Testkopie nicht bestanden: {page} ({viewport}).",
+      "staging_passed": "Alle Tests auf der Testkopie bestanden.",
+      "maintenance_on": "Wartungsmodus an: Besucher sehen kurz einen Wartungshinweis.",
+      "snapshot_ready": "Backup von Dateien und Datenbank erstellt.",
+      "item_updated": "{name}: {from} → {to}.",
+      "item_failed": "{name}: {status}.",
+      "item_crashed": "{name}: Die Website reagierte nach dem Update nicht mehr.",
+      "postcheck_failed": "Prüfung nach dem Livegang nicht bestanden: {page} ({viewport}). Wird zurückgesetzt…",
+      "postcheck_passed": "Prüfung nach dem Livegang bestanden.",
+      "rollback_done": "Dateien und Datenbank zurückgesetzt.",
+      "rollback_verified": "Die Website funktioniert wieder wie vor dem Update.",
+      "rollback_still_broken": "Nach dem Zurücksetzen funktioniert die Website noch nicht (HTTP {status}).",
+      "cleanup_done": "Testkopie entfernt und Wartungsmodus aus.",
+      "cleanup_failed": "Aufräumen auf dem Server ist fehlgeschlagen; die Testkopie wird später entfernt.",
+      "verdict_deployed": "Fertig: live.",
+      "verdict_blocked": "Fertig: gestoppt, nichts ging live.",
+      "verdict_rolled_back": "Fertig: zurückgesetzt.",
+      "verdict_error": "Fertig: fehlgeschlagen.",
+      "verdict_cancelled": "Fertig: abgebrochen.",
+      "done": "Fertig."
+    }
   }
 }

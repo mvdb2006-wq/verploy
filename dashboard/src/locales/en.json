@@ -281,11 +281,23 @@
       },
       "core_update": {
         "title": "WordPress {version} is available",
-        "body": "A new version of WordPress is available. Safe updating follows in the Verploy update flow."
+        "body": "A new version of WordPress is available. Start a safe update on the site’s page."
       },
       "plugin_updates": {
         "title": "{count, plural, one {# plugin or theme update available} other {# plugin and theme updates available}}",
         "body": "See the list on the site's page."
+      },
+      "update_blocked": {
+        "title": "Update blocked: {items}",
+        "body": "{reason} Nothing went live."
+      },
+      "update_rolled_back": {
+        "title": "Update rolled back: {items}",
+        "body": "{reason} The site was automatically restored to its state from before the update."
+      },
+      "update_failed": {
+        "title": "Update failed: {items}",
+        "body": "{reason}"
       }
     },
     "sslError": {
@@ -310,5 +322,172 @@
     "disk": "Free disk space",
     "noHttps": "no HTTPS",
     "openAlerts": "Open alerts"
+  },
+  "runs": {
+    "errorActive": "An update is already running on this site. Wait until it has finished.",
+    "errorNoUpdate": "One of the selected items no longer has an update available. Refresh the page.",
+    "errorConnector": "Safe updates require Verploy Connector 2.1 or newer. Update the plugin on the site.",
+    "errorNotConnected": "This site is not connected.",
+    "errorReadOnly": "Your trial or subscription has ended. Monitoring continues, but you can’t start updates.",
+    "errorNotCancellable": "This update can no longer be cancelled: the live site is already being updated.",
+    "errorNoItems": "Select at least one update (20 at most).",
+    "panel": {
+      "hint": "Tick what you want to update. Verploy tests on a copy of the site first and only goes live when everything works.",
+      "start": "{count, plural, =0 {Select an update} one {Safely run # update} other {Safely run # updates}}",
+      "starting": "Starting…",
+      "active": "An update is running on this site.",
+      "view": "View progress",
+      "connectorOutdated": "Safe updates require Verploy Connector 2.1 or newer (currently {version}). Update the plugin on the site."
+    },
+    "settings": {
+      "title": "Test settings",
+      "intro": "Verploy tests the home page, pages from the menu, shop pages and the login page, on desktop and mobile.",
+      "paths": "Extra pages to test (one per line, max. 5)",
+      "pathsHelp": "Path from the root, for example /contact/.",
+      "masks": "Parts that are allowed to change (CSS selectors, one per line, max. 10)",
+      "masksHelp": "For example sliders, cookie notices or blocks showing the date. They are ignored when screenshots are compared.",
+      "threshold": "Allowed visual difference (%)",
+      "thresholdHelp": "If a page differs by more than this percentage after the update, the test fails. Default 2%.",
+      "errorPaths": "Use at most 5 paths that start with /, without spaces.",
+      "errorMasks": "Use at most 10 valid CSS selectors.",
+      "errorThreshold": "Choose a percentage between 0.1 and 50."
+    },
+    "history": {
+      "title": "Update history"
+    },
+    "status": {
+      "queued": "Queued",
+      "running": "Running"
+    },
+    "verdict": {
+      "deployed": "Live",
+      "blocked": "Blocked",
+      "rolled_back": "Rolled back",
+      "error": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "outcome": {
+      "deployed": "All updates are live and the post-deploy check passed.",
+      "blocked": "Nothing went live: the update caused problems on the test copy.",
+      "rolled_back": "The check after going live failed. The site was automatically restored to its state from before the update.",
+      "error": "The update could not be completed.",
+      "cancelled": "Cancelled. Nothing went live."
+    },
+    "steps": {
+      "preparing": "Preparing",
+      "baseline": "Baseline on the live site",
+      "staging_create": "Creating test copy (staging)",
+      "staging_baseline": "Measuring test copy before the update",
+      "staging_update": "Updates on the test copy",
+      "staging_test": "Testing the test copy after the update",
+      "deploy_snapshot": "Maintenance mode and backup",
+      "deploy_apply": "Going live",
+      "postcheck": "Check after going live",
+      "rollback": "Rolling back",
+      "cleanup": "Cleaning up",
+      "queued": "Queued",
+      "done": "Done"
+    },
+    "viewport": {
+      "desktop": "Desktop",
+      "mobile": "Mobile"
+    },
+    "itemStatus": {
+      "updated": "Updated",
+      "already_current": "Already current",
+      "update_failed": "Update failed",
+      "not_installed": "Not installed",
+      "no_update_available": "No update available",
+      "filesystem_not_writable": "No write access on the server",
+      "unknown_type": "Unknown type",
+      "crashed": "Site crashed after the update"
+    },
+    "phpError": {
+      "wp_critical_error": "WordPress reports a critical error",
+      "php_fatal": "PHP throws a fatal error",
+      "db_connection": "the database is unreachable",
+      "maintenance": "the site is in maintenance mode"
+    },
+    "reason": {
+      "cancelled": "Cancelled on request.",
+      "site_missing": "The site no longer exists.",
+      "not_connected": "The site is not (or no longer) connected.",
+      "connector_outdated": "The plugin on the site is too old for safe updates. Update Verploy Connector to 2.1 or newer.",
+      "no_pages": "No pages were found to test.",
+      "site_unreachable": "The live site could not be reached, so no baseline could be taken.",
+      "staging_unusable": "The test copy does not work properly on this server (status {status}), so testing isn’t reliable. Nothing was changed.",
+      "update_failed": "{name} could not be updated on the test copy ({status}).",
+      "update_failed_production": "{name} could not be updated on the live site ({status}).",
+      "rollback_failed": "Rolling back failed or the site still doesn’t work afterwards. Check the site right away.",
+      "step_failed": "The step “{step}” failed after several attempts.",
+      "site_rejected": "The site refused a command during “{step}” (HTTP {status}). You may need to reconnect the site.",
+      "unknown": "Unknown cause.",
+      "check": {
+        "reachable": "{page} ({viewport}) no longer loaded.",
+        "http": "{page} ({viewport}) returned HTTP {after} (was {before}).",
+        "php_error": "{page} ({viewport}): {error}.",
+        "js_errors": "{page} ({viewport}) has new JavaScript errors: {errors}",
+        "resources": "{page} ({viewport}): files no longer load: {resources}",
+        "landmarks": "{page} ({viewport}): parts of the page disappeared ({missing}).",
+        "content": "{page} ({viewport}) shows much less content than before.",
+        "visual": "{page} ({viewport}) looks {percent}% different (allowed: {limit}%).",
+        "login": "The WordPress login form no longer works."
+      }
+    },
+    "detail": {
+      "title": "Safe update",
+      "startedAt": "Started on {date}",
+      "duration": "duration {time}",
+      "cancel": "Cancel",
+      "cancelling": "Cancelling… The test copy is being cleaned up.",
+      "items": "Updates",
+      "component": "Item",
+      "version": "Version",
+      "staging": "Test copy",
+      "production": "Live site",
+      "steps": "Steps",
+      "skipped": "skipped",
+      "stagingTests": "Tests on the test copy",
+      "stagingTestsIntro": "The same pages before and after the update, on a copy of the site.",
+      "productionTests": "Check on the live site",
+      "productionTestsIntro": "Just before and right after going live.",
+      "beforeUpdate": "Before",
+      "afterUpdate": "After",
+      "diff": "Difference",
+      "passed": "Passed",
+      "failed": "Failed",
+      "loginPage": "Login page",
+      "timeline": "Timeline"
+    },
+    "events": {
+      "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",
+      "cancel_requested": "Cancellation requested.",
+      "step_started": "{step}.",
+      "step_failed": "“{step}” failed.",
+      "retry": "“{step}” did not succeed (attempt {attempt}); Verploy will try again shortly.",
+      "pages": "{count, plural, one {# page} other {# pages}} selected for testing: {pages}.",
+      "baseline_done": "Baseline done: {healthy} of {total} measurements OK.",
+      "staging_ready": "Test copy ready ({files} files, {tables} tables).",
+      "staging_failed": "Tests on the test copy failed: {page} ({viewport}).",
+      "staging_passed": "All tests on the test copy passed.",
+      "maintenance_on": "Maintenance mode on: visitors briefly see a maintenance notice.",
+      "snapshot_ready": "Backup of files and database created.",
+      "item_updated": "{name}: {from} → {to}.",
+      "item_failed": "{name}: {status}.",
+      "item_crashed": "{name}: the site stopped responding after the update.",
+      "postcheck_failed": "Check after going live failed: {page} ({viewport}). Rolling back…",
+      "postcheck_passed": "Check after going live passed.",
+      "rollback_done": "Files and database restored.",
+      "rollback_verified": "The site works again as it did before the update.",
+      "rollback_still_broken": "After rolling back the site still doesn’t work (HTTP {status}).",
+      "cleanup_done": "Test copy removed and maintenance mode off.",
+      "cleanup_failed": "Cleaning up on the server failed; the test copy will be removed later.",
+      "verdict_deployed": "Done: live.",
+      "verdict_blocked": "Done: blocked, nothing went live.",
+      "verdict_rolled_back": "Done: rolled back.",
+      "verdict_error": "Done: failed.",
+      "verdict_cancelled": "Done: cancelled.",
+      "done": "Done."
+    }
   }
 }

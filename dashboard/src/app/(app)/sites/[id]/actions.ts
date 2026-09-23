@@ -28,3 +28,43 @@ export async function deleteSite(_: { error?: string }, form: FormData): Promise
   revalidatePath('/')
   redirect('/')
 }
+
+export interface RunState { error?: string }
+
+/** Start een veilige update voor de aangevinkte componenten ("type:slug"). */
+export async function startRun(_: RunState, form: FormData): Promise<RunState> {
+  const t = await getT()
+  const siteId = String(form.get('site_id') ?? '')
+  const items = form.getAll('item').map(String).map(v => {
+    const i = v.indexOf(':')
+    return { type: v.slice(0, i), slug: v.slice(i + 1) }
+  }).filter(i => ['plugin', 'theme', 'core'].includes(i.type) && i.slug)
+  if (!items.length) return { error: t('runs.errorNoItems') }
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('create_update_run', { p_site: siteId, p_items: items })
+  if (error || !data) return { error: t(dbErrorKey(error)) }
+  revalidatePath(`/sites/${siteId}`)
+  redirect(`/sites/${siteId}/runs/${data}`)
+}
+
+export interface SettingsState { error?: string; saved?: boolean }
+
+/** Testinstellingen: extra pagina's, te maskeren onderdelen en de pixeldrempel. */
+export async function saveTestSettings(_: SettingsState, form: FormData): Promise<SettingsState> {
+  const t = await getT()
+  const siteId = String(form.get('site_id') ?? '')
+  const lines = (name: string) => String(form.get(name) ?? '').split('\n').map(s => s.trim()).filter(Boolean)
+  const paths = lines('test_paths')
+  const masks = lines('test_masks')
+  const threshold = Number(String(form.get('diff_threshold') ?? '').replace(',', '.'))
+  if (paths.length > 5 || paths.some(p => !/^\/[^\s]*$/.test(p) || p.length > 200)) return { error: t('runs.settings.errorPaths') }
+  if (masks.length > 10 || masks.some(m => m.length > 200 || /[{}<>]/.test(m))) return { error: t('runs.settings.errorMasks') }
+  if (!Number.isFinite(threshold) || threshold < 0.1 || threshold > 50) return { error: t('runs.settings.errorThreshold') }
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('sites')
+    .update({ test_paths: paths, test_masks: masks, diff_threshold: Math.round(threshold * 10) / 1000 }, { count: 'exact' })
+    .eq('id', siteId)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath(`/sites/${siteId}`)
+  return { saved: true }
+}

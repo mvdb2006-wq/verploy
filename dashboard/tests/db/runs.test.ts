@@ -212,7 +212,7 @@ describe('Worker-functies', () => {
       expect((await expectError(db, `select public.advance_update_run($1, 'w1', 'baseline')`, [id])).message).toBe('lease_lost')
     }))
 
-  it('advance: volgende stap zet attempt op 0 en voegt step_state samen; done vraagt een verdict', () =>
+  it('advance: volgende stap begint bij poging 1 en voegt step_state samen; done vraagt een verdict', () =>
     inTx(async db => {
       const { a, site } = await readySite(db)
       const id = await createRun(db, a, site)
@@ -220,7 +220,7 @@ describe('Worker-functies', () => {
       await asWorker(db, () => db.query(`select public.advance_update_run($1, 'w1', 'baseline', '{"a":1}')`, [id]))
       await asWorker(db, () => db.query(`select public.advance_update_run($1, 'w1', 'staging_create', '{"b":2}')`, [id]))
       const r = await db.query(`select status, attempt, step_state from public.update_runs where id = $1`, [id])
-      expect(r.rows[0]).toEqual({ status: 'staging_create', attempt: 0, step_state: { a: 1, b: 2 } })
+      expect(r.rows[0]).toEqual({ status: 'staging_create', attempt: 1, step_state: { a: 1, b: 2 } })
       await actAs(db, { role: 'service_role' })
       await expectError(db, `select public.advance_update_run($1, 'w1', 'done')`, [id])
       await db.query(`select public.advance_update_run($1, 'w1', 'done', '{}', 'blocked', 'run.reason.visual', '{"page":"Home"}')`, [id])

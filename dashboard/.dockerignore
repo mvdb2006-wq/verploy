@@ -1,0 +1,8 @@
+# Nooit in een image: geheimen en lokale build-/testresten
+.env*
+!.env.example
+node_modules
+.next
+worker/dist
+test-results
+playwright-report

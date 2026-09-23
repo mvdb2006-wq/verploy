@@ -1,5 +1,6 @@
 import type { Locale, MessageKey, Translate } from '@/lib/i18n/core'
 import { formatDate } from '@/lib/format'
+import { presentReason } from '@/lib/runs'
 
 export interface AlertLike { type: string; severity: string; params: unknown }
 
@@ -18,6 +19,10 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
     mb: Number(p.mb ?? 0),
     count: Number(p.count ?? 0),
     reason: p.error ? t(`alerts.sslError.${str(p.error)}` as MessageKey) : '',
+  }
+  if (alert.type.startsWith('update_')) {
+    vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
+    vars.reason = presentReason(t, typeof p.reason_key === 'string' ? p.reason_key : null, p.reason_params)
   }
   const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon') : alert.type
   return {

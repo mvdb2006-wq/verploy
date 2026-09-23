@@ -12,7 +12,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: 'unit', include: ['src/**/*.test.ts'], environment: 'node' },
+        test: { name: 'unit', include: ['src/**/*.test.ts', 'worker/**/*.test.ts'], environment: 'node' },
       },
       {
         extends: true,

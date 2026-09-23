@@ -67,20 +67,18 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 
 ---
 
-## 3. 🟠 Railway voor de worker — nodig in fase 4
+## 3. 🟠 Railway voor de worker — nodig om fase 4 live te zetten
 
-**Waarom:** de worker (staging, Playwright-tests, rollback, later PDF's) moet ergens 24/7 draaien. Er bestaat nog geen Railway-project.
+**Waarom:** de worker voert de veilige updates uit (staging, tests, rollback) en neemt het monitoringonderhoud over. Hij is klaar en getest, maar moet ergens 24/7 draaien. Er bestaat nog geen Railway-project.
 
 **Wat je moet doen:**
 1. Maak een account op railway.com (inloggen met GitHub kan) en kies het Hobby-plan ($5/maand).
-2. New Project → Deploy from GitHub repo → `mvdb2006-wq/verploy`, root directory `worker`.
-3. Zet deze variabelen onder *Variables*: `SUPABASE_URL` en `SUPABASE_SERVICE_ROLE_KEY` (dezelfde waarden als in Vercel). De rest staat in `worker/.env.example`, en daar vertel ik je op dat moment precies welke waarden erin moeten.
+2. New Project → Deploy from GitHub repo → `mvdb2006-wq/verploy`. Zet bij Settings: **Root Directory** `dashboard`, **Config file** `worker/railway.json` (die gebruikt `worker/Dockerfile`).
+3. Zet onder *Variables* dezelfde waarden als in Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VERPLOY_ENCRYPTION_KEY` (als je die in Vercel hebt), `NEXT_PUBLIC_APP_URL=https://app.verploy.com`, en straks `RESEND_API_KEY` + `RESEND_FROM` (#5).
 
-**Ondertussen:** de worker draait en wordt getest in mijn sandbox tegen een echte test-WordPress.
+Of zeg: *"Je mag Railway instellen."* Dan doe ik stap 2 en 3 zelf in de browser, zodra jij in de browser van de Claude-app bent ingelogd op railway.com.
 
----
-
-## 4. 🟠 Publiek bereikbare test-WordPress — nodig voor het controlemoment na fase 4
+## 4. 🟠 Publiek bereikbare test-WordPress — voor het controlemoment na fase 4
 
 **Waarom:** je wilt de drie scenario's (live / tegengehouden / teruggedraaid) zelf zien op een echte site. Mijn sandbox-WordPress is niet bereikbaar vanaf internet.
 

@@ -87,6 +87,8 @@ create table public.test_results (
   -- [{check, ok, detail?}] — check ∈ http, php_error, js_errors, resources, landmarks, visual, login
   checks          jsonb not null default '[]'::jsonb,
   js_errors       jsonb not null default '[]'::jsonb,
+  -- meetgegevens voor latere vergelijking: fout, PHP-fout, mislukte bestanden, landmarks, tekstlengte …
+  facts           jsonb not null default '{}'::jsonb,
   screenshot_path text,
   diff_path       text,
   diff_ratio      numeric(7,6),
@@ -226,7 +228,7 @@ end $$;
 -- ── 5. RPC's voor de worker (alleen service role) ────────────────────────────
 
 -- Pakt de oudste wachtende run, of een run waarvan de lease verlopen is (worker gecrasht).
--- attempt telt de pogingen voor de huidige stap; advance zet hem terug op 0.
+-- attempt telt de pogingen voor de huidige stap; advance zet hem op 1 (de lopende poging).
 create or replace function public.claim_update_run(p_worker text, p_lease_seconds int default 120)
 returns setof public.update_runs
 language plpgsql security definer set search_path = '' as $$
@@ -277,7 +279,8 @@ begin
   update public.update_runs
      set status          = p_status,
          step_state      = step_state || coalesce(p_step_state, '{}'::jsonb),
-         attempt         = 0,
+         -- de worker die de run vasthoudt, begint direct aan poging 1 van de volgende stap
+         attempt         = case when p_status = 'done' then attempt else 1 end,
          step_started_at = now(),
          items           = coalesce(p_items, items),
          verdict         = coalesce(p_verdict, verdict),
@@ -322,3 +325,38 @@ begin
     on conflict (id) do nothing;
   end if;
 end $$;
+
+-- ── 7. Uitkomst van een run → melding (zelfde meldingen + e-mailroute als monitoring) ──
+alter table public.alerts drop constraint alerts_type_check;
+alter table public.alerts add constraint alerts_type_check check (type in ('site_offline','ssl_expiring','ssl_invalid',
+  'ssl_missing','domain_expiring','php_eol','memory_low','disk_low','core_update','plugin_updates',
+  'update_blocked','update_rolled_back','update_failed'));
+
+-- Idempotent: dezelfde run opnieuw melden verandert niets.
+create or replace function public.record_run_outcome(p_run uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_run public.update_runs%rowtype;
+  v_params jsonb;
+begin
+  select * into v_run from public.update_runs where id = p_run;
+  if v_run.id is null or v_run.status <> 'done' then
+    raise exception 'run_not_done' using errcode = 'P0001';
+  end if;
+  v_params := jsonb_build_object(
+    'run_id', v_run.id, 'reason_key', v_run.reason_key, 'reason_params', v_run.reason_params,
+    'items', (select coalesce(jsonb_agg(i->>'name'), '[]'::jsonb) from jsonb_array_elements(v_run.items) i));
+  if v_run.verdict = 'deployed' then
+    perform app.resolve_alert(v_run.site_id, t)
+       from unnest(array['update_blocked','update_rolled_back','update_failed']) t;
+  elsif v_run.verdict = 'blocked' then
+    perform app.raise_alert(v_run.site_id, v_run.agency_id, 'update_blocked', 'warning', v_params);
+  elsif v_run.verdict = 'rolled_back' then
+    perform app.raise_alert(v_run.site_id, v_run.agency_id, 'update_rolled_back', 'critical', v_params);
+  elsif v_run.verdict = 'error' then
+    perform app.raise_alert(v_run.site_id, v_run.agency_id, 'update_failed',
+      case when v_run.reason_key = 'run.reason.rollback_failed' then 'critical' else 'warning' end, v_params);
+  end if;
+end $$;
+revoke all on function public.record_run_outcome(uuid) from public, anon, authenticated;
+grant execute on function public.record_run_outcome(uuid) to service_role;

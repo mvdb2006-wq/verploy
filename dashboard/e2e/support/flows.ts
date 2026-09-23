@@ -23,9 +23,9 @@ export async function login(page: Page, who: Account) {
 }
 
 /** Opent de Verploy-instellingen in wp-admin, en logt zo nodig eerst in. */
-export async function wpAdmin(context: BrowserContext): Promise<Page> {
+export async function wpAdmin(context: BrowserContext, wpUrl = WP): Promise<Page> {
   const wp = await context.newPage()
-  await wp.goto(`${WP}/wp-admin/options-general.php?page=verploy-connector`)
+  await wp.goto(`${wpUrl}/wp-admin/options-general.php?page=verploy-connector`)
   if (await wp.locator('#user_login').isVisible()) {
     await wp.locator('#user_login').fill(WP_USER)
     await wp.locator('#user_pass').fill(WP_PASS)
@@ -36,16 +36,16 @@ export async function wpAdmin(context: BrowserContext): Promise<Page> {
 }
 
 /** Voegt de test-WordPress toe en koppelt hem via wp-admin; geeft de site-id terug. */
-export async function addAndPairWordPress(page: Page, context: BrowserContext, name = 'Test-WordPress'): Promise<string> {
+export async function addAndPairWordPress(page: Page, context: BrowserContext, name = 'Test-WordPress', wpUrl = WP): Promise<string> {
   await page.goto('/sites/new')
-  await page.getByLabel('Adres van de site').fill(WP)
+  await page.getByLabel('Adres van de site').fill(wpUrl)
   await page.getByLabel('Naam', { exact: true }).fill(name)
   await page.getByRole('button', { name: 'Site toevoegen' }).click()
   await expect(page).toHaveURL(/\/sites\/[0-9a-f-]{36}/)
   const siteId = page.url().match(/sites\/([0-9a-f-]{36})/)![1]!
   await page.getByRole('button', { name: 'Koppelcode maken' }).click()
   const code = (await page.locator('output[aria-label="Koppelcode"]').textContent())!.trim()
-  const wp = await wpAdmin(context)
+  const wp = await wpAdmin(context, wpUrl)
   await wp.getByLabel('Koppelcode').fill(code)
   await wp.getByRole('button', { name: 'Koppelen', exact: true }).click()
   await expect(wp.locator('.notice-success, .notice-warning')).toContainText('Gekoppeld')
@@ -55,8 +55,8 @@ export async function addAndPairWordPress(page: Page, context: BrowserContext, n
 }
 
 /** Laat de plugin direct een heartbeat sturen (knop "Verbinding testen"). */
-export async function sendHeartbeat(context: BrowserContext) {
-  const wp = await wpAdmin(context)
+export async function sendHeartbeat(context: BrowserContext, wpUrl = WP) {
+  const wp = await wpAdmin(context, wpUrl)
   await wp.getByRole('button', { name: 'Verbinding testen' }).click()
   await expect(wp.locator('.notice-success')).toContainText('Verbinding werkt')
   await wp.close()

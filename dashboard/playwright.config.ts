@@ -38,5 +38,22 @@ export default defineConfig({
         CRON_SECRET,
       },
     },
+    {
+      // Worker voor de kernflow (vooraf: npm run worker:build)
+      command: 'node --env-file=.env.local worker/dist/main.mjs',
+      url: 'http://127.0.0.1:4020/',
+      reuseExistingServer: false,
+      stdout: 'pipe',
+      env: {
+        WORKER_ID: 'e2e-worker',
+        WORKER_HEALTH_PORT: '4020',
+        WORKER_POLL_MS: '1000',
+        WORKER_MAINTENANCE_MS: '3600000',
+        RESEND_API_KEY: 're_e2e_local',
+        RESEND_BASE_URL: `http://127.0.0.1:${MOCK_RESEND_PORT}`,
+        NEXT_PUBLIC_APP_URL: 'http://127.0.0.1:3000',
+        ...(process.env.PW_CHROMIUM_PATH ? { PLAYWRIGHT_CHROMIUM_PATH: process.env.PW_CHROMIUM_PATH } : {}),
+      },
+    },
   ],
 })

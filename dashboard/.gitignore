@@ -27,3 +27,4 @@ yarn-debug.log*
 # Tests
 test-results/
 playwright-report/
+worker/dist/

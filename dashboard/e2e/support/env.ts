@@ -3,6 +3,10 @@ import pg from 'pg'
 export const WP = process.env.E2E_WP_URL ?? 'http://127.0.0.1:8088'
 export const WP_USER = process.env.E2E_WP_USER ?? 'admin'
 export const WP_PASS = process.env.E2E_WP_PASS ?? 'adminpass123'
+/** WordPress op MySQL met de labplugins, voor de kernflow (staging vraagt MySQL/MariaDB). */
+export const LAB_WP = process.env.E2E_LAB_WP_URL ?? 'http://127.0.0.1:8089'
+export const LAB_WP_DIR = process.env.E2E_LAB_WP_DIR ?? '/home/claude/wptest/wpm'
+export const LAB_DIR = process.env.E2E_LAB_DIR ?? '/home/claude/wptest/lab'
 export const MOCK_RESEND = `http://127.0.0.1:${process.env.MOCK_RESEND_PORT ?? 4010}`
 export const CRON_SECRET = process.env.E2E_CRON_SECRET ?? 'e2e-local-cron-secret'
 

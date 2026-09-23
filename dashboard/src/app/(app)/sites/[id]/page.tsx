@@ -4,13 +4,17 @@ import { ExternalLink } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
-import { canManage, requireAgency } from '@/lib/session'
+import { agencyIsWritable, canManage, requireAgency } from '@/lib/session'
 import { effectiveStatus, formatDate, formatRelative } from '@/lib/format'
 import type { MessageKey } from '@/lib/i18n/core'
 import { AlertList } from '@/components/AlertList'
 import { SEVERITY_ORDER } from '@/lib/monitoring/present'
 import { PairingPanel } from './pairing'
 import { DeleteSite } from './delete'
+import { UpdatesPanel } from './updates'
+import { TestSettings } from './test-settings'
+import { RunHistory } from './run-history'
+import { MIN_CONNECTOR_FOR_RUNS, versionAtLeast } from '@/lib/runs'
 
 function memoryRaw(raw: unknown): string | null {
   const server = (raw as { server?: { memory_limit?: unknown } } | null)?.server
@@ -24,12 +28,14 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
   const { data: site } = await supabase.from('sites').select('*').eq('id', id).maybeSingle()
   if (!site) notFound()
-  const [{ data: snap }, { data: components }, { data: alerts }] = await Promise.all([
+  const [{ data: snap }, { data: components }, { data: alerts }, { data: runs }] = await Promise.all([
     supabase.from('health_snapshots').select('memory_limit_mb, disk_free_mb, captured_at, raw').eq('site_id', id).order('id', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('site_components').select('type, slug, name, version, latest_version, update_available, active').eq('site_id', id)
       .order('update_available', { ascending: false }).order('active', { ascending: false }).order('type').order('name'),
     supabase.from('alerts').select('id, type, severity, status, params, opened_at, resolved_at, acknowledged_at')
       .eq('site_id', id).eq('status', 'open').neq('severity', 'info').order('opened_at', { ascending: false }),
+    supabase.from('update_runs').select('id, status, verdict, items, created_at, finished_at, reason_key, reason_params')
+      .eq('site_id', id).order('created_at', { ascending: false }).limit(10),
   ])
   const openAlerts = (alerts ?? []).sort((a, b) => (SEVERITY_ORDER[a.severity as keyof typeof SEVERITY_ORDER] ?? 9) - (SEVERITY_ORDER[b.severity as keyof typeof SEVERITY_ORDER] ?? 9))
   const phpAlert = openAlerts.find(a => a.type === 'php_eol')
@@ -63,7 +69,11 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   const status = effectiveStatus(site)
   const connected = site.connection_status === 'connected'
   const manage = canManage(session.role)
-  const updates = (components ?? []).filter(c => c.update_available).length
+  const activeRun = (runs ?? []).find(r => r.status !== 'done') ?? null
+  const blockedReason = !connected ? null
+    : !versionAtLeast(site.connector_version, MIN_CONNECTOR_FOR_RUNS) ? t('runs.panel.connectorOutdated', { version: site.connector_version ?? '—' })
+    : !agencyIsWritable(session.agency) ? t('runs.errorReadOnly')
+    : null
 
   const facts: Array<[string, string]> = [
     [t('siteDetail.wordpress'), site.wp_version ?? '—'],
@@ -133,32 +143,13 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
         </dl>
       )}
 
-      <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="components-title">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-4">
-          <h2 id="components-title" className="font-bold">{t('siteDetail.componentsTitle')}</h2>
-          {updates > 0 && <span className="badge badge-warn">{t('siteDetail.updatesAvailable', { count: updates })}</span>}
-        </header>
-        {(components ?? []).length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted">{t('siteDetail.componentsEmpty')}</p>
-        ) : (
-          <ul className="divide-y divide-border/60">
-            {(components ?? []).map(c => (
-              <li key={`${c.type}:${c.slug}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
-                    {c.name}
-                    {!c.active && <span className="ml-2 text-xs text-subtle">({t('siteDetail.inactive')})</span>}
-                  </p>
-                  <p className="font-mono text-xs text-subtle">{t(`siteDetail.type.${c.type}` as MessageKey)} · {c.version ?? '—'}</p>
-                </div>
-                {c.update_available && c.latest_version
-                  ? <span className="badge badge-warn">{t('siteDetail.updateTo', { version: c.latest_version })}</span>
-                  : <span className="text-xs text-muted">{t('siteDetail.upToDate')}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} />
+
+      {(runs ?? []).length > 0 && <RunHistory siteId={site.id} runs={runs ?? []} t={t} locale={locale} />}
+
+      {connected && manage && (
+        <TestSettings siteId={site.id} paths={site.test_paths} masks={site.test_masks} threshold={Number(site.diff_threshold)} />
+      )}
 
       {connected && manage && <PairingPanel siteId={site.id} connected />}
       {manage && <DeleteSite siteId={site.id} name={site.name} />}

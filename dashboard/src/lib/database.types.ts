@@ -452,6 +452,7 @@ export type Database = {
           passed: boolean
           checks: Json
           js_errors: Json
+          facts: Json
           screenshot_path: string | null
           diff_path: string | null
           diff_ratio: number | null
@@ -470,6 +471,7 @@ export type Database = {
           passed: boolean
           checks?: Json
           js_errors?: Json
+          facts?: Json
           screenshot_path?: string | null
           diff_path?: string | null
           diff_ratio?: number | null
@@ -488,6 +490,7 @@ export type Database = {
           passed?: boolean
           checks?: Json
           js_errors?: Json
+          facts?: Json
           screenshot_path?: string | null
           diff_path?: string | null
           diff_ratio?: number | null
@@ -616,6 +619,7 @@ export type Database = {
       invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
       peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
+      record_run_outcome: { Args: { p_run: string | null }; Returns: undefined }
       record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
       release_update_run: { Args: { p_run: string | null; p_worker: string | null; p_delay_seconds?: number | null }; Returns: undefined }
       remove_member: { Args: { p_user: string | null }; Returns: undefined }

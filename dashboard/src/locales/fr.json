@@ -281,11 +281,23 @@
       },
       "core_update": {
         "title": "WordPress {version} est disponible",
-        "body": "Une nouvelle version de WordPress est disponible. La mise à jour sécurisée suit dans le flux de mise à jour de Verploy."
+        "body": "Une nouvelle version de WordPress est disponible. Lancez une mise à jour sécurisée depuis la page du site."
       },
       "plugin_updates": {
         "title": "{count, plural, one {# mise à jour d'extension ou de thème disponible} other {# mises à jour d'extensions et de thèmes disponibles}}",
         "body": "Consultez la liste sur la page du site."
+      },
+      "update_blocked": {
+        "title": "Mise à jour bloquée : {items}",
+        "body": "{reason} Rien n’a été mis en ligne."
+      },
+      "update_rolled_back": {
+        "title": "Mise à jour annulée et restaurée : {items}",
+        "body": "{reason} Le site a été automatiquement restauré dans son état d’avant la mise à jour."
+      },
+      "update_failed": {
+        "title": "Échec de la mise à jour : {items}",
+        "body": "{reason}"
       }
     },
     "sslError": {
@@ -310,5 +322,172 @@
     "disk": "Espace disque libre",
     "noHttps": "pas de HTTPS",
     "openAlerts": "Alertes ouvertes"
+  },
+  "runs": {
+    "errorActive": "Une mise à jour est déjà en cours sur ce site. Attendez qu’elle soit terminée.",
+    "errorNoUpdate": "L’un des éléments sélectionnés n’a plus de mise à jour disponible. Actualisez la page.",
+    "errorConnector": "Les mises à jour sécurisées nécessitent Verploy Connector 2.1 ou plus récent. Mettez à jour l’extension sur le site.",
+    "errorNotConnected": "Ce site n’est pas connecté.",
+    "errorReadOnly": "Votre essai ou abonnement est terminé. La surveillance continue, mais vous ne pouvez pas lancer de mises à jour.",
+    "errorNotCancellable": "Cette mise à jour ne peut plus être annulée : le site en ligne est déjà en cours de mise à jour.",
+    "errorNoItems": "Sélectionnez au moins une mise à jour (20 au maximum).",
+    "panel": {
+      "hint": "Cochez ce que vous voulez mettre à jour. Verploy teste d’abord sur une copie du site et ne met en ligne que si tout fonctionne.",
+      "start": "{count, plural, =0 {Choisissez une mise à jour} one {Lancer # mise à jour sécurisée} other {Lancer # mises à jour sécurisées}}",
+      "starting": "Démarrage…",
+      "active": "Une mise à jour est en cours sur ce site.",
+      "view": "Voir la progression",
+      "connectorOutdated": "Les mises à jour sécurisées nécessitent Verploy Connector 2.1 ou plus récent (actuellement {version}). Mettez à jour l’extension sur le site."
+    },
+    "settings": {
+      "title": "Paramètres de test",
+      "intro": "Verploy teste la page d’accueil, les pages du menu, les pages de boutique et la page de connexion, sur ordinateur et sur mobile.",
+      "paths": "Pages supplémentaires à tester (une par ligne, 5 max.)",
+      "pathsHelp": "Chemin depuis la racine, par exemple /contact/.",
+      "masks": "Zones qui peuvent changer (sélecteurs CSS, un par ligne, 10 max.)",
+      "masksHelp": "Par exemple des carrousels, des bandeaux cookies ou des blocs affichant la date. Ils sont ignorés lors de la comparaison des captures d’écran.",
+      "threshold": "Différence visuelle autorisée (%)",
+      "thresholdHelp": "Si une page diffère de plus de ce pourcentage après la mise à jour, le test échoue. Par défaut : 2 %.",
+      "errorPaths": "Utilisez au maximum 5 chemins commençant par /, sans espaces.",
+      "errorMasks": "Utilisez au maximum 10 sélecteurs CSS valides.",
+      "errorThreshold": "Choisissez un pourcentage entre 0,1 et 50."
+    },
+    "history": {
+      "title": "Historique des mises à jour"
+    },
+    "status": {
+      "queued": "En attente",
+      "running": "En cours"
+    },
+    "verdict": {
+      "deployed": "En ligne",
+      "blocked": "Bloquée",
+      "rolled_back": "Annulée (restaurée)",
+      "error": "Échec",
+      "cancelled": "Annulée"
+    },
+    "outcome": {
+      "deployed": "Toutes les mises à jour sont en ligne et le contrôle après mise en ligne a réussi.",
+      "blocked": "Rien n’a été mis en ligne : la mise à jour a posé problème sur la copie de test.",
+      "rolled_back": "Le contrôle après mise en ligne a échoué. Le site a été automatiquement restauré dans son état d’avant la mise à jour.",
+      "error": "La mise à jour n’a pas pu être terminée.",
+      "cancelled": "Annulée. Rien n’a été mis en ligne."
+    },
+    "steps": {
+      "preparing": "Préparation",
+      "baseline": "Mesure de référence sur le site en ligne",
+      "staging_create": "Création de la copie de test (staging)",
+      "staging_baseline": "Mesure de la copie avant la mise à jour",
+      "staging_update": "Mises à jour sur la copie de test",
+      "staging_test": "Test de la copie après la mise à jour",
+      "deploy_snapshot": "Mode maintenance et sauvegarde",
+      "deploy_apply": "Mise en ligne",
+      "postcheck": "Contrôle après mise en ligne",
+      "rollback": "Restauration",
+      "cleanup": "Nettoyage",
+      "queued": "En attente",
+      "done": "Terminé"
+    },
+    "viewport": {
+      "desktop": "Ordinateur",
+      "mobile": "Mobile"
+    },
+    "itemStatus": {
+      "updated": "Mis à jour",
+      "already_current": "Déjà à jour",
+      "update_failed": "Échec de la mise à jour",
+      "not_installed": "Non installé",
+      "no_update_available": "Aucune mise à jour disponible",
+      "filesystem_not_writable": "Pas de droits d’écriture sur le serveur",
+      "unknown_type": "Type inconnu",
+      "crashed": "Le site a planté après la mise à jour"
+    },
+    "phpError": {
+      "wp_critical_error": "WordPress signale une erreur critique",
+      "php_fatal": "PHP renvoie une erreur fatale",
+      "db_connection": "la base de données est injoignable",
+      "maintenance": "le site est en mode maintenance"
+    },
+    "reason": {
+      "cancelled": "Annulée à la demande.",
+      "site_missing": "Le site n’existe plus.",
+      "not_connected": "Le site n’est pas (ou plus) connecté.",
+      "connector_outdated": "L’extension sur le site est trop ancienne pour les mises à jour sécurisées. Mettez à jour Verploy Connector vers 2.1 ou plus récent.",
+      "no_pages": "Aucune page à tester n’a été trouvée.",
+      "site_unreachable": "Le site en ligne était injoignable : aucune mesure de référence n’a pu être faite.",
+      "staging_unusable": "La copie de test ne fonctionne pas correctement sur ce serveur (statut {status}) : les tests ne sont pas fiables. Rien n’a été modifié.",
+      "update_failed": "{name} n’a pas pu être mis à jour sur la copie de test ({status}).",
+      "update_failed_production": "{name} n’a pas pu être mis à jour sur le site en ligne ({status}).",
+      "rollback_failed": "La restauration a échoué ou le site ne fonctionne toujours pas. Vérifiez le site immédiatement.",
+      "step_failed": "L’étape « {step} » a échoué après plusieurs tentatives.",
+      "site_rejected": "Le site a refusé une commande pendant « {step} » (HTTP {status}). Reconnectez le site si nécessaire.",
+      "unknown": "Cause inconnue.",
+      "check": {
+        "reachable": "{page} ({viewport}) ne se charge plus.",
+        "http": "{page} ({viewport}) a renvoyé HTTP {after} (avant : {before}).",
+        "php_error": "{page} ({viewport}) : {error}.",
+        "js_errors": "{page} ({viewport}) présente de nouvelles erreurs JavaScript : {errors}",
+        "resources": "{page} ({viewport}) : des fichiers ne se chargent plus : {resources}",
+        "landmarks": "{page} ({viewport}) : des parties de la page ont disparu ({missing}).",
+        "content": "{page} ({viewport}) affiche beaucoup moins de contenu qu’avant.",
+        "visual": "{page} ({viewport}) est différente à {percent} % (autorisé : {limit} %).",
+        "login": "Le formulaire de connexion WordPress ne fonctionne plus."
+      }
+    },
+    "detail": {
+      "title": "Mise à jour sécurisée",
+      "startedAt": "Lancée le {date}",
+      "duration": "durée {time}",
+      "cancel": "Annuler",
+      "cancelling": "Annulation… La copie de test est en cours de nettoyage.",
+      "items": "Mises à jour",
+      "component": "Élément",
+      "version": "Version",
+      "staging": "Copie de test",
+      "production": "Site en ligne",
+      "steps": "Étapes",
+      "skipped": "ignorée",
+      "stagingTests": "Tests sur la copie de test",
+      "stagingTestsIntro": "Les mêmes pages avant et après la mise à jour, sur une copie du site.",
+      "productionTests": "Contrôle sur le site en ligne",
+      "productionTestsIntro": "Juste avant et juste après la mise en ligne.",
+      "beforeUpdate": "Avant",
+      "afterUpdate": "Après",
+      "diff": "Différence",
+      "passed": "Réussi",
+      "failed": "Échoué",
+      "loginPage": "Page de connexion",
+      "timeline": "Chronologie"
+    },
+    "events": {
+      "queued": "{count, plural, one {Mise à jour planifiée} other {# mises à jour planifiées}}.",
+      "cancel_requested": "Annulation demandée.",
+      "step_started": "{step}.",
+      "step_failed": "« {step} » a échoué.",
+      "retry": "« {step} » n’a pas abouti (tentative {attempt}) ; Verploy réessaie dans un instant.",
+      "pages": "{count, plural, one {# page sélectionnée} other {# pages sélectionnées}} pour les tests : {pages}.",
+      "baseline_done": "Mesure de référence terminée : {healthy} mesures sur {total} correctes.",
+      "staging_ready": "Copie de test prête ({files} fichiers, {tables} tables).",
+      "staging_failed": "Tests échoués sur la copie de test : {page} ({viewport}).",
+      "staging_passed": "Tous les tests sur la copie de test ont réussi.",
+      "maintenance_on": "Mode maintenance activé : les visiteurs voient brièvement un message de maintenance.",
+      "snapshot_ready": "Sauvegarde des fichiers et de la base de données créée.",
+      "item_updated": "{name} : {from} → {to}.",
+      "item_failed": "{name} : {status}.",
+      "item_crashed": "{name} : le site ne répondait plus après la mise à jour.",
+      "postcheck_failed": "Contrôle après mise en ligne échoué : {page} ({viewport}). Restauration…",
+      "postcheck_passed": "Contrôle après mise en ligne réussi.",
+      "rollback_done": "Fichiers et base de données restaurés.",
+      "rollback_verified": "Le site fonctionne à nouveau comme avant la mise à jour.",
+      "rollback_still_broken": "Après la restauration, le site ne fonctionne toujours pas (HTTP {status}).",
+      "cleanup_done": "Copie de test supprimée et mode maintenance désactivé.",
+      "cleanup_failed": "Le nettoyage sur le serveur a échoué ; la copie de test sera supprimée plus tard.",
+      "verdict_deployed": "Terminé : en ligne.",
+      "verdict_blocked": "Terminé : bloquée, rien n’a été mis en ligne.",
+      "verdict_rolled_back": "Terminé : restaurée.",
+      "verdict_error": "Terminé : échec.",
+      "verdict_cancelled": "Terminé : annulée.",
+      "done": "Terminé."
+    }
   }
 }

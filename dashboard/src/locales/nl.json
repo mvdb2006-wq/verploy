@@ -281,11 +281,23 @@
       },
       "core_update": {
         "title": "WordPress {version} is beschikbaar",
-        "body": "Er is een nieuwe versie van WordPress. Veilig updaten volgt in de update-flow van Verploy."
+        "body": "Er is een nieuwe versie van WordPress. Start een veilige update op de pagina van de site."
       },
       "plugin_updates": {
         "title": "{count, plural, one {# plugin- of thema-update beschikbaar} other {# plugin- en thema-updates beschikbaar}}",
         "body": "Bekijk de lijst op de pagina van de site."
+      },
+      "update_blocked": {
+        "title": "Update tegengehouden: {items}",
+        "body": "{reason} Er is niets live gezet."
+      },
+      "update_rolled_back": {
+        "title": "Update teruggedraaid: {items}",
+        "body": "{reason} De site is automatisch teruggezet naar de versie van vóór de update."
+      },
+      "update_failed": {
+        "title": "Update mislukt: {items}",
+        "body": "{reason}"
       }
     },
     "sslError": {
@@ -310,5 +322,172 @@
     "disk": "Vrije schijfruimte",
     "noHttps": "geen HTTPS",
     "openAlerts": "Open meldingen"
+  },
+  "runs": {
+    "errorActive": "Er loopt al een update op deze site. Wacht tot die klaar is.",
+    "errorNoUpdate": "Voor een van de gekozen onderdelen is geen update (meer) beschikbaar. Ververs de pagina.",
+    "errorConnector": "Veilige updates vragen Verploy Connector 2.1 of nieuwer. Werk de plugin op de site bij.",
+    "errorNotConnected": "Deze site is niet gekoppeld.",
+    "errorReadOnly": "Je proefperiode of abonnement is afgelopen. Monitoring loopt door, maar updates starten kan niet.",
+    "errorNotCancellable": "Deze update kan niet meer worden geannuleerd: productie wordt al bijgewerkt.",
+    "errorNoItems": "Kies ten minste één update (maximaal 20).",
+    "panel": {
+      "hint": "Vink aan wat je wilt bijwerken. Verploy test eerst op een kopie van de site en zet het pas live als alles werkt.",
+      "start": "{count, plural, =0 {Kies een update} one {# update veilig uitvoeren} other {# updates veilig uitvoeren}}",
+      "starting": "Bezig met starten…",
+      "active": "Er loopt een update op deze site.",
+      "view": "Voortgang bekijken",
+      "connectorOutdated": "Veilige updates vragen Verploy Connector 2.1 of nieuwer (nu: {version}). Werk de plugin op de site bij."
+    },
+    "settings": {
+      "title": "Testinstellingen",
+      "intro": "Verploy test de startpagina, de pagina’s uit het menu, webwinkelpagina’s en de inlogpagina, op desktop en mobiel.",
+      "paths": "Extra pagina’s om te testen (één per regel, max. 5)",
+      "pathsHelp": "Pad vanaf de hoofdmap, bijvoorbeeld /contact/.",
+      "masks": "Onderdelen die mogen veranderen (CSS-selectors, één per regel, max. 10)",
+      "masksHelp": "Bijvoorbeeld sliders, cookiemeldingen of blokken met de datum. Die worden bij het vergelijken van schermafbeeldingen genegeerd.",
+      "threshold": "Toegestaan beeldverschil (%)",
+      "thresholdHelp": "Verschilt een pagina ná de update meer dan dit percentage van ervóór, dan geldt de test als gezakt. Standaard 2 %.",
+      "errorPaths": "Gebruik maximaal 5 paden die met / beginnen, zonder spaties.",
+      "errorMasks": "Gebruik maximaal 10 geldige CSS-selectors.",
+      "errorThreshold": "Kies een percentage tussen 0,1 en 50."
+    },
+    "history": {
+      "title": "Updategeschiedenis"
+    },
+    "status": {
+      "queued": "In de wachtrij",
+      "running": "Bezig"
+    },
+    "verdict": {
+      "deployed": "Live gezet",
+      "blocked": "Tegengehouden",
+      "rolled_back": "Teruggedraaid",
+      "error": "Mislukt",
+      "cancelled": "Geannuleerd"
+    },
+    "outcome": {
+      "deployed": "Alle updates staan live en de controle na livegang is geslaagd.",
+      "blocked": "Niets live gezet: de update gaf problemen op de testkopie.",
+      "rolled_back": "Na livegang ging de controle mis. De site is automatisch teruggezet naar de versie van vóór de update.",
+      "error": "De update kon niet worden afgerond.",
+      "cancelled": "Geannuleerd. Er is niets live gezet."
+    },
+    "steps": {
+      "preparing": "Voorbereiden",
+      "baseline": "Nulmeting op de live site",
+      "staging_create": "Testkopie (staging) maken",
+      "staging_baseline": "Testkopie meten vóór de update",
+      "staging_update": "Updates op de testkopie",
+      "staging_test": "Testkopie testen na de update",
+      "deploy_snapshot": "Onderhoudsmodus en back-up",
+      "deploy_apply": "Updates live zetten",
+      "postcheck": "Controle na livegang",
+      "rollback": "Terugdraaien",
+      "cleanup": "Opruimen",
+      "queued": "In de wachtrij",
+      "done": "Klaar"
+    },
+    "viewport": {
+      "desktop": "Desktop",
+      "mobile": "Mobiel"
+    },
+    "itemStatus": {
+      "updated": "Bijgewerkt",
+      "already_current": "Al actueel",
+      "update_failed": "Update mislukt",
+      "not_installed": "Niet geïnstalleerd",
+      "no_update_available": "Geen update beschikbaar",
+      "filesystem_not_writable": "Geen schrijfrechten op de server",
+      "unknown_type": "Onbekend type",
+      "crashed": "Site crashte na de update"
+    },
+    "phpError": {
+      "wp_critical_error": "WordPress meldt een kritieke fout",
+      "php_fatal": "PHP geeft een fatale fout",
+      "db_connection": "de database is niet bereikbaar",
+      "maintenance": "de site staat in onderhoudsmodus"
+    },
+    "reason": {
+      "cancelled": "Geannuleerd op verzoek.",
+      "site_missing": "De site bestaat niet meer.",
+      "not_connected": "De site is niet (meer) gekoppeld.",
+      "connector_outdated": "De plugin op de site is te oud voor veilige updates. Werk Verploy Connector bij naar 2.1 of nieuwer.",
+      "no_pages": "Er zijn geen pagina’s gevonden om te testen.",
+      "site_unreachable": "De live site was niet bereikbaar, dus er kon geen nulmeting worden gedaan.",
+      "staging_unusable": "De testkopie werkt op deze server niet goed (status {status}), dus testen is niet betrouwbaar. Er is niets gewijzigd.",
+      "update_failed": "{name} kon niet worden bijgewerkt op de testkopie ({status}).",
+      "update_failed_production": "{name} kon niet worden bijgewerkt op de live site ({status}).",
+      "rollback_failed": "Terugdraaien is niet gelukt of de site werkt daarna nog niet. Controleer de site direct.",
+      "step_failed": "De stap “{step}” is na meerdere pogingen niet gelukt.",
+      "site_rejected": "De site weigerde een opdracht bij “{step}” (HTTP {status}). Koppel de site eventueel opnieuw.",
+      "unknown": "Onbekende oorzaak.",
+      "check": {
+        "reachable": "{page} ({viewport}) laadde niet meer.",
+        "http": "{page} ({viewport}) gaf HTTP {after} (was {before}).",
+        "php_error": "{page} ({viewport}): {error}.",
+        "js_errors": "{page} ({viewport}) geeft nieuwe JavaScript-fouten: {errors}",
+        "resources": "{page} ({viewport}): bestanden laden niet meer: {resources}",
+        "landmarks": "{page} ({viewport}): onderdelen van de pagina zijn verdwenen ({missing}).",
+        "content": "{page} ({viewport}) toont veel minder inhoud dan ervoor.",
+        "visual": "{page} ({viewport}) ziet er {percent}% anders uit (toegestaan: {limit}%).",
+        "login": "Het inlogformulier van WordPress werkt niet meer."
+      }
+    },
+    "detail": {
+      "title": "Veilige update",
+      "startedAt": "Gestart op {date}",
+      "duration": "duur {time}",
+      "cancel": "Annuleren",
+      "cancelling": "Wordt geannuleerd… De testkopie wordt opgeruimd.",
+      "items": "Updates",
+      "component": "Onderdeel",
+      "version": "Versie",
+      "staging": "Testkopie",
+      "production": "Live site",
+      "steps": "Stappen",
+      "skipped": "overgeslagen",
+      "stagingTests": "Tests op de testkopie",
+      "stagingTestsIntro": "Dezelfde pagina’s vóór en na de update, op een kopie van de site.",
+      "productionTests": "Controle op de live site",
+      "productionTestsIntro": "Vlak vóór en direct na het live zetten.",
+      "beforeUpdate": "Vóór",
+      "afterUpdate": "Na",
+      "diff": "Verschil",
+      "passed": "Geslaagd",
+      "failed": "Gezakt",
+      "loginPage": "Inlogpagina",
+      "timeline": "Tijdlijn"
+    },
+    "events": {
+      "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",
+      "cancel_requested": "Annuleren aangevraagd.",
+      "step_started": "{step}.",
+      "step_failed": "“{step}” is mislukt.",
+      "retry": "“{step}” lukte niet (poging {attempt}); Verploy probeert het straks opnieuw.",
+      "pages": "{count, plural, one {# pagina} other {# pagina’s}} gekozen om te testen: {pages}.",
+      "baseline_done": "Nulmeting klaar: {healthy} van {total} metingen in orde.",
+      "staging_ready": "Testkopie klaar ({files} bestanden, {tables} tabellen).",
+      "staging_failed": "Tests op de testkopie gezakt: {page} ({viewport}).",
+      "staging_passed": "Alle tests op de testkopie geslaagd.",
+      "maintenance_on": "Onderhoudsmodus aan: bezoekers zien kort een onderhoudsmelding.",
+      "snapshot_ready": "Back-up van bestanden en database gemaakt.",
+      "item_updated": "{name}: {from} → {to}.",
+      "item_failed": "{name}: {status}.",
+      "item_crashed": "{name}: de site reageerde niet meer na de update.",
+      "postcheck_failed": "Controle na livegang gezakt: {page} ({viewport}). Terugdraaien…",
+      "postcheck_passed": "Controle na livegang geslaagd.",
+      "rollback_done": "Bestanden en database teruggezet.",
+      "rollback_verified": "De site werkt weer zoals vóór de update.",
+      "rollback_still_broken": "Na het terugdraaien werkt de site nog niet (HTTP {status}).",
+      "cleanup_done": "Testkopie verwijderd en onderhoudsmodus uit.",
+      "cleanup_failed": "Opruimen op de server is niet gelukt; de testkopie wordt later opnieuw opgeruimd.",
+      "verdict_deployed": "Klaar: live gezet.",
+      "verdict_blocked": "Klaar: tegengehouden, niets live gezet.",
+      "verdict_rolled_back": "Klaar: teruggedraaid.",
+      "verdict_error": "Klaar: mislukt.",
+      "verdict_cancelled": "Klaar: geannuleerd.",
+      "done": "Klaar."
+    }
   }
 }

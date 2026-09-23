@@ -14,7 +14,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | 1 | Inventarisatie + architectuur | ✅ klaar (23-09-2026) | PLAN.md bevat datamodel, services, jobflow en fasering |
 | 2 | Fundament: auth, bureaus, teamleden, site koppelen | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Nieuw bureau registreert, koppelt site, plugin stuurt aantoonbaar data. RLS-tests groen |
 | 3 | Monitoring + dashboard | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
-| 4 | Veilige updates (kernflow 1–7) | ⏳ volgende | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
+| 4 | Veilige updates (kernflow 1–7) | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2, #3 | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
 | 5 | AI-diagnose | — | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
 | 6 | Rapporten | — | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
@@ -181,7 +181,7 @@ Een eenmalige migratie `2026xxxx_v2.sql` maakt het v2-schema naast v1 aan. Daarn
 ## 5. Kernflow: update-run state machine
 
 ```
-queued ─▶ preparing ─▶ baseline ─▶ staging_create ─▶ staging_update ─▶ staging_test
+queued ─▶ preparing ─▶ baseline ─▶ staging_create ─▶ staging_baseline ─▶ staging_update ─▶ staging_test
                                                                          │
                                ┌──────────── gezakt ──────────────────────┤
                                ▼                                          ▼ geslaagd
@@ -320,3 +320,29 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 
 **Bekende beperking tot de worker draait (fase 4 / BLOCKERS #3):** pg_cron maakt offline-meldingen elke 5 min in-app aan. De e-mail daarvoor gaat mee met de eerstvolgende heartbeat van een willekeurige site, of met de dagelijkse cron. Liggen álle sites tegelijk plat, dan kan de e-mail tot de dagelijkse run uitblijven. De worker roept `/api/cron/maintenance` elke 5 min aan en heft dit op.
 
+
+---
+
+## 13. Resultaat fase 4 (24-09-2026) — branch `v2`
+
+**Gebouwd:**
+- **Connector 2.1.0** (`connector-plugin/verploy-connector/includes/class-run-engine.php` e.a.): staging als volledige kopie (bestanden + tabellen, in stukjes), updates via de eigen upgraders van WordPress, snapshot (betrokken mappen + alle tabellen), onderhoudsmodus met bypass, rollback (bestanden terug + `RENAME TABLE`), een rollback-noodroute als mu-plugin, opruimen (staging weg, back-ups na 7 dagen), een lijst met testpagina's (menu's, ook blokthema-navigatie, webwinkel, extra paden) en een directe heartbeat. Een run-lock voorkomt twee runs tegelijk.
+- **Migratie `20260926000000_update_runs.sql`:**
+  - tabellen `update_runs`, `update_run_events` en `test_results`, met RLS (lezen voor leden, schrijven alleen via RPC's en de service role)
+  - RPC's `create_update_run` (rol, alleen-lezen-bureau, gekoppeld, connector ≥ 2.1, versies uit de heartbeat, één actieve run per site), `cancel_update_run`, `claim/renew/advance/release_update_run` en `record_run_outcome`
+  - testinstellingen per site
+  - de bucket `run-artifacts`
+  - een site met een lopende run kan niet worden verwijderd
+- **Worker** (`dashboard/worker/`): state machine uit §5 plus een extra stap `staging_baseline` (staging meten vóór de update). Playwright-checks en pixelmatch, time-outs per stap, pogingen, lease, annuleren vóór de deploy, meldingen en e-mail na afloop. Ook een healthcheck en elke 5 minuten monitoringonderhoud.
+- **Dashboard:** updates aanvinken en veilig laten uitvoeren op de sitepagina, updategeschiedenis en testinstellingen. De run-pagina ververst live en toont stappen, updates per omgeving, tests per pagina/viewport met schermafbeeldingen vóór, na en verschil, en een tijdlijn. Er zijn meldingen voor tegengehouden, teruggedraaid en mislukt. Alles in 5 talen.
+
+**Bewijs:**
+
+| Suite | Resultaat |
+|---|---|
+| Engine-integratietest (`connector-plugin/tests/engine-test.php`, WordPress 7.1.2 op MySQL-compatibele DB) | 27/27. Maakt deel uit van `build.sh`: zonder groene engine-test geen release |
+| DB-tests | 124/124, waarvan 18 nieuw voor runs: rechten, bureau-isolatie, lease/overname, annuleren, integriteit |
+| Unit | 100/100, waaronder pixelvergelijking, vergelijkingsregels, foutherkenning en signing van de worker |
+| Playwright, alle fasen | 15/15. Fase 4: koppelen → **scenario 1** goede update live (footer 1.0.0 → 1.1.0 op de echte site) · **scenario 2** fatale update tegengehouden, productie nooit aangeraakt, melding · **scenario 3** update die alleen live breekt (de site crasht volledig, ook de REST-API) → automatisch teruggedraaid, site werkt weer, e-mail met link naar de run |
+
+**Lokaal draaien:** zie README (MySQL-WordPress + `tests/lab/build-lab.sh`, daarna `npm run worker:build` en `npx playwright test`).
