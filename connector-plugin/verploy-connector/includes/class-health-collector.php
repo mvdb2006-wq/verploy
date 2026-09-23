@@ -12,8 +12,9 @@ class Verploy_Health_Collector {
 	 */
 	public static function collect(): array {
 		return [
-			'collected_at' => gmdate( 'c' ),
-			'site'         => self::site_info(),
+			'collected_at'      => gmdate( 'c' ),
+			'connector_version' => VERPLOY_VERSION,
+			'site'              => self::site_info(),
 			'server'       => self::server_info(),
 			'wordpress'    => self::wordpress_info(),
 			'plugins'      => self::plugins_info(),

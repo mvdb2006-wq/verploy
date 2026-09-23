@@ -3,11 +3,12 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Globe, Wifi, WifiOff, Clock, Code2,
-  Puzzle, Palette, Key, Copy, RefreshCw,
+  Puzzle, Palette, Key, Copy, RefreshCw, Plug,
 } from 'lucide-react'
 import { timeAgo, formatDate, phpSeverity } from '@/lib/utils'
 import CopyButton from '../new/success/CopyButton'
 import DeleteSiteButton from './DeleteSiteButton'
+import EditSiteForm from './EditSiteForm'
 import { revalidatePath } from 'next/cache'
 
 async function deleteSite(siteId: string): Promise<{ error?: string }> {
@@ -34,6 +35,39 @@ async function deleteSite(siteId: string): Promise<{ error?: string }> {
   revalidatePath('/settings')
   revalidatePath('/dashboard')
   redirect('/settings')
+}
+
+async function updateSite(formData: FormData): Promise<{ error?: string }> {
+  'use server'
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Niet ingelogd' }
+
+  const { data: membership } = await supabase
+    .from('agency_members')
+    .select('agency_id')
+    .eq('user_id', user.id)
+    .single()
+  if (!membership) return { error: 'Geen toegang' }
+
+  const id          = formData.get('id') as string
+  const name        = (formData.get('name') as string)?.trim()
+  const url         = (formData.get('url') as string)?.trim()
+  const client_name = (formData.get('client_name') as string)?.trim() || null
+
+  if (!name || !url) return { error: 'Naam en URL zijn verplicht' }
+
+  const { error } = await supabase
+    .from('sites')
+    .update({ name, url, client_name, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('agency_id', membership.agency_id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/settings/sites/${id}`)
+  revalidatePath('/settings')
+  return {}
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -78,7 +112,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
 
   const { data: site } = await supabase
     .from('sites')
-    .select('id, name, url, client_name, status, api_key, created_at, last_ping_at, wp_data')
+    .select('id, name, url, client_name, status, api_key, created_at, last_ping_at, wp_data, connector_version, wp_version, php_version')
     .eq('id', params.id)
     .eq('agency_id', membership.agency_id)
     .single()
@@ -86,7 +120,10 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
   if (!site) notFound()
 
   const wp = (site.wp_data ?? {}) as WpData
-  const phpBad = phpSeverity(wp.php_version ?? null)
+  const phpBad = phpSeverity(site.php_version ?? wp.php_version ?? null)
+
+  // Bind server action ids
+  const deleteSiteBound = deleteSite.bind(null, site.id)
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -97,7 +134,16 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
         </Link>
         <div className="flex-1 min-w-0">
           <p className="section-label mb-0.5">Instellingen → Sites</p>
-          <h1 className="text-2xl font-extrabold text-text tracking-tight truncate">{site.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-text tracking-tight truncate">{site.name}</h1>
+            <EditSiteForm
+              siteId={site.id}
+              initialName={site.name}
+              initialUrl={site.url}
+              initialClientName={site.client_name ?? null}
+              updateAction={updateSite}
+            />
+          </div>
         </div>
         <StatusBadge status={site.status} />
         <a
@@ -139,6 +185,12 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
               {site.last_ping_at ? timeAgo(site.last_ping_at) : <span className="text-muted">Nog niet gepingd</span>}
             </p>
           </div>
+          {site.connector_version && (
+            <div>
+              <p className="label flex items-center gap-1"><Plug size={11} /> Verploy Connector</p>
+              <p className="text-text font-mono text-xs">v{site.connector_version}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -155,7 +207,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
       </div>
 
       {/* WordPress-info */}
-      {Object.keys(wp).length > 0 ? (
+      {(Object.keys(wp).length > 0 || site.wp_version || site.php_version) ? (
         <div className="card mb-4">
           <div className="flex items-center gap-2 mb-4">
             <Code2 size={15} className="text-accent" />
@@ -164,7 +216,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
               <p className="label">WordPress</p>
-              <p className="text-text font-semibold">{wp.wp_version ?? '—'}</p>
+              <p className="text-text font-semibold">{site.wp_version ?? wp.wp_version ?? '—'}</p>
             </div>
             <div>
               <p className="label">PHP</p>
@@ -172,7 +224,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
                 phpBad === 'danger' ? 'text-danger' :
                 phpBad === 'warn'   ? 'text-warn'   : 'text-text'
               }`}>
-                {wp.php_version ?? '—'}
+                {site.php_version ?? wp.php_version ?? '—'}
                 {phpBad === 'danger' && <span className="ml-1 text-xs font-normal">(verouderd!)</span>}
                 {phpBad === 'warn'   && <span className="ml-1 text-xs font-normal">(update aanbevolen)</span>}
               </p>
@@ -223,7 +275,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
       {/* Danger zone */}
       <div className="card border border-danger/20 bg-danger/5">
         <p className="text-xs font-bold text-danger uppercase tracking-widest mb-3">Gevaarlijke zone</p>
-        <DeleteSiteButton siteId={site.id} siteName={site.name} onDelete={deleteSite} />
+        <DeleteSiteButton siteId={site.id} siteName={site.name} onDelete={deleteSiteBound} />
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import { sendAlertEmail } from '@/lib/email'
 
 interface IncomingPayload {
   collected_at: string
+  connector_version?: string
   site?: { url?: string; name?: string; admin_email?: string; language?: string; timezone?: string; multisite?: boolean }
   server?: {
     php_version?: string; php_major?: string; mysql_version?: string
@@ -141,12 +142,13 @@ export async function POST(req: NextRequest) {
     const { error: updateError } = await supabase
       .from('sites')
       .update({
-        status:           'online',
-        last_seen_at:     now.toISOString(),
-        last_heartbeat_at: now.toISOString(),
-        wp_version:       wp.version       ?? null,
-        php_version:      server.php_version ?? null,
-        updated_at:       now.toISOString(),
+        status:             'online',
+        last_seen_at:       now.toISOString(),
+        last_heartbeat_at:  now.toISOString(),
+        wp_version:         wp.version          ?? null,
+        php_version:        server.php_version  ?? null,
+        connector_version:  body.connector_version ?? null,
+        updated_at:         now.toISOString(),
       })
       .eq('id', site.id)
 
