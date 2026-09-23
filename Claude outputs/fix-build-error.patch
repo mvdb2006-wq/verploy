@@ -1,0 +1,29 @@
+From 6c223044ce80e25e346dfd4ee41c3c2378545894 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 23 Sep 2026 19:02:57 +0200
+Subject: [PATCH] fix: verwijder onnodige @ts-expect-error (bouwfout Vercel)
+
+TypeScript klaagde dat de suppress-directive geen fout onderdrukte
+door de inline type-cast erboven.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ dashboard/src/app/api/v1/sites/jobs/[id]/complete/route.ts | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/dashboard/src/app/api/v1/sites/jobs/[id]/complete/route.ts b/dashboard/src/app/api/v1/sites/jobs/[id]/complete/route.ts
+index 603c4fb..3cca85e 100644
+--- a/dashboard/src/app/api/v1/sites/jobs/[id]/complete/route.ts
++++ b/dashboard/src/app/api/v1/sites/jobs/[id]/complete/route.ts
+@@ -38,7 +38,6 @@ export async function POST(
+       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+     }
+ 
+-    // @ts-expect-error — Supabase join typing
+     if (job.sites?.api_key !== api_key) {
+       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+     }
+-- 
+2.43.0
+
