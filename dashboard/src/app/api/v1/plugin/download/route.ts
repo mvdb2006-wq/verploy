@@ -11,16 +11,16 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const zipPath = join(process.cwd(), 'public', 'downloads', 'verploy-connector-1.3.0.zip')
+    const zipPath = join(process.cwd(), 'public', 'downloads', 'verploy-connector-1.3.1.zip')
     const file    = readFileSync(zipPath)
 
     return new NextResponse(file, {
       status: 200,
       headers: {
         'Content-Type':        'application/zip',
-        'Content-Disposition': 'attachment; filename="verploy-connector-1.3.0.zip"',
+        'Content-Disposition': 'attachment; filename="verploy-connector-1.3.1.zip"',
         'Content-Length':      String(file.length),
-        'Cache-Control':       'public, max-age=3600',
+        'Cache-Control':       'no-store',
         'Content-Encoding':    'identity',   // ← voorkomt gzip/br compressie door CDN
       },
     })

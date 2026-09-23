@@ -69,7 +69,7 @@ async function createUpdateJob(formData: FormData): Promise<{ error?: string }> 
   // No class-updater.php → update_plugins transient is leeg → Plugin_Upgrader mislukt.
   if (slug === VERPLOY_SLUG && semverLt(site.connector_version, JOB_RUNNER_MIN)) {
     return {
-      error: `Connector ${site.connector_version ?? 'onbekend'} kan zichzelf niet automatisch updaten. Upload 1.3.0 handmatig via WP-admin → Plugins → Plugin uploaden: https://app.verploy.com/api/v1/plugin/download`,
+      error: `Connector ${site.connector_version ?? 'onbekend'} kan zichzelf niet automatisch updaten. Upload de nieuwste versie handmatig via WP-admin → Plugins → Plugin uploaden: https://app.verploy.com/api/v1/plugin/download`,
     }
   }
 

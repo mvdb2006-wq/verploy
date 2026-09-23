@@ -289,41 +289,11 @@ class Verploy_Job_Runner {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
+		// The skin extends WP_Upgrader_Skin, which only exists after the upgrader
+		// libraries above are loaded. Loading it earlier fatals every request.
+		require_once VERPLOY_PLUGIN_DIR . 'includes/class-silent-upgrader-skin.php';
 
 		// Tell WordPress to use direct filesystem — avoids FTP credential prompts
 		add_filter( 'filesystem_method', function() { return 'direct'; } );
-	}
-}
-
-// ─── Silent upgrader skin ─────────────────────────────────────────────────────
-
-/**
- * Upgrader skin that captures output instead of printing it.
- * Used by Verploy_Job_Runner so update logs can be stored and reported.
- */
-class Verploy_Silent_Upgrader_Skin extends WP_Upgrader_Skin {
-
-	private array $messages = [];
-
-	public function feedback( $string, ...$args ): void {
-		if ( ! empty( $string ) ) {
-			$this->messages[] = is_string( $string ) ? $string : (string) $string;
-		}
-	}
-
-	public function header(): void {}
-	public function footer(): void {}
-	public function error( $errors ): void {
-		if ( is_wp_error( $errors ) ) {
-			foreach ( $errors->get_error_messages() as $msg ) {
-				$this->messages[] = 'Fout: ' . $msg;
-			}
-		} else {
-			$this->messages[] = 'Fout: ' . (string) $errors;
-		}
-	}
-
-	public function get_log(): string {
-		return implode( "\n", $this->messages );
 	}
 }

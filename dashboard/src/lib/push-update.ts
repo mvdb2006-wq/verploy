@@ -78,5 +78,5 @@ export function semverLt(a: string | null | undefined, b: string): boolean {
 }
 
 export const VERPLOY_SLUG    = 'verploy-connector/verploy-connector.php'
-export const VERPLOY_LATEST  = '1.3.0'
+export const VERPLOY_LATEST  = '1.3.1'
 export const JOB_RUNNER_MIN  = '1.3.0' // Eerste connector-versie met class-job-runner.php
