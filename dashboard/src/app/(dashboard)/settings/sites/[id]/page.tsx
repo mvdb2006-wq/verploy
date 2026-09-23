@@ -12,13 +12,10 @@ import { revalidatePath } from 'next/cache'
 
 async function deleteSite(siteId: string): Promise<{ error?: string }> {
   'use server'
-  const { createClient } = await import('@/lib/supabase/server')
-  const { redirect } = await import('next/navigation')
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Niet ingelogd' }
 
-  // Verify ownership
   const { data: membership } = await supabase
     .from('agency_members')
     .select('agency_id')
