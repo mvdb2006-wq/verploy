@@ -4,7 +4,7 @@ import { actAs, asSuper, expectError, inTx, pool, seedAgency, type Agency, type 
 afterAll(() => pool.end())
 
 /** Tabellen met bureau-data die leden mogen lezen. */
-const READABLE = ['agencies', 'agency_members', 'sites', 'health_snapshots', 'site_components', 'update_runs', 'update_run_events', 'test_results', 'diagnoses'] as const
+const READABLE = ['agencies', 'agency_members', 'sites', 'health_snapshots', 'site_components', 'update_runs', 'update_run_events', 'test_results', 'diagnoses', 'reports'] as const
 /** Tabellen die voor gebruikers volledig onzichtbaar moeten zijn. */
 const SECRET = ['site_credentials', 'signed_request_nonces'] as const
 const ALL_TABLES = [...READABLE, 'agency_invitations', 'plans', ...SECRET] as const

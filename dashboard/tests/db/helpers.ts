@@ -114,6 +114,10 @@ export async function seedAgency(db: Db, label: string, opts: { plan?: string; p
     [ag.id, run!.id],
   )
   await db.query(
+    `insert into public.reports (agency_id, site_id, trigger, period_start, period_end, locale, status) values ($1, $2, 'manual', '2026-08-01', '2026-08-31', 'nl', 'ready')`,
+    [ag.id, siteIds[0]],
+  )
+  await db.query(
     `insert into public.diagnoses (run_id, agency_id, source, locale, summary, cause, fix, confidence) values ($2, $1, 'rules', 'nl', 'x', 'x', 'x', 'low')`,
     [ag.id, run!.id],
   )

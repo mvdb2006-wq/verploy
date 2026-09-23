@@ -19,7 +19,8 @@ export async function saveAgency(_: SettingsState, form: FormData): Promise<Sett
     name: z.string().trim().min(2).max(120),
     dashboard_locale: z.enum(LOCALES),
     brand_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  }).safeParse({ name: form.get('name'), dashboard_locale: form.get('dashboard_locale'), brand_color: form.get('brand_color') })
+    report_sender_name: z.string().trim().max(120).transform(v => v || null),
+  }).safeParse({ name: form.get('name'), dashboard_locale: form.get('dashboard_locale'), brand_color: form.get('brand_color'), report_sender_name: form.get('report_sender_name') ?? '' })
   if (!parsed.success) {
     const field = parsed.error.issues[0]?.path[0]
     return { error: field === 'brand_color' ? t('settings.errorColor') : field === 'name' ? t('onboarding.errorName') : t('common.errorGeneric') }
@@ -89,4 +90,48 @@ export async function removeMember(_: SettingsState, form: FormData): Promise<Se
     redirect('/onboarding')
   }
   return {}
+}
+
+export interface LogoState { error?: string; ok?: boolean }
+
+const LOGO_MAX = 1024 * 1024
+/** Herkent het bestandstype aan de eerste bytes (niet aan de bestandsnaam of het opgegeven type). */
+function sniffImage(buf: Buffer): 'png' | 'jpg' | 'webp' | null {
+  if (buf.length > 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'png'
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg'
+  if (buf.length > 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'webp'
+  return null
+}
+
+/** Logo voor rapporten uploaden of verwijderen (eigenaar/beheerder). */
+export async function saveLogo(_: LogoState, form: FormData): Promise<LogoState> {
+  const session = await requireAgency()
+  const t = await getT()
+  if (session.role !== 'owner' && session.role !== 'admin') return { error: t('common.errorForbidden') }
+  const supabase = await createClient()
+  const admin = (await import('@/lib/supabase/admin')).createAdminClient()
+  const old = session.agency.brand_logo_path
+  if (form.get('remove') === '1') {
+    const { error } = await supabase.from('agencies').update({ brand_logo_path: null }).eq('id', session.agency.id)
+    if (error) return { error: t(dbErrorKey(error)) }
+    if (old) await admin.storage.from('branding').remove([old])
+    revalidatePath('/settings')
+    return { ok: true }
+  }
+  const file = form.get('logo')
+  if (!(file instanceof File) || file.size === 0 || file.size > LOGO_MAX) return { error: t('reports.branding.errorType') }
+  const buf = Buffer.from(await file.arrayBuffer())
+  const ext = sniffImage(buf)
+  if (!ext) return { error: t('reports.branding.errorType') }
+  const path = `${session.agency.id}/logo-${crypto.randomUUID()}.${ext}`
+  const { error: upErr } = await admin.storage.from('branding').upload(path, buf, { contentType: ext === 'jpg' ? 'image/jpeg' : `image/${ext}` })
+  if (upErr) return { error: t('common.errorGeneric') }
+  const { error } = await supabase.from('agencies').update({ brand_logo_path: path }).eq('id', session.agency.id)
+  if (error) {
+    await admin.storage.from('branding').remove([path])
+    return { error: t(dbErrorKey(error)) }
+  }
+  if (old && old !== path) await admin.storage.from('branding').remove([old])
+  revalidatePath('/settings')
+  return { ok: true }
 }

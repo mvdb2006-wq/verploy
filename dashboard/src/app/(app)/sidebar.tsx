@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bell, Globe, LogOut, Settings, Users } from 'lucide-react'
+import { Bell, FileText, Globe, LogOut, Settings, Users } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { signOut } from '../(auth)/actions'
@@ -10,12 +10,13 @@ export function Sidebar({ agencyName, email, labels, alertCount }: {
   agencyName: string
   email: string
   alertCount: number
-  labels: { sites: string; alerts: string; settings: string; team: string; signOut: string; agency: string; mainNav: string }
+  labels: { sites: string; alerts: string; reports: string; settings: string; team: string; signOut: string; agency: string; mainNav: string }
 }) {
   const path = usePathname()
   const nav = [
     { href: '/', label: labels.sites, icon: Globe, active: path === '/' || path.startsWith('/sites'), count: 0 },
     { href: '/alerts', label: labels.alerts, icon: Bell, active: path.startsWith('/alerts'), count: alertCount },
+    { href: '/reports', label: labels.reports, icon: FileText, active: path.startsWith('/reports'), count: 0 },
     { href: '/settings/team', label: labels.team, icon: Users, active: path.startsWith('/settings/team'), count: 0 },
     { href: '/settings', label: labels.settings, icon: Settings, active: path === '/settings', count: 0 },
   ]

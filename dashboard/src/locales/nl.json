@@ -26,7 +26,8 @@
     "signOut": "Uitloggen",
     "agency": "Bureau",
     "mainNav": "Hoofdmenu",
-    "alerts": "Meldingen"
+    "alerts": "Meldingen",
+    "reports": "Rapporten"
   },
   "auth": {
     "email": "E-mailadres",
@@ -619,6 +620,142 @@
         "medium": "Zekerheid: gemiddeld",
         "low": "Zekerheid: laag"
       }
+    }
+  },
+  "report": {
+    "title": "Onderhoudsrapport",
+    "period": "{start} – {end}",
+    "client": "Klant",
+    "preparedBy": "Opgesteld door {agency} op {date}",
+    "page": "Pagina {page} van {total}",
+    "durationHm": "{h} u {m} min",
+    "durationM": "{m} min",
+    "kpi": {
+      "uptime": "Beschikbaarheid",
+      "uptimeNote": "elke 15 minuten gemeten",
+      "updates": "Updates live gezet",
+      "updatesNote": "na tests op een kopie",
+      "stopped": "Problemen opgevangen",
+      "stoppedNote": "tegengehouden of teruggedraaid",
+      "attention": "Aandachtspunten",
+      "attentionNote": "zie hieronder",
+      "attentionNone": "alles in orde"
+    },
+    "updates": {
+      "title": "Updates in deze periode",
+      "intro": "Elke update is eerst getest op een kopie van de website. Alleen updates die alle tests doorstonden, zijn live gezet.",
+      "none": "In deze periode zijn geen updates uitgevoerd.",
+      "date": "Datum",
+      "component": "Onderdeel",
+      "version": "Versie",
+      "result": "Resultaat"
+    },
+    "result": {
+      "deployed": "Live gezet",
+      "blocked": "Tegengehouden",
+      "rolled_back": "Teruggedraaid"
+    },
+    "health": {
+      "title": "Staat van de website",
+      "intro": "Stand op het moment van dit rapport.",
+      "wordpress": "WordPress",
+      "php": "PHP",
+      "ssl": "SSL-certificaat",
+      "domain": "Domeinnaam",
+      "memory": "Geheugenlimiet",
+      "disk": "Vrije schijfruimte",
+      "pending": "Openstaande updates",
+      "unknown": "onbekend",
+      "noHttps": "geen HTTPS",
+      "sslUntil": "geldig tot {date}",
+      "domainUntil": "geregistreerd tot {date}",
+      "phpEolPast": "{version} – geen beveiligingsupdates meer sinds {date}",
+      "phpEolSoon": "{version} – beveiligingsupdates tot {date}",
+      "pendingCount": "{count, plural, one {# update} other {# updates}}",
+      "pendingNone": "geen"
+    },
+    "attention": {
+      "title": "Aandachtspunten",
+      "none": "Er zijn geen openstaande aandachtspunten."
+    },
+    "downtime": {
+      "title": "Onderbrekingen",
+      "none": "In deze periode zijn geen onderbrekingen gemeten.",
+      "start": "Begin",
+      "duration": "Duur",
+      "ongoing": "nog niet opgelost"
+    },
+    "email": {
+      "subject": "Onderhoudsrapport {site} – {period}",
+      "heading": "Onderhoudsrapport {site}",
+      "body": "Hierbij het onderhoudsrapport van {site} over {period}. Het volledige rapport zit als PDF in de bijlage.",
+      "footer": "Dit rapport is verstuurd door {agency}.",
+      "filename": "onderhoudsrapport"
+    }
+  },
+  "reports": {
+    "title": "Rapporten",
+    "intro": "Onderhoudsrapporten per site, in de taal van de klant en met de branding van je bureau.",
+    "empty": "Nog geen rapporten. Maak er hierboven een, of zet maandrapporten aan bij een site.",
+    "create": {
+      "title": "Rapport maken",
+      "site": "Site",
+      "period": "Periode",
+      "lastMonth": "Vorige maand",
+      "thisMonth": "Deze maand tot vandaag",
+      "custom": "Eigen periode",
+      "from": "Van",
+      "to": "Tot en met",
+      "send": "Ook per e-mail naar de klant sturen",
+      "sendHint": "Alleen voor eigenaren en beheerders, en alleen als bij de site een e-mailadres van de klant staat.",
+      "submit": "Rapport maken",
+      "created": "Het rapport wordt gemaakt en verschijnt zo in de lijst."
+    },
+    "table": {
+      "site": "Site",
+      "period": "Periode",
+      "language": "Taal",
+      "trigger": "Soort",
+      "status": "Status",
+      "created": "Aangemaakt"
+    },
+    "trigger": {
+      "manual": "Handmatig",
+      "monthly": "Maandelijks"
+    },
+    "status": {
+      "queued": "In de wachtrij",
+      "generating": "Wordt gemaakt",
+      "ready": "Klaar",
+      "sent": "Verstuurd naar {email}",
+      "failed": "Mislukt"
+    },
+    "download": "PDF downloaden",
+    "errors": {
+      "invalid_period": "Kies een geldige periode: maximaal een jaar en niet in de toekomst.",
+      "no_client_email": "Vul eerst het e-mailadres van de klant in bij de site.",
+      "rate_limited": "Je hebt het afgelopen uur veel rapporten gemaakt. Probeer het later opnieuw."
+    },
+    "site": {
+      "title": "Klant en rapporten",
+      "clientName": "Naam van de klant",
+      "clientEmail": "E-mailadres van de klant",
+      "reportLocale": "Taal van rapporten",
+      "monthly": "Elke maand automatisch een rapport maken en naar de klant sturen",
+      "monthlyHelp": "Op de 1e van de maand, over de vorige maand.",
+      "errorEmail": "Vul een geldig e-mailadres in.",
+      "errorMonthly": "Voor maandrapporten is een e-mailadres van de klant nodig.",
+      "makeReport": "Rapport maken"
+    },
+    "branding": {
+      "logo": "Logo voor rapporten",
+      "logoHint": "PNG, JPG of WebP, maximaal 1 MB. Staat bovenaan elk rapport.",
+      "upload": "Logo uploaden",
+      "remove": "Logo verwijderen",
+      "errorType": "Gebruik een PNG-, JPG- of WebP-bestand van maximaal 1 MB.",
+      "sender": "Afzender van rapporten",
+      "senderHint": "Staat onder elk rapport en als afzender van de e-mail. Leeg laten = naam van het bureau.",
+      "current": "Huidig logo"
     }
   }
 }

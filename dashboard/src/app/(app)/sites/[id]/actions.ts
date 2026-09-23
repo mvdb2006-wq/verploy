@@ -68,3 +68,25 @@ export async function saveTestSettings(_: SettingsState, form: FormData): Promis
   revalidatePath(`/sites/${siteId}`)
   return { saved: true }
 }
+
+export interface ClientState { error?: string; saved?: boolean }
+
+/** Klantgegevens en rapportinstellingen van een site (eigenaar/beheerder; RLS dwingt dat af). */
+export async function saveClientSettings(_: ClientState, form: FormData): Promise<ClientState> {
+  const t = await getT()
+  const siteId = String(form.get('site_id') ?? '')
+  const clientName = String(form.get('client_name') ?? '').trim()
+  const clientEmail = String(form.get('client_email') ?? '').trim().toLowerCase()
+  const locale = String(form.get('report_locale') ?? '')
+  const monthly = form.get('report_monthly') === 'on'
+  if (clientEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail)) return { error: t('reports.site.errorEmail') }
+  if (monthly && !clientEmail) return { error: t('reports.site.errorMonthly') }
+  if (!['nl', 'en', 'de', 'fr', 'es'].includes(locale) || clientName.length > 120) return { error: t('common.errorGeneric') }
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('sites').update({
+    client_name: clientName || null, client_email: clientEmail || null, report_locale: locale, report_monthly: monthly,
+  }, { count: 'exact' }).eq('id', siteId)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath(`/sites/${siteId}`)
+  return { saved: true }
+}

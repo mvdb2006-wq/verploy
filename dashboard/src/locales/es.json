@@ -26,7 +26,8 @@
     "signOut": "Cerrar sesión",
     "agency": "Agencia",
     "mainNav": "Menú principal",
-    "alerts": "Alertas"
+    "alerts": "Alertas",
+    "reports": "Informes"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -619,6 +620,142 @@
         "medium": "Fiabilidad: media",
         "low": "Fiabilidad: baja"
       }
+    }
+  },
+  "report": {
+    "title": "Informe de mantenimiento",
+    "period": "{start} – {end}",
+    "client": "Cliente",
+    "preparedBy": "Elaborado por {agency} el {date}",
+    "page": "Página {page} de {total}",
+    "durationHm": "{h} h {m} min",
+    "durationM": "{m} min",
+    "kpi": {
+      "uptime": "Disponibilidad",
+      "uptimeNote": "medida cada 15 minutos",
+      "updates": "Actualizaciones publicadas",
+      "updatesNote": "tras pruebas en una copia",
+      "stopped": "Problemas evitados",
+      "stoppedNote": "bloqueados o revertidos",
+      "attention": "Puntos de atención",
+      "attentionNote": "ver abajo",
+      "attentionNone": "todo en orden"
+    },
+    "updates": {
+      "title": "Actualizaciones de este periodo",
+      "intro": "Cada actualización se probó primero en una copia del sitio web. Solo se publicaron las que superaron todas las pruebas.",
+      "none": "En este periodo no se realizaron actualizaciones.",
+      "date": "Fecha",
+      "component": "Componente",
+      "version": "Versión",
+      "result": "Resultado"
+    },
+    "result": {
+      "deployed": "Publicada",
+      "blocked": "Bloqueada",
+      "rolled_back": "Revertida"
+    },
+    "health": {
+      "title": "Estado del sitio web",
+      "intro": "Situación en el momento de este informe.",
+      "wordpress": "WordPress",
+      "php": "PHP",
+      "ssl": "Certificado SSL",
+      "domain": "Nombre de dominio",
+      "memory": "Límite de memoria",
+      "disk": "Espacio libre en disco",
+      "pending": "Actualizaciones pendientes",
+      "unknown": "desconocido",
+      "noHttps": "sin HTTPS",
+      "sslUntil": "válido hasta el {date}",
+      "domainUntil": "registrado hasta el {date}",
+      "phpEolPast": "{version} – sin actualizaciones de seguridad desde el {date}",
+      "phpEolSoon": "{version} – actualizaciones de seguridad hasta el {date}",
+      "pendingCount": "{count, plural, one {# actualización} other {# actualizaciones}}",
+      "pendingNone": "ninguna"
+    },
+    "attention": {
+      "title": "Puntos de atención",
+      "none": "No hay puntos de atención pendientes."
+    },
+    "downtime": {
+      "title": "Interrupciones",
+      "none": "No se midieron interrupciones en este periodo.",
+      "start": "Inicio",
+      "duration": "Duración",
+      "ongoing": "aún sin resolver"
+    },
+    "email": {
+      "subject": "Informe de mantenimiento {site} – {period}",
+      "heading": "Informe de mantenimiento {site}",
+      "body": "Adjuntamos el informe de mantenimiento de {site} correspondiente a {period}. El informe completo va adjunto en PDF.",
+      "footer": "Este informe lo ha enviado {agency}.",
+      "filename": "informe-de-mantenimiento"
+    }
+  },
+  "reports": {
+    "title": "Informes",
+    "intro": "Informes de mantenimiento por sitio, en el idioma del cliente y con la imagen de tu agencia.",
+    "empty": "Aún no hay informes. Crea uno arriba o activa los informes mensuales en un sitio.",
+    "create": {
+      "title": "Crear informe",
+      "site": "Sitio",
+      "period": "Periodo",
+      "lastMonth": "Mes pasado",
+      "thisMonth": "Este mes hasta hoy",
+      "custom": "Periodo personalizado",
+      "from": "Desde",
+      "to": "Hasta (incluido)",
+      "send": "Enviarlo también por correo al cliente",
+      "sendHint": "Solo para propietarios y administradores, y solo si el sitio tiene el correo del cliente.",
+      "submit": "Crear informe",
+      "created": "El informe se está creando y aparecerá enseguida en la lista."
+    },
+    "table": {
+      "site": "Sitio",
+      "period": "Periodo",
+      "language": "Idioma",
+      "trigger": "Tipo",
+      "status": "Estado",
+      "created": "Creado"
+    },
+    "trigger": {
+      "manual": "Manual",
+      "monthly": "Mensual"
+    },
+    "status": {
+      "queued": "En cola",
+      "generating": "Creándose",
+      "ready": "Listo",
+      "sent": "Enviado a {email}",
+      "failed": "Fallido"
+    },
+    "download": "Descargar PDF",
+    "errors": {
+      "invalid_period": "Elige un periodo válido: como máximo un año y no en el futuro.",
+      "no_client_email": "Primero añade el correo del cliente en el sitio.",
+      "rate_limited": "Has creado muchos informes en la última hora. Inténtalo más tarde."
+    },
+    "site": {
+      "title": "Cliente e informes",
+      "clientName": "Nombre del cliente",
+      "clientEmail": "Correo del cliente",
+      "reportLocale": "Idioma de los informes",
+      "monthly": "Crear un informe automáticamente cada mes y enviarlo al cliente",
+      "monthlyHelp": "El día 1 de cada mes, sobre el mes anterior.",
+      "errorEmail": "Introduce un correo válido.",
+      "errorMonthly": "Los informes mensuales requieren el correo del cliente.",
+      "makeReport": "Crear informe"
+    },
+    "branding": {
+      "logo": "Logotipo para informes",
+      "logoHint": "PNG, JPG o WebP, máx. 1 MB. Aparece en la parte superior de cada informe.",
+      "upload": "Subir logotipo",
+      "remove": "Quitar logotipo",
+      "errorType": "Usa un archivo PNG, JPG o WebP de 1 MB como máximo.",
+      "sender": "Remitente de los informes",
+      "senderHint": "Aparece bajo cada informe y como remitente del correo. Vacío = nombre de la agencia.",
+      "current": "Logotipo actual"
     }
   }
 }

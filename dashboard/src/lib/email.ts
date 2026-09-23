@@ -2,7 +2,26 @@ import 'server-only'
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
 
-export interface OutgoingEmail { to: string; subject: string; html: string; text: string }
+export interface OutgoingEmail {
+  to: string
+  subject: string
+  html: string
+  text: string
+  /** Weergavenaam van de afzender (white-label); het adres blijft dat van RESEND_FROM. */
+  fromName?: string
+  replyTo?: string
+  attachments?: { filename: string; content: Buffer; contentType?: string }[]
+  /** Voorkomt dubbel versturen bij een nieuwe poging (Resend bewaart de sleutel 24 uur). */
+  idempotencyKey?: string
+}
+
+/** "Naam <adres>" met de naam vervangen; tekens die de header breken, worden verwijderd. */
+export function withFromName(from: string, name: string | undefined): string {
+  if (!name) return from
+  const address = /<([^>]+)>/.exec(from)?.[1] ?? from.trim()
+  const clean = name.replace(/["<>\r\n]/g, '').trim().slice(0, 80)
+  return clean ? `"${clean}" <${address}>` : from
+}
 
 /**
  * Verstuurt via Resend. Zonder RESEND_API_KEY wordt er niets verstuurd en geeft
@@ -12,7 +31,11 @@ export async function sendEmail(mail: OutgoingEmail): Promise<boolean> {
   const e = env()
   if (!e.RESEND_API_KEY) return false
   const resend = new Resend(e.RESEND_API_KEY)
-  const { error } = await resend.emails.send({ from: e.RESEND_FROM, to: mail.to, subject: mail.subject, html: mail.html, text: mail.text })
+  const { error } = await resend.emails.send({
+    from: withFromName(e.RESEND_FROM, mail.fromName), to: mail.to, subject: mail.subject, html: mail.html, text: mail.text,
+    ...(mail.replyTo ? { replyTo: mail.replyTo } : {}),
+    ...(mail.attachments ? { attachments: mail.attachments } : {}),
+  }, mail.idempotencyKey ? { idempotencyKey: mail.idempotencyKey } : undefined)
   if (error) {
     console.error('[email] versturen mislukt:', error.name, error.message)
     return false
@@ -35,4 +58,18 @@ export function renderEmail(opts: { heading: string; body: string; cta: string; 
 </table></td></tr></table></body></html>`
   const text = `${opts.heading}\n\n${opts.body}\n\n${opts.cta}: ${opts.url}\n\n${opts.footer}`
   return { html, text }
+}
+
+/** White-label mail namens een bureau (rapporten naar klanten): kleur en naam van het bureau, geen Verploy. */
+export function renderAgencyEmail(opts: { agency: string; color: string; heading: string; body: string; footer: string }): { html: string; text: string } {
+  const color = /^#[0-9A-Fa-f]{6}$/.test(opts.color) ? opts.color : '#22D98A'
+  const html = `<!doctype html><html><body style="margin:0;background:#F5F7FB;font-family:Inter,Segoe UI,Arial,sans-serif;color:#0B1220">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:40px 16px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E3E7EF;border-top:4px solid ${color};border-radius:8px;padding:32px">
+<tr><td style="font-size:15px;font-weight:700">${esc(opts.agency)}</td></tr>
+<tr><td style="padding-top:20px;font-size:20px;font-weight:700">${esc(opts.heading)}</td></tr>
+<tr><td style="padding-top:12px;font-size:15px;line-height:1.6;color:#3A4358">${esc(opts.body)}</td></tr>
+<tr><td style="padding-top:24px;font-size:12px;line-height:1.6;color:#5B6478">${esc(opts.footer)}</td></tr>
+</table></td></tr></table></body></html>`
+  return { html, text: `${opts.heading}\n\n${opts.body}\n\n${opts.footer}` }
 }

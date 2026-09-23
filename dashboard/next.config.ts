@@ -10,6 +10,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Logo-upload (max. 1 MB) gaat via een server action
+  experimental: { serverActions: { bodySizeLimit: '2mb' } },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },

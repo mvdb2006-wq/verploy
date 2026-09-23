@@ -10,6 +10,7 @@ import { runMaintenance } from '@/lib/monitoring/maintenance'
 import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
+import { closePdfBrowser, processReport } from './reports'
 import {
   DEFAULT_STEP_TIMEOUT_MS, RunFailure, STEP_TIMEOUT_MS, event, failureTransition, loadContext, step,
   type Admin, type Run, type Transition,
@@ -156,6 +157,10 @@ async function main() {
     if (Date.now() - lastMaintenance > MAINTENANCE_EVERY_MS) {
       lastMaintenance = Date.now()
       await runMaintenance(admin).then(r => log('maintenance', { ...r })).catch(e => log('maintenance_failed', { error: (e as Error).message }))
+      await admin.rpc('schedule_monthly_reports').then(({ data, error }) => {
+        if (error) log('schedule_reports_failed', { error: error.message })
+        else if (data) log('reports_scheduled', { count: data })
+      })
     }
     const { data, error } = await admin.rpc('claim_update_run', { p_worker: WORKER_ID, p_lease_seconds: LEASE_SECONDS })
     if (error) {
@@ -166,9 +171,16 @@ async function main() {
       currentRun = null
       continue
     }
+    // Geen update-run te doen: dan een rapport (updates gaan voor, want die houden een site bezet).
+    const rep = await admin.rpc('claim_report', { p_worker: WORKER_ID, p_lease_seconds: 300 })
+    if (!rep.error && rep.data && rep.data.length) {
+      await processReport(admin, rep.data[0]!, WORKER_ID, log)
+      continue
+    }
     await new Promise(r => setTimeout(r, POLL_MS))
   }
   await browser?.close().catch(() => undefined)
+  await closePdfBrowser()
   log('stopped')
 }
 

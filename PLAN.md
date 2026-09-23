@@ -17,7 +17,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | 4 | Veilige updates (kernflow 1–7) | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2, #3 | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
 | 5 | AI-diagnose | ✅ klaar lokaal (24-09) · AI-verfijning wacht op BLOCKERS #6 (werkt nu regelgebaseerd) | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
-| 6 | Rapporten | — | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
+| 6 | Rapporten | ✅ klaar lokaal (24-09) · versturen vanaf verploy.com wacht op BLOCKERS #5 | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
 | 7 | Stripe | — | Abonneren/upgraden/downgraden/opzeggen in testmodus; tier-limiet server-side afgedwongen |
 | 8 | Afwerking | — | Onboarding, lege staten, foutmeldingen, responsive, plugin volgens WP.org-richtlijnen, README met deploy |
 
@@ -362,3 +362,30 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - **UI:** diagnosekaart op de run-pagina (samenvatting, oorzaak, wat je kunt doen, schuldige, zekerheid, foutmelding, bron).
 
 **Bewijs:** engine-test 30/30 (inclusief diagnose op staging en via de noodroute terwijl productie plat ligt) · unit 111/111 (herkenning, alle categorieën in 5 talen, Claude-aanroep en foutpaden met nagebootste API-antwoorden) · DB 130/130 · Playwright 15/15. Scenario 2 en 3 tonen nu een diagnose met de juiste plugin en functie, en de e-mail van scenario 3 bevat de diagnose.
+
+---
+
+## 15. Resultaat fase 6 (24-09-2026) — branch `v2`
+
+**Gebouwd:**
+- **Migratie `20260928000000_reports.sql`:**
+  - maandrapport aan/uit per site
+  - tabel `reports` als wachtrij en archief (RLS: lezen voor leden)
+  - `request_report`: elk lid mag een rapport maken, versturen naar de klant alleen eigenaar/beheerder, max. 30 per uur per bureau
+  - `schedule_monthly_reports`: idempotent, één maandrapport per site per maand
+  - `claim_report` / `complete_report`: lease en max. 3 pogingen
+  - privé-buckets `reports` en `branding`
+- **Rapport** (`src/lib/reports/`) in NL/EN/DE/FR/ES:
+  - beschikbaarheid uit de offline-meldingen (heartbeat elke 15 min)
+  - updates in de periode met resultaat, en bij tegengehouden of teruggedraaide updates de diagnose, opnieuw opgebouwd in de taal van het rapport
+  - staat van de site (WordPress, PHP met EOL, SSL, domein, geheugen, schijf, openstaande updates)
+  - aandachtspunten en onderbrekingen
+  - white-label: logo, kleur en afzender van het bureau, nergens "Verploy"
+- **PDF** met Puppeteer (`puppeteer-core` 25.12, dezelfde Chromium als Playwright). De HTML bevat alles zelf (lettertype Inter en logo als data-URI), en netwerkverzoeken zijn geblokkeerd. A4 met paginanummers.
+- **Worker:** rapporten verwerken (update-runs gaan voor) en elke 5 min de maandplanner draaien. Versturen gebeurt via Resend met de PDF als bijlage, afzendernaam van het bureau, reply-to naar de eigenaar en een idempotentiesleutel (nooit dubbel verstuurd).
+- **UI:**
+  - pagina Rapporten (maken: vorige maand / deze maand / eigen periode, optioneel versturen; lijst met status en download)
+  - paneel "Klant en rapporten" per site (naam, e-mail, taal, maandrapport)
+  - logo-upload (bestandstype wordt aan de inhoud herkend: PNG, JPG of WebP, max. 1 MB) en afzendernaam in de instellingen
+
+**Bewijs:** unit 121/121 (beschikbaarheid, render in 5 talen, escaping, onveilige kleur, footer) · DB 139/139 (rechten, periode, maandplanner idempotent, wachtrij) · Playwright 17/17. Fase 6: Duitse klant, logo, rapport versturen → e-mail met afzender "Agentur Nord" en een PDF-bijlage die met `pdftotext` is gecontroleerd (Duits, klantnaam, geen "Verploy"), downloaden werkt, een SVG vermomd als PNG wordt geweigerd, en een ander bureau krijgt 404.

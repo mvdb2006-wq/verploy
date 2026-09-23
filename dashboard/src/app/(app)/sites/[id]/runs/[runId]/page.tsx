@@ -10,7 +10,7 @@ import { CANCELLABLE, RUN_STEPS, presentReason, runBadge, type RunStep } from '@
 import { RunBadge } from '@/components/RunBadge'
 import { Alert } from '@/components/Alert'
 import { cn } from '@/lib/cn'
-import { AutoRefresh } from './auto-refresh'
+import { AutoRefresh } from '@/components/AutoRefresh'
 import { CancelRun } from './cancel'
 
 export async function generateMetadata() {

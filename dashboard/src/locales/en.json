@@ -26,7 +26,8 @@
     "signOut": "Sign out",
     "agency": "Agency",
     "mainNav": "Main menu",
-    "alerts": "Alerts"
+    "alerts": "Alerts",
+    "reports": "Reports"
   },
   "auth": {
     "email": "Email address",
@@ -619,6 +620,142 @@
         "medium": "Confidence: medium",
         "low": "Confidence: low"
       }
+    }
+  },
+  "report": {
+    "title": "Maintenance report",
+    "period": "{start} – {end}",
+    "client": "Client",
+    "preparedBy": "Prepared by {agency} on {date}",
+    "page": "Page {page} of {total}",
+    "durationHm": "{h} h {m} min",
+    "durationM": "{m} min",
+    "kpi": {
+      "uptime": "Availability",
+      "uptimeNote": "measured every 15 minutes",
+      "updates": "Updates deployed",
+      "updatesNote": "after tests on a copy",
+      "stopped": "Problems caught",
+      "stoppedNote": "blocked or rolled back",
+      "attention": "Points of attention",
+      "attentionNote": "see below",
+      "attentionNone": "all good"
+    },
+    "updates": {
+      "title": "Updates in this period",
+      "intro": "Every update was first tested on a copy of the website. Only updates that passed all tests went live.",
+      "none": "No updates were carried out in this period.",
+      "date": "Date",
+      "component": "Component",
+      "version": "Version",
+      "result": "Result"
+    },
+    "result": {
+      "deployed": "Deployed",
+      "blocked": "Blocked",
+      "rolled_back": "Rolled back"
+    },
+    "health": {
+      "title": "Website status",
+      "intro": "Status at the time of this report.",
+      "wordpress": "WordPress",
+      "php": "PHP",
+      "ssl": "SSL certificate",
+      "domain": "Domain name",
+      "memory": "Memory limit",
+      "disk": "Free disk space",
+      "pending": "Pending updates",
+      "unknown": "unknown",
+      "noHttps": "no HTTPS",
+      "sslUntil": "valid until {date}",
+      "domainUntil": "registered until {date}",
+      "phpEolPast": "{version} – no security updates since {date}",
+      "phpEolSoon": "{version} – security updates until {date}",
+      "pendingCount": "{count, plural, one {# update} other {# updates}}",
+      "pendingNone": "none"
+    },
+    "attention": {
+      "title": "Points of attention",
+      "none": "There are no open points of attention."
+    },
+    "downtime": {
+      "title": "Interruptions",
+      "none": "No interruptions were measured in this period.",
+      "start": "Start",
+      "duration": "Duration",
+      "ongoing": "not resolved yet"
+    },
+    "email": {
+      "subject": "Maintenance report {site} – {period}",
+      "heading": "Maintenance report {site}",
+      "body": "Please find the maintenance report for {site} covering {period}. The full report is attached as a PDF.",
+      "footer": "This report was sent by {agency}.",
+      "filename": "maintenance-report"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "intro": "Maintenance reports per site, in the client’s language and with your agency’s branding.",
+    "empty": "No reports yet. Create one above, or turn on monthly reports for a site.",
+    "create": {
+      "title": "Create report",
+      "site": "Site",
+      "period": "Period",
+      "lastMonth": "Last month",
+      "thisMonth": "This month to date",
+      "custom": "Custom period",
+      "from": "From",
+      "to": "Up to and including",
+      "send": "Also email it to the client",
+      "sendHint": "Only for owners and admins, and only when the site has a client email address.",
+      "submit": "Create report",
+      "created": "The report is being created and will appear in the list shortly."
+    },
+    "table": {
+      "site": "Site",
+      "period": "Period",
+      "language": "Language",
+      "trigger": "Type",
+      "status": "Status",
+      "created": "Created"
+    },
+    "trigger": {
+      "manual": "Manual",
+      "monthly": "Monthly"
+    },
+    "status": {
+      "queued": "Queued",
+      "generating": "Generating",
+      "ready": "Ready",
+      "sent": "Sent to {email}",
+      "failed": "Failed"
+    },
+    "download": "Download PDF",
+    "errors": {
+      "invalid_period": "Choose a valid period: at most one year and not in the future.",
+      "no_client_email": "First enter the client’s email address for the site.",
+      "rate_limited": "You created many reports in the past hour. Please try again later."
+    },
+    "site": {
+      "title": "Client and reports",
+      "clientName": "Client name",
+      "clientEmail": "Client email address",
+      "reportLocale": "Report language",
+      "monthly": "Automatically create a report every month and send it to the client",
+      "monthlyHelp": "On the 1st of the month, covering the previous month.",
+      "errorEmail": "Enter a valid email address.",
+      "errorMonthly": "Monthly reports need a client email address.",
+      "makeReport": "Create report"
+    },
+    "branding": {
+      "logo": "Logo for reports",
+      "logoHint": "PNG, JPG or WebP, max. 1 MB. Shown at the top of every report.",
+      "upload": "Upload logo",
+      "remove": "Remove logo",
+      "errorType": "Use a PNG, JPG or WebP file of at most 1 MB.",
+      "sender": "Report sender",
+      "senderHint": "Shown under every report and as the email sender. Leave empty to use the agency name.",
+      "current": "Current logo"
     }
   }
 }

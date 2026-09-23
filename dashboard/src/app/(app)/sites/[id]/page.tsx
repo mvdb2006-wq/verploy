@@ -14,6 +14,7 @@ import { DeleteSite } from './delete'
 import { UpdatesPanel } from './updates'
 import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
+import { ClientReports } from './client-reports'
 import { MIN_CONNECTOR_FOR_RUNS, versionAtLeast } from '@/lib/runs'
 
 function memoryRaw(raw: unknown): string | null {
@@ -146,6 +147,9 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
       <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} />
 
       {(runs ?? []).length > 0 && <RunHistory siteId={site.id} runs={runs ?? []} t={t} locale={locale} />}
+
+      <ClientReports siteId={site.id} clientName={site.client_name} clientEmail={site.client_email} reportLocale={site.report_locale}
+        monthly={site.report_monthly} canEdit={manage} />
 
       {connected && manage && (
         <TestSettings siteId={site.id} paths={site.test_paths} masks={site.test_masks} threshold={Number(site.diff_threshold)} />

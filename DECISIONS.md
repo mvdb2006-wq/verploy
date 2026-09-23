@@ -126,3 +126,12 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **Privacy:** paden gaan zonder serverindeling naar buiten (`…/wp-content/…`). Er gaat geen inhoud van de site of bezoekersdata naar de AI, alleen foutmeldingen, gezakte checks, versies en de pluginlijst.
 - **Fouten vastleggen met een shutdown-handler in een must-use-plugin**, alleen tijdens staging en deploy. Er staat geen permanente logging aan op productie. Logbestanden hebben een naam die van het site-secret is afgeleid (niet te raden) en worden na 7 dagen opgeruimd.
 - **Diagnose in de taal van het bureau, één keer gemaakt en opgeslagen**, zodat e-mail en UI hetzelfde zeggen en het niet bij elke paginaweergave opnieuw geld kost.
+
+## Fase 6 — rapporten (24-09-2026)
+
+- **Puppeteer (`puppeteer-core`) met de Chromium van Playwright.** Dat volgt de opdracht (Puppeteer voor PDF's) zonder tweede browser in het image.
+- **Rapporten zijn voor de klant van het bureau:** volledig white-label (logo, kleur, afzendernaam), in de rapporttaal van de site en niet in de dashboardtaal. De diagnose wordt in het rapport opnieuw opgebouwd uit het opgeslagen bewijs in de taal van het rapport. De opgeslagen AI-tekst staat in de taal van het bureau.
+- **Beschikbaarheid** wordt afgeleid van offline-meldingen (begin = laatste heartbeat, einde = herstel), gemeten vanaf de koppeling. De periodegrenzen zijn hele dagen in UTC; het verschil met Nederlandse tijd (1–2 uur aan de randen) is voor een maandrapport verwaarloosbaar.
+- **Versturen alleen door eigenaar/beheerder;** maken mag iedereen. Naar de klant gaat de mail met de afzendernaam van het bureau en reply-to naar de eigenaar, zodat antwoorden bij het bureau terechtkomen. Het adres blijft dat van Verploy (`RESEND_FROM`): een eigen afzenderdomein per bureau vraagt DNS bij elk bureau en valt buiten de opdracht.
+- **Logo's** worden alleen als PNG, JPG of WebP geaccepteerd, herkend aan de inhoud. SVG is geweigerd vanwege scriptrisico. Opslag is privé; het rapport krijgt het logo als data-URI.
+- **Maandrapporten** gaan op de 1e (Nederlandse tijd) over de vorige kalendermaand, en alleen voor gekoppelde sites van een actief bureau met een e-mailadres van de klant.

@@ -26,7 +26,8 @@
     "signOut": "Abmelden",
     "agency": "Agentur",
     "mainNav": "Hauptmenü",
-    "alerts": "Meldungen"
+    "alerts": "Meldungen",
+    "reports": "Berichte"
   },
   "auth": {
     "email": "E-Mail-Adresse",
@@ -619,6 +620,142 @@
         "medium": "Sicherheit: mittel",
         "low": "Sicherheit: niedrig"
       }
+    }
+  },
+  "report": {
+    "title": "Wartungsbericht",
+    "period": "{start} – {end}",
+    "client": "Kunde",
+    "preparedBy": "Erstellt von {agency} am {date}",
+    "page": "Seite {page} von {total}",
+    "durationHm": "{h} Std. {m} Min.",
+    "durationM": "{m} Min.",
+    "kpi": {
+      "uptime": "Verfügbarkeit",
+      "uptimeNote": "alle 15 Minuten gemessen",
+      "updates": "Updates live geschaltet",
+      "updatesNote": "nach Tests auf einer Kopie",
+      "stopped": "Probleme abgefangen",
+      "stoppedNote": "gestoppt oder zurückgesetzt",
+      "attention": "Hinweise",
+      "attentionNote": "siehe unten",
+      "attentionNone": "alles in Ordnung"
+    },
+    "updates": {
+      "title": "Updates in diesem Zeitraum",
+      "intro": "Jedes Update wurde zuerst auf einer Kopie der Website getestet. Nur Updates, die alle Tests bestanden haben, wurden live geschaltet.",
+      "none": "In diesem Zeitraum wurden keine Updates durchgeführt.",
+      "date": "Datum",
+      "component": "Komponente",
+      "version": "Version",
+      "result": "Ergebnis"
+    },
+    "result": {
+      "deployed": "Live geschaltet",
+      "blocked": "Gestoppt",
+      "rolled_back": "Zurückgesetzt"
+    },
+    "health": {
+      "title": "Zustand der Website",
+      "intro": "Stand zum Zeitpunkt dieses Berichts.",
+      "wordpress": "WordPress",
+      "php": "PHP",
+      "ssl": "SSL-Zertifikat",
+      "domain": "Domain",
+      "memory": "Speicherlimit",
+      "disk": "Freier Speicherplatz",
+      "pending": "Ausstehende Updates",
+      "unknown": "unbekannt",
+      "noHttps": "kein HTTPS",
+      "sslUntil": "gültig bis {date}",
+      "domainUntil": "registriert bis {date}",
+      "phpEolPast": "{version} – keine Sicherheitsupdates mehr seit {date}",
+      "phpEolSoon": "{version} – Sicherheitsupdates bis {date}",
+      "pendingCount": "{count, plural, one {# Update} other {# Updates}}",
+      "pendingNone": "keine"
+    },
+    "attention": {
+      "title": "Hinweise",
+      "none": "Es gibt keine offenen Hinweise."
+    },
+    "downtime": {
+      "title": "Unterbrechungen",
+      "none": "In diesem Zeitraum wurden keine Unterbrechungen gemessen.",
+      "start": "Beginn",
+      "duration": "Dauer",
+      "ongoing": "noch nicht behoben"
+    },
+    "email": {
+      "subject": "Wartungsbericht {site} – {period}",
+      "heading": "Wartungsbericht {site}",
+      "body": "Anbei erhalten Sie den Wartungsbericht für {site} für den Zeitraum {period}. Den vollständigen Bericht finden Sie als PDF im Anhang.",
+      "footer": "Dieser Bericht wurde von {agency} versendet.",
+      "filename": "wartungsbericht"
+    }
+  },
+  "reports": {
+    "title": "Berichte",
+    "intro": "Wartungsberichte pro Website, in der Sprache des Kunden und mit dem Branding deiner Agentur.",
+    "empty": "Noch keine Berichte. Erstelle oben einen oder aktiviere Monatsberichte bei einer Website.",
+    "create": {
+      "title": "Bericht erstellen",
+      "site": "Website",
+      "period": "Zeitraum",
+      "lastMonth": "Letzter Monat",
+      "thisMonth": "Dieser Monat bis heute",
+      "custom": "Eigener Zeitraum",
+      "from": "Von",
+      "to": "Bis einschließlich",
+      "send": "Auch per E-Mail an den Kunden senden",
+      "sendHint": "Nur für Inhaber und Administratoren und nur, wenn bei der Website eine E-Mail-Adresse des Kunden hinterlegt ist.",
+      "submit": "Bericht erstellen",
+      "created": "Der Bericht wird erstellt und erscheint gleich in der Liste."
+    },
+    "table": {
+      "site": "Website",
+      "period": "Zeitraum",
+      "language": "Sprache",
+      "trigger": "Art",
+      "status": "Status",
+      "created": "Erstellt"
+    },
+    "trigger": {
+      "manual": "Manuell",
+      "monthly": "Monatlich"
+    },
+    "status": {
+      "queued": "In der Warteschlange",
+      "generating": "Wird erstellt",
+      "ready": "Fertig",
+      "sent": "Gesendet an {email}",
+      "failed": "Fehlgeschlagen"
+    },
+    "download": "PDF herunterladen",
+    "errors": {
+      "invalid_period": "Wähle einen gültigen Zeitraum: höchstens ein Jahr und nicht in der Zukunft.",
+      "no_client_email": "Trage zuerst die E-Mail-Adresse des Kunden bei der Website ein.",
+      "rate_limited": "Du hast in der letzten Stunde viele Berichte erstellt. Versuche es später erneut."
+    },
+    "site": {
+      "title": "Kunde und Berichte",
+      "clientName": "Name des Kunden",
+      "clientEmail": "E-Mail-Adresse des Kunden",
+      "reportLocale": "Sprache der Berichte",
+      "monthly": "Jeden Monat automatisch einen Bericht erstellen und an den Kunden senden",
+      "monthlyHelp": "Am 1. des Monats, für den Vormonat.",
+      "errorEmail": "Gib eine gültige E-Mail-Adresse ein.",
+      "errorMonthly": "Für Monatsberichte ist eine E-Mail-Adresse des Kunden nötig.",
+      "makeReport": "Bericht erstellen"
+    },
+    "branding": {
+      "logo": "Logo für Berichte",
+      "logoHint": "PNG, JPG oder WebP, max. 1 MB. Erscheint oben auf jedem Bericht.",
+      "upload": "Logo hochladen",
+      "remove": "Logo entfernen",
+      "errorType": "Verwende eine PNG-, JPG- oder WebP-Datei mit höchstens 1 MB.",
+      "sender": "Absender der Berichte",
+      "senderHint": "Steht unter jedem Bericht und als Absender der E-Mail. Leer = Name der Agentur.",
+      "current": "Aktuelles Logo"
     }
   }
 }

@@ -305,6 +305,72 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          id: string
+          agency_id: string
+          site_id: string
+          created_by: string | null
+          trigger: string
+          period_start: string
+          period_end: string
+          locale: string
+          send_to: string | null
+          status: string
+          attempt: number
+          worker_id: string | null
+          lease_until: string | null
+          pdf_path: string | null
+          pdf_bytes: number | null
+          error: string | null
+          sent_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          site_id: string
+          created_by?: string | null
+          trigger: string
+          period_start: string
+          period_end: string
+          locale: string
+          send_to?: string | null
+          status?: string
+          attempt?: number
+          worker_id?: string | null
+          lease_until?: string | null
+          pdf_path?: string | null
+          pdf_bytes?: number | null
+          error?: string | null
+          sent_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          site_id?: string
+          created_by?: string | null
+          trigger?: string
+          period_start?: string
+          period_end?: string
+          locale?: string
+          send_to?: string | null
+          status?: string
+          attempt?: number
+          worker_id?: string | null
+          lease_until?: string | null
+          pdf_path?: string | null
+          pdf_bytes?: number | null
+          error?: string | null
+          sent_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       signed_request_nonces: {
         Row: {
           site_id: string
@@ -427,6 +493,7 @@ export type Database = {
           test_paths: string[]
           test_masks: string[]
           diff_threshold: number
+          report_monthly: boolean
         }
         Insert: {
           id?: string
@@ -456,6 +523,7 @@ export type Database = {
           test_paths?: string[]
           test_masks?: string[]
           diff_threshold?: number
+          report_monthly?: boolean
         }
         Update: {
           id?: string
@@ -485,6 +553,7 @@ export type Database = {
           test_paths?: string[]
           test_masks?: string[]
           diff_threshold?: number
+          report_monthly?: boolean
         }
         Relationships: []
       }
@@ -658,10 +727,13 @@ export type Database = {
       accept_invitation: { Args: { p_token: string | null }; Returns: string }
       acknowledge_alert: { Args: { p_alert: string | null }; Returns: undefined }
       advance_update_run: { Args: { p_run: string | null; p_worker: string | null; p_status: string | null; p_step_state?: Json | null; p_verdict?: string | null; p_reason_key?: string | null; p_reason_params?: Json | null; p_items?: Json | null }; Returns: undefined }
+      agency_owner_email: { Args: { p_agency: string | null }; Returns: string }
       cancel_update_run: { Args: { p_run: string | null }; Returns: undefined }
       claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
+      claim_report: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['reports']['Row'][] }
       claim_update_run: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['update_runs']['Row'][] }
       complete_alert_notification: { Args: { p_alert: string | null; p_kind: string | null; p_sent: boolean | null }; Returns: undefined }
+      complete_report: { Args: { p_report: string | null; p_worker: string | null; p_status: string | null; p_pdf_path?: string | null; p_pdf_bytes?: number | null; p_error?: string | null }; Returns: undefined }
       consume_pairing_code: { Args: { p_code_hash: string | null; p_secret_box: string | null; p_connector_version: string | null }; Returns: { site_id: string; agency_id: string; secret_version: number }[] }
       create_agency: { Args: { p_name: string | null }; Returns: string }
       create_pairing_code: { Args: { p_site: string | null }; Returns: string }
@@ -675,6 +747,8 @@ export type Database = {
       release_update_run: { Args: { p_run: string | null; p_worker: string | null; p_delay_seconds?: number | null }; Returns: undefined }
       remove_member: { Args: { p_user: string | null }; Returns: undefined }
       renew_update_run: { Args: { p_run: string | null; p_worker: string | null; p_lease_seconds?: number | null }; Returns: boolean }
+      request_report: { Args: { p_site: string | null; p_start: string | null; p_end: string | null; p_send?: boolean | null }; Returns: string }
+      schedule_monthly_reports: { Args: Record<PropertyKey, never>; Returns: number }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }

@@ -26,7 +26,8 @@
     "signOut": "Se déconnecter",
     "agency": "Agence",
     "mainNav": "Menu principal",
-    "alerts": "Alertes"
+    "alerts": "Alertes",
+    "reports": "Rapports"
   },
   "auth": {
     "email": "Adresse e-mail",
@@ -619,6 +620,142 @@
         "medium": "Fiabilité : moyenne",
         "low": "Fiabilité : faible"
       }
+    }
+  },
+  "report": {
+    "title": "Rapport de maintenance",
+    "period": "{start} – {end}",
+    "client": "Client",
+    "preparedBy": "Préparé par {agency} le {date}",
+    "page": "Page {page} sur {total}",
+    "durationHm": "{h} h {m} min",
+    "durationM": "{m} min",
+    "kpi": {
+      "uptime": "Disponibilité",
+      "uptimeNote": "mesurée toutes les 15 minutes",
+      "updates": "Mises à jour en ligne",
+      "updatesNote": "après tests sur une copie",
+      "stopped": "Problèmes évités",
+      "stoppedNote": "bloqués ou annulés",
+      "attention": "Points d’attention",
+      "attentionNote": "voir ci-dessous",
+      "attentionNone": "tout est en ordre"
+    },
+    "updates": {
+      "title": "Mises à jour de la période",
+      "intro": "Chaque mise à jour a d’abord été testée sur une copie du site. Seules celles qui ont réussi tous les tests ont été mises en ligne.",
+      "none": "Aucune mise à jour n’a été effectuée pendant cette période.",
+      "date": "Date",
+      "component": "Élément",
+      "version": "Version",
+      "result": "Résultat"
+    },
+    "result": {
+      "deployed": "Mise en ligne",
+      "blocked": "Bloquée",
+      "rolled_back": "Annulée (restaurée)"
+    },
+    "health": {
+      "title": "État du site",
+      "intro": "Situation au moment de ce rapport.",
+      "wordpress": "WordPress",
+      "php": "PHP",
+      "ssl": "Certificat SSL",
+      "domain": "Nom de domaine",
+      "memory": "Limite de mémoire",
+      "disk": "Espace disque libre",
+      "pending": "Mises à jour en attente",
+      "unknown": "inconnu",
+      "noHttps": "pas de HTTPS",
+      "sslUntil": "valide jusqu’au {date}",
+      "domainUntil": "enregistré jusqu’au {date}",
+      "phpEolPast": "{version} – plus de mises à jour de sécurité depuis le {date}",
+      "phpEolSoon": "{version} – mises à jour de sécurité jusqu’au {date}",
+      "pendingCount": "{count, plural, one {# mise à jour} other {# mises à jour}}",
+      "pendingNone": "aucune"
+    },
+    "attention": {
+      "title": "Points d’attention",
+      "none": "Aucun point d’attention en suspens."
+    },
+    "downtime": {
+      "title": "Interruptions",
+      "none": "Aucune interruption n’a été mesurée pendant cette période.",
+      "start": "Début",
+      "duration": "Durée",
+      "ongoing": "pas encore résolue"
+    },
+    "email": {
+      "subject": "Rapport de maintenance {site} – {period}",
+      "heading": "Rapport de maintenance {site}",
+      "body": "Veuillez trouver le rapport de maintenance de {site} pour la période {period}. Le rapport complet est joint au format PDF.",
+      "footer": "Ce rapport a été envoyé par {agency}.",
+      "filename": "rapport-de-maintenance"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "intro": "Rapports de maintenance par site, dans la langue du client et aux couleurs de votre agence.",
+    "empty": "Aucun rapport pour l’instant. Créez-en un ci-dessus ou activez les rapports mensuels pour un site.",
+    "create": {
+      "title": "Créer un rapport",
+      "site": "Site",
+      "period": "Période",
+      "lastMonth": "Mois dernier",
+      "thisMonth": "Ce mois-ci jusqu’à aujourd’hui",
+      "custom": "Période personnalisée",
+      "from": "Du",
+      "to": "Au (inclus)",
+      "send": "L’envoyer aussi par e-mail au client",
+      "sendHint": "Uniquement pour les propriétaires et administrateurs, et seulement si le site a une adresse e-mail client.",
+      "submit": "Créer le rapport",
+      "created": "Le rapport est en cours de création et apparaîtra bientôt dans la liste."
+    },
+    "table": {
+      "site": "Site",
+      "period": "Période",
+      "language": "Langue",
+      "trigger": "Type",
+      "status": "Statut",
+      "created": "Créé"
+    },
+    "trigger": {
+      "manual": "Manuel",
+      "monthly": "Mensuel"
+    },
+    "status": {
+      "queued": "En attente",
+      "generating": "En cours de création",
+      "ready": "Prêt",
+      "sent": "Envoyé à {email}",
+      "failed": "Échec"
+    },
+    "download": "Télécharger le PDF",
+    "errors": {
+      "invalid_period": "Choisissez une période valide : un an maximum et pas dans le futur.",
+      "no_client_email": "Saisissez d’abord l’adresse e-mail du client pour ce site.",
+      "rate_limited": "Vous avez créé beaucoup de rapports au cours de la dernière heure. Réessayez plus tard."
+    },
+    "site": {
+      "title": "Client et rapports",
+      "clientName": "Nom du client",
+      "clientEmail": "Adresse e-mail du client",
+      "reportLocale": "Langue des rapports",
+      "monthly": "Créer automatiquement un rapport chaque mois et l’envoyer au client",
+      "monthlyHelp": "Le 1er du mois, pour le mois précédent.",
+      "errorEmail": "Saisissez une adresse e-mail valide.",
+      "errorMonthly": "Les rapports mensuels nécessitent une adresse e-mail client.",
+      "makeReport": "Créer un rapport"
+    },
+    "branding": {
+      "logo": "Logo des rapports",
+      "logoHint": "PNG, JPG ou WebP, 1 Mo max. Affiché en haut de chaque rapport.",
+      "upload": "Téléverser le logo",
+      "remove": "Supprimer le logo",
+      "errorType": "Utilisez un fichier PNG, JPG ou WebP de 1 Mo maximum.",
+      "sender": "Expéditeur des rapports",
+      "senderHint": "Affiché sous chaque rapport et comme expéditeur de l’e-mail. Vide = nom de l’agence.",
+      "current": "Logo actuel"
     }
   }
 }
