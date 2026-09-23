@@ -1,7 +1,7 @@
 From 856ca4f7ddb1986f7c31d89679f18006460c609e Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Wed, 23 Sep 2026 17:55:53 +0200
-Subject: [PATCH] feat(plugin): handmatige heartbeat knop + versie 1.1.0
+Subject: [PATCH 1/2] feat(plugin): handmatige heartbeat knop + versie 1.1.0
 
 - Nieuwe "Nu versturen naar Verploy" knop op de plugin settings pagina
 - Direct een heartbeat versturen zonder te wachten op WP-cron
