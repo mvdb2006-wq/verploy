@@ -186,7 +186,8 @@
     "planTrial": "Testphase bis {date}",
     "planComped": "Kostenloses Konto",
     "planActive": "Aktiv",
-    "usage": "{used} von {limit} Websites genutzt"
+    "usage": "{used} von {limit} Websites genutzt",
+    "manageBilling": "Abo verwalten"
   },
   "team": {
     "title": "Team",
@@ -757,5 +758,36 @@
       "senderHint": "Steht unter jedem Bericht und als Absender der E-Mail. Leer = Name der Agentur.",
       "current": "Aktuelles Logo"
     }
+  },
+  "billing": {
+    "title": "Abo",
+    "intro": "Wähle das Abo, das zur Anzahl deiner Websites passt. Preise pro Monat zzgl. MwSt. Monatlich kündbar.",
+    "perMonth": "pro Monat",
+    "sites": "bis zu {count} Websites",
+    "choose": "Auswählen",
+    "switch": "Wechseln",
+    "currentBadge": "Aktuell",
+    "status": {
+      "trialing": "Testphase bis {date}",
+      "trialEnded": "Deine Testphase ist abgelaufen. Wähle ein Abo, um wieder Websites hinzuzufügen und Updates auszuführen.",
+      "active": "Aktiv",
+      "renews": "Verlängert sich am {date}",
+      "cancels": "Endet am {date}",
+      "past_due": "Die letzte Zahlung ist fehlgeschlagen. Stripe versucht es erneut; bitte aktualisiere deine Zahlungsdaten.",
+      "canceled": "Gekündigt. Das Monitoring läuft weiter, aber für neue Websites und Updates ist ein Abo nötig.",
+      "comped": "Kostenloses Konto"
+    },
+    "cancel": "Abo kündigen",
+    "cancelHint": "Das Abo läuft bis zum Ende des bezahlten Zeitraums weiter.",
+    "resume": "Doch weiterführen",
+    "portal": "Zahlungsdaten und Rechnungen",
+    "ownerOnly": "Nur der Inhaber der Agentur kann das Abo ändern.",
+    "notConfigured": "Online-Zahlung ist noch nicht verfügbar.",
+    "overLimit": "Du hast derzeit {used} Websites und {plan} erlaubt höchstens {limit}. Entferne zuerst Websites oder wähle ein größeres Abo.",
+    "success": "Danke! Dein Abo wird verarbeitet; das dauert ein paar Sekunden.",
+    "changed": "Änderung übermittelt. Das neue Abo ist in wenigen Sekunden aktiv.",
+    "canceled": "Kündigung übermittelt.",
+    "resumed": "Das Abo läuft weiter.",
+    "error": "Stripe hat einen Fehler gemeldet. Versuche es erneut oder kontaktiere uns."
   }
 }

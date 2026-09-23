@@ -135,3 +135,12 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **Versturen alleen door eigenaar/beheerder;** maken mag iedereen. Naar de klant gaat de mail met de afzendernaam van het bureau en reply-to naar de eigenaar, zodat antwoorden bij het bureau terechtkomen. Het adres blijft dat van Verploy (`RESEND_FROM`): een eigen afzenderdomein per bureau vraagt DNS bij elk bureau en valt buiten de opdracht.
 - **Logo's** worden alleen als PNG, JPG of WebP geaccepteerd, herkend aan de inhoud. SVG is geweigerd vanwege scriptrisico. Opslag is privé; het rapport krijgt het logo als data-URI.
 - **Maandrapporten** gaan op de 1e (Nederlandse tijd) over de vorige kalendermaand, en alleen voor gekoppelde sites van een actief bureau met een e-mailadres van de klant.
+
+## Fase 7 — Stripe (24-09-2026)
+
+- **Webhooks zijn de bron van waarheid.** Server actions vragen alleen iets aan bij Stripe; het bureau verandert pas als het ondertekende event binnenkomt. Events worden per id één keer verwerkt, en een event dat ouder is dan de laatst verwerkte stand wordt genegeerd (Stripe garandeert geen volgorde).
+- **Eigen UI voor overstappen en opzeggen, klantportaal alleen voor betaalmethode en facturen.** Zo blijft de regel "niet downgraden onder het aantal sites" server-side afdwingbaar; in het Stripe-portaal zou dat kunnen worden omzeild. Opzeggen is altijd aan het einde van de betaalde periode.
+- **Upgrade direct afrekenen (`always_invoice`), downgrade als tegoed (`create_prorations`).**
+- **`past_due` blijft schrijfbaar:** Stripe probeert de betaling nog een paar keer, en een mislukte incasso mag een bureau niet direct blokkeren. Na de laatste poging zegt Stripe het abonnement op (`canceled`), en dan wordt het bureau alleen-lezen. Monitoring loopt altijd door.
+- **Prijzen exclusief btw, geen Stripe Tax.** Btw-afhandeling (verlegging bij EU-bedrijven, OSS) is een keuze voor Martijn en zijn boekhouder: zie BLOCKERS #7. Checkout verzamelt al het factuuradres en btw-nummer, zodat Stripe Tax later zonder codewijziging aan kan.
+- **Tests tegen stripe-mock**, de officiële mock van Stripe met hun OpenAPI-specificatie (versie 0.203.0). Zo test de echte SDK de echte request-vormen. Webhooks worden in de test ondertekend met `generateTestHeaderString`; dat is hetzelfde verificatiepad als in productie.

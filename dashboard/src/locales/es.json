@@ -186,7 +186,8 @@
     "planTrial": "Prueba hasta el {date}",
     "planComped": "Cuenta gratuita",
     "planActive": "Activa",
-    "usage": "{used} de {limit} sitios en uso"
+    "usage": "{used} de {limit} sitios en uso",
+    "manageBilling": "Gestionar suscripción"
   },
   "team": {
     "title": "Equipo",
@@ -757,5 +758,36 @@
       "senderHint": "Aparece bajo cada informe y como remitente del correo. Vacío = nombre de la agencia.",
       "current": "Logotipo actual"
     }
+  },
+  "billing": {
+    "title": "Suscripción",
+    "intro": "Elige el plan que se ajuste al número de sitios que gestionas. Precios mensuales sin IVA. Cancela cuando quieras.",
+    "perMonth": "al mes",
+    "sites": "hasta {count} sitios",
+    "choose": "Elegir",
+    "switch": "Cambiar",
+    "currentBadge": "Actual",
+    "status": {
+      "trialing": "Prueba hasta el {date}",
+      "trialEnded": "Tu prueba ha terminado. Elige un plan para volver a añadir sitios y ejecutar actualizaciones.",
+      "active": "Activa",
+      "renews": "Se renueva el {date}",
+      "cancels": "Termina el {date}",
+      "past_due": "El último pago falló. Stripe lo volverá a intentar; actualiza tus datos de pago.",
+      "canceled": "Cancelada. La monitorización continúa, pero para nuevos sitios y actualizaciones hace falta una suscripción.",
+      "comped": "Cuenta gratuita"
+    },
+    "cancel": "Cancelar suscripción",
+    "cancelHint": "La suscripción sigue hasta el final del periodo pagado.",
+    "resume": "Mantener suscripción",
+    "portal": "Datos de pago y facturas",
+    "ownerOnly": "Solo el propietario de la agencia puede cambiar la suscripción.",
+    "notConfigured": "El pago en línea aún no está disponible.",
+    "overLimit": "Ahora tienes {used} sitios y {plan} permite como máximo {limit}. Elimina sitios primero o elige un plan mayor.",
+    "success": "¡Gracias! Tu suscripción se está procesando; tarda unos segundos.",
+    "changed": "Cambio enviado. El nuevo plan estará activo en unos segundos.",
+    "canceled": "Cancelación enviada.",
+    "resumed": "La suscripción continúa.",
+    "error": "Stripe devolvió un error. Inténtalo de nuevo o contáctanos."
   }
 }

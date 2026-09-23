@@ -10,9 +10,9 @@ describe('abonnementsstatus (spiegelt app.agency_is_writable)', () => {
     expect(agencyIsWritable(base, now)).toBe(true)
     expect(agencyIsWritable(base, new Date('2026-10-02T00:00:00Z'))).toBe(false)
   })
-  it('active en comped zijn altijd schrijfbaar; canceled/past_due niet', () => {
-    for (const s of ['active', 'comped']) expect(agencyIsWritable({ ...base, plan_status: s }, now)).toBe(true)
-    for (const s of ['canceled', 'past_due']) expect(agencyIsWritable({ ...base, plan_status: s }, now)).toBe(false)
+  it('active, comped en past_due (Stripe incasseert nog) zijn schrijfbaar; canceled niet', () => {
+    for (const s of ['active', 'comped', 'past_due']) expect(agencyIsWritable({ ...base, plan_status: s }, now)).toBe(true)
+    for (const s of ['canceled']) expect(agencyIsWritable({ ...base, plan_status: s }, now)).toBe(false)
   })
   it('resterende proefdagen', () => {
     expect(trialDaysLeft(base, now)).toBe(7)

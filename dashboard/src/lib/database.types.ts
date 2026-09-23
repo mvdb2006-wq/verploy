@@ -20,6 +20,9 @@ export type Database = {
           stripe_subscription_id: string | null
           created_at: string
           updated_at: string
+          subscription_period_end: string | null
+          subscription_cancel_at_end: boolean
+          stripe_synced_at: string | null
         }
         Insert: {
           id?: string
@@ -36,6 +39,9 @@ export type Database = {
           stripe_subscription_id?: string | null
           created_at?: string
           updated_at?: string
+          subscription_period_end?: string | null
+          subscription_cancel_at_end?: boolean
+          stripe_synced_at?: string | null
         }
         Update: {
           id?: string
@@ -52,6 +58,9 @@ export type Database = {
           stripe_subscription_id?: string | null
           created_at?: string
           updated_at?: string
+          subscription_period_end?: string | null
+          subscription_cancel_at_end?: boolean
+          stripe_synced_at?: string | null
         }
         Relationships: []
       }
@@ -557,6 +566,27 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_events: {
+        Row: {
+          id: string
+          type: string
+          agency_id: string | null
+          received_at: string
+        }
+        Insert: {
+          id: string
+          type: string
+          agency_id?: string | null
+          received_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          agency_id?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
       test_results: {
         Row: {
           id: number
@@ -728,6 +758,7 @@ export type Database = {
       acknowledge_alert: { Args: { p_alert: string | null }; Returns: undefined }
       advance_update_run: { Args: { p_run: string | null; p_worker: string | null; p_status: string | null; p_step_state?: Json | null; p_verdict?: string | null; p_reason_key?: string | null; p_reason_params?: Json | null; p_items?: Json | null }; Returns: undefined }
       agency_owner_email: { Args: { p_agency: string | null }; Returns: string }
+      apply_stripe_subscription: { Args: { p_event_id: string | null; p_event_type: string | null; p_event_created: string | null; p_agency: string | null; p_customer: string | null; p_subscription: string | null; p_price: string | null; p_status: string | null; p_period_end: string | null; p_cancel_at_end: boolean | null }; Returns: boolean }
       cancel_update_run: { Args: { p_run: string | null }; Returns: undefined }
       claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
       claim_report: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['reports']['Row'][] }
@@ -749,6 +780,8 @@ export type Database = {
       renew_update_run: { Args: { p_run: string | null; p_worker: string | null; p_lease_seconds?: number | null }; Returns: boolean }
       request_report: { Args: { p_site: string | null; p_start: string | null; p_end: string | null; p_send?: boolean | null }; Returns: string }
       schedule_monthly_reports: { Args: Record<PropertyKey, never>; Returns: number }
+      set_plan_price: { Args: { p_plan: string | null; p_price: string | null }; Returns: undefined }
+      set_stripe_customer: { Args: { p_agency: string | null; p_customer: string | null }; Returns: undefined }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }

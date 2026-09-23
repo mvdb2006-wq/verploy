@@ -186,7 +186,8 @@
     "planTrial": "Proefperiode tot {date}",
     "planComped": "Gratis account",
     "planActive": "Actief",
-    "usage": "{used} van {limit} sites in gebruik"
+    "usage": "{used} van {limit} sites in gebruik",
+    "manageBilling": "Abonnement beheren"
   },
   "team": {
     "title": "Team",
@@ -757,5 +758,36 @@
       "senderHint": "Staat onder elk rapport en als afzender van de e-mail. Leeg laten = naam van het bureau.",
       "current": "Huidig logo"
     }
+  },
+  "billing": {
+    "title": "Abonnement",
+    "intro": "Kies het abonnement dat past bij het aantal sites dat je beheert. Prijzen per maand, exclusief btw. Maandelijks opzegbaar.",
+    "perMonth": "per maand",
+    "sites": "tot {count} sites",
+    "choose": "Kiezen",
+    "switch": "Overstappen",
+    "currentBadge": "Huidig",
+    "status": {
+      "trialing": "Proefperiode tot {date}",
+      "trialEnded": "Je proefperiode is afgelopen. Kies een abonnement om weer sites toe te voegen en updates uit te voeren.",
+      "active": "Actief",
+      "renews": "Wordt verlengd op {date}",
+      "cancels": "Stopt op {date}",
+      "past_due": "De laatste betaling is mislukt. Stripe probeert het opnieuw; werk je betaalgegevens bij.",
+      "canceled": "Opgezegd. Monitoring loopt door, maar voor nieuwe sites en updates is een abonnement nodig.",
+      "comped": "Gratis account"
+    },
+    "cancel": "Abonnement opzeggen",
+    "cancelHint": "Het abonnement loopt door tot het einde van de betaalde periode.",
+    "resume": "Toch doorgaan",
+    "portal": "Betaalgegevens en facturen",
+    "ownerOnly": "Alleen de eigenaar van het bureau kan het abonnement wijzigen.",
+    "notConfigured": "Online betalen is nog niet beschikbaar.",
+    "overLimit": "Je hebt nu {used} sites en {plan} is voor maximaal {limit}. Verwijder eerst sites of kies een groter abonnement.",
+    "success": "Bedankt! Je abonnement wordt verwerkt; dat duurt een paar seconden.",
+    "changed": "Wijziging doorgegeven. Het nieuwe abonnement is binnen enkele seconden actief.",
+    "canceled": "Opzegging doorgegeven.",
+    "resumed": "Het abonnement loopt weer door.",
+    "error": "Stripe gaf een fout. Probeer het opnieuw of neem contact op."
   }
 }

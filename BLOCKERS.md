@@ -109,11 +109,16 @@ Of zeg: *"Je mag Railway instellen."* Dan doe ik stap 2 en 3 zelf in de browser,
 
 **Ondertussen:** de aanroep is getest met nagebootste API-antwoorden in het gedocumenteerde formaat, inclusief weigering, afgebroken antwoord, fout en ongeldige JSON. Een echte aanroep is pas mogelijk met de sleutel; de eerste echte run controleer ik zelf.
 
-## 7. 🟡 Stripe — nodig in fase 7
+## 7. 🟡 Stripe — fase 7 is klaar, wacht op de sleutel
 
-**Wat je moet doen:** een Stripe-account (testmodus is genoeg om te bouwen). Zet `STRIPE_SECRET_KEY` (sk_test_…) in Vercel. Producten, prijzen en de webhook maak ik zelf aan via de API.
+**Wat je moet doen:**
+1. Maak een Stripe-account (of gebruik je bestaande) en blijf in **testmodus**.
+2. Developers → API keys → kopieer de **Secret key** (`sk_test_…`) en zet hem in Vercel als `STRIPE_SECRET_KEY`. Of zeg *"Je mag Stripe instellen"*, dan doe ik dat in de browser zodra je bent ingelogd.
+3. Daarna draai ik zelf `scripts/stripe-setup.mjs`. Dat maakt het product, de 4 prijzen (uit de plans-tabel), het klantportaal en de webhook aan, en ik zet `STRIPE_WEBHOOK_SECRET` en `STRIPE_PORTAL_CONFIGURATION` in Vercel.
 
----
+**Keuze voor jou (met je boekhouder):** btw. De prijzen zijn nu exclusief btw en Stripe rekent zelf nog geen btw. Voor verkoop in de EU is Stripe Tax de eenvoudigste route (Settings → Tax → activeren, NL-registratie invullen). Zeg welke kant je op wilt, dan zet ik het aan: de code is er al op voorbereid.
+
+**Live gaan (later):** dezelfde stappen met de live-sleutel, na je akkoord.
 
 ## 8. ⚪ WordPress.org-publicatie — fase 8
 

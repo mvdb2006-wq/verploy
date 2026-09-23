@@ -47,7 +47,7 @@ export function canManage(role: Role): boolean {
 
 /** Mag het bureau nieuwe dingen doen (zelfde regel als app.agency_is_writable in de database)? */
 export function agencyIsWritable(agency: Tables<'agencies'>, now = new Date()): boolean {
-  if (agency.plan_status === 'active' || agency.plan_status === 'comped') return true
+  if (agency.plan_status === 'active' || agency.plan_status === 'comped' || agency.plan_status === 'past_due') return true
   return agency.plan_status === 'trialing' && agency.trial_ends_at !== null && new Date(agency.trial_ends_at) > now
 }
 

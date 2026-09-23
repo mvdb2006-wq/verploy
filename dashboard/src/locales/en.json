@@ -186,7 +186,8 @@
     "planTrial": "Trial until {date}",
     "planComped": "Complimentary account",
     "planActive": "Active",
-    "usage": "{used} of {limit} sites in use"
+    "usage": "{used} of {limit} sites in use",
+    "manageBilling": "Manage subscription"
   },
   "team": {
     "title": "Team",
@@ -757,5 +758,36 @@
       "senderHint": "Shown under every report and as the email sender. Leave empty to use the agency name.",
       "current": "Current logo"
     }
+  },
+  "billing": {
+    "title": "Subscription",
+    "intro": "Choose the plan that fits the number of sites you manage. Prices per month, excluding VAT. Cancel any month.",
+    "perMonth": "per month",
+    "sites": "up to {count} sites",
+    "choose": "Choose",
+    "switch": "Switch",
+    "currentBadge": "Current",
+    "status": {
+      "trialing": "Trial until {date}",
+      "trialEnded": "Your trial has ended. Choose a plan to add sites and run updates again.",
+      "active": "Active",
+      "renews": "Renews on {date}",
+      "cancels": "Ends on {date}",
+      "past_due": "The last payment failed. Stripe will try again; please update your payment details.",
+      "canceled": "Cancelled. Monitoring continues, but new sites and updates require a subscription.",
+      "comped": "Free account"
+    },
+    "cancel": "Cancel subscription",
+    "cancelHint": "The subscription continues until the end of the paid period.",
+    "resume": "Keep subscription",
+    "portal": "Payment details and invoices",
+    "ownerOnly": "Only the agency owner can change the subscription.",
+    "notConfigured": "Online payment is not available yet.",
+    "overLimit": "You currently have {used} sites and {plan} allows up to {limit}. Remove sites first or choose a larger plan.",
+    "success": "Thank you! Your subscription is being processed; this takes a few seconds.",
+    "changed": "Change submitted. The new plan will be active within seconds.",
+    "canceled": "Cancellation submitted.",
+    "resumed": "The subscription continues.",
+    "error": "Stripe returned an error. Please try again or contact us."
   }
 }

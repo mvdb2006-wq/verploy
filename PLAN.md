@@ -18,7 +18,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
 | 5 | AI-diagnose | ✅ klaar lokaal (24-09) · AI-verfijning wacht op BLOCKERS #6 (werkt nu regelgebaseerd) | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
 | 6 | Rapporten | ✅ klaar lokaal (24-09) · versturen vanaf verploy.com wacht op BLOCKERS #5 | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
-| 7 | Stripe | — | Abonneren/upgraden/downgraden/opzeggen in testmodus; tier-limiet server-side afgedwongen |
+| 7 | Stripe | ✅ klaar lokaal (24-09) · live wacht op BLOCKERS #7 (Stripe-sleutel) | Abonneren/upgraden/downgraden/opzeggen in testmodus; tier-limiet server-side afgedwongen |
 | 8 | Afwerking | — | Onboarding, lege staten, foutmeldingen, responsive, plugin volgens WP.org-richtlijnen, README met deploy |
 
 ---
@@ -389,3 +389,31 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
   - logo-upload (bestandstype wordt aan de inhoud herkend: PNG, JPG of WebP, max. 1 MB) en afzendernaam in de instellingen
 
 **Bewijs:** unit 121/121 (beschikbaarheid, render in 5 talen, escaping, onveilige kleur, footer) · DB 139/139 (rechten, periode, maandplanner idempotent, wachtrij) · Playwright 17/17. Fase 6: Duitse klant, logo, rapport versturen → e-mail met afzender "Agentur Nord" en een PDF-bijlage die met `pdftotext` is gecontroleerd (Duits, klantnaam, geen "Verploy"), downloaden werkt, een SVG vermomd als PNG wordt geweigerd, en een ander bureau krijgt 404.
+
+---
+
+## 16. Resultaat fase 7 (24-09-2026) — branch `v2`
+
+**Gebouwd:**
+- **Migratie `20260929000000_billing.sql`:**
+  - periode-einde en "stopt aan einde periode" op het bureau (alleen de server schrijft)
+  - `stripe_events` voor idempotente webhooks
+  - `apply_stripe_subscription`: status mappen, events die in de verkeerde volgorde binnenkomen negeren, nooit een andere Stripe-klant overnemen, gratis accounts blijven gratis
+  - `past_due` blijft schrijfbaar zolang Stripe nog incasseert; `canceled` wordt alleen-lezen
+- **Afrekenen** (`/settings/billing`, alleen de eigenaar):
+  - Stripe Checkout voor het eerste abonnement (factuuradres en btw-nummer, promotiecodes, taal van het dashboard)
+  - overstappen naar een ander plan binnen het abonnement: upgrade wordt direct naar rato gefactureerd, downgrade als tegoed; downgraden onder het huidige aantal sites wordt geweigerd
+  - opzeggen aan het einde van de periode en weer doorgaan
+  - klantportaal voor betaalmethode en facturen
+- **Webhook** `/api/stripe/webhook`: handtekening gecontroleerd op de ruwe body. De status komt uitsluitend uit Stripe-events, zodat de UI nooit iets toont dat Stripe niet bevestigd heeft.
+- **Prijzen blijven op één plek:** `scripts/stripe-setup.mjs` maakt product en maandprijzen (EUR, excl. btw) aan vanuit de tabel `plans` en schrijft de price-id's terug. Het script maakt ook het klantportaal en de webhook aan, en is idempotent: bij een prijswijziging komt er een nieuwe prijs en wordt de oude gearchiveerd.
+
+**Bewijs:** DB 145/145 (6 nieuw: mapping, idempotentie, volgorde, opzeggen en past_due, onbekende prijs, andere klant, gratis account, rechten) · unit 121/121 · Playwright 22/22. Fase 7 draait tegen **stripe-mock**, de officiële Stripe-API-mock:
+- Checkout gaat naar checkout.stripe.com
+- een ondertekende webhook maakt Studio actief
+- een vervalste handtekening geeft 400; hetzelfde event nogmaals wordt één keer verwerkt
+- upgrade naar Agency werkt
+- downgrade naar Solo met te veel sites wordt geweigerd
+- opzeggen en weer doorgaan werken
+- beëindigd → nieuwe site geweigerd → nieuw abonnement → weer schrijfbaar
+- een beheerder ziet geen knoppen om het abonnement te wijzigen

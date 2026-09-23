@@ -186,7 +186,8 @@
     "planTrial": "Essai jusqu'au {date}",
     "planComped": "Compte offert",
     "planActive": "Actif",
-    "usage": "{used} sites utilisés sur {limit}"
+    "usage": "{used} sites utilisés sur {limit}",
+    "manageBilling": "Gérer l’abonnement"
   },
   "team": {
     "title": "Équipe",
@@ -757,5 +758,36 @@
       "senderHint": "Affiché sous chaque rapport et comme expéditeur de l’e-mail. Vide = nom de l’agence.",
       "current": "Logo actuel"
     }
+  },
+  "billing": {
+    "title": "Abonnement",
+    "intro": "Choisissez l’abonnement adapté au nombre de sites que vous gérez. Prix mensuels hors TVA. Résiliable chaque mois.",
+    "perMonth": "par mois",
+    "sites": "jusqu’à {count} sites",
+    "choose": "Choisir",
+    "switch": "Changer",
+    "currentBadge": "Actuel",
+    "status": {
+      "trialing": "Essai jusqu’au {date}",
+      "trialEnded": "Votre essai est terminé. Choisissez un abonnement pour ajouter des sites et lancer des mises à jour.",
+      "active": "Actif",
+      "renews": "Renouvelé le {date}",
+      "cancels": "Se termine le {date}",
+      "past_due": "Le dernier paiement a échoué. Stripe va réessayer ; mettez à jour vos informations de paiement.",
+      "canceled": "Résilié. La surveillance continue, mais un abonnement est nécessaire pour de nouveaux sites et des mises à jour.",
+      "comped": "Compte gratuit"
+    },
+    "cancel": "Résilier l’abonnement",
+    "cancelHint": "L’abonnement continue jusqu’à la fin de la période payée.",
+    "resume": "Continuer l’abonnement",
+    "portal": "Paiement et factures",
+    "ownerOnly": "Seul le propriétaire de l’agence peut modifier l’abonnement.",
+    "notConfigured": "Le paiement en ligne n’est pas encore disponible.",
+    "overLimit": "Vous avez actuellement {used} sites et {plan} en permet au maximum {limit}. Supprimez d’abord des sites ou choisissez un abonnement plus grand.",
+    "success": "Merci ! Votre abonnement est en cours de traitement ; cela prend quelques secondes.",
+    "changed": "Modification envoyée. Le nouvel abonnement sera actif dans quelques secondes.",
+    "canceled": "Résiliation envoyée.",
+    "resumed": "L’abonnement continue.",
+    "error": "Stripe a renvoyé une erreur. Réessayez ou contactez-nous."
   }
 }

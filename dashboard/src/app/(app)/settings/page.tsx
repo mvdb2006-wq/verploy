@@ -41,6 +41,7 @@ export default async function SettingsPage() {
           </div>
           <p className="mt-2 text-xs text-muted tabular-nums">{t('settings.usage', { used, limit })}</p>
         </div>
+        <a href="/settings/billing" className="btn btn-ghost mt-4">{t('settings.manageBilling')}</a>
       </section>
     </div>
   )

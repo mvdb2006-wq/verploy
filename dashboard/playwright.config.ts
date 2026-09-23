@@ -7,6 +7,7 @@ import { defineConfig } from '@playwright/test'
  */
 const CRON_SECRET = process.env.E2E_CRON_SECRET ?? 'e2e-local-cron-secret'
 const MOCK_RESEND_PORT = process.env.MOCK_RESEND_PORT ?? '4010'
+const STRIPE_MOCK_PORT = process.env.STRIPE_MOCK_PORT ?? '12111'
 
 export default defineConfig({
   testDir: './e2e',
@@ -23,6 +24,12 @@ export default defineConfig({
   },
   webServer: [
     {
+      // Officiële Stripe-API-mock (github.com/stripe/stripe-mock)
+      command: `${process.env.STRIPE_MOCK_BIN ?? 'stripe-mock'} -http-port ${STRIPE_MOCK_PORT}`,
+      port: Number(STRIPE_MOCK_PORT),
+      reuseExistingServer: true,
+    },
+    {
       command: 'node e2e/support/mock-resend.mjs',
       url: `http://127.0.0.1:${MOCK_RESEND_PORT}/health`,
       env: { MOCK_RESEND_PORT },
@@ -36,6 +43,9 @@ export default defineConfig({
         RESEND_API_KEY: 're_e2e_local',
         RESEND_BASE_URL: `http://127.0.0.1:${MOCK_RESEND_PORT}`,
         CRON_SECRET,
+        STRIPE_SECRET_KEY: 'sk_test_e2e',
+        STRIPE_WEBHOOK_SECRET: process.env.E2E_STRIPE_WEBHOOK_SECRET ?? 'whsec_e2e_local',
+        STRIPE_API_BASE: `http://127.0.0.1:${STRIPE_MOCK_PORT}`,
       },
     },
     {

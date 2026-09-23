@@ -12,6 +12,13 @@ const schema = z.object({
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM: z.string().default('Verploy <noreply@verploy.com>'),
   CRON_SECRET: z.string().optional(),
+  /** Stripe (fase 7). Zonder sleutel is afrekenen uitgeschakeld en blijft het bureau op zijn huidige plan. */
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  /** Klantportaal-configuratie (uitvoer van scripts/stripe-setup.mjs). */
+  STRIPE_PORTAL_CONFIGURATION: z.string().optional(),
+  /** Alleen voor tests: stripe-mock, bijv. http://127.0.0.1:12111 */
+  STRIPE_API_BASE: z.url().optional(),
 })
 
 export type Env = z.infer<typeof schema>
