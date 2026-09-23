@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { timeAgo, cn, sslSeverity, phpSeverity, vitalsGrade, vitalsColor } from '@/lib/utils'
+import TriggerUpdateButton from '@/app/(dashboard)/settings/sites/[id]/TriggerUpdateButton'
 import type { Alert } from '@/types'
 import {
   ArrowLeft,
@@ -14,9 +17,65 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  Settings,
 } from 'lucide-react'
 
 export const metadata = { title: 'Site detail' }
+
+// ─── Server action ────────────────────────────────────────────────────────────
+
+async function createUpdateJob(formData: FormData): Promise<{ error?: string }> {
+  'use server'
+  // Verify the user is authenticated
+  const authClient = createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) return { error: 'Niet ingelogd' }
+
+  const { data: membership } = await authClient
+    .from('agency_members')
+    .select('agency_id')
+    .eq('user_id', user.id)
+    .single()
+  if (!membership) return { error: 'Geen toegang' }
+
+  const site_id      = formData.get('site_id') as string
+  const slug         = formData.get('slug') as string
+  const name         = formData.get('name') as string
+  const from_version = formData.get('from_version') as string
+  const to_version   = formData.get('to_version') as string
+
+  // Verify site belongs to this agency
+  const { data: site } = await authClient
+    .from('sites')
+    .select('id')
+    .eq('id', site_id)
+    .eq('agency_id', membership.agency_id)
+    .single()
+  if (!site) return { error: 'Site niet gevonden' }
+
+  // Use service client to bypass RLS on update_jobs
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('update_jobs')
+    .insert({
+      site_id,
+      agency_id:    membership.agency_id,
+      type:         'plugin',
+      slug,
+      name,
+      from_version,
+      to_version,
+      status:       'pending',
+      created_by:   user.id,
+    })
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/sites/${site_id}`)
+  return {}
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function SiteDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -34,7 +93,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
   // Fetch site
   const { data: site } = await supabase
     .from('sites')
-    .select('id, name, url, client_name, status, last_seen_at, last_heartbeat_at, wp_version, php_version, created_at')
+    .select('id, name, url, client_name, status, last_seen_at, last_heartbeat_at, wp_version, php_version, connector_version, created_at')
     .eq('id', params.id)
     .eq('agency_id', membership.agency_id)
     .single()
@@ -54,19 +113,20 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
   // Plugins (active, updates first)
   const { data: plugins } = await supabase
     .from('site_plugins')
-    .select('id, name, slug, version, latest_version, update_available, active, vulnerable')
+    .select('id, slug, name, version, latest_version, update_available, active, vulnerable')
     .eq('site_id', site.id)
     .eq('active', true)
     .order('update_available', { ascending: false })
     .order('name')
     .limit(50)
 
-  // Recent update runs
-  const { data: runs } = await supabase
-    .from('update_runs')
-    .select('id, status, plugin_slugs, plugin_count, queued_at, finished_at, test_passed, error_message')
+  // Recent update jobs (service client bypasses RLS)
+  const serviceClient = createServiceClient()
+  const { data: jobs } = await serviceClient
+    .from('update_jobs')
+    .select('id, type, slug, name, from_version, to_version, status, result_log, created_at, completed_at')
     .eq('site_id', site.id)
-    .order('queued_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(10)
 
   // Recent alerts
@@ -101,11 +161,20 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      {/* Back */}
-      <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-text mb-5 transition-colors">
-        <ArrowLeft size={14} />
-        Terug naar dashboard
-      </Link>
+      {/* Back + Settings */}
+      <div className="flex items-center justify-between mb-5">
+        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-text transition-colors">
+          <ArrowLeft size={14} />
+          Terug naar dashboard
+        </Link>
+        <Link
+          href={`/settings/sites/${site.id}`}
+          className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-text transition-colors"
+        >
+          <Settings size={14} />
+          Instellingen
+        </Link>
+      </div>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-4">
@@ -155,7 +224,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Plugins */}
+        {/* Plugins met update-knoppen */}
         <section className="card p-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -166,18 +235,27 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
               <span className="badge badge-warn">{pendingUpdates} update{pendingUpdates !== 1 ? 's' : ''}</span>
             )}
           </div>
-          <div className="divide-y divide-border max-h-72 overflow-y-auto">
+          <div className="divide-y divide-border max-h-96 overflow-y-auto">
             {(plugins ?? []).length === 0 ? (
               <p className="px-5 py-4 text-sm text-muted">Geen plugin-data beschikbaar.</p>
             ) : (
               (plugins ?? []).map(plugin => (
                 <div key={plugin.id} className="px-5 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text truncate">{plugin.name}</p>
                     <p className="text-xs text-subtle font-mono">{plugin.version}</p>
                   </div>
-                  {plugin.update_available && plugin.latest_version && (
-                    <span className="badge badge-warn flex-shrink-0">→ {plugin.latest_version}</span>
+                  {plugin.update_available && plugin.latest_version ? (
+                    <TriggerUpdateButton
+                      siteId={site.id}
+                      slug={plugin.slug}
+                      name={plugin.name}
+                      currentVersion={plugin.version ?? ''}
+                      toVersion={plugin.latest_version}
+                      createJobAction={createUpdateJob}
+                    />
+                  ) : (
+                    <span className="text-xs text-muted shrink-0">✓ up-to-date</span>
                   )}
                   {plugin.vulnerable && (
                     <span className="badge badge-danger flex-shrink-0">kwetsbaar</span>
@@ -188,31 +266,43 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           </div>
         </section>
 
-        {/* Update runs */}
+        {/* Update-geschiedenis */}
         <section className="card p-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center gap-2">
             <RefreshCw size={15} className="text-accent" />
-            <h2 className="font-bold text-text">Update-runs</h2>
+            <h2 className="font-bold text-text">Update-geschiedenis</h2>
           </div>
-          <div className="divide-y divide-border max-h-72 overflow-y-auto">
-            {(runs ?? []).length === 0 ? (
+          <div className="divide-y divide-border max-h-96 overflow-y-auto">
+            {(jobs ?? []).length === 0 ? (
               <p className="px-5 py-4 text-sm text-muted">Nog geen updates uitgevoerd.</p>
             ) : (
-              (runs ?? []).map((run: {
-                id: string; status: string; plugin_slugs: string[]
-                plugin_count: number | null; queued_at: string
-                finished_at: string | null; test_passed: boolean | null; error_message: string | null
-              }) => (
-                <div key={run.id} className="px-5 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-text truncate">
-                      {(run.plugin_slugs ?? []).join(', ') || 'Onbekend'}
-                    </p>
-                    <p className="text-xs text-subtle">{timeAgo(run.queued_at)}</p>
+              (jobs ?? []).map(job => (
+                <div key={job.id} className="px-5 py-3">
+                  <div className="flex items-center gap-2">
+                    <JobStatusIcon status={job.status} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text truncate">
+                        {job.name ?? job.slug}
+                        {job.from_version && job.to_version && (
+                          <span className="text-muted font-normal ml-1 text-xs">
+                            {job.from_version} → {job.to_version}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted">
+                        {job.completed_at
+                          ? `${job.status === 'success' ? 'Voltooid' : 'Mislukt'} ${timeAgo(job.completed_at)}`
+                          : job.status === 'running'
+                            ? 'Bezig...'
+                            : `In wachtrij · ${timeAgo(job.created_at)}`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <RunStatusBadge status={run.status} />
-                  </div>
+                  {job.result_log && (
+                    <pre className="mt-1 ml-6 text-xs text-muted bg-surface2 rounded p-2 overflow-x-auto max-h-20 whitespace-pre-wrap">
+                      {job.result_log}
+                    </pre>
+                  )}
                 </div>
               ))
             )}
@@ -235,7 +325,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           </section>
         )}
 
-        {/* Recent alerts */}
+        {/* Recente meldingen */}
         <section className="card p-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -274,6 +364,8 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
   )
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function InfoTile({ label, value, severity, mono }: {
   label: string
   value: string
@@ -304,21 +396,9 @@ function VitalTile({ label, value, ok }: { label: string; value: string; ok?: bo
   )
 }
 
-function RunStatusBadge({ status }: { status: string }) {
-  const config: Record<string, { cls: string; label: string; icon?: React.ReactNode }> = {
-    queued:      { cls: 'badge-muted', label: 'In wachtrij', icon: <Clock size={10} /> },
-    staging:     { cls: 'badge-warn', label: 'Staging...',   icon: <Loader2 size={10} className="animate-spin" /> },
-    testing:     { cls: 'badge-warn', label: 'Testen...',    icon: <Loader2 size={10} className="animate-spin" /> },
-    passed:      { cls: 'badge-accent', label: 'Geslaagd',   icon: <CheckCircle2 size={10} /> },
-    failed:      { cls: 'badge-danger', label: 'Mislukt',    icon: <XCircle size={10} /> },
-    deployed:    { cls: 'badge-accent', label: 'Geïnstalleerd', icon: <CheckCircle2 size={10} /> },
-    rolled_back: { cls: 'badge-danger', label: 'Teruggedraaid', icon: <XCircle size={10} /> },
-  }
-  const c = config[status] ?? { cls: 'badge-muted', label: status }
-  return (
-    <span className={cn('badge gap-1', c.cls)}>
-      {c.icon}
-      {c.label}
-    </span>
-  )
+function JobStatusIcon({ status }: { status: string }) {
+  if (status === 'success') return <CheckCircle2 size={14} className="text-accent shrink-0" />
+  if (status === 'failed')  return <XCircle size={14} className="text-danger shrink-0" />
+  if (status === 'running') return <Loader2 size={14} className="text-warn animate-spin shrink-0" />
+  return <Clock size={14} className="text-muted shrink-0" />
 }
