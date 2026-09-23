@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v2]
+  pull_request:
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['54322:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PG_HOST: 127.0.0.1
+      PG_PORT: '54322'
+      PGPASSWORD: postgres
+      TEST_PG_HOST: 127.0.0.1
+      TEST_PG_PASSWORD: postgres
+      LOCAL_SB_BIN: ${{ github.workspace }}/.gotrue
+      GOTRUE_VERSION: v2.197.0
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - name: GoTrue (auth-schema voor DB-tests)
+        working-directory: .
+        run: |
+          mkdir -p "$LOCAL_SB_BIN"
+          curl -sSL "https://github.com/supabase/auth/releases/download/${GOTRUE_VERSION}/auth-${GOTRUE_VERSION}-x86.tar.gz" | tar xz -C "$LOCAL_SB_BIN"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run test:db
+      - run: npx next build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key-000000000000
+          SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key-0000000000
+
+  connector:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: phpcs
+      - name: Syntax op PHP 7.4 (minimaal ondersteunde versie)
+        run: find connector-plugin/verploy-connector -name '*.php' -print0 | xargs -0 -n1 php -l

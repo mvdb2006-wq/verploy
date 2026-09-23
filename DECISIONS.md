@@ -8,7 +8,7 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 |---|---|---|
 | next | 16.3.6 | latest stable (dist-tag `latest`) |
 | react / react-dom | 19.3.0 | vereist door Next 16 |
-| typescript | 7.0.2 | latest stable; in fase 2 controleer ik of `next build` ermee overweg kan. Zo niet, dan wordt het de laatste 6.x en dat komt hier te staan |
+| typescript | 6.0.3 | 7.0.2 is latest, maar heeft geen JS-API meer (`createProgram` ontbreekt) die Next.js en typescript-eslint nodig hebben; typescript-eslint ondersteunt `<6.1.0` |
 | tailwindcss / @tailwindcss/postcss | 4.3.3 | v4 CSS-first config; tokens gaan naar `@theme` |
 | @supabase/supabase-js | 2.117.1 | |
 | @supabase/ssr | 0.12.7 | |
@@ -23,6 +23,8 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 | pg | 8.23.0 | RLS-tests direct op Postgres |
 | @anthropic-ai/sdk | 0.128.0 | AI-diagnose (fase 5) |
 | lucide-react | 1.47.0 | iconen (bestond al) |
+| @fontsource-variable/inter | 5.3.0 | Inter zelf gehost: geen Google-verzoek, build werkt offline |
+| GoTrue / PostgREST (lokaal) | v2.197.0 / v16.3 | zelfde auth- en API-laag als Supabase, als release-binaries |
 | clsx 2.1.1, tailwind-merge 3.7.0, date-fns 4.4.0 | | bestonden al |
 | eslint 10.11.0, eslint-config-next 16.3.6 | | |
 | Node | 22 LTS | zowel Vercel als Railway |
@@ -64,3 +66,20 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **Test-WordPress op SQLite (officiële `sqlite-database-integration`) + PHP built-in server.** Er is geen MySQL of Docker Hub beschikbaar; SQLite draait echte WordPress-core en echte plugin-upgrades.
 - **Productiedatabase: lezen van gebruikersdata en schrijven zijn voor mij geblokkeerd (auto-mode-beleid).** Migraties naar productie gaan via een GitHub Action (`supabase db push`) zodra Martijn de secrets toevoegt (BLOCKERS), of via zijn expliciete akkoord per migratie.
 - **Commits worden in de sandbox gemaakt en via een patch op de laptop gepusht.** De sandbox heeft geen schrijfrechten op GitHub; de laptop wel.
+
+## Fase 2
+
+- **Eén bureau per gebruiker (`unique(user_id)`).** Houdt sessie, RLS-helpers en UI eenvoudig; een tweede bureau vraagt een tweede account. Kan later versoepeld worden.
+- **Gevoelige mutaties via SECURITY DEFINER-RPC's, niet via policies.** Bureau aanmaken, uitnodigen, rollen, koppelcodes: één plek met expliciete checks, en de tests roepen exact die functies aan.
+- **Kolomrechten naast RLS.** `authenticated` kan bijv. `agencies.plan_id` of `sites.status` niet wijzigen, ook niet als owner; alleen de server (service role) zet die.
+- **Bestaand bureau (EM Hosting) wordt `scale` + `comped`.** Oprichtersaccount mag niet op slot gaan vóór Stripe (fase 7).
+- **Encryptiesleutel valt terug op een HKDF-afleiding van de service-role-key; ciphertext draagt een sleutel-id.** Geen extra blocker nu; een eigen `VERPLOY_ENCRYPTION_KEY` kan later zonder dataverlies (d1 blijft leesbaar).
+- **Heartbeat met afwijkend site-adres wordt geweigerd (409).** Een gekloonde site (bijv. staging) met hetzelfde secret kan de echte site niet overschrijven.
+- **Inkomende plugin-verzoeken ondertekenen de REST-route (`/verploy/v2/...`), niet het URL-pad.** Werkt dan met `/wp-json/` én `?rest_route=`.
+- **Koppelcode: 8 tekens uit 32 (40 bit), 30 min, eenmalig, gebonden aan site-adres.** Brute force binnen het venster is onhaalbaar; geen rate-limit-infrastructuur nodig.
+- **`typedRoutes` uit.** Dynamische redirects (`?next=`) zouden overal casts vereisen; `safeNext()` + tests beschermen tegen open redirects.
+- **ESLint: React-versie expliciet.** eslint-plugin-react in eslint-config-next 16.3.6 gebruikt een in ESLint 10 verwijderde API bij autodetectie.
+- **Vercel bouwt de branch `v2` niet.** Een preview zou tegen het v1-productieschema draaien; uitrol gaat via merge naar `main` ná de migratie.
+- **Eigen typegenerator (`scripts/gen-db-types.mjs`) i.p.v. `supabase gen types`.** De CLI heeft Docker nodig; een DB-test bewaakt dat de typen actueel zijn.
+- **Plugin-releaseregel in `connector-plugin/build.sh`.** Publiceren naar `dashboard/public/downloads/` kan alleen na groene PHP-tests en PHP 7.4-check.
+

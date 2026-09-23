@@ -28,9 +28,9 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 
 ---
 
-## 2. 🟠 Migraties naar productie kunnen uitrollen — nodig vóór het einde van fase 2
+## 2. 🔴 Migraties naar productie — fase 2 staat klaar en wacht hierop
 
-**Waarom:** het v2-schema moet op de live database komen. Schrijven naar productie is voor mij geblokkeerd door het beleid van deze omgeving; de hotfix van 23-09 lukte alleen met jouw expliciete akkoord in de chat.
+**Waarom:** fase 2 is gebouwd en getest (branch `v2`), maar kan pas live als het v2-schema op de productiedatabase staat. Tot die tijd draait app.verploy.com de oude versie en blijft registratie dicht. Schrijven naar productie is voor mij geblokkeerd door het beleid van deze omgeving; de hotfix van 23-09 lukte alleen met jouw expliciete akkoord in de chat.
 
 **Wat je moet doen (één van de twee):**
 - **A. (aanbevolen, eenmalig):** voeg drie GitHub-secrets toe aan de repo `mvdb2006-wq/verploy` (Settings → Secrets and variables → Actions → New repository secret):
@@ -41,7 +41,19 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
   Ik schrijf de GitHub Action die bij elke push naar `main` de migraties toepast (`supabase db push`).
 - **B.** Per migratie in de chat akkoord geven, zodat ik hem via de SQL Editor uitvoer.
 
-**Ondertussen:** alle migraties worden lokaal op Postgres 16 getest met de RLS-testsuite.
+**Daarna doe ik zelf:** `v2` mergen naar `main` (Vercel deployt), in Supabase Auth de redirect-URL `https://app.verploy.com/auth/callback` toevoegen en registratie weer aanzetten, controleren dat alles werkt, en je laten weten dat de sites opnieuw gekoppeld kunnen worden (#1).
+
+**Ondertussen:** ik bouw fase 3 verder op `v2`; alle migraties worden lokaal op Postgres 16 getest met de RLS-testsuite.
+
+---
+
+## 2b. 🟡 CI en migratie-workflow activeren — kan nu
+
+**Waarom:** de GitHub-token op je laptop mist de `workflow`-scope, dus ik kan geen bestanden in `.github/workflows/` pushen. De workflows staan klaar in `ops/github-workflows/` (CI: typecheck, lint, unit- en databasetests, build, PHP 7.4-syntax; migraties: `supabase db push` na groene CI op `main`).
+
+**Wat je moet doen (één van de twee):**
+- **A.** Geef toestemming in de chat: *"Je mag de workflows via de GitHub-website toevoegen."* Dan zet ik ze via de browser in de repo (je moet dan ingelogd zijn op github.com in de browser van de Claude-app).
+- **B.** Vernieuw de token op je laptop met de scope `workflow` (GitHub → Settings → Developer settings → Personal access tokens). Daarna push ik ze zelf.
 
 ---
 

@@ -1,8 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/v1/cron/check-offline",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": { "deploymentEnabled": { "v2": false } }
 }

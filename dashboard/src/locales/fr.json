@@ -1,0 +1,222 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "copy": "Copier",
+    "copied": "Copié",
+    "optional": "facultatif",
+    "never": "jamais",
+    "errorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
+    "errorForbidden": "Votre rôle dans cette agence ne le permet pas.",
+    "locales": {
+      "nl": "Nederlands",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "sites": "Sites",
+    "settings": "Paramètres",
+    "team": "Équipe",
+    "signOut": "Se déconnecter",
+    "agency": "Agence",
+    "mainNav": "Menu principal"
+  },
+  "auth": {
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Bon retour sur Verploy.",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours…",
+      "forgot": "Mot de passe oublié ?",
+      "noAccount": "Pas encore de compte ?",
+      "signupLink": "Créer un compte",
+      "errorInvalid": "L'adresse e-mail ou le mot de passe est incorrect.",
+      "errorUnconfirmed": "Confirmez d'abord votre adresse e-mail via le lien reçu dans votre boîte de réception."
+    },
+    "signup": {
+      "title": "Créer un compte",
+      "subtitle": "Démarrez votre essai de 14 jours. Aucune carte bancaire requise.",
+      "passwordHint": "Au moins 10 caractères.",
+      "submit": "Créer le compte",
+      "submitting": "Création du compte…",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "loginLink": "Se connecter",
+      "checkEmailTitle": "Consultez votre boîte de réception",
+      "checkEmailBody": "Nous avons envoyé un lien de confirmation à {email}. Cliquez dessus pour continuer.",
+      "errorClosed": "Les inscriptions sont temporairement fermées.",
+      "errorExists": "Un compte existe déjà avec cette adresse e-mail. Connectez-vous ou réinitialisez votre mot de passe.",
+      "errorWeak": "Choisissez un mot de passe d'au moins 10 caractères."
+    },
+    "forgot": {
+      "title": "Mot de passe oublié",
+      "body": "Saisissez votre adresse e-mail. Nous vous enverrons un lien pour définir un nouveau mot de passe.",
+      "submit": "Envoyer le lien",
+      "sent": "Si un compte existe pour {email}, le lien se trouve maintenant dans votre boîte de réception.",
+      "back": "Retour à la connexion"
+    },
+    "reset": {
+      "title": "Définir un nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "submit": "Enregistrer le mot de passe",
+      "done": "Votre mot de passe a été modifié."
+    },
+    "linkInvalid": "Ce lien est invalide ou a expiré. Demandez-en un nouveau."
+  },
+  "onboarding": {
+    "title": "Créez votre agence",
+    "body": "Votre agence réunit vos sites, votre équipe et vos rapports.",
+    "name": "Nom de votre agence",
+    "namePlaceholder": "Par ex. Studio Nord Web",
+    "submit": "Créer l'agence",
+    "errorAlready": "Vous faites déjà partie d'une agence.",
+    "errorName": "Donnez à votre agence un nom d'au moins 2 caractères."
+  },
+  "invite": {
+    "title": "Invitation",
+    "body": "Vous êtes invité(e) à rejoindre {agency} en tant que {role}.",
+    "accept": "Accepter l'invitation",
+    "signedInAs": "Vous êtes connecté(e) en tant que {email}.",
+    "loginFirst": "Connectez-vous ou créez un compte avec {email} pour accepter l'invitation.",
+    "errorInvalid": "Cette invitation est invalide, a expiré ou a déjà été utilisée.",
+    "errorMismatch": "Cette invitation concerne une autre adresse e-mail. Déconnectez-vous puis connectez-vous avec l'adresse invitée.",
+    "errorAlready": "Vous faites déjà partie d'une agence. Un compte ne peut appartenir qu'à une seule agence."
+  },
+  "dashboard": {
+    "title": "Sites",
+    "summary": "{count, plural, one {# site} other {# sites}} · {online} en ligne",
+    "addSite": "Ajouter un site",
+    "emptyTitle": "Aucun site pour l'instant",
+    "emptyBody": "Connectez votre premier site WordPress. Cela prend environ deux minutes.",
+    "colSite": "Site",
+    "colStatus": "Statut",
+    "colWordpress": "WordPress",
+    "colPhp": "PHP",
+    "colLastSeen": "Dernier contact",
+    "trialBanner": "Essai : {days, plural, one {encore # jour} other {encore # jours}}.",
+    "readOnlyBanner": "Votre essai ou votre abonnement est terminé. La surveillance continue, mais l'ajout de sites et les mises à jour sont bloqués."
+  },
+  "site": {
+    "status": {
+      "pending": "En attente de connexion",
+      "online": "En ligne",
+      "offline": "Hors ligne"
+    },
+    "connection": {
+      "awaiting_pairing": "Non connecté",
+      "connected": "Connecté",
+      "revoked": "Révoqué"
+    }
+  },
+  "sitesNew": {
+    "title": "Ajouter un site",
+    "name": "Nom",
+    "namePlaceholder": "Par ex. Boulangerie Leblanc",
+    "url": "Adresse du site",
+    "urlPlaceholder": "https://client.fr",
+    "clientName": "Nom du client",
+    "clientEmail": "Adresse e-mail du client (pour les rapports)",
+    "reportLocale": "Langue des rapports pour ce client",
+    "submit": "Ajouter le site",
+    "errorUrl": "Saisissez une adresse web valide, par exemple https://client.fr.",
+    "errorEmail": "Saisissez une adresse e-mail valide ou laissez le champ vide.",
+    "errorName": "Donnez un nom au site.",
+    "errorDuplicate": "Ce site existe déjà dans votre agence.",
+    "errorLimit": "Votre formule ({plan}) autorise au maximum {limit} sites. Passez à une formule supérieure pour connecter plus de sites.",
+    "errorInactive": "Votre essai ou votre abonnement est terminé. Vous pourrez ajouter des sites dès que votre abonnement sera actif.",
+    "errorForbidden": "Seuls les propriétaires et les administrateurs peuvent ajouter des sites."
+  },
+  "siteDetail": {
+    "back": "Tous les sites",
+    "connectTitle": "Connecter le site",
+    "connectIntro": "Connectez le site avec un code à usage unique. Le code est valable 30 minutes et ne fonctionne qu'une fois.",
+    "step1": "Téléchargez Verploy Connector et installez-le sur le site : Extensions → Ajouter une extension → Téléverser une extension.",
+    "step2": "Dans WordPress, allez dans Réglages → Verploy.",
+    "step3": "Collez le code de connexion et cliquez sur Connecter.",
+    "download": "Télécharger Verploy Connector",
+    "generate": "Créer un code de connexion",
+    "regenerate": "Créer un nouveau code",
+    "codeLabel": "Code de connexion",
+    "codeExpires": "Valable jusqu'à {time}.",
+    "waiting": "En attente de l'extension… Cette page s'actualise automatiquement dès que le site est connecté.",
+    "repairTitle": "Reconnecter",
+    "repairBody": "Nécessaire après la réinstallation de l'extension, ou si vous souhaitez remplacer la clé de ce site. La connexion actuelle reste active jusqu'à l'utilisation du nouveau code.",
+    "connectedSince": "Connecté depuis le {date}",
+    "lastHeartbeat": "Dernier heartbeat",
+    "wordpress": "WordPress",
+    "php": "PHP",
+    "connector": "Connecteur",
+    "memoryLimit": "Limite de mémoire",
+    "client": "Client",
+    "componentsTitle": "Extensions et thèmes",
+    "updatesAvailable": "{count, plural, one {# mise à jour disponible} other {# mises à jour disponibles}}",
+    "upToDate": "À jour",
+    "updateTo": "Mettre à jour vers {version}",
+    "inactive": "inactif",
+    "componentsEmpty": "Pas encore de données. Elles apparaissent après le premier heartbeat.",
+    "type": {
+      "plugin": "Extension",
+      "theme": "Thème",
+      "core": "Cœur WordPress"
+    },
+    "dangerTitle": "Supprimer le site",
+    "dangerBody": "Supprime le site et toutes ses données de Verploy. L'extension sur le site cessera ensuite d'envoyer des données.",
+    "deleteConfirm": "Saisissez le nom du site ({name}) pour confirmer.",
+    "deleteButton": "Supprimer définitivement le site",
+    "unlimited": "Illimitée"
+  },
+  "settings": {
+    "title": "Paramètres de l'agence",
+    "name": "Nom de l'agence",
+    "locale": "Langue du tableau de bord",
+    "brandColor": "Couleur de marque (pour les rapports)",
+    "brandColorHint": "Code hexadécimal, par exemple #22D98A.",
+    "errorColor": "Utilisez un code hexadécimal comme #22D98A.",
+    "planTitle": "Abonnement",
+    "planLine": "{plan} · jusqu'à {limit} sites",
+    "planTrial": "Essai jusqu'au {date}",
+    "planComped": "Compte offert",
+    "planActive": "Actif",
+    "usage": "{used} sites utilisés sur {limit}"
+  },
+  "team": {
+    "title": "Équipe",
+    "members": "Membres",
+    "you": "(vous)",
+    "role": {
+      "owner": "Propriétaire",
+      "admin": "Administrateur",
+      "member": "Membre"
+    },
+    "roleHelp": "Les propriétaires gèrent tout, y compris l'équipe et l'abonnement. Les administrateurs gèrent les sites. Les membres peuvent tout consulter.",
+    "inviteTitle": "Inviter un membre de l'équipe",
+    "inviteEmail": "Adresse e-mail",
+    "inviteRole": "Rôle",
+    "inviteSubmit": "Créer l'invitation",
+    "inviteLinkLabel": "Lien d'invitation pour {email}",
+    "inviteLinkHelp": "Partagez ce lien. Il est valable 7 jours et ne fonctionne que pour cette adresse e-mail.",
+    "inviteEmailed": "Invitation envoyée à {email}.",
+    "pending": "Invitations en attente",
+    "expires": "expire le {date}",
+    "revoke": "Révoquer",
+    "makeRole": "Nommer {role}",
+    "remove": "Retirer",
+    "leave": "Quitter l'agence",
+    "errorLastOwner": "Une agence doit avoir au moins un propriétaire.",
+    "errorAlreadyMember": "Cette personne est déjà membre de votre agence.",
+    "errorEmail": "Saisissez une adresse e-mail valide."
+  },
+  "email": {
+    "inviteSubject": "Invitation à rejoindre {agency} sur Verploy",
+    "inviteBody": "{inviter} vous invite à rejoindre {agency} sur Verploy en tant que {role}.",
+    "inviteCta": "Voir l'invitation",
+    "inviteFooter": "Ce lien est valable 7 jours. Vous n'attendiez pas cet e-mail ? Vous pouvez l'ignorer."
+  }
+}

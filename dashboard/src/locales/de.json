@@ -1,0 +1,222 @@
+{
+  "common": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "optional": "optional",
+    "never": "noch nie",
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "errorForbidden": "Deine Rolle in dieser Agentur erlaubt das nicht.",
+    "locales": {
+      "nl": "Nederlands",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "sites": "Websites",
+    "settings": "Einstellungen",
+    "team": "Team",
+    "signOut": "Abmelden",
+    "agency": "Agentur",
+    "mainNav": "Hauptmenü"
+  },
+  "auth": {
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "login": {
+      "title": "Anmelden",
+      "subtitle": "Willkommen zurück bei Verploy.",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung läuft…",
+      "forgot": "Passwort vergessen?",
+      "noAccount": "Noch kein Konto?",
+      "signupLink": "Konto erstellen",
+      "errorInvalid": "E-Mail-Adresse oder Passwort ist falsch.",
+      "errorUnconfirmed": "Bitte bestätige zuerst deine E-Mail-Adresse über den Link in deinem Posteingang."
+    },
+    "signup": {
+      "title": "Konto erstellen",
+      "subtitle": "Starte deine 14-tägige Testphase. Keine Kreditkarte nötig.",
+      "passwordHint": "Mindestens 10 Zeichen.",
+      "submit": "Konto erstellen",
+      "submitting": "Konto wird erstellt…",
+      "haveAccount": "Schon ein Konto?",
+      "loginLink": "Anmelden",
+      "checkEmailTitle": "Prüfe deinen Posteingang",
+      "checkEmailBody": "Wir haben einen Bestätigungslink an {email} gesendet. Klicke darauf, um fortzufahren.",
+      "errorClosed": "Die Registrierung ist vorübergehend geschlossen.",
+      "errorExists": "Mit dieser E-Mail-Adresse gibt es bereits ein Konto. Melde dich an oder setze dein Passwort zurück.",
+      "errorWeak": "Wähle ein Passwort mit mindestens 10 Zeichen."
+    },
+    "forgot": {
+      "title": "Passwort vergessen",
+      "body": "Gib deine E-Mail-Adresse ein. Wir senden dir einen Link, um ein neues Passwort festzulegen.",
+      "submit": "Link senden",
+      "sent": "Falls ein Konto für {email} existiert, liegt der Link jetzt in deinem Posteingang.",
+      "back": "Zurück zur Anmeldung"
+    },
+    "reset": {
+      "title": "Neues Passwort festlegen",
+      "newPassword": "Neues Passwort",
+      "submit": "Passwort speichern",
+      "done": "Dein Passwort wurde geändert."
+    },
+    "linkInvalid": "Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an."
+  },
+  "onboarding": {
+    "title": "Erstelle deine Agentur",
+    "body": "In deiner Agentur laufen Websites, Team und Berichte zusammen.",
+    "name": "Name deiner Agentur",
+    "namePlaceholder": "z. B. Studio Nord Webdesign",
+    "submit": "Agentur erstellen",
+    "errorAlready": "Du gehörst bereits zu einer Agentur.",
+    "errorName": "Gib deiner Agentur einen Namen mit mindestens 2 Zeichen."
+  },
+  "invite": {
+    "title": "Einladung",
+    "body": "Du wurdest eingeladen, {agency} als {role} beizutreten.",
+    "accept": "Einladung annehmen",
+    "signedInAs": "Du bist angemeldet als {email}.",
+    "loginFirst": "Melde dich mit {email} an oder erstelle ein Konto, um die Einladung anzunehmen.",
+    "errorInvalid": "Diese Einladung ist ungültig, abgelaufen oder wurde bereits verwendet.",
+    "errorMismatch": "Diese Einladung gilt für eine andere E-Mail-Adresse. Melde dich ab und mit der eingeladenen Adresse wieder an.",
+    "errorAlready": "Du gehörst bereits zu einer Agentur. Ein Konto kann zu einer Agentur gehören."
+  },
+  "dashboard": {
+    "title": "Websites",
+    "summary": "{count, plural, one {# Website} other {# Websites}} · {online} online",
+    "addSite": "Website hinzufügen",
+    "emptyTitle": "Noch keine Websites",
+    "emptyBody": "Verbinde deine erste WordPress-Website. Das dauert etwa zwei Minuten.",
+    "colSite": "Website",
+    "colStatus": "Status",
+    "colWordpress": "WordPress",
+    "colPhp": "PHP",
+    "colLastSeen": "Letzter Kontakt",
+    "trialBanner": "Testphase: {days, plural, one {noch # Tag} other {noch # Tage}}.",
+    "readOnlyBanner": "Deine Testphase oder dein Abo ist abgelaufen. Das Monitoring läuft weiter, aber neue Websites und Updates sind gesperrt."
+  },
+  "site": {
+    "status": {
+      "pending": "Wartet auf Verbindung",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "connection": {
+      "awaiting_pairing": "Nicht verbunden",
+      "connected": "Verbunden",
+      "revoked": "Widerrufen"
+    }
+  },
+  "sitesNew": {
+    "title": "Website hinzufügen",
+    "name": "Name",
+    "namePlaceholder": "z. B. Bäckerei Weiß",
+    "url": "Adresse der Website",
+    "urlPlaceholder": "https://kunde.de",
+    "clientName": "Name des Kunden",
+    "clientEmail": "E-Mail-Adresse des Kunden (für Berichte)",
+    "reportLocale": "Berichtssprache für diesen Kunden",
+    "submit": "Website hinzufügen",
+    "errorUrl": "Gib eine gültige Webadresse ein, zum Beispiel https://kunde.de.",
+    "errorEmail": "Gib eine gültige E-Mail-Adresse ein oder lass das Feld leer.",
+    "errorName": "Gib der Website einen Namen.",
+    "errorDuplicate": "Diese Website ist bereits in deiner Agentur.",
+    "errorLimit": "Dein Tarif ({plan}) erlaubt höchstens {limit} Websites. Führe ein Upgrade durch, um weitere Websites zu verbinden.",
+    "errorInactive": "Deine Testphase oder dein Abo ist abgelaufen. Neue Websites kannst du wieder hinzufügen, sobald dein Abo aktiv ist.",
+    "errorForbidden": "Nur Inhaber und Admins können Websites hinzufügen."
+  },
+  "siteDetail": {
+    "back": "Alle Websites",
+    "connectTitle": "Website verbinden",
+    "connectIntro": "Verbinde die Website mit einem Einmalcode. Der Code ist 30 Minuten gültig und funktioniert nur einmal.",
+    "step1": "Lade den Verploy Connector herunter und installiere ihn auf der Website: Plugins → Neues Plugin hinzufügen → Plugin hochladen.",
+    "step2": "Gehe in WordPress zu Einstellungen → Verploy.",
+    "step3": "Füge den Verbindungscode ein und klicke auf Verbinden.",
+    "download": "Verploy Connector herunterladen",
+    "generate": "Verbindungscode erstellen",
+    "regenerate": "Neuen Code erstellen",
+    "codeLabel": "Verbindungscode",
+    "codeExpires": "Gültig bis {time}.",
+    "waiting": "Warte auf das Plugin… Diese Seite aktualisiert sich automatisch, sobald die Website verbunden ist.",
+    "repairTitle": "Neu verbinden",
+    "repairBody": "Nötig nach einer Neuinstallation des Plugins oder wenn du den Schlüssel dieser Website ersetzen möchtest. Die aktuelle Verbindung funktioniert, bis der neue Code verwendet wird.",
+    "connectedSince": "Verbunden seit {date}",
+    "lastHeartbeat": "Letzter Heartbeat",
+    "wordpress": "WordPress",
+    "php": "PHP",
+    "connector": "Connector",
+    "memoryLimit": "Speicherlimit",
+    "client": "Kunde",
+    "componentsTitle": "Plugins und Themes",
+    "updatesAvailable": "{count, plural, one {# Update verfügbar} other {# Updates verfügbar}}",
+    "upToDate": "Aktuell",
+    "updateTo": "Update auf {version}",
+    "inactive": "inaktiv",
+    "componentsEmpty": "Noch keine Daten. Sie erscheinen nach dem ersten Heartbeat.",
+    "type": {
+      "plugin": "Plugin",
+      "theme": "Theme",
+      "core": "WordPress-Core"
+    },
+    "dangerTitle": "Website löschen",
+    "dangerBody": "Entfernt die Website und alle zugehörigen Daten aus Verploy. Das Plugin auf der Website sendet danach keine Daten mehr.",
+    "deleteConfirm": "Gib zur Bestätigung den Namen der Website ({name}) ein.",
+    "deleteButton": "Website endgültig löschen",
+    "unlimited": "Unbegrenzt"
+  },
+  "settings": {
+    "title": "Agentur-Einstellungen",
+    "name": "Name der Agentur",
+    "locale": "Sprache des Dashboards",
+    "brandColor": "Markenfarbe (für Berichte)",
+    "brandColorHint": "Hex-Code, zum Beispiel #22D98A.",
+    "errorColor": "Verwende einen Hex-Code wie #22D98A.",
+    "planTitle": "Abonnement",
+    "planLine": "{plan} · höchstens {limit} Websites",
+    "planTrial": "Testphase bis {date}",
+    "planComped": "Kostenloses Konto",
+    "planActive": "Aktiv",
+    "usage": "{used} von {limit} Websites genutzt"
+  },
+  "team": {
+    "title": "Team",
+    "members": "Mitglieder",
+    "you": "(du)",
+    "role": {
+      "owner": "Inhaber",
+      "admin": "Admin",
+      "member": "Mitglied"
+    },
+    "roleHelp": "Inhaber verwalten alles, auch Team und Abonnement. Admins verwalten Websites. Mitglieder können alles einsehen.",
+    "inviteTitle": "Teammitglied einladen",
+    "inviteEmail": "E-Mail-Adresse",
+    "inviteRole": "Rolle",
+    "inviteSubmit": "Einladung erstellen",
+    "inviteLinkLabel": "Einladungslink für {email}",
+    "inviteLinkHelp": "Teile diesen Link. Er ist 7 Tage gültig und funktioniert nur für diese E-Mail-Adresse.",
+    "inviteEmailed": "Einladung an {email} gesendet.",
+    "pending": "Offene Einladungen",
+    "expires": "läuft ab {date}",
+    "revoke": "Widerrufen",
+    "makeRole": "Zu {role} machen",
+    "remove": "Entfernen",
+    "leave": "Agentur verlassen",
+    "errorLastOwner": "Eine Agentur braucht mindestens einen Inhaber.",
+    "errorAlreadyMember": "Diese Person ist bereits Mitglied deiner Agentur.",
+    "errorEmail": "Gib eine gültige E-Mail-Adresse ein."
+  },
+  "email": {
+    "inviteSubject": "Einladung zu {agency} auf Verploy",
+    "inviteBody": "{inviter} lädt dich ein, {agency} auf Verploy als {role} beizutreten.",
+    "inviteCta": "Einladung ansehen",
+    "inviteFooter": "Dieser Link ist 7 Tage gültig. Hast du diese E-Mail nicht erwartet? Dann kannst du sie ignorieren."
+  }
+}

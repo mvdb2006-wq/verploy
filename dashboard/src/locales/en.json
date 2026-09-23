@@ -1,0 +1,222 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "copy": "Copy",
+    "copied": "Copied",
+    "optional": "optional",
+    "never": "never",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorForbidden": "Your role in this agency doesn't allow this.",
+    "locales": {
+      "nl": "Nederlands",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "sites": "Sites",
+    "settings": "Settings",
+    "team": "Team",
+    "signOut": "Sign out",
+    "agency": "Agency",
+    "mainNav": "Main menu"
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back to Verploy.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgot": "Forgot your password?",
+      "noAccount": "No account yet?",
+      "signupLink": "Create an account",
+      "errorInvalid": "Email address or password is incorrect.",
+      "errorUnconfirmed": "Please confirm your email address first using the link in your inbox."
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "Start your 14-day trial. No credit card required.",
+      "passwordHint": "At least 10 characters.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "checkEmailTitle": "Check your inbox",
+      "checkEmailBody": "We sent a confirmation link to {email}. Click it to continue.",
+      "errorClosed": "Sign-ups are temporarily closed.",
+      "errorExists": "An account with this email address already exists. Sign in or reset your password.",
+      "errorWeak": "Choose a password of at least 10 characters."
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "body": "Enter your email address and we'll send you a link to set a new password.",
+      "submit": "Send link",
+      "sent": "If an account exists for {email}, the link is now in your inbox.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "newPassword": "New password",
+      "submit": "Save password",
+      "done": "Your password has been changed."
+    },
+    "linkInvalid": "This link is invalid or has expired. Please request a new one."
+  },
+  "onboarding": {
+    "title": "Create your agency",
+    "body": "Your agency is where your sites, team and reports come together.",
+    "name": "Agency name",
+    "namePlaceholder": "E.g. North Studio Web Design",
+    "submit": "Create agency",
+    "errorAlready": "You already belong to an agency.",
+    "errorName": "Give your agency a name of at least 2 characters."
+  },
+  "invite": {
+    "title": "Invitation",
+    "body": "You've been invited to join {agency} as {role}.",
+    "accept": "Accept invitation",
+    "signedInAs": "You're signed in as {email}.",
+    "loginFirst": "Sign in or create an account with {email} to accept the invitation.",
+    "errorInvalid": "This invitation is invalid, has expired or has already been used.",
+    "errorMismatch": "This invitation is for a different email address. Sign out and sign in with the invited address.",
+    "errorAlready": "You already belong to an agency. An account can belong to one agency."
+  },
+  "dashboard": {
+    "title": "Sites",
+    "summary": "{count, plural, one {# site} other {# sites}} · {online} online",
+    "addSite": "Add site",
+    "emptyTitle": "No sites yet",
+    "emptyBody": "Connect your first WordPress site. It takes about two minutes.",
+    "colSite": "Site",
+    "colStatus": "Status",
+    "colWordpress": "WordPress",
+    "colPhp": "PHP",
+    "colLastSeen": "Last contact",
+    "trialBanner": "Trial: {days, plural, one {# day left} other {# days left}}.",
+    "readOnlyBanner": "Your trial or subscription has ended. Monitoring continues, but new sites and updates are blocked."
+  },
+  "site": {
+    "status": {
+      "pending": "Awaiting connection",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "connection": {
+      "awaiting_pairing": "Not connected",
+      "connected": "Connected",
+      "revoked": "Revoked"
+    }
+  },
+  "sitesNew": {
+    "title": "Add site",
+    "name": "Name",
+    "namePlaceholder": "E.g. White's Bakery",
+    "url": "Site address",
+    "urlPlaceholder": "https://client.com",
+    "clientName": "Client name",
+    "clientEmail": "Client email address (for reports)",
+    "reportLocale": "Report language for this client",
+    "submit": "Add site",
+    "errorUrl": "Enter a valid web address, for example https://client.com.",
+    "errorEmail": "Enter a valid email address or leave the field empty.",
+    "errorName": "Give the site a name.",
+    "errorDuplicate": "This site is already in your agency.",
+    "errorLimit": "Your plan ({plan}) allows up to {limit} sites. Upgrade to connect more sites.",
+    "errorInactive": "Your trial or subscription has ended. You can add new sites again once your subscription is active.",
+    "errorForbidden": "Only owners and admins can add sites."
+  },
+  "siteDetail": {
+    "back": "All sites",
+    "connectTitle": "Connect site",
+    "connectIntro": "Connect the site with a one-time code. The code is valid for 30 minutes and works only once.",
+    "step1": "Download the Verploy Connector and install it on the site: Plugins → Add New Plugin → Upload Plugin.",
+    "step2": "In WordPress, go to Settings → Verploy.",
+    "step3": "Paste the connection code and click Connect.",
+    "download": "Download Verploy Connector",
+    "generate": "Create connection code",
+    "regenerate": "Create new code",
+    "codeLabel": "Connection code",
+    "codeExpires": "Valid until {time}.",
+    "waiting": "Waiting for the plugin… This page refreshes automatically once the site is connected.",
+    "repairTitle": "Reconnect",
+    "repairBody": "Needed after reinstalling the plugin, or if you want to replace this site's key. The current connection keeps working until the new code is used.",
+    "connectedSince": "Connected since {date}",
+    "lastHeartbeat": "Last heartbeat",
+    "wordpress": "WordPress",
+    "php": "PHP",
+    "connector": "Connector",
+    "memoryLimit": "Memory limit",
+    "client": "Client",
+    "componentsTitle": "Plugins and themes",
+    "updatesAvailable": "{count, plural, one {# update available} other {# updates available}}",
+    "upToDate": "Up to date",
+    "updateTo": "Update to {version}",
+    "inactive": "inactive",
+    "componentsEmpty": "No data yet. It appears after the first heartbeat.",
+    "type": {
+      "plugin": "Plugin",
+      "theme": "Theme",
+      "core": "WordPress core"
+    },
+    "dangerTitle": "Delete site",
+    "dangerBody": "Removes the site and all its data from Verploy. The plugin on the site will stop reporting.",
+    "deleteConfirm": "Type the site name ({name}) to confirm.",
+    "deleteButton": "Permanently delete site",
+    "unlimited": "Unlimited"
+  },
+  "settings": {
+    "title": "Agency settings",
+    "name": "Agency name",
+    "locale": "Dashboard language",
+    "brandColor": "Brand colour (for reports)",
+    "brandColorHint": "Hex code, for example #22D98A.",
+    "errorColor": "Use a hex code such as #22D98A.",
+    "planTitle": "Subscription",
+    "planLine": "{plan} · up to {limit} sites",
+    "planTrial": "Trial until {date}",
+    "planComped": "Complimentary account",
+    "planActive": "Active",
+    "usage": "{used} of {limit} sites in use"
+  },
+  "team": {
+    "title": "Team",
+    "members": "Members",
+    "you": "(you)",
+    "role": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "roleHelp": "Owners manage everything, including team and subscription. Admins manage sites. Members can view everything.",
+    "inviteTitle": "Invite a team member",
+    "inviteEmail": "Email address",
+    "inviteRole": "Role",
+    "inviteSubmit": "Create invitation",
+    "inviteLinkLabel": "Invitation link for {email}",
+    "inviteLinkHelp": "Share this link. It's valid for 7 days and only works for this email address.",
+    "inviteEmailed": "Invitation sent to {email}.",
+    "pending": "Pending invitations",
+    "expires": "expires {date}",
+    "revoke": "Revoke",
+    "makeRole": "Make {role}",
+    "remove": "Remove",
+    "leave": "Leave agency",
+    "errorLastOwner": "An agency must have at least one owner.",
+    "errorAlreadyMember": "This person is already a member of your agency.",
+    "errorEmail": "Enter a valid email address."
+  },
+  "email": {
+    "inviteSubject": "Invitation to {agency} on Verploy",
+    "inviteBody": "{inviter} invites you to join {agency} on Verploy as {role}.",
+    "inviteCta": "View invitation",
+    "inviteFooter": "This link is valid for 7 days. Weren't expecting this email? You can ignore it."
+  }
+}

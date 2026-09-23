@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server'
+import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 
-const PLUGIN_VERSION  = '1.3.1'
-const PLUGIN_DOWNLOAD = `https://app.verploy.com/api/v1/plugin/download`
-const PLUGIN_DETAILS  = 'https://verploy.com/docs/connector'
+export const dynamic = 'force-dynamic'
 
-// Cache for 1 hour on Vercel Edge
-export const revalidate = 3600
-
+/** Update-informatie voor de zelf-updater in de direct-build van de plugin. */
 export async function GET() {
   return NextResponse.json({
-    version:      PLUGIN_VERSION,
-    download_url: PLUGIN_DOWNLOAD,
-    details_url:  PLUGIN_DETAILS,
-    tested_up_to: '6.7',
-    requires:     '5.8',
-    requires_php: '7.4',
-    slug:         'verploy-connector',
-    name:         'Verploy Connector',
-    author:       'Verploy',
-  })
+    version: CONNECTOR_RELEASE.version,
+    download_url: 'https://app.verploy.com/api/v1/plugin/download',
+    details_url: 'https://app.verploy.com',
+    tested_up_to: CONNECTOR_RELEASE.testedWp,
+    requires: CONNECTOR_RELEASE.requiresWp,
+    requires_php: CONNECTOR_RELEASE.requiresPhp,
+    slug: 'verploy-connector',
+    name: 'Verploy Connector',
+    author: 'Verploy',
+  }, { headers: { 'Cache-Control': 'no-store' } })
 }

@@ -1,0 +1,222 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "saving": "Bezig met opslaan…",
+    "saved": "Opgeslagen.",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "optional": "optioneel",
+    "never": "nog nooit",
+    "errorGeneric": "Er ging iets mis. Probeer het opnieuw.",
+    "errorForbidden": "Je hebt hiervoor niet de juiste rol in dit bureau.",
+    "locales": {
+      "nl": "Nederlands",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "sites": "Sites",
+    "settings": "Instellingen",
+    "team": "Team",
+    "signOut": "Uitloggen",
+    "agency": "Bureau",
+    "mainNav": "Hoofdmenu"
+  },
+  "auth": {
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "login": {
+      "title": "Inloggen",
+      "subtitle": "Welkom terug bij Verploy.",
+      "submit": "Inloggen",
+      "submitting": "Bezig met inloggen…",
+      "forgot": "Wachtwoord vergeten?",
+      "noAccount": "Nog geen account?",
+      "signupLink": "Account aanmaken",
+      "errorInvalid": "E-mailadres of wachtwoord klopt niet.",
+      "errorUnconfirmed": "Bevestig eerst je e-mailadres via de link in je inbox."
+    },
+    "signup": {
+      "title": "Account aanmaken",
+      "subtitle": "Start je proefperiode van 14 dagen. Geen creditcard nodig.",
+      "passwordHint": "Minimaal 10 tekens.",
+      "submit": "Account aanmaken",
+      "submitting": "Account wordt aangemaakt…",
+      "haveAccount": "Al een account?",
+      "loginLink": "Inloggen",
+      "checkEmailTitle": "Check je inbox",
+      "checkEmailBody": "We hebben een bevestigingslink gestuurd naar {email}. Klik erop om verder te gaan.",
+      "errorClosed": "Registratie is tijdelijk gesloten.",
+      "errorExists": "Er bestaat al een account met dit e-mailadres. Log in of stel een nieuw wachtwoord in.",
+      "errorWeak": "Kies een wachtwoord van minimaal 10 tekens."
+    },
+    "forgot": {
+      "title": "Wachtwoord vergeten",
+      "body": "Vul je e-mailadres in. We sturen je een link om een nieuw wachtwoord in te stellen.",
+      "submit": "Stuur link",
+      "sent": "Als er een account bestaat voor {email}, staat de link nu in je inbox.",
+      "back": "Terug naar inloggen"
+    },
+    "reset": {
+      "title": "Nieuw wachtwoord instellen",
+      "newPassword": "Nieuw wachtwoord",
+      "submit": "Wachtwoord opslaan",
+      "done": "Je wachtwoord is gewijzigd."
+    },
+    "linkInvalid": "Deze link is ongeldig of verlopen. Vraag een nieuwe aan."
+  },
+  "onboarding": {
+    "title": "Maak je bureau aan",
+    "body": "Je bureau is de plek waar je sites, team en rapporten samenkomen.",
+    "name": "Naam van je bureau",
+    "namePlaceholder": "Bijv. Studio Noord Webdesign",
+    "submit": "Bureau aanmaken",
+    "errorAlready": "Je hoort al bij een bureau.",
+    "errorName": "Geef je bureau een naam van minimaal 2 tekens."
+  },
+  "invite": {
+    "title": "Uitnodiging",
+    "body": "Je bent uitgenodigd voor {agency}, met de rol {role}.",
+    "accept": "Uitnodiging accepteren",
+    "signedInAs": "Je bent ingelogd als {email}.",
+    "loginFirst": "Log in of maak een account aan met {email} om de uitnodiging te accepteren.",
+    "errorInvalid": "Deze uitnodiging is ongeldig, verlopen of al gebruikt.",
+    "errorMismatch": "Deze uitnodiging is voor een ander e-mailadres. Log uit en log in met het uitgenodigde adres.",
+    "errorAlready": "Je hoort al bij een bureau. Een account kan bij één bureau horen."
+  },
+  "dashboard": {
+    "title": "Sites",
+    "summary": "{count, plural, one {# site} other {# sites}} · {online} online",
+    "addSite": "Site toevoegen",
+    "emptyTitle": "Nog geen sites",
+    "emptyBody": "Koppel je eerste WordPress-site. Dat duurt ongeveer twee minuten.",
+    "colSite": "Site",
+    "colStatus": "Status",
+    "colWordpress": "WordPress",
+    "colPhp": "PHP",
+    "colLastSeen": "Laatste contact",
+    "trialBanner": "Proefperiode: {days, plural, one {nog # dag} other {nog # dagen}}.",
+    "readOnlyBanner": "Je proefperiode of abonnement is afgelopen. Monitoring loopt door, maar nieuwe sites en updates zijn geblokkeerd."
+  },
+  "site": {
+    "status": {
+      "pending": "Wacht op koppeling",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "connection": {
+      "awaiting_pairing": "Niet gekoppeld",
+      "connected": "Gekoppeld",
+      "revoked": "Ingetrokken"
+    }
+  },
+  "sitesNew": {
+    "title": "Site toevoegen",
+    "name": "Naam",
+    "namePlaceholder": "Bijv. Bakkerij De Wit",
+    "url": "Adres van de site",
+    "urlPlaceholder": "https://klant.nl",
+    "clientName": "Naam van de klant",
+    "clientEmail": "E-mailadres van de klant (voor rapporten)",
+    "reportLocale": "Taal van rapporten voor deze klant",
+    "submit": "Site toevoegen",
+    "errorUrl": "Vul een geldig webadres in, bijvoorbeeld https://klant.nl.",
+    "errorEmail": "Vul een geldig e-mailadres in of laat het veld leeg.",
+    "errorName": "Geef de site een naam.",
+    "errorDuplicate": "Deze site staat al in je bureau.",
+    "errorLimit": "Je abonnement ({plan}) staat maximaal {limit} sites toe. Upgrade om meer sites te koppelen.",
+    "errorInactive": "Je proefperiode of abonnement is afgelopen. Nieuwe sites toevoegen kan weer zodra je abonnement actief is.",
+    "errorForbidden": "Alleen eigenaren en beheerders kunnen sites toevoegen."
+  },
+  "siteDetail": {
+    "back": "Alle sites",
+    "connectTitle": "Site koppelen",
+    "connectIntro": "Koppel de site met een eenmalige code. De code is 30 minuten geldig en werkt maar één keer.",
+    "step1": "Download de Verploy Connector en installeer hem op de site: Plugins → Nieuwe plugin → Plugin uploaden.",
+    "step2": "Ga in WordPress naar Instellingen → Verploy.",
+    "step3": "Plak de koppelcode en klik op Koppelen.",
+    "download": "Verploy Connector downloaden",
+    "generate": "Koppelcode maken",
+    "regenerate": "Nieuwe code maken",
+    "codeLabel": "Koppelcode",
+    "codeExpires": "Geldig tot {time}.",
+    "waiting": "Wachten op de plugin… Deze pagina ververst vanzelf zodra de site gekoppeld is.",
+    "repairTitle": "Opnieuw koppelen",
+    "repairBody": "Nodig na het opnieuw installeren van de plugin, of als je de sleutel van deze site wilt vervangen. De huidige koppeling blijft werken tot de nieuwe code is gebruikt.",
+    "connectedSince": "Gekoppeld sinds {date}",
+    "lastHeartbeat": "Laatste heartbeat",
+    "wordpress": "WordPress",
+    "php": "PHP",
+    "connector": "Connector",
+    "memoryLimit": "Geheugenlimiet",
+    "client": "Klant",
+    "componentsTitle": "Plugins en thema's",
+    "updatesAvailable": "{count, plural, one {# update beschikbaar} other {# updates beschikbaar}}",
+    "upToDate": "Actueel",
+    "updateTo": "Update naar {version}",
+    "inactive": "inactief",
+    "componentsEmpty": "Nog geen gegevens. Die verschijnen na de eerste heartbeat.",
+    "type": {
+      "plugin": "Plugin",
+      "theme": "Thema",
+      "core": "WordPress-core"
+    },
+    "dangerTitle": "Site verwijderen",
+    "dangerBody": "Verwijdert de site en alle gegevens ervan uit Verploy. De plugin op de site stopt daarna met rapporteren.",
+    "deleteConfirm": "Typ de naam van de site ({name}) om te bevestigen.",
+    "deleteButton": "Site definitief verwijderen",
+    "unlimited": "Onbeperkt"
+  },
+  "settings": {
+    "title": "Bureau-instellingen",
+    "name": "Naam van het bureau",
+    "locale": "Taal van het dashboard",
+    "brandColor": "Merkkleur (voor rapporten)",
+    "brandColorHint": "Hexcode, bijvoorbeeld #22D98A.",
+    "errorColor": "Gebruik een hexcode zoals #22D98A.",
+    "planTitle": "Abonnement",
+    "planLine": "{plan} · maximaal {limit} sites",
+    "planTrial": "Proefperiode tot {date}",
+    "planComped": "Gratis account",
+    "planActive": "Actief",
+    "usage": "{used} van {limit} sites in gebruik"
+  },
+  "team": {
+    "title": "Team",
+    "members": "Leden",
+    "you": "(jij)",
+    "role": {
+      "owner": "Eigenaar",
+      "admin": "Beheerder",
+      "member": "Lid"
+    },
+    "roleHelp": "Eigenaren beheren alles, inclusief team en abonnement. Beheerders beheren sites. Leden kunnen alles bekijken.",
+    "inviteTitle": "Teamlid uitnodigen",
+    "inviteEmail": "E-mailadres",
+    "inviteRole": "Rol",
+    "inviteSubmit": "Uitnodiging maken",
+    "inviteLinkLabel": "Uitnodigingslink voor {email}",
+    "inviteLinkHelp": "Deel deze link. Hij is 7 dagen geldig en werkt alleen voor dit e-mailadres.",
+    "inviteEmailed": "Uitnodiging verstuurd naar {email}.",
+    "pending": "Openstaande uitnodigingen",
+    "expires": "verloopt {date}",
+    "revoke": "Intrekken",
+    "makeRole": "Maak {role}",
+    "remove": "Verwijderen",
+    "leave": "Bureau verlaten",
+    "errorLastOwner": "Een bureau moet minstens één eigenaar hebben.",
+    "errorAlreadyMember": "Deze persoon is al lid van je bureau.",
+    "errorEmail": "Vul een geldig e-mailadres in."
+  },
+  "email": {
+    "inviteSubject": "Uitnodiging voor {agency} op Verploy",
+    "inviteBody": "{inviter} nodigt je uit om als {role} lid te worden van {agency} op Verploy.",
+    "inviteCta": "Uitnodiging bekijken",
+    "inviteFooter": "Deze link is 7 dagen geldig. Verwachtte je deze e-mail niet? Dan kun je hem negeren."
+  }
+}

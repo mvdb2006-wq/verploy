@@ -1,32 +1,20 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-})
+import { getLocale } from '@/lib/i18n/server'
+import { I18nProvider } from '@/lib/i18n/client'
 
 export const metadata: Metadata = {
-  title: { default: 'Verploy', template: '%s — Verploy' },
-  description: 'WordPress agency site intelligence platform. Verify before you deploy.',
-  icons: {
-    icon: '/favicon.svg',
-  },
+  title: { default: 'Verploy', template: '%s · Verploy' },
+  description: 'Verify before you deploy — veilige WordPress-updates voor webbureaus.',
+  robots: { index: false, follow: false },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
   return (
-    <html lang="nl" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans bg-bg text-text antialiased">
-        {children}
+    <html lang={locale}>
+      <body className="min-h-dvh">
+        <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>
     </html>
   )

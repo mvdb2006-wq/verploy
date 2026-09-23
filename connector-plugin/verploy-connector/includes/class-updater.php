@@ -13,20 +13,20 @@ class Verploy_Updater {
 	const CACHE_KEY   = 'verploy_update_info';
 	const CACHE_HOURS = 12;
 
-	public static function init(): void {
+	public static function init() {
 		add_filter( 'pre_set_site_transient_update_plugins', [ __CLASS__, 'check_for_update' ] );
 		add_filter( 'plugins_api',                           [ __CLASS__, 'plugin_info' ], 10, 3 );
 	}
 
-	private static function fetch_info(): ?array {
+	private static function fetch_info() {
 		$cached = get_transient( self::CACHE_KEY );
 		if ( $cached !== false ) return $cached;
 
-		$response = wp_remote_get( self::UPDATE_URL, [ 'timeout' => 10 ] );
+		$response = wp_remote_get( self::UPDATE_URL, array( 'timeout' => 10 ) );
 		if ( is_wp_error( $response ) ) return null;
 
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( ! isset( $data['version'] ) ) return null;
+		if ( ! isset( $data['version'], $data['download_url'] ) || ! preg_match( '/^[0-9.]+$/', (string) $data['version'] ) ) return null;
 
 		set_transient( self::CACHE_KEY, $data, self::CACHE_HOURS * HOUR_IN_SECONDS );
 		return $data;

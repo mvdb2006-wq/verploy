@@ -12,8 +12,8 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | # | Fase | Status | Klaar als |
 |---|------|--------|-----------|
 | 1 | Inventarisatie + architectuur | ✅ klaar (23-09-2026) | PLAN.md bevat datamodel, services, jobflow en fasering |
-| 2 | Fundament: auth, bureaus, teamleden, site koppelen | ⏳ volgende | Nieuw bureau registreert, koppelt site, plugin stuurt aantoonbaar data. RLS-tests groen |
-| 3 | Monitoring + dashboard | — | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
+| 2 | Fundament: auth, bureaus, teamleden, site koppelen | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Nieuw bureau registreert, koppelt site, plugin stuurt aantoonbaar data. RLS-tests groen |
+| 3 | Monitoring + dashboard | ⏳ volgende | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
 | 4 | Veilige updates (kernflow 1–7) | — | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
 | 5 | AI-diagnose | — | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
@@ -253,3 +253,26 @@ Snapshots + componenten verwerken, SSL/domein-check-cron, drempelregels + alerts
 Plugin-endpoints (lock, staging, update, snapshot, rollback, onderhoudsmodus, cleanup), worker-state-machine, Playwright-checks + pixel-diff, run-tijdlijn in de UI, drie E2E-scenario's, testsite + stappenlijst voor Martijn → **controlemoment**.
 
 **Fase 5–8:** zie de tabel bovenaan.
+
+---
+
+## 10. Resultaat fase 2 (24-09-2026) — branch `v2`
+
+**Gebouwd:** v2-schema (`supabase/migrations/20260924000000_v2_foundation.sql`, werkt op lege DB én op de v1-productiestaat), Next 16-dashboard (registreren, inloggen, wachtwoord vergeten, onboarding, sites, site-detail met koppelen, team + uitnodigingen, bureau-instellingen; 5 talen), plugin-API (`/api/v2/connect`, `/api/v2/heartbeat`, `/api/v2/ping`), Verploy Connector 2.0.0 (koppelcode, HMAC in beide richtingen, schema-2-heartbeat, PHP 7.4-compatibel), lokale Supabase-stack (`supabase/local/`), CI en migratie-workflow (`.github/workflows/`).
+
+**Bewijs (lokaal gedraaid):**
+
+| Suite | Resultaat | Wat het bewijst |
+|---|---|---|
+| `npm run test:db` | 78/78 | RLS per tabel en bewerking: bureau A kan niet bij B (owner/admin/member), anon nergens, secrets voor niemand leesbaar, kolomrechten, rollen, tier-limieten ook voor service_role, koppelcode eenmalig, heartbeat-ingest, typen actueel. Mutatietest: ingebouwd lek → 5 tests falen |
+| `npm run test:unit` | 66/66 | HMAC (vaste openssl-vector), replay/tijdvenster/manipulatie, AES-GCM, URL-normalisatie, heartbeat-schema, i18n volledig in 5 talen incl. meervoud |
+| `connector-plugin/tests/run-tests.php` | 19/19 | In echte WordPress 7.1.2: zelfde HMAC-vector als TypeScript, inkomende verificatie, collector, REST 401/200 |
+| PHPCompatibility 7.4- | 0 fouten | 2.0 draait op PHP 7.4 (1.x niet: union types) |
+| Playwright E2E | 6/6, 5× achter elkaar | Registreren → bureau → site → koppelcode → koppelen in wp-admin → data in dashboard; teamlid via uitnodiging; ander bureau krijgt 404; vervalste/ongesigneerde heartbeats 401; plugin 1.x krijgt 410 |
+| `next build`, `tsc`, `eslint` | groen | |
+
+**Uitrol naar productie (zodra BLOCKERS #2 opgelost is):** migratie toepassen → `v2` mergen naar `main` (Vercel deployt) → registratie weer aanzetten + redirect-URL `https://app.verploy.com/auth/callback` in Supabase Auth → 3 sites opnieuw koppelen (BLOCKERS #1).
+
+## 11. Lokaal ontwikkelen en testen
+
+Zie `README.md`.

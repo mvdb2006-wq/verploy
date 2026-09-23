@@ -1,41 +1,23 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import 'server-only'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { env } from '@/lib/env'
+import type { Database } from '@/lib/database.types'
 
-export function createClient() {
-  const cookieStore = cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet: { name: string; value: string; options: CookieOptions }[]) => {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Can be called from a Server Component — safe to ignore
-          }
-        },
+/** Supabase-client namens de ingelogde gebruiker (RLS geldt). */
+export async function createClient() {
+  const cookieStore = await cookies()
+  const e = env()
+  return createServerClient<Database>(e.NEXT_PUBLIC_SUPABASE_URL, e.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: toSet => {
+        try {
+          for (const { name, value, options } of toSet) cookieStore.set(name, value, options)
+        } catch {
+          // Vanuit een Server Component kunnen cookies niet gezet worden; proxy.ts ververst de sessie.
+        }
       },
-    }
-  )
-}
-
-// Service role client — server-side only, bypasses RLS entirely
-// Uses @supabase/supabase-js directly (not @supabase/ssr) so the service_role
-// key is sent as the API key header, which Supabase recognises as admin access.
-export function createServiceClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession:   false,
-      },
-    }
-  )
+    },
+  })
 }

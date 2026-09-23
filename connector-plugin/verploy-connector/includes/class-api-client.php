@@ -1,72 +1,84 @@
 <?php
 /**
- * Handles all outbound HTTP communication with the Verploy cloud API.
+ * Uitgaande HTTP-verzoeken naar Verploy. Alles behalve /connect is HMAC-ondertekend.
+ *
+ * @package VerployConnector
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-class Verploy_API_Client {
+class Verploy_Api_Client {
 
-	private string $api_key;
-	private string $base_url;
-
-	public function __construct( string $api_key, string $base_url = VERPLOY_API_BASE ) {
-		$this->api_key  = $api_key;
-		$this->base_url = rtrim( $base_url, '/' );
+	/**
+	 * @return array|WP_Error Gedecodeerde JSON of fout.
+	 */
+	public static function post_unsigned( $endpoint, array $body ) {
+		return self::request( 'POST', $endpoint, wp_json_encode( $body ), array() );
 	}
 
-	// ── Public methods ────────────────────────────────────────────────────────
-
-	public function get( string $endpoint, array $params = [] ): array|WP_Error {
-		$url = $this->base_url . $endpoint;
-		if ( ! empty( $params ) ) {
-			$url = add_query_arg( $params, $url );
+	/**
+	 * @return array|WP_Error
+	 */
+	public static function signed( $method, $endpoint, $body = null ) {
+		if ( ! Verploy_Connection::is_connected() ) {
+			return new WP_Error( 'verploy_not_connected', __( 'Deze site is nog niet gekoppeld aan Verploy.', 'verploy-connector' ) );
 		}
-		return $this->request( 'GET', $url );
+		$raw     = null === $body ? '' : wp_json_encode( $body );
+		$path    = (string) wp_parse_url( VERPLOY_API_BASE . $endpoint, PHP_URL_PATH );
+		$headers = Verploy_Signer::headers( Verploy_Connection::site_id(), Verploy_Connection::secret(), $method, $path, $raw );
+		return self::request( $method, $endpoint, $raw, $headers );
 	}
 
-	public function post( string $endpoint, array $body = [] ): array|WP_Error {
-		return $this->request( 'POST', $this->base_url . $endpoint, $body );
-	}
-
-	public function put( string $endpoint, array $body = [] ): array|WP_Error {
-		return $this->request( 'PUT', $this->base_url . $endpoint, $body );
-	}
-
-	// ── Core request ─────────────────────────────────────────────────────────
-
-	private function request( string $method, string $url, array $body = [] ): array|WP_Error {
-		$args = [
-			'method'  => $method,
-			'timeout' => 20,
-			'headers' => [
-				'Authorization' => 'Bearer ' . $this->api_key,
-				'Content-Type'  => 'application/json',
-				'X-Site-URL'    => get_site_url(),
-				'X-Plugin-Ver'  => VERPLOY_VERSION,
-				'Accept'        => 'application/json',
-			],
-		];
-
-		if ( ! empty( $body ) ) {
-			$args['body'] = wp_json_encode( $body );
+	/**
+	 * @return array|WP_Error
+	 */
+	private static function request( $method, $endpoint, $raw, array $headers ) {
+		$args = array(
+			'method'      => $method,
+			'timeout'     => 20,
+			'redirection' => 0,
+			'headers'     => array_merge(
+				array(
+					'Content-Type' => 'application/json',
+					'Accept'       => 'application/json',
+					'User-Agent'   => 'VerployConnector/' . VERPLOY_VERSION . '; ' . home_url(),
+				),
+				$headers
+			),
+		);
+		if ( '' !== $raw && 'GET' !== $method ) {
+			$args['body'] = $raw;
 		}
-
-		$response = wp_remote_request( $url, $args );
-
+		$response = wp_remote_request( VERPLOY_API_BASE . $endpoint, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-
-		$code = wp_remote_retrieve_response_code( $response );
-		$raw  = wp_remote_retrieve_body( $response );
-		$data = json_decode( $raw, true );
-
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$data = is_array( $data ) ? $data : array();
 		if ( $code >= 400 ) {
-			$message = $data['message'] ?? "API error {$code}";
-			return new WP_Error( 'verploy_api_error', $message, [ 'status' => $code ] );
+			return new WP_Error( 'verploy_http_' . $code, self::error_message( $code, $data ), array( 'status' => $code, 'body' => $data ) );
 		}
+		return $data;
+	}
 
-		return $data ?? [];
+	private static function error_message( $code, array $data ) {
+		$error = isset( $data['error'] ) ? (string) $data['error'] : '';
+		switch ( $error ) {
+			case 'invalid_code':
+				return __( 'Deze koppelcode is ongeldig, verlopen of al gebruikt. Maak in Verploy een nieuwe code.', 'verploy-connector' );
+			case 'site_url_mismatch':
+				/* translators: %s: het adres dat in Verploy is ingesteld. */
+				return sprintf( __( 'Deze code hoort bij een ander site-adres (%s). Controleer het adres in Verploy.', 'verploy-connector' ), isset( $data['expected_url'] ) ? esc_url_raw( $data['expected_url'] ) : '?' );
+			case 'unauthorized':
+				return __( 'Verploy herkent deze site niet meer. Koppel de site opnieuw met een nieuwe code.', 'verploy-connector' );
+		}
+		if ( isset( $data['message'] ) ) {
+			return sanitize_text_field( (string) $data['message'] );
+		}
+		/* translators: %d: HTTP-statuscode. */
+		return sprintf( __( 'Verploy gaf een fout terug (HTTP %d).', 'verploy-connector' ), $code );
 	}
 }

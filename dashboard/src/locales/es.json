@@ -1,0 +1,222 @@
+{
+  "common": {
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Guardado.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "optional": "opcional",
+    "never": "nunca",
+    "errorGeneric": "Algo ha salido mal. Inténtalo de nuevo.",
+    "errorForbidden": "Tu rol en esta agencia no lo permite.",
+    "locales": {
+      "nl": "Nederlands",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "sites": "Sitios",
+    "settings": "Ajustes",
+    "team": "Equipo",
+    "signOut": "Cerrar sesión",
+    "agency": "Agencia",
+    "mainNav": "Menú principal"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Bienvenido de nuevo a Verploy.",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión…",
+      "forgot": "¿Has olvidado tu contraseña?",
+      "noAccount": "¿Aún no tienes cuenta?",
+      "signupLink": "Crear una cuenta",
+      "errorInvalid": "El correo electrónico o la contraseña no son correctos.",
+      "errorUnconfirmed": "Primero confirma tu correo electrónico con el enlace que te hemos enviado."
+    },
+    "signup": {
+      "title": "Crear una cuenta",
+      "subtitle": "Empieza tu prueba de 14 días. Sin tarjeta de crédito.",
+      "passwordHint": "Mínimo 10 caracteres.",
+      "submit": "Crear cuenta",
+      "submitting": "Creando la cuenta…",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "loginLink": "Iniciar sesión",
+      "checkEmailTitle": "Revisa tu bandeja de entrada",
+      "checkEmailBody": "Hemos enviado un enlace de confirmación a {email}. Haz clic en él para continuar.",
+      "errorClosed": "El registro está cerrado temporalmente.",
+      "errorExists": "Ya existe una cuenta con este correo electrónico. Inicia sesión o restablece tu contraseña.",
+      "errorWeak": "Elige una contraseña de al menos 10 caracteres."
+    },
+    "forgot": {
+      "title": "Contraseña olvidada",
+      "body": "Introduce tu correo electrónico y te enviaremos un enlace para crear una nueva contraseña.",
+      "submit": "Enviar enlace",
+      "sent": "Si existe una cuenta para {email}, el enlace ya está en tu bandeja de entrada.",
+      "back": "Volver a iniciar sesión"
+    },
+    "reset": {
+      "title": "Crear una nueva contraseña",
+      "newPassword": "Nueva contraseña",
+      "submit": "Guardar contraseña",
+      "done": "Tu contraseña se ha cambiado."
+    },
+    "linkInvalid": "Este enlace no es válido o ha caducado. Solicita uno nuevo."
+  },
+  "onboarding": {
+    "title": "Crea tu agencia",
+    "body": "Tu agencia es donde se reúnen tus sitios, tu equipo y tus informes.",
+    "name": "Nombre de tu agencia",
+    "namePlaceholder": "P. ej. Estudio Norte Web",
+    "submit": "Crear agencia",
+    "errorAlready": "Ya perteneces a una agencia.",
+    "errorName": "Dale a tu agencia un nombre de al menos 2 caracteres."
+  },
+  "invite": {
+    "title": "Invitación",
+    "body": "Te han invitado a unirte a {agency} como {role}.",
+    "accept": "Aceptar invitación",
+    "signedInAs": "Has iniciado sesión como {email}.",
+    "loginFirst": "Inicia sesión o crea una cuenta con {email} para aceptar la invitación.",
+    "errorInvalid": "Esta invitación no es válida, ha caducado o ya se ha utilizado.",
+    "errorMismatch": "Esta invitación es para otro correo electrónico. Cierra sesión e inicia sesión con la dirección invitada.",
+    "errorAlready": "Ya perteneces a una agencia. Una cuenta solo puede pertenecer a una agencia."
+  },
+  "dashboard": {
+    "title": "Sitios",
+    "summary": "{count, plural, one {# sitio} other {# sitios}} · {online} en línea",
+    "addSite": "Añadir sitio",
+    "emptyTitle": "Aún no hay sitios",
+    "emptyBody": "Conecta tu primer sitio WordPress. Se tarda unos dos minutos.",
+    "colSite": "Sitio",
+    "colStatus": "Estado",
+    "colWordpress": "WordPress",
+    "colPhp": "PHP",
+    "colLastSeen": "Último contacto",
+    "trialBanner": "Prueba: {days, plural, one {queda # día} other {quedan # días}}.",
+    "readOnlyBanner": "Tu prueba o suscripción ha terminado. La monitorización continúa, pero los sitios nuevos y las actualizaciones están bloqueados."
+  },
+  "site": {
+    "status": {
+      "pending": "Pendiente de conexión",
+      "online": "En línea",
+      "offline": "Sin conexión"
+    },
+    "connection": {
+      "awaiting_pairing": "No conectado",
+      "connected": "Conectado",
+      "revoked": "Revocado"
+    }
+  },
+  "sitesNew": {
+    "title": "Añadir sitio",
+    "name": "Nombre",
+    "namePlaceholder": "P. ej. Panadería Blanco",
+    "url": "Dirección del sitio",
+    "urlPlaceholder": "https://cliente.es",
+    "clientName": "Nombre del cliente",
+    "clientEmail": "Correo electrónico del cliente (para informes)",
+    "reportLocale": "Idioma de los informes para este cliente",
+    "submit": "Añadir sitio",
+    "errorUrl": "Introduce una dirección web válida, por ejemplo https://cliente.es.",
+    "errorEmail": "Introduce un correo electrónico válido o deja el campo vacío.",
+    "errorName": "Dale un nombre al sitio.",
+    "errorDuplicate": "Este sitio ya está en tu agencia.",
+    "errorLimit": "Tu plan ({plan}) permite como máximo {limit} sitios. Mejora tu plan para conectar más sitios.",
+    "errorInactive": "Tu prueba o suscripción ha terminado. Podrás añadir sitios de nuevo cuando tu suscripción esté activa.",
+    "errorForbidden": "Solo los propietarios y administradores pueden añadir sitios."
+  },
+  "siteDetail": {
+    "back": "Todos los sitios",
+    "connectTitle": "Conectar sitio",
+    "connectIntro": "Conecta el sitio con un código de un solo uso. El código es válido durante 30 minutos y solo funciona una vez.",
+    "step1": "Descarga Verploy Connector e instálalo en el sitio: Plugins → Añadir nuevo plugin → Subir plugin.",
+    "step2": "En WordPress, ve a Ajustes → Verploy.",
+    "step3": "Pega el código de conexión y haz clic en Conectar.",
+    "download": "Descargar Verploy Connector",
+    "generate": "Crear código de conexión",
+    "regenerate": "Crear un código nuevo",
+    "codeLabel": "Código de conexión",
+    "codeExpires": "Válido hasta las {time}.",
+    "waiting": "Esperando al plugin… Esta página se actualiza sola cuando el sitio esté conectado.",
+    "repairTitle": "Volver a conectar",
+    "repairBody": "Necesario tras reinstalar el plugin o si quieres sustituir la clave de este sitio. La conexión actual sigue funcionando hasta que se use el código nuevo.",
+    "connectedSince": "Conectado desde el {date}",
+    "lastHeartbeat": "Último heartbeat",
+    "wordpress": "WordPress",
+    "php": "PHP",
+    "connector": "Conector",
+    "memoryLimit": "Límite de memoria",
+    "client": "Cliente",
+    "componentsTitle": "Plugins y temas",
+    "updatesAvailable": "{count, plural, one {# actualización disponible} other {# actualizaciones disponibles}}",
+    "upToDate": "Actualizado",
+    "updateTo": "Actualizar a {version}",
+    "inactive": "inactivo",
+    "componentsEmpty": "Aún no hay datos. Aparecerán tras el primer heartbeat.",
+    "type": {
+      "plugin": "Plugin",
+      "theme": "Tema",
+      "core": "Núcleo de WordPress"
+    },
+    "dangerTitle": "Eliminar sitio",
+    "dangerBody": "Elimina el sitio y todos sus datos de Verploy. Después, el plugin del sitio dejará de enviar datos.",
+    "deleteConfirm": "Escribe el nombre del sitio ({name}) para confirmar.",
+    "deleteButton": "Eliminar el sitio definitivamente",
+    "unlimited": "Ilimitado"
+  },
+  "settings": {
+    "title": "Ajustes de la agencia",
+    "name": "Nombre de la agencia",
+    "locale": "Idioma del panel",
+    "brandColor": "Color de marca (para informes)",
+    "brandColorHint": "Código hexadecimal, por ejemplo #22D98A.",
+    "errorColor": "Usa un código hexadecimal como #22D98A.",
+    "planTitle": "Suscripción",
+    "planLine": "{plan} · hasta {limit} sitios",
+    "planTrial": "Prueba hasta el {date}",
+    "planComped": "Cuenta gratuita",
+    "planActive": "Activa",
+    "usage": "{used} de {limit} sitios en uso"
+  },
+  "team": {
+    "title": "Equipo",
+    "members": "Miembros",
+    "you": "(tú)",
+    "role": {
+      "owner": "Propietario",
+      "admin": "Administrador",
+      "member": "Miembro"
+    },
+    "roleHelp": "Los propietarios gestionan todo, incluidos el equipo y la suscripción. Los administradores gestionan los sitios. Los miembros pueden verlo todo.",
+    "inviteTitle": "Invitar a un miembro del equipo",
+    "inviteEmail": "Correo electrónico",
+    "inviteRole": "Rol",
+    "inviteSubmit": "Crear invitación",
+    "inviteLinkLabel": "Enlace de invitación para {email}",
+    "inviteLinkHelp": "Comparte este enlace. Es válido durante 7 días y solo funciona para este correo electrónico.",
+    "inviteEmailed": "Invitación enviada a {email}.",
+    "pending": "Invitaciones pendientes",
+    "expires": "caduca el {date}",
+    "revoke": "Revocar",
+    "makeRole": "Hacer {role}",
+    "remove": "Quitar",
+    "leave": "Abandonar la agencia",
+    "errorLastOwner": "Una agencia debe tener al menos un propietario.",
+    "errorAlreadyMember": "Esta persona ya es miembro de tu agencia.",
+    "errorEmail": "Introduce un correo electrónico válido."
+  },
+  "email": {
+    "inviteSubject": "Invitación a {agency} en Verploy",
+    "inviteBody": "{inviter} te invita a unirte a {agency} en Verploy como {role}.",
+    "inviteCta": "Ver invitación",
+    "inviteFooter": "Este enlace es válido durante 7 días. ¿No esperabas este correo? Puedes ignorarlo."
+  }
+}

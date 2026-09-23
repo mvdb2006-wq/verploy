@@ -1,0 +1,2 @@
+# Minimale Supabase CLI-config (gebruikt door de migratie-workflow).
+project_id = "verploy"
