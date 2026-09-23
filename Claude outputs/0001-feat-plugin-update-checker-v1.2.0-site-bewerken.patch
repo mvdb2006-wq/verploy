@@ -1,0 +1,596 @@
+From 81eaa9a9fa0aa04a132de3739c323667cd709308 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 23 Sep 2026 18:08:39 +0200
+Subject: [PATCH] feat: plugin update-checker v1.2.0 + site bewerken
+
+- Verploy Connector v1.2.0 met automatische update-checker (class-updater.php)
+  WordPress toont voortaan update-notificatie en auto-update toggle
+- GET /api/v1/plugin/update-info endpoint voor versie + download URL
+- Plugin ZIP v1.2.0 opgeslagen in public/downloads/
+- Site bewerken: naam, URL en klantnaam aanpasbaar (EditSiteForm.tsx)
+- updateSite server action toegevoegd aan site-detailpagina
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ .../includes/class-updater.php                | 111 ++++++++++++++++++
+ .../verploy-connector/verploy-connector.php   |   6 +-
+ .../downloads/verploy-connector-1.2.0.zip     | Bin 0 -> 13413 bytes
+ .../settings/sites/[id]/EditSiteForm.tsx      |  84 +++++++++++++
+ .../(dashboard)/settings/sites/[id]/page.tsx  |  34 ++++++
+ .../app/api/v1/plugin/update-info/route.ts    |  21 ++++
+ 6 files changed, 254 insertions(+), 2 deletions(-)
+ create mode 100644 connector-plugin/verploy-connector/includes/class-updater.php
+ create mode 100644 dashboard/public/downloads/verploy-connector-1.2.0.zip
+ create mode 100644 dashboard/src/app/(dashboard)/settings/sites/[id]/EditSiteForm.tsx
+ create mode 100644 dashboard/src/app/api/v1/plugin/update-info/route.ts
+
+diff --git a/connector-plugin/verploy-connector/includes/class-updater.php b/connector-plugin/verploy-connector/includes/class-updater.php
+new file mode 100644
+index 0000000..8e7a61d
+--- /dev/null
++++ b/connector-plugin/verploy-connector/includes/class-updater.php
+@@ -0,0 +1,111 @@
++<?php
++/**
++ * Automatic update checker for the Verploy Connector plugin.
++ *
++ * Polls https://app.verploy.com/api/v1/plugin/update-info once per 12 hours.
++ * When a newer version is available WordPress shows the usual update notice
++ * and users can enable auto-updates via the standard Plugins screen toggle.
++ */
++
++if ( ! defined( 'ABSPATH' ) ) exit;
++
++class Verploy_Updater {
++
++	const UPDATE_URL  = 'https://app.verploy.com/api/v1/plugin/update-info';
++	const PLUGIN_SLUG = 'verploy-connector/verploy-connector.php';
++	const CACHE_KEY   = 'verploy_update_info';
++	const CACHE_HOURS = 12;
++
++	public static function init(): void {
++		add_filter( 'pre_set_site_transient_update_plugins', [ __CLASS__, 'check_for_update' ] );
++		add_filter( 'plugins_api',                           [ __CLASS__, 'plugin_info' ], 10, 3 );
++	}
++
++	/**
++	 * Fetches update info from our server (cached for 12 hours).
++	 */
++	private static function fetch_info(): ?array {
++		$cached = get_transient( self::CACHE_KEY );
++		if ( $cached !== false ) return $cached;
++
++		$response = wp_remote_get( self::UPDATE_URL, [ 'timeout' => 10 ] );
++		if ( is_wp_error( $response ) ) return null;
++
++		$body = wp_remote_retrieve_body( $response );
++		$data = json_decode( $body, true );
++		if ( ! isset( $data['version'] ) ) return null;
++
++		set_transient( self::CACHE_KEY, $data, self::CACHE_HOURS * HOUR_IN_SECONDS );
++		return $data;
++	}
++
++	/**
++	 * Injects update info into WordPress's plugin update transient.
++	 */
++	public static function check_for_update( $transient ) {
++		if ( empty( $transient->checked ) ) return $transient;
++
++		$info = self::fetch_info();
++		if ( ! $info ) return $transient;
++
++		if ( version_compare( $info['version'], VERPLOY_VERSION, '>' ) ) {
++			$transient->response[ self::PLUGIN_SLUG ] = (object) [
++				'id'           => self::PLUGIN_SLUG,
++				'slug'         => 'verploy-connector',
++				'plugin'       => self::PLUGIN_SLUG,
++				'new_version'  => $info['version'],
++				'url'          => $info['details_url'] ?? 'https://verploy.com',
++				'package'      => $info['download_url'],
++				'tested'       => $info['tested_up_to'] ?? '',
++				'requires'     => $info['requires'] ?? '',
++				'requires_php' => $info['requires_php'] ?? '',
++				'icons'        => [],
++				'banners'      => [],
++				'banners_rtl'  => [],
++				'upgrade_notice'  => '',
++				'compatibility'   => new \stdClass(),
++			];
++		} else {
++			// Tell WordPress this plugin is up-to-date (enables auto-update toggle)
++			$transient->no_update[ self::PLUGIN_SLUG ] = (object) [
++				'id'          => self::PLUGIN_SLUG,
++				'slug'        => 'verploy-connector',
++				'plugin'      => self::PLUGIN_SLUG,
++				'new_version' => VERPLOY_VERSION,
++				'url'         => $info['details_url'] ?? 'https://verploy.com',
++				'package'     => $info['download_url'],
++				'icons'       => [],
++				'banners'     => [],
++				'compatibility' => new \stdClass(),
++			];
++		}
++
++		return $transient;
++	}
++
++	/**
++	 * Provides plugin info for the "View version details" popup.
++	 */
++	public static function plugin_info( $result, $action, $args ) {
++		if ( $action !== 'plugin_information' ) return $result;
++		if ( ( $args->slug ?? '' ) !== 'verploy-connector' ) return $result;
++
++		$info = self::fetch_info();
++		if ( ! $info ) return $result;
++
++		return (object) [
++			'name'          => $info['name'] ?? 'Verploy Connector',
++			'slug'          => 'verploy-connector',
++			'version'       => $info['version'],
++			'author'        => $info['author'] ?? 'Verploy',
++			'homepage'      => $info['details_url'] ?? 'https://verploy.com',
++			'download_link' => $info['download_url'],
++			'requires'      => $info['requires'] ?? '5.8',
++			'tested'        => $info['tested_up_to'] ?? '6.7',
++			'requires_php'  => $info['requires_php'] ?? '7.4',
++			'sections'      => [
++				'description' => 'Connects your WordPress site to Verploy — automated update testing, server health monitoring, and client reporting for agencies.',
++			],
++		];
++	}
++}
+diff --git a/connector-plugin/verploy-connector/verploy-connector.php b/connector-plugin/verploy-connector/verploy-connector.php
+index 9aa2505..bdb5f3c 100644
+--- a/connector-plugin/verploy-connector/verploy-connector.php
++++ b/connector-plugin/verploy-connector/verploy-connector.php
+@@ -3,7 +3,7 @@
+  * Plugin Name: Verploy Connector
+  * Plugin URI:  https://verploy.com
+  * Description: Connects your WordPress site to Verploy — automated update testing, server health monitoring, and client reporting for agencies.
+- * Version:     1.0.0
++ * Version:     1.2.0
+  * Author:      Verploy
+  * Author URI:  https://verploy.com
+  * License:     GPL-2.0-or-later
+@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
+ 	exit;
+ }
+ 
+-define( 'VERPLOY_VERSION',    '1.0.0' );
++define( 'VERPLOY_VERSION',    '1.2.0' );
+ define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+ define( 'VERPLOY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+ define( 'VERPLOY_API_BASE',   'https://app.verploy.com/api/v1' );
+@@ -27,11 +27,13 @@ require_once VERPLOY_PLUGIN_DIR . 'includes/class-health-collector.php';
+ require_once VERPLOY_PLUGIN_DIR . 'includes/class-rest-endpoints.php';
+ require_once VERPLOY_PLUGIN_DIR . 'includes/class-admin.php';
+ require_once VERPLOY_PLUGIN_DIR . 'includes/class-heartbeat.php';
++require_once VERPLOY_PLUGIN_DIR . 'includes/class-updater.php';
+ 
+ // ─── Bootstrap ────────────────────────────────────────────────────────────────
+ function verploy_init() {
+ 	Verploy_REST_Endpoints::init();
+ 	Verploy_Heartbeat::init();
++	Verploy_Updater::init();
+ 
+ 	if ( is_admin() ) {
+ 		Verploy_Admin::init();
+diff --git a/dashboard/public/downloads/verploy-connector-1.2.0.zip b/dashboard/public/downloads/verploy-connector-1.2.0.zip
+new file mode 100644
+index 0000000000000000000000000000000000000000..d1aa627e80459801975f6de06a0a4712b5466bfa
+GIT binary patch
+literal 13413
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/[id]/EditSiteForm.tsx b/dashboard/src/app/(dashboard)/settings/sites/[id]/EditSiteForm.tsx
+new file mode 100644
+index 0000000..fc9cbc1
+--- /dev/null
++++ b/dashboard/src/app/(dashboard)/settings/sites/[id]/EditSiteForm.tsx
+@@ -0,0 +1,84 @@
++'use client'
++
++import { useState } from 'react'
++import { useRouter } from 'next/navigation'
++
++interface Props {
++  siteId: string
++  initialName: string
++  initialUrl: string
++  initialClientName: string
++  updateAction: (formData: FormData) => Promise<{ error?: string }>
++}
++
++export default function EditSiteForm({
++  siteId, initialName, initialUrl, initialClientName, updateAction
++}: Props) {
++  const router = useRouter()
++  const [editing, setEditing] = useState(false)
++  const [loading, setLoading] = useState(false)
++  const [error, setError] = useState<string | null>(null)
++
++  if (!editing) {
++    return (
++      <button
++        onClick={() => setEditing(true)}
++        className="btn btn-ghost btn-sm text-xs mb-4"
++      >
++        Sitegegevens bewerken
++      </button>
++    )
++  }
++
++  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
++    e.preventDefault()
++    setLoading(true)
++    setError(null)
++    const fd = new FormData(e.currentTarget)
++    fd.append('siteId', siteId)
++    const result = await updateAction(fd)
++    if (result?.error) {
++      setError(result.error)
++      setLoading(false)
++    } else {
++      setEditing(false)
++      setLoading(false)
++      router.refresh()
++    }
++  }
++
++  return (
++    <form onSubmit={handleSubmit} className="card mb-4">
++      <h2 className="font-bold text-text mb-4 text-sm">Site bewerken</h2>
++      {error && (
++        <p className="text-danger text-xs mb-3 bg-danger/10 px-3 py-2 rounded-lg">{error}</p>
++      )}
++      <div className="space-y-3">
++        <div>
++          <label className="label block mb-1" htmlFor="edit-name">Naam</label>
++          <input id="edit-name" name="name" type="text" defaultValue={initialName}
++            required className="input w-full text-sm" placeholder="Mijn WordPress site" />
++        </div>
++        <div>
++          <label className="label block mb-1" htmlFor="edit-url">URL</label>
++          <input id="edit-url" name="url" type="url" defaultValue={initialUrl}
++            required className="input w-full text-sm font-mono" placeholder="https://jouwsite.nl" />
++        </div>
++        <div>
++          <label className="label block mb-1" htmlFor="edit-client">Klantnaam (optioneel)</label>
++          <input id="edit-client" name="client_name" type="text" defaultValue={initialClientName}
++            className="input w-full text-sm" placeholder="Naam van de klant" />
++        </div>
++      </div>
++      <div className="flex gap-2 mt-4">
++        <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
++          {loading ? 'Opslaan…' : 'Opslaan'}
++        </button>
++        <button type="button" onClick={() => { setEditing(false); setError(null) }}
++          className="btn btn-ghost btn-sm">
++          Annuleren
++        </button>
++      </div>
++    </form>
++  )
++}
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx b/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
+index 8551dc9..3f744ff 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
+@@ -8,8 +8,33 @@ import {
+ import { timeAgo, formatDate, phpSeverity } from '@/lib/utils'
+ import CopyButton from '../new/success/CopyButton'
+ import DeleteSiteButton from './DeleteSiteButton'
++import EditSiteForm from './EditSiteForm'
+ import { revalidatePath } from 'next/cache'
+ 
++async function updateSite(formData: FormData): Promise<{ error?: string }> {
++  'use server'
++  const supabase = createClient()
++  const { data: { user } } = await supabase.auth.getUser()
++  if (!user) return { error: 'Niet ingelogd' }
++
++  const siteId     = formData.get('siteId') as string
++  const name       = (formData.get('name') as string)?.trim()
++  const url        = (formData.get('url') as string)?.trim()
++  const clientName = (formData.get('client_name') as string)?.trim() || null
++
++  if (!name || !url) return { error: 'Naam en URL zijn verplicht' }
++
++  const { error } = await supabase
++    .from('sites')
++    .update({ name, url, client_name: clientName })
++    .eq('id', siteId)
++
++  if (error) return { error: error.message }
++  revalidatePath(`/settings/sites/${siteId}`)
++  revalidatePath('/settings')
++  return {}
++}
++
+ async function deleteSite(siteId: string): Promise<{ error?: string }> {
+   'use server'
+   const supabase = createClient()
+@@ -109,6 +134,15 @@ export default async function SiteDetailPage({ params }: { params: { id: string
+         </a>
+       </div>
+ 
++      {/* Edit form */}
++      <EditSiteForm
++        siteId={site.id}
++        initialName={site.name}
++        initialUrl={site.url}
++        initialClientName={site.client_name ?? ''}
++        updateAction={updateSite}
++      />
++
+       {/* Algemeen */}
+       <div className="card mb-4">
+         <div className="flex items-center gap-2 mb-4">
+diff --git a/dashboard/src/app/api/v1/plugin/update-info/route.ts b/dashboard/src/app/api/v1/plugin/update-info/route.ts
+new file mode 100644
+index 0000000..6f9fbd4
+--- /dev/null
++++ b/dashboard/src/app/api/v1/plugin/update-info/route.ts
+@@ -0,0 +1,21 @@
++import { NextResponse } from 'next/server'
++
++const PLUGIN_VERSION  = '1.2.0'
++const PLUGIN_DOWNLOAD = `https://app.verploy.com/downloads/verploy-connector-${PLUGIN_VERSION}.zip`
++const PLUGIN_DETAILS  = 'https://verploy.com/docs/connector'
++
++export const revalidate = 3600
++
++export async function GET() {
++  return NextResponse.json({
++    version:      PLUGIN_VERSION,
++    download_url: PLUGIN_DOWNLOAD,
++    details_url:  PLUGIN_DETAILS,
++    tested_up_to: '6.7',
++    requires:     '5.8',
++    requires_php: '7.4',
++    slug:         'verploy-connector',
++    name:         'Verploy Connector',
++    author:       'Verploy',
++  })
++}
+-- 
+2.43.0
+
