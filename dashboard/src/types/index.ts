@@ -119,20 +119,21 @@ export interface Alert {
 export interface SiteOverview {
   id: string
   agency_id: string
-  url: string
   name: string
-  client_name: string | null
+  url: string
   status: SiteStatus
-  last_seen_at: string | null
-  last_heartbeat_at: string | null
+  api_key: string
+  created_at: string
+  last_checked_at: string | null
   wp_version: string | null
   php_version: string | null
-  ssl_days_remaining: number | null
   ssl_valid: boolean | null
+  ssl_days_remaining: number | null
+  uptime_ms: number | null
   performance_score: number | null
+  lcp_ms: number | null
+  status_code: number | null
   pending_updates: number
-  critical_alerts: number
-  last_snapshot_at: string | null
 }
 
 export interface Report {

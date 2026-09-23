@@ -7,6 +7,37 @@ import {
 } from 'lucide-react'
 import { timeAgo, formatDate, phpSeverity } from '@/lib/utils'
 import CopyButton from '../new/success/CopyButton'
+import DeleteSiteButton from './DeleteSiteButton'
+import { revalidatePath } from 'next/cache'
+
+async function deleteSite(siteId: string): Promise<{ error?: string }> {
+  'use server'
+  const { createClient } = await import('@/lib/supabase/server')
+  const { redirect } = await import('next/navigation')
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Niet ingelogd' }
+
+  // Verify ownership
+  const { data: membership } = await supabase
+    .from('agency_members')
+    .select('agency_id')
+    .eq('user_id', user.id)
+    .single()
+  if (!membership) return { error: 'Geen toegang' }
+
+  const { error } = await supabase
+    .from('sites')
+    .delete()
+    .eq('id', siteId)
+    .eq('agency_id', membership.agency_id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+  redirect('/settings')
+}
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   return { title: 'Site details' }
@@ -175,7 +206,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
       )}
 
       {/* Acties */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 mb-4">
         <Link href="/settings" className="btn btn-ghost flex-1 justify-center">
           Terug naar instellingen
         </Link>
@@ -183,6 +214,12 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           Site openen
           <Globe size={14} />
         </a>
+      </div>
+
+      {/* Danger zone */}
+      <div className="card border border-danger/20 bg-danger/5">
+        <p className="text-xs font-bold text-danger uppercase tracking-widest mb-3">Gevaarlijke zone</p>
+        <DeleteSiteButton siteId={site.id} siteName={site.name} onDelete={deleteSite} />
       </div>
     </div>
   )

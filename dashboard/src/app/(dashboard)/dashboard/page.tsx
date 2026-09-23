@@ -49,7 +49,7 @@ export default async function DashboardPage() {
   const offline = rows.filter(s => s.status === 'offline').length
   const updates = rows.reduce((n, s) => n + (s.pending_updates ?? 0), 0)
 
-  const alerts  = rows.reduce((n, s) => n + (s.critical_alerts ?? 0), 0)
+  const alerts  = 0 // critical_alerts kolom niet meer in view
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -206,7 +206,7 @@ function SiteRow({ site }: { site: SiteOverview }) {
         <span className={cn('text-sm font-bold', gradeColor)}>{grade}</span>
       </td>
       <td className="px-4 py-3.5 text-right text-xs text-muted tabular-nums">
-        {timeAgo(site.last_seen_at)}
+        {timeAgo(site.last_checked_at)}
       </td>
       <td className="px-4 py-3.5">
         <Link
