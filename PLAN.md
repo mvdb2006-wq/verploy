@@ -34,7 +34,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | Connector-plugin | `connector-plugin/verploy-connector/` v1.3.1 | Heartbeat elke 15 min, REST `/status` `/health` `/update`, job-runner, eigen updater |
 | Oude plugin | `wp-plugin/verploy-connector/` (1 bestand, v1.0) | Verouderd duplicaat |
 | Worker | `worker/` — Express + Playwright + OpenAI | **Nooit gedeployd** (geen Railway-project bekend) |
-| Landingspagina | Claude-artifact "Verploy — Verify Before You Deploy" | **Niet live**: verploy.com toont de DirectAdmin-placeholder |
+| Landingspagina | Claude-artifact | Buiten scope op verzoek van Martijn (focus = app.verploy.com) |
 
 ### 1.2 Wat aantoonbaar werkt
 
@@ -48,7 +48,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 
 | Probleem | Ernst | Besluit |
 |---|---|---|
-| `site_overview` is een view zonder `security_invoker`, met `GRANT SELECT TO authenticated`, en bevat `api_key`. Elke ingelogde gebruiker kan zo de sleutels van **alle** sites lezen, en registreren staat open. | **Kritiek (lek)** | Hotfix-SQL staat in BLOCKERS #1. Het nieuwe datamodel bevat geen views met secrets meer |
+| `site_overview` is een view zonder `security_invoker`, met `GRANT SELECT TO authenticated`, en bevat `api_key`. Elke ingelogde gebruiker kan zo de sleutels van **alle** sites lezen, en registreren staat open. | **Kritiek (lek)** | ✅ Gedicht op 23-09 (security_invoker, anon ingetrokken, registratie uit, alle keys geroteerd, test bewezen). v2 heeft geen views met secrets meer |
 | Plugin ↔ backend werkt met een platte bearer-key (dezelfde key in beide richtingen, zonder handtekening, timestamp of replay-bescherming) | Hoog | Wordt herschreven naar HMAC-SHA256 + timestamp + nonce (§4) |
 | `is_agency_owner()` (migratie 20260923) verwijst naar `agencies.owner_id`, maar die kolom bestaat niet → policies voor eigenaren falen | Hoog | Herschreven op basis van `agency_members.role` |
 | Policy "owners can update their agency" vergelijkt `agency_members.agency_id = agency_members.id` → is altijd onwaar | Middel | Herschreven |
@@ -59,7 +59,6 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | Dubbele of oude endpoints: `/api/heartbeat` (verwacht `vp_live_` keys), `/api/v1/ping`, `/api/v1/sites/ping`, `/api/updates/trigger` | Laag | Verwijderen; één set v2-endpoints |
 | Repo-rommel: ~25 `.patch`-bestanden, `Claude outputs/`, losse `layout.tsx`, `*.zip`, `tsbuildinfo` | Laag | Opruimen in fase 2 |
 | Stripe-prijzen €29/79/199 en tiers starter/agency/pro wijken af van de opdracht (€19–249) | Middel | Nieuwe tiers (§3.3), herbouw in fase 7 |
-| Landingspagina-artifact bevat verzonnen testimonials en bureaunamen ("Sarah de Vries, WebStudio Noordzee", …) | Middel | Niet overnemen; vermeld in BLOCKERS |
 | Pakketten zijn 1–2 major-versies oud (Next 14, React 18, Tailwind 3, Stripe 17) | Middel | Upgrade in fase 2 naar de versies in DECISIONS.md |
 | Er zijn geen tests | Hoog | Vitest + pg-tests + Playwright E2E vanaf fase 2 |
 
@@ -156,6 +155,8 @@ Storage-buckets `screenshots`, `reports` en `branding` zijn **privé**. Het pad 
 | Studio | €49 | 15 |
 | Agency | €99 | 40 |
 | Scale | €249 | 120 |
+
+Prijzen en limieten staan op één plek: de tabel `plans` (tier, naam, prijs in centen, sites-limiet, Stripe-prijs-id). De UI, de limiet-trigger en Stripe lezen allemaal daaruit, dus aanpassen = één migratie van één regel per tier.
 
 Proefperiode van 14 dagen met Studio-limieten, zonder creditcard. Na afloop zonder abonnement geldt: alleen-lezen (monitoring loopt door, geen nieuwe sites of update-runs).
 

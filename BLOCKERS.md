@@ -4,29 +4,33 @@ Wat alleen Martijn kan leveren, gesorteerd op urgentie. Per item: waarom het nod
 
 ---
 
-## 1. 🔴 Datalek in productie dichtzetten — NU
+## 1. 🟠 Sites opnieuw koppelen na key-rotatie — na fase 2
 
-**Waarom:** de view `site_overview` draait met eigenaarsrechten (hij omzeilt RLS), is leesbaar voor elke ingelogde gebruiker en bevat de `api_key` van **alle** sites. Iedereen die zich op app.verploy.com registreert, kan zo de sleutels van jouw klantsites lezen en daarmee update-commando's naar die sites sturen.
-**Waarom ik het niet zelf doe:** schrijven naar de productiedatabase is voor mij geblokkeerd door het veiligheidsbeleid van deze omgeving.
+**Wat er gebeurd is (23-09, met jouw akkoord):** het lek in `site_overview` is gedicht (views volgen nu RLS, `anon` heeft geen rechten meer op public-tabellen), registratie staat uit in Supabase, en alle drie de site-API-keys zijn vervangen door nieuwe willekeurige waarden. De oude keys werken nergens meer. Test: een vreemde ingelogde gebruiker ziet 0 sites en 0 keys, anon krijgt "permission denied", en jij als bureaulid ziet nog steeds je 3 sites. Gebruikerscontrole: er is maar één account (martijn@emhostingendesign.nl).
 
-**Wat je moet doen (één van de twee):**
-- **A.** Antwoord in de chat: *"Je mag de hotfix op productie uitvoeren."* Dan probeer ik het opnieuw met jouw expliciete akkoord.
-- **B.** Supabase → project *verploy* → SQL Editor → plak dit en klik **Run**:
-  ```sql
-  alter view public.site_overview set (security_invoker = true);
-  alter view public.latest_health_snapshots set (security_invoker = true);
-  revoke all on public.site_overview from anon;
-  revoke all on public.latest_health_snapshots from anon;
-  ```
-  Het dashboard blijft gewoon werken: leden zien via RLS nog steeds hun eigen sites.
+**Gevolg:** deze sites sturen geen data meer tot ze opnieuw gekoppeld zijn:
 
-**Ondertussen:** het nieuwe datamodel (fase 2) heeft geen views met secrets meer, en de API-keys worden vervangen door versleutelde per-site secrets.
+| Site | Huidige plugin | Status |
+|---|---|---|
+| EM Hosting & Design — https://emhostingendesign.nl | verwijderd door jou (na 1.3.0-incident) | geen heartbeats |
+| Feel Good TentEvent — https://feelgoodtentevent.nl | oude versie (onbekend) | heartbeats worden geweigerd (401) |
+| Borgo Vista Serena — https://borgovistaserena.com | 1.2.0 | heartbeats worden geweigerd (401) |
+
+**Advies:** koppel niet opnieuw met de oude plugin. Die gebruikt nog de platte sleutel waar het lek om draaide. Wacht op connector 2.0 (einde fase 2: koppelcode + HMAC). Ik meld het zodra hij klaarstaat.
+
+**Wat je dan per site doet (± 2 minuten per site):**
+1. Log in op wp-admin van de site → Plugins → zoek "Verploy Connector". Staat hij erop: **Deactiveren** → **Verwijderen**.
+2. Plugins → Nieuwe plugin → **Plugin uploaden** → kies de ZIP van https://app.verploy.com/api/v1/plugin/download → **Nu installeren** → **Activeren**.
+3. Ga in het Verploy-dashboard naar de site → **Koppelcode maken** en kopieer de code van 8 tekens.
+4. In wp-admin: Instellingen → Verploy → plak de code → **Koppelen**. Binnen een minuut staat de site in het dashboard weer op "Online".
+
+Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin van de site in de browser van de Claude-app; de rest doe ik.
 
 ---
 
 ## 2. 🟠 Migraties naar productie kunnen uitrollen — nodig vóór het einde van fase 2
 
-**Waarom:** het v2-schema moet op de live database komen. Ik mag daar niet zelf schrijven (zie #1).
+**Waarom:** het v2-schema moet op de live database komen. Schrijven naar productie is voor mij geblokkeerd door het beleid van deze omgeving; de hotfix van 23-09 lukte alleen met jouw expliciete akkoord in de chat.
 
 **Wat je moet doen (één van de twee):**
 - **A. (aanbevolen, eenmalig):** voeg drie GitHub-secrets toe aan de repo `mvdb2006-wq/verploy` (Settings → Secrets and variables → Actions → New repository secret):
@@ -99,5 +103,4 @@ Wat alleen Martijn kan leveren, gesorteerd op urgentie. Per item: waarom het nod
 
 ## 9. ⚪ Ter info (geen actie nodig voor de bouw)
 
-- **verploy.com toont nog de DirectAdmin-placeholder.** De landingspagina bestaat alleen als Claude-artifact. Let op: die bevat verzonnen testimonials en bureaunamen ("Sarah de Vries — WebStudio Noordzee" e.d.) en de oude prijzen (€29/79/199). Publiceer hem niet zo; de app sluit qua stijl en belofte aan, maar neemt die content niet over.
 - **Connector 1.3.0-incident (23-09):** 1.3.0 gaf een fatale fout op elke pagina. 1.3.1 lost het op en staat op de downloadlink; jij hebt de plugin van emhostingendesign.nl verwijderd en de site draait weer. Zodra connector 2.0 klaar is (fase 2), koppelen we de site opnieuw via een koppelcode.

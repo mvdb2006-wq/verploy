@@ -49,8 +49,11 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **PDF's met Puppeteer in de worker, niet op Vercel.** De worker heeft al Chromium, en PDF-rendering is te zwaar en traag voor serverless.
 - **AI-diagnose via de Anthropic API in plaats van OpenAI.** Dat is niet vastgelegd in de stack; de Anthropic-API is bereikbaar vanuit de ontwikkelomgeving (OpenAI niet), dus hij is echt te testen.
 - **Twee plugin-builds: `wporg` (zonder zelf-updater) en `direct` (met updater).** WordPress.org verbiedt updates van externe servers (richtlijn 8), maar EM Hosting heeft updates nodig vóór de WP.org-goedkeuring.
+- **Marketingsite op verploy.com buiten scope (besluit Martijn 23-09).** Alle focus op app.verploy.com.
+- **Registratie dicht tot fase 2 klaar is (besluit Martijn 23-09).** Uitgezet in Supabase Auth; gaat weer open met het nieuwe v2-fundament.
 - **Dashboard in vijf talen (NL/EN/DE/FR/ES), één taal per bureau.** De rapporten moeten al vijf talen hebben, dus met dezelfde i18n-infrastructuur is het dashboard in dezelfde talen weinig extra werk.
 - **Tiers Solo €19/5 · Studio €49/15 · Agency €99/40 · Scale €249/120 sites.** Dat past binnen de opdracht (€19–249). Een lineaire prijs per site van ongeveer €4 → €2 beloont groei. De landingspagina-prijzen (€29–199) worden losgelaten.
+- **Prijzen en limieten centraal in tabel `plans`, niet in code.** Martijn wil ze later makkelijk aanpassen; één bron voorkomt dat UI, limiet-trigger en Stripe uit elkaar lopen. Tiers voorlopig akkoord (23-09).
 - **Tier-limiet via DB-trigger `enforce_site_limit` op `sites` INSERT.** Die geldt dan voor elk pad (UI, API, service role), niet alleen in de UI.
 - **Proefperiode 14 dagen met Studio-limieten; daarna alleen-lezen.** Een bureau kan zo echt testen zonder creditcard, en er gaat nooit data verloren.
 
