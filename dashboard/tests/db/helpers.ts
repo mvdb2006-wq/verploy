@@ -101,6 +101,18 @@ export async function seedAgency(db: Db, label: string, opts: { plan?: string; p
     await db.query(`update public.site_credentials set secret_ciphertext = 'ciphertext-${label}${i}' where site_id = $1`, [s.id])
     await db.query(`insert into public.signed_request_nonces (site_id, nonce) values ($1, $2)`, [s.id, randomUUID().replaceAll('-', '')])
   }
+  // Eén afgeronde update-run met tijdlijn en testresultaat (voor de RLS-tests)
+  const { rows: [run] } = await db.query<{ id: string }>(
+    `insert into public.update_runs (agency_id, site_id, status, items, verdict, finished_at)
+     values ($1, $2, 'done', '[{"type":"plugin","slug":"akismet/akismet.php","from_version":"5.0","to_version":"5.1"}]', 'deployed', now())
+     returning id`,
+    [ag.id, siteIds[0]],
+  )
+  await db.query(`insert into public.update_run_events (agency_id, run_id, step, message_key) values ($1, $2, 'done', 'run.done')`, [ag.id, run!.id])
+  await db.query(
+    `insert into public.test_results (agency_id, run_id, phase, page_key, page_url, viewport, passed) values ($1, $2, 'production_after', 'home', 'https://x.example/', 'desktop', true)`,
+    [ag.id, run!.id],
+  )
   await db.query(
     `insert into public.agency_invitations (agency_id, email, role, token_hash) values ($1, $2, 'member', $3)`,
     [ag.id, `invitee-${label}@example.test`, randomUUID()],

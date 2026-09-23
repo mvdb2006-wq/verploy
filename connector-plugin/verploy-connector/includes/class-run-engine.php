@@ -569,7 +569,7 @@ PHP;
 		if ( false !== strpos( $uri, 'wp-login.php' ) || false !== strpos( $uri, '/wp-json/' ) || isset( $_GET['rest_route'] ) ) { // phpcs:ignore
 			return;
 		}
-		$given = isset( $_SERVER['HTTP_X_VERPLOY_BYPASS'] ) ? (string) $_SERVER['HTTP_X_VERPLOY_BYPASS'] : ''; // phpcs:ignore
+		$given = isset( $_SERVER['HTTP_X_VERPLOY_BYPASS'] ) ? (string) $_SERVER['HTTP_X_VERPLOY_BYPASS'] : ( isset( $_COOKIE['verploy_bypass'] ) ? (string) $_COOKIE['verploy_bypass'] : '' ); // phpcs:ignore
 		if ( '' !== $given && hash_equals( $m['bypass'], hash( 'sha256', $given ) ) ) {
 			return;
 		}
@@ -617,6 +617,150 @@ PHP;
 				Verploy_Table_Copier::drop_prefix( 'vpbk' . $short . '_' );
 			}
 		}
+	}
+
+	// ── Testpagina's ─────────────────────────────────────────────────────────
+
+	const MAX_PAGES = 8;
+
+	/**
+	 * Bepaalt welke pagina's de worker test. Zonder $keys (productie): startpagina, menu-items,
+	 * webwinkelpagina's en de opgegeven extra paden. Met $keys (staging): dezelfde objecten,
+	 * maar met de URL's van deze installatie (staging gebruikt eenvoudige permalinks).
+	 *
+	 * @param string[]|null $keys        Sleutels uit een eerdere productie-aanroep.
+	 * @param string[]      $extra_paths Extra paden (alleen productie), bijv. /contact/.
+	 * @return array<int,array{key:string,label:string,url:string}>
+	 */
+	public static function pages( $keys, array $extra_paths ) {
+		$out  = array();
+		$seen = array();
+		$add  = function ( $key, $label, $url ) use ( &$out, &$seen ) {
+			if ( ! $url || isset( $seen[ $key ] ) || count( $out ) >= self::MAX_PAGES ) {
+				return;
+			}
+			$seen[ $key ] = true;
+			$out[]        = array( 'key' => $key, 'label' => wp_strip_all_tags( (string) $label ), 'url' => (string) $url );
+		};
+		$resolve = function ( $key ) {
+			if ( 'home' === $key ) {
+				return array( get_bloginfo( 'name' ), home_url( '/' ) );
+			}
+			if ( preg_match( '/^post:(\d+)$/', $key, $m ) ) {
+				$post = get_post( (int) $m[1] );
+				return $post && 'publish' === $post->post_status ? array( get_the_title( $post ), get_permalink( $post ) ) : null;
+			}
+			if ( preg_match( '/^term:(\d+)$/', $key, $m ) ) {
+				$term = get_term( (int) $m[1] );
+				$link = $term && ! is_wp_error( $term ) ? get_term_link( $term ) : null;
+				return $link && ! is_wp_error( $link ) ? array( $term->name, $link ) : null;
+			}
+			return null;
+		};
+
+		if ( is_array( $keys ) ) {
+			foreach ( $keys as $key ) {
+				$r = $resolve( (string) $key );
+				if ( $r ) {
+					$add( (string) $key, $r[0], $r[1] );
+				}
+			}
+			return $out;
+		}
+
+		$r = $resolve( 'home' );
+		$add( 'home', $r[0], $r[1] );
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		foreach ( $extra_paths as $path ) {
+			$path = '/' . ltrim( (string) $path, '/' );
+			$url  = home_url( $path );
+			$id   = url_to_postid( $url );
+			if ( $id ) {
+				$r = $resolve( 'post:' . $id );
+				if ( $r ) {
+					$add( 'post:' . $id, $r[0], $r[1] );
+				}
+				continue;
+			}
+			$add( 'path:' . $path, $path, $url );
+		}
+		foreach ( get_nav_menu_locations() as $menu_id ) {
+			foreach ( (array) wp_get_nav_menu_items( $menu_id ) as $item ) {
+				if ( ! is_object( $item ) ) {
+					continue;
+				}
+				if ( 'post_type' === $item->type ) {
+					$r = $resolve( 'post:' . (int) $item->object_id );
+					if ( $r ) {
+						$add( 'post:' . (int) $item->object_id, $item->title, $r[1] );
+					}
+				} elseif ( 'taxonomy' === $item->type ) {
+					$r = $resolve( 'term:' . (int) $item->object_id );
+					if ( $r ) {
+						$add( 'term:' . (int) $item->object_id, $item->title, $r[1] );
+					}
+				} elseif ( 'custom' === $item->type && wp_parse_url( $item->url, PHP_URL_HOST ) === $host ) {
+					$id = url_to_postid( $item->url );
+					if ( $id ) {
+						$add( 'post:' . $id, $item->title, get_permalink( $id ) );
+					}
+				}
+			}
+		}
+		// Blokthema's: navigatie staat in wp_navigation-berichten in plaats van menulocaties.
+		$nav_posts = get_posts( array( 'post_type' => 'wp_navigation', 'numberposts' => 3, 'post_status' => 'publish' ) );
+		$walk      = function ( array $blocks ) use ( &$walk, $add, $resolve, $host ) {
+			foreach ( $blocks as $block ) {
+				$name  = isset( $block['blockName'] ) ? $block['blockName'] : '';
+				$attrs = isset( $block['attrs'] ) ? $block['attrs'] : array();
+				if ( in_array( $name, array( 'core/navigation-link', 'core/navigation-submenu' ), true ) ) {
+					$kind = isset( $attrs['kind'] ) ? $attrs['kind'] : 'custom';
+					$id   = isset( $attrs['id'] ) ? (int) $attrs['id'] : 0;
+					$key  = null;
+					if ( 'post-type' === $kind && $id ) {
+						$key = 'post:' . $id;
+					} elseif ( 'taxonomy' === $kind && $id ) {
+						$key = 'term:' . $id;
+					} elseif ( ! empty( $attrs['url'] ) && wp_parse_url( $attrs['url'], PHP_URL_HOST ) === $host ) {
+						$pid = url_to_postid( $attrs['url'] );
+						$key = $pid ? 'post:' . $pid : null;
+					}
+					$r = $key ? $resolve( $key ) : null;
+					if ( $r ) {
+						$add( $key, isset( $attrs['label'] ) ? $attrs['label'] : $r[0], $r[1] );
+					}
+				} elseif ( 'core/page-list' === $name ) {
+					foreach ( get_pages( array( 'parent' => 0, 'sort_column' => 'menu_order', 'number' => self::MAX_PAGES ) ) as $page ) {
+						$add( 'post:' . $page->ID, get_the_title( $page ), get_permalink( $page ) );
+					}
+				}
+				if ( ! empty( $block['innerBlocks'] ) ) {
+					$walk( $block['innerBlocks'] );
+				}
+			}
+		};
+		foreach ( $nav_posts as $nav ) {
+			$walk( parse_blocks( $nav->post_content ) );
+		}
+		// WooCommerce: winkel, winkelwagen en afrekenen zijn de pagina's die het meest stukgaan.
+		if ( function_exists( 'wc_get_page_id' ) ) {
+			foreach ( array( 'shop', 'cart', 'checkout' ) as $wc ) {
+				$id = (int) wc_get_page_id( $wc );
+				if ( $id > 0 ) {
+					$r = $resolve( 'post:' . $id );
+					if ( $r ) {
+						$add( 'post:' . $id, $r[0], $r[1] );
+					}
+				}
+			}
+		}
+		// Geen menu? Neem de nieuwste pagina's en het nieuwste bericht.
+		if ( count( $out ) < 3 ) {
+			foreach ( get_posts( array( 'post_type' => array( 'page', 'post' ), 'numberposts' => 4, 'post_status' => 'publish' ) ) as $post ) {
+				$add( 'post:' . $post->ID, get_the_title( $post ), get_permalink( $post ) );
+			}
+		}
+		return $out;
 	}
 
 	public static function describe( $run_id ) {

@@ -373,6 +373,9 @@ export type Database = {
           domain_expires_at: string | null
           domain_error: string | null
           domain_checked_at: string | null
+          test_paths: string[]
+          test_masks: string[]
+          diff_threshold: number
         }
         Insert: {
           id?: string
@@ -399,6 +402,9 @@ export type Database = {
           domain_expires_at?: string | null
           domain_error?: string | null
           domain_checked_at?: string | null
+          test_paths?: string[]
+          test_masks?: string[]
+          diff_threshold?: number
         }
         Update: {
           id?: string
@@ -425,6 +431,170 @@ export type Database = {
           domain_expires_at?: string | null
           domain_error?: string | null
           domain_checked_at?: string | null
+          test_paths?: string[]
+          test_masks?: string[]
+          diff_threshold?: number
+        }
+        Relationships: []
+      }
+      test_results: {
+        Row: {
+          id: number
+          agency_id: string
+          run_id: string
+          phase: string
+          page_key: string
+          page_label: string
+          page_url: string
+          viewport: string
+          http_status: number | null
+          load_ms: number | null
+          passed: boolean
+          checks: Json
+          js_errors: Json
+          screenshot_path: string | null
+          diff_path: string | null
+          diff_ratio: number | null
+          created_at: string
+        }
+        Insert: {
+          agency_id: string
+          run_id: string
+          phase: string
+          page_key: string
+          page_label?: string
+          page_url: string
+          viewport: string
+          http_status?: number | null
+          load_ms?: number | null
+          passed: boolean
+          checks?: Json
+          js_errors?: Json
+          screenshot_path?: string | null
+          diff_path?: string | null
+          diff_ratio?: number | null
+          created_at?: string
+        }
+        Update: {
+          agency_id?: string
+          run_id?: string
+          phase?: string
+          page_key?: string
+          page_label?: string
+          page_url?: string
+          viewport?: string
+          http_status?: number | null
+          load_ms?: number | null
+          passed?: boolean
+          checks?: Json
+          js_errors?: Json
+          screenshot_path?: string | null
+          diff_path?: string | null
+          diff_ratio?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      update_run_events: {
+        Row: {
+          id: number
+          agency_id: string
+          run_id: string
+          step: string
+          level: string
+          message_key: string
+          params: Json
+          created_at: string
+        }
+        Insert: {
+          agency_id: string
+          run_id: string
+          step: string
+          level?: string
+          message_key: string
+          params?: Json
+          created_at?: string
+        }
+        Update: {
+          agency_id?: string
+          run_id?: string
+          step?: string
+          level?: string
+          message_key?: string
+          params?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      update_runs: {
+        Row: {
+          id: string
+          agency_id: string
+          site_id: string
+          created_by: string | null
+          status: string
+          items: Json
+          verdict: string | null
+          reason_key: string | null
+          reason_params: Json
+          attempt: number
+          max_attempts: number
+          worker_id: string | null
+          lease_until: string | null
+          not_before: string
+          step_started_at: string | null
+          step_state: Json
+          cancel_requested: boolean
+          created_at: string
+          started_at: string | null
+          finished_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          site_id: string
+          created_by?: string | null
+          status?: string
+          items: Json
+          verdict?: string | null
+          reason_key?: string | null
+          reason_params?: Json
+          attempt?: number
+          max_attempts?: number
+          worker_id?: string | null
+          lease_until?: string | null
+          not_before?: string
+          step_started_at?: string | null
+          step_state?: Json
+          cancel_requested?: boolean
+          created_at?: string
+          started_at?: string | null
+          finished_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          site_id?: string
+          created_by?: string | null
+          status?: string
+          items?: Json
+          verdict?: string | null
+          reason_key?: string | null
+          reason_params?: Json
+          attempt?: number
+          max_attempts?: number
+          worker_id?: string | null
+          lease_until?: string | null
+          not_before?: string
+          step_started_at?: string | null
+          step_state?: Json
+          cancel_requested?: boolean
+          created_at?: string
+          started_at?: string | null
+          finished_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -433,17 +603,23 @@ export type Database = {
     Functions: {
       accept_invitation: { Args: { p_token: string | null }; Returns: string }
       acknowledge_alert: { Args: { p_alert: string | null }; Returns: undefined }
+      advance_update_run: { Args: { p_run: string | null; p_worker: string | null; p_status: string | null; p_step_state?: Json | null; p_verdict?: string | null; p_reason_key?: string | null; p_reason_params?: Json | null; p_items?: Json | null }; Returns: undefined }
+      cancel_update_run: { Args: { p_run: string | null }; Returns: undefined }
       claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
+      claim_update_run: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['update_runs']['Row'][] }
       complete_alert_notification: { Args: { p_alert: string | null; p_kind: string | null; p_sent: boolean | null }; Returns: undefined }
       consume_pairing_code: { Args: { p_code_hash: string | null; p_secret_box: string | null; p_connector_version: string | null }; Returns: { site_id: string; agency_id: string; secret_version: number }[] }
       create_agency: { Args: { p_name: string | null }; Returns: string }
       create_pairing_code: { Args: { p_site: string | null }; Returns: string }
+      create_update_run: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       ingest_heartbeat: { Args: { p_site: string | null; p_snapshot: Json | null; p_components: Json | null }; Returns: number }
       invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
       peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
       record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
+      release_update_run: { Args: { p_run: string | null; p_worker: string | null; p_delay_seconds?: number | null }; Returns: undefined }
       remove_member: { Args: { p_user: string | null }; Returns: undefined }
+      renew_update_run: { Args: { p_run: string | null; p_worker: string | null; p_lease_seconds?: number | null }; Returns: boolean }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }

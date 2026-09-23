@@ -42,6 +42,8 @@ class Verploy_Rest_Endpoints {
 			'/maintenance'     => array( 'maintenance', $run + array( 'enabled' => array( 'required' => true, 'type' => 'boolean' ), 'ttl' => array( 'type' => 'integer', 'default' => 900 ) ), true ),
 			'/rollback'        => array( 'rollback', $run, true ),
 			'/cleanup'         => array( 'cleanup', $run, false ),
+			'/run/pages'       => array( 'pages', $run + array( 'keys' => array( 'type' => array( 'array', 'null' ), 'default' => null ), 'extra_paths' => array( 'type' => 'array', 'default' => array() ) ), false ),
+			'/heartbeat/now'   => array( 'heartbeat', $run, false ),
 		);
 		foreach ( $routes as $route => $def ) {
 			list( $method, $args, $needs_lock ) = $def;
@@ -95,6 +97,12 @@ class Verploy_Rest_Endpoints {
 					return new WP_REST_Response( Verploy_Run_Engine::set_maintenance( $run_id, (bool) $request->get_param( 'enabled' ), (int) $request->get_param( 'ttl' ) ), 200 );
 				case 'rollback':
 					return new WP_REST_Response( Verploy_Run_Engine::rollback( $run_id ), 200 );
+				case 'pages':
+					$keys = $request->get_param( 'keys' );
+					return new WP_REST_Response( array( 'pages' => Verploy_Run_Engine::pages( is_array( $keys ) ? array_map( 'strval', $keys ) : null, array_map( 'strval', (array) $request->get_param( 'extra_paths' ) ) ) ), 200 );
+				case 'heartbeat':
+					$sent = Verploy_Heartbeat::send();
+					return is_wp_error( $sent ) ? new WP_Error( 'verploy_heartbeat_failed', $sent->get_error_message(), array( 'status' => 502 ) ) : new WP_REST_Response( array( 'sent' => true ), 200 );
 				case 'cleanup':
 					return new WP_REST_Response( Verploy_Run_Engine::cleanup( $run_id ), 200 );
 			}

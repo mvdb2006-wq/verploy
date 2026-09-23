@@ -10,12 +10,13 @@ const PG_TO_TS = {
   uuid: 'string', text: 'string', 'character varying': 'string', 'timestamp with time zone': 'string',
   date: 'string', integer: 'number', bigint: 'number', smallint: 'number', numeric: 'number',
   boolean: 'boolean', jsonb: 'Json', json: 'Json', bytea: 'string',
+  _text: 'string[]', _uuid: 'string[]', _int4: 'number[]',
 }
 const tsType = t => t.endsWith('[]') ? `${tsType(t.slice(0, -2))}[]` : PG_TO_TS[t] ?? (() => { throw new Error(`Onbekend Postgres-type: ${t}`) })()
 
 export async function generate(client) {
   const cols = (await client.query(`
-    select c.table_name, c.column_name, c.data_type, c.is_nullable = 'YES' as nullable,
+    select c.table_name, c.column_name, case when c.data_type = 'ARRAY' then c.udt_name else c.data_type end as data_type, c.is_nullable = 'YES' as nullable,
            (c.column_default is not null or c.is_identity = 'YES' or c.is_generated = 'ALWAYS') as has_default,
            c.is_generated = 'ALWAYS' or c.identity_generation = 'ALWAYS' as generated_always
       from information_schema.columns c
@@ -56,8 +57,11 @@ export async function generate(client) {
       return `${n}${dflt ? '?' : ''}: ${tsType(t.join(' '))} | null`
     }) : []
     const table = /^TABLE\((.*)\)$/.exec(f.ret)
+    const setof = /^SETOF (\w+)$/.exec(f.ret)
     const ret = f.ret === 'void'
       ? 'undefined'
+      : setof && tables.has(setof[1])
+        ? `Database['public']['Tables']['${setof[1]}']['Row'][]`
       : table
         ? `{ ${table[1].split(', ').map(c => { const [n, ...t] = c.split(' '); return `${n}: ${tsType(t.join(' '))}` }).join('; ')} }[]`
         : tsType(f.ret)
