@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export function createClient() {
@@ -23,11 +24,18 @@ export function createClient() {
   )
 }
 
-// Service role client — server-side only, never expose to browser
+// Service role client — server-side only, bypasses RLS entirely
+// Uses @supabase/supabase-js directly (not @supabase/ssr) so the service_role
+// key is sent as the API key header, which Supabase recognises as admin access.
 export function createServiceClient() {
-  return createServerClient(
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession:   false,
+      },
+    }
   )
 }
