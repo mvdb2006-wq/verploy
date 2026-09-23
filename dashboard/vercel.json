@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/v1/cron/check-offline",
-      "schedule": "0 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
