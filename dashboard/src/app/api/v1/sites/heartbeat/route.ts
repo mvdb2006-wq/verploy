@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendAlertEmail } from '@/lib/email'
+import { semverLt, VERPLOY_SLUG, VERPLOY_LATEST } from '@/lib/push-update'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -116,17 +117,24 @@ export async function POST(req: NextRequest) {
 
     // 5. Upsert plugins
     if (Array.isArray(body.plugins) && body.plugins.length > 0) {
-      const pluginRows = body.plugins.map(p => ({
-        site_id:          site.id,
-        slug:             p.file    ?? 'unknown',
-        name:             p.name    ?? 'Unknown plugin',
-        version:          p.version ?? null,
-        latest_version:   p.update_version ?? null,
-        update_available: p.update_available ?? false,
-        active:           p.active  ?? true,
-        vulnerable:       false,
-        last_checked_at:  now.toISOString(),
-      }))
+      const pluginRows = body.plugins.map(p => {
+        // Server-side override: Verploy Connector op < 1.3.0 rapporteert zichzelf
+        // als up-to-date (geen class-updater.php). Wij weten beter.
+        const isOldConnector =
+          p.file === VERPLOY_SLUG && semverLt(p.version, VERPLOY_LATEST)
+
+        return {
+          site_id:          site.id,
+          slug:             p.file    ?? 'unknown',
+          name:             p.name    ?? 'Unknown plugin',
+          version:          p.version ?? null,
+          latest_version:   isOldConnector ? VERPLOY_LATEST : (p.update_version ?? null),
+          update_available: isOldConnector ? true : (p.update_available ?? false),
+          active:           p.active  ?? true,
+          vulnerable:       false,
+          last_checked_at:  now.toISOString(),
+        }
+      })
 
       const { error: pluginError } = await supabase
         .from('site_plugins')
