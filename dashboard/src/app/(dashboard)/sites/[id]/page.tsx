@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { timeAgo, cn, sslSeverity, phpSeverity, vitalsGrade, vitalsColor } from '@/lib/utils'
+import { pushPluginUpdate, semverLt, VERPLOY_SLUG, JOB_RUNNER_MIN } from '@/lib/push-update'
 import TriggerUpdateButton from '@/app/(dashboard)/settings/sites/[id]/TriggerUpdateButton'
 import type { Alert } from '@/types'
 import {
@@ -44,18 +45,36 @@ async function createUpdateJob(formData: FormData): Promise<{ error?: string }> 
   const from_version = formData.get('from_version') as string
   const to_version   = formData.get('to_version') as string
 
-  // Verify site belongs to this agency
-  const { data: site } = await authClient
+  // Verify site belongs to this agency (RLS ownership check)
+  const { data: siteCheck } = await authClient
     .from('sites')
     .select('id')
     .eq('id', site_id)
     .eq('agency_id', membership.agency_id)
     .single()
+  if (!siteCheck) return { error: 'Site niet gevonden' }
+
+  // Use service client for sensitive fields (api_key) + bypass RLS on update_jobs
+  const supabase = createServiceClient()
+
+  const { data: site } = await supabase
+    .from('sites')
+    .select('url, api_key, connector_version')
+    .eq('id', site_id)
+    .single()
   if (!site) return { error: 'Site niet gevonden' }
 
-  // Use service client to bypass RLS on update_jobs
-  const supabase = createServiceClient()
-  const { error } = await supabase
+  // Block Verploy Connector self-update on connector < 1.3.0:
+  // No class-job-runner.php → heartbeat jobs worden genegeerd;
+  // No class-updater.php → update_plugins transient is leeg → Plugin_Upgrader mislukt.
+  if (slug === VERPLOY_SLUG && semverLt(site.connector_version, JOB_RUNNER_MIN)) {
+    return {
+      error: `Connector ${site.connector_version ?? 'onbekend'} kan zichzelf niet automatisch updaten. Upload 1.3.0 handmatig via WP-admin → Plugins → Plugin uploaden: https://app.verploy.com/api/v1/plugin/download`,
+    }
+  }
+
+  // Insert update job, grab the id for status updates
+  const { data: job, error: jobError } = await supabase
     .from('update_jobs')
     .insert({
       site_id,
@@ -68,8 +87,42 @@ async function createUpdateJob(formData: FormData): Promise<{ error?: string }> 
       status:       'pending',
       created_by:   user.id,
     })
+    .select('id')
+    .single()
 
-  if (error) return { error: error.message }
+  if (jobError || !job) return { error: jobError?.message ?? 'Kon job niet aanmaken' }
+
+  // Push update direct naar de WordPress site (sneller dan wachten op volgende heartbeat).
+  // Werkt voor WP.org-plugins op connector 1.2.0+ en alle plugins op 1.3.0+.
+  if (site.url && site.api_key) {
+    const now  = new Date().toISOString()
+    const push = await pushPluginUpdate(site.url, site.api_key, slug)
+
+    if (push.success) {
+      // Push geslaagd → job direct afgerond
+      await supabase
+        .from('update_jobs')
+        .update({
+          status:       'success',
+          started_at:   now,
+          completed_at: now,
+          result_log:   push.log ?? 'Update succesvol via directe push.',
+        })
+        .eq('id', job.id)
+    } else if (!push.timedOut) {
+      // Push mislukt (HTTP-fout, geen timeout) → job markeren als mislukt
+      await supabase
+        .from('update_jobs')
+        .update({
+          status:       'failed',
+          started_at:   now,
+          completed_at: now,
+          result_log:   push.log ?? 'Push mislukt.',
+        })
+        .eq('id', job.id)
+    }
+    // Bij timeout: job blijft 'pending' zodat connector het via de volgende heartbeat oppikt
+  }
 
   revalidatePath(`/sites/${site_id}`)
   return {}
