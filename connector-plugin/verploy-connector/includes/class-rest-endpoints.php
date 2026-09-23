@@ -29,6 +29,79 @@ class Verploy_Rest_Endpoints {
 				'permission_callback' => array( __CLASS__, 'authenticate' ),
 			)
 		);
+		$run = array(
+			'run_id' => array( 'required' => true, 'type' => 'string', 'validate_callback' => array( 'Verploy_Run_Engine', 'valid_run_id' ) ),
+		);
+		$routes = array(
+			'/run/lock'        => array( 'lock', $run + array( 'ttl' => array( 'type' => 'integer', 'default' => 1800 ) ), false ),
+			'/run/release'     => array( 'release', $run, false ),
+			'/run/state'       => array( 'describe', $run, false ),
+			'/staging/build'   => array( 'staging_build', $run, true ),
+			'/updates/apply'   => array( 'apply', $run + array( 'item' => array( 'required' => true, 'type' => 'object' ) ), true ),
+			'/snapshot/create' => array( 'snapshot', $run + array( 'items' => array( 'required' => true, 'type' => 'array' ) ), true ),
+			'/maintenance'     => array( 'maintenance', $run + array( 'enabled' => array( 'required' => true, 'type' => 'boolean' ), 'ttl' => array( 'type' => 'integer', 'default' => 900 ) ), true ),
+			'/rollback'        => array( 'rollback', $run, true ),
+			'/cleanup'         => array( 'cleanup', $run, false ),
+		);
+		foreach ( $routes as $route => $def ) {
+			list( $method, $args, $needs_lock ) = $def;
+			register_rest_route(
+				self::NS,
+				$route,
+				array(
+					'methods'             => 'POST',
+					'args'                => $args,
+					'permission_callback' => array( __CLASS__, 'authenticate' ),
+					'callback'            => function ( WP_REST_Request $request ) use ( $method, $needs_lock ) {
+						return Verploy_Rest_Endpoints::run_action( $method, $needs_lock, $request );
+					},
+				)
+			);
+		}
+	}
+
+	/**
+	 * Voert een run-actie uit met lock-controle en nette foutafhandeling.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function run_action( $method, $needs_lock, WP_REST_Request $request ) {
+		$run_id = (string) $request->get_param( 'run_id' );
+		if ( $needs_lock && ! Verploy_Run_Lock::holds( $run_id ) ) {
+			return new WP_Error( 'verploy_not_locked', 'Run does not hold the site lock.', array( 'status' => 409 ) );
+		}
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		}
+		@ignore_user_abort( true ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		try {
+			switch ( $method ) {
+				case 'lock':
+					$r = Verploy_Run_Lock::acquire( $run_id, (int) $request->get_param( 'ttl' ) );
+					return is_wp_error( $r ) ? $r : new WP_REST_Response( array( 'locked' => true ), 200 );
+				case 'release':
+					Verploy_Run_Lock::release( $run_id );
+					return new WP_REST_Response( array( 'released' => true ), 200 );
+				case 'describe':
+					return new WP_REST_Response( Verploy_Run_Engine::describe( $run_id ), 200 );
+				case 'staging_build':
+					return new WP_REST_Response( Verploy_Run_Engine::staging_build( $run_id, new Verploy_Budget( 20 ) ), 200 );
+				case 'apply':
+					$item = (array) $request->get_param( 'item' );
+					return new WP_REST_Response( Verploy_Run_Engine::apply_update( $item ), 200 );
+				case 'snapshot':
+					return new WP_REST_Response( Verploy_Run_Engine::snapshot_create( $run_id, (array) $request->get_param( 'items' ), new Verploy_Budget( 20 ) ), 200 );
+				case 'maintenance':
+					return new WP_REST_Response( Verploy_Run_Engine::set_maintenance( $run_id, (bool) $request->get_param( 'enabled' ), (int) $request->get_param( 'ttl' ) ), 200 );
+				case 'rollback':
+					return new WP_REST_Response( Verploy_Run_Engine::rollback( $run_id ), 200 );
+				case 'cleanup':
+					return new WP_REST_Response( Verploy_Run_Engine::cleanup( $run_id ), 200 );
+			}
+		} catch ( Throwable $e ) {
+			return new WP_Error( 'verploy_run_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+		return new WP_Error( 'verploy_unknown_action', 'Unknown action.', array( 'status' => 400 ) );
 	}
 
 	/**

@@ -8,6 +8,8 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 VERSION="$(sed -n "s/^define( 'VERPLOY_VERSION', '\([0-9.]*\)' );/\1/p" "$HERE/verploy-connector/verploy-connector.php")"
 : "${WP_LOAD:?zet WP_LOAD naar wp-load.php van een test-WordPress met deze plugin actief}"
 : "${PHPCS:?zet PHPCS naar phpcs.phar (met PHPCompatibility geïnstalleerd)}"
+: "${ENGINE_WP_DIR:?zet ENGINE_WP_DIR naar de map van een test-WordPress op MySQL met de labplugins (tests/lab)}"
+: "${ENGINE_SITE:?zet ENGINE_SITE naar '<url> <site-id> <secret>' van die test-WordPress}"
 
 echo "▶ PHP 7.4-compatibiliteit"
 php "$PHPCS" --standard=PHPCompatibility --runtime-set testVersion 7.4- -q "$HERE/verploy-connector"
@@ -17,6 +19,10 @@ echo "▶ Integratietests in WordPress"
 WP_PLUGIN_DIR="$(dirname "$WP_LOAD")/wp-content/plugins/verploy-connector"
 rm -rf "$WP_PLUGIN_DIR" && cp -r "$HERE/verploy-connector" "$WP_PLUGIN_DIR"
 php "$HERE/tests/run-tests.php" 2>/dev/null
+echo "▶ Update-engine (staging, deploy, rollback) op MySQL"
+rm -rf "$ENGINE_WP_DIR/wp-content/plugins/verploy-connector" && cp -r "$HERE/verploy-connector" "$ENGINE_WP_DIR/wp-content/plugins/verploy-connector"
+# shellcheck disable=SC2086
+php "$HERE/tests/engine-test.php" $ENGINE_SITE
 
 DIST="$HERE/dist"; rm -rf "$DIST"; mkdir -p "$DIST"
 STAGE="$(mktemp -d)"

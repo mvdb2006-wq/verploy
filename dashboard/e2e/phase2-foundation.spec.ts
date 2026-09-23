@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { WP, WP_PASS, WP_USER } from './support/env'
+import { CONNECTOR_RELEASE } from '../src/lib/connector/release'
 const run = Date.now().toString(36)
 const owner = { email: `owner-${run}@example.test`, password: 'correct-horse-battery' }
 const colleague = { email: `collega-${run}@example.test`, password: 'correct-horse-battery-2' }
@@ -87,7 +88,7 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await expect(page.getByText('Plugins en thema\'s')).toBeVisible()
     await expect(page.getByText('Verploy Connector')).toBeVisible()
     await expect(page.locator('dd').filter({ hasText: /^7\.\d/ })).toBeVisible()   // WordPress-versie
-    await expect(page.locator('dd').filter({ hasText: '2.0.0' })).toBeVisible()      // connector-versie
+    await expect(page.locator('dd').filter({ hasText: CONNECTOR_RELEASE.version })).toBeVisible()      // connector-versie
 
     // Tweede heartbeat via "Verbinding testen" werkt ook (nieuwe nonce, zelfde secret)
     await wp.getByRole('button', { name: 'Verbinding testen' }).click()
