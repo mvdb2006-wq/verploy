@@ -1,0 +1,149 @@
+From 4b091b92647168a1fc9da07c5159aca25ed83177 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 22 Sep 2026 22:47:46 +0200
+Subject: [PATCH] fix(site-form): show errors + loading state on addSite action
+
+- Server action now returns error messages instead of silently returning
+- NewSiteForm uses useFormState to display the error to the user
+- Submit button shows spinner + 'Aanmaken...' while pending
+- Validates name/url before DB insert
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ .../settings/sites/new/NewSiteForm.tsx        | 32 +++++++++++++----
+ .../(dashboard)/settings/sites/new/page.tsx   | 35 +++++++++++--------
+ 2 files changed, 46 insertions(+), 21 deletions(-)
+
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx b/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
+index 4f717ea..f02cada 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
+@@ -1,13 +1,28 @@
+ 'use client'
+ 
+-import { ArrowLeft, Globe, Plus } from 'lucide-react'
++import { useFormState, useFormStatus } from 'react-dom'
++import { ArrowLeft, Globe, Plus, Loader2 } from 'lucide-react'
+ import Link from 'next/link'
+ 
++type State = { error?: string } | null
++
++function SubmitButton() {
++  const { pending } = useFormStatus()
++  return (
++    <button type="submit" disabled={pending} className="btn btn-primary w-full">
++      {pending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
++      {pending ? 'Aanmaken…' : 'Site aanmaken'}
++    </button>
++  )
++}
++
+ export default function NewSiteForm({
+   addSite,
+ }: {
+-  addSite: (formData: FormData) => Promise<void>
++  addSite: (prevState: State, formData: FormData) => Promise<State>
+ }) {
++  const [state, formAction] = useFormState(addSite, null)
++
+   return (
+     <div className="p-6 max-w-xl mx-auto">
+       {/* Header */}
+@@ -27,7 +42,13 @@ export default function NewSiteForm({
+           <h2 className="font-bold text-text">Sitegegevens</h2>
+         </div>
+ 
+-        <form action={addSite} className="space-y-4">
++        {state?.error && (
++          <div className="bg-danger/10 border border-danger/20 text-danger text-sm rounded-lg px-4 py-3 mb-4">
++            {state.error}
++          </div>
++        )}
++
++        <form action={formAction} className="space-y-4">
+           <div>
+             <label htmlFor="name" className="label block mb-1.5">
+               Sitenaam <span className="text-danger">*</span>
+@@ -75,10 +96,7 @@ export default function NewSiteForm({
+           </div>
+ 
+           <div className="pt-2">
+-            <button type="submit" className="btn btn-primary w-full">
+-              <Plus size={15} />
+-              Site aanmaken
+-            </button>
++            <SubmitButton />
+           </div>
+         </form>
+       </div>
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx b/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
+index cc1b2b7..d023896 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
+@@ -1,5 +1,3 @@
+-'use server'
+-
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
+ import { revalidatePath } from 'next/cache'
+@@ -20,7 +18,10 @@ export default async function NewSitePage() {
+ 
+   if (!membership) redirect('/dashboard')
+ 
+-  async function addSite(formData: FormData) {
++  async function addSite(
++    prevState: { error?: string } | null,
++    formData: FormData,
++  ): Promise<{ error?: string } | null> {
+     'use server'
+     const supabase = createClient()
+     const { data: { user } } = await supabase.auth.getUser()
+@@ -32,27 +33,33 @@ export default async function NewSitePage() {
+       .eq('user_id', user.id)
+       .single()
+ 
+-    if (!membership) return
++    if (!membership) {
++      return { error: 'Geen bureau-lidmaatschap gevonden. Neem contact op met support.' }
++    }
++
++    const name       = (formData.get('name')        as string | null) ?? ''
++    const rawUrl     = (formData.get('url')          as string | null) ?? ''
++    const clientName = (formData.get('client_name') as string | null) ?? ''
++    const url        = rawUrl.replace(/\/$/, '').trim()
+ 
+-    const name = formData.get('name') as string
+-    const url = (formData.get('url') as string).replace(/\/$/, '') // strip trailing slash
+-    const clientName = (formData.get('client_name') as string) || null
++    if (!name.trim())  return { error: 'Vul een sitenaam in.' }
++    if (!url)          return { error: 'Vul een geldige website-URL in.' }
+ 
+     const { data: site, error } = await supabase
+       .from('sites')
+       .insert({
+-        agency_id: membership.agency_id,
+-        name: name.trim(),
+-        url: url.trim(),
+-        client_name: clientName?.trim() || null,
+-        status: 'unknown',
++        agency_id:   membership.agency_id,
++        name:        name.trim(),
++        url,
++        client_name: clientName.trim() || null,
++        status:      'unknown',
+       })
+       .select('id, api_key')
+       .single()
+ 
+     if (error || !site) {
+-      console.error('Fout bij aanmaken site:', error)
+-      return
++      console.error('[verploy] Fout bij aanmaken site:', error)
++      return { error: error?.message ?? 'Onbekende fout bij aanmaken site. Probeer het opnieuw.' }
+     }
+ 
+     revalidatePath('/settings')
+-- 
+2.43.0
+

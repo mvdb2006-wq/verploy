@@ -1,0 +1,108 @@
+From 856ca4f7ddb1986f7c31d89679f18006460c609e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 23 Sep 2026 17:55:53 +0200
+Subject: [PATCH] feat(plugin): handmatige heartbeat knop + versie 1.1.0
+
+- Nieuwe "Nu versturen naar Verploy" knop op de plugin settings pagina
+- Direct een heartbeat versturen zonder te wachten op WP-cron
+- Verploy_Heartbeat::send() wordt aangeroepen bij POST verploy_send_heartbeat
+- Success/error notice getoond na versturen
+- Plugin versie verhoogd naar 1.1.0
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ .../includes/class-admin.php                  | 40 +++++++++++++++----
+ .../verploy-connector/verploy-connector.php   |  4 +-
+ 2 files changed, 35 insertions(+), 9 deletions(-)
+
+diff --git a/connector-plugin/verploy-connector/includes/class-admin.php b/connector-plugin/verploy-connector/includes/class-admin.php
+index 9ce1186..e3d7874 100644
+--- a/connector-plugin/verploy-connector/includes/class-admin.php
++++ b/connector-plugin/verploy-connector/includes/class-admin.php
+@@ -68,6 +68,17 @@ class Verploy_Admin {
+ 				? [ 'ok' => false, 'message' => $response->get_error_message() ]
+ 				: [ 'ok' => true,  'message' => __( 'Connected successfully.', 'verploy-connector' ) ];
+ 		}
++
++		// Handle manual heartbeat
++		$heartbeat_result = null;
++		if ( isset( $_POST['verploy_send_heartbeat'] ) && $connected ) {
++			check_admin_referer( 'verploy_heartbeat' );
++			Verploy_Heartbeat::send();
++			$heartbeat = get_option( 'verploy_last_heartbeat', null );
++			$heartbeat_result = $heartbeat && $heartbeat['success']
++				? [ 'ok' => true,  'message' => __( 'Heartbeat verstuurd naar Verploy!', 'verploy-connector' ) ]
++				: [ 'ok' => false, 'message' => isset( $heartbeat['error'] ) ? $heartbeat['error'] : __( 'Heartbeat mislukt.', 'verploy-connector' ) ];
++		}
+ 		?>
+ 		<div class="wrap">
+ 			<h1 style="display:flex;align-items:center;gap:10px;">
+@@ -85,6 +96,12 @@ class Verploy_Admin {
+ 				</div>
+ 			<?php endif; ?>
+ 
++			<?php if ( $heartbeat_result ) : ?>
++				<div class="notice notice-<?php echo $heartbeat_result['ok'] ? 'success' : 'error'; ?> is-dismissible">
++					<p><?php echo esc_html( $heartbeat_result['message'] ); ?></p>
++				</div>
++			<?php endif; ?>
++
+ 			<!-- Status card -->
+ 			<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px 24px;margin:20px 0;max-width:640px;">
+ 				<h2 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:#666;">
+@@ -147,13 +164,22 @@ class Verploy_Admin {
+ 			</form>
+ 
+ 			<?php if ( $connected ) : ?>
+-				<form method="post" style="margin-top:0;max-width:640px;">
+-					<?php wp_nonce_field( 'verploy_test' ); ?>
+-					<input type="hidden" name="verploy_test_connection" value="1">
+-					<button type="submit" class="button button-secondary">
+-						<?php esc_html_e( 'Test connection', 'verploy-connector' ); ?>
+-					</button>
+-				</form>
++				<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:0;max-width:640px;">
++					<form method="post">
++						<?php wp_nonce_field( 'verploy_test' ); ?>
++						<input type="hidden" name="verploy_test_connection" value="1">
++						<button type="submit" class="button button-secondary">
++							<?php esc_html_e( 'Test connection', 'verploy-connector' ); ?>
++						</button>
++					</form>
++					<form method="post">
++						<?php wp_nonce_field( 'verploy_heartbeat' ); ?>
++						<input type="hidden" name="verploy_send_heartbeat" value="1">
++						<button type="submit" class="button button-primary">
++							&#9650; <?php esc_html_e( 'Nu versturen naar Verploy', 'verploy-connector' ); ?>
++						</button>
++					</form>
++				</div>
+ 			<?php endif; ?>
+ 
+ 			<hr style="margin:32px 0;">
+diff --git a/connector-plugin/verploy-connector/verploy-connector.php b/connector-plugin/verploy-connector/verploy-connector.php
+index 9aa2505..249b680 100644
+--- a/connector-plugin/verploy-connector/verploy-connector.php
++++ b/connector-plugin/verploy-connector/verploy-connector.php
+@@ -3,7 +3,7 @@
+  * Plugin Name: Verploy Connector
+  * Plugin URI:  https://verploy.com
+  * Description: Connects your WordPress site to Verploy — automated update testing, server health monitoring, and client reporting for agencies.
+- * Version:     1.0.0
++ * Version:     1.1.0
+  * Author:      Verploy
+  * Author URI:  https://verploy.com
+  * License:     GPL-2.0-or-later
+@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
+ 	exit;
+ }
+ 
+-define( 'VERPLOY_VERSION',    '1.0.0' );
++define( 'VERPLOY_VERSION',    '1.1.0' );
+ define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+ define( 'VERPLOY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+ define( 'VERPLOY_API_BASE',   'https://app.verploy.com/api/v1' );
+-- 
+2.43.0
+

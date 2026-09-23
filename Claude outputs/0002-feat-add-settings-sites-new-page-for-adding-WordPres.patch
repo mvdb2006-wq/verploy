@@ -1,0 +1,94 @@
+From d85a97c8ed3568ca35bf4e507b7bc88273095f56 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 22 Sep 2026 19:15:33 +0200
+Subject: [PATCH 2/3] feat: add /settings/sites/new page for adding WordPress
+ sites
+
+- NewSiteForm.tsx: client component with name, URL, client_name fields
+- page.tsx: server component with Server Action to insert into sites table
+- success/page.tsx: shows generated API key with copy button and setup steps
+- success/CopyButton.tsx: client component for clipboard copy with feedback
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ .../src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx  | 2 ++
+ dashboard/src/app/(dashboard)/settings/sites/new/page.tsx   | 1 +
+ .../src/app/(dashboard)/settings/sites/new/success/page.tsx | 6 +++++-
+ 3 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx b/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
+index 8626eb6..4f717ea 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/new/NewSiteForm.tsx
+@@ -10,6 +10,7 @@ export default function NewSiteForm({
+ }) {
+   return (
+     <div className="p-6 max-w-xl mx-auto">
++      {/* Header */}
+       <div className="flex items-center gap-3 mb-6">
+         <Link href="/settings" className="text-muted hover:text-text transition-colors">
+           <ArrowLeft size={18} />
+@@ -82,6 +83,7 @@ export default function NewSiteForm({
+         </form>
+       </div>
+ 
++      {/* Uitleg */}
+       <div className="card bg-surface2/50">
+         <p className="text-sm font-semibold text-text mb-2">Hoe werkt het?</p>
+         <ol className="text-sm text-muted space-y-2 list-none">
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx b/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
+index 80595b5..cc1b2b7 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/new/page.tsx
+@@ -1,3 +1,4 @@
++'use server'
+ 
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/new/success/page.tsx b/dashboard/src/app/(dashboard)/settings/sites/new/success/page.tsx
+index b0aa0aa..4c0c22d 100644
+--- a/dashboard/src/app/(dashboard)/settings/sites/new/success/page.tsx
++++ b/dashboard/src/app/(dashboard)/settings/sites/new/success/page.tsx
+@@ -1,5 +1,5 @@
+ import Link from 'next/link'
+-import { CheckCircle2, ArrowRight } from 'lucide-react'
++import { CheckCircle2, Copy, ArrowRight } from 'lucide-react'
+ import CopyButton from './CopyButton'
+ 
+ export const metadata = { title: 'Site toegevoegd' }
+@@ -13,6 +13,7 @@ export default function SuccessPage({
+ 
+   return (
+     <div className="p-6 max-w-xl mx-auto">
++      {/* Succes header */}
+       <div className="flex flex-col items-center text-center mb-8 pt-4">
+         <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+           <CheckCircle2 size={28} className="text-accent" />
+@@ -23,6 +24,7 @@ export default function SuccessPage({
+         </p>
+       </div>
+ 
++      {/* API key */}
+       <div className="card mb-5">
+         <p className="label mb-3">Jouw API-sleutel</p>
+         <div className="bg-surface2 rounded-lg px-4 py-3 flex items-center justify-between gap-3 mb-3">
+@@ -35,6 +37,7 @@ export default function SuccessPage({
+         </p>
+       </div>
+ 
++      {/* Stappen */}
+       <div className="card mb-5">
+         <p className="text-sm font-bold text-text mb-4">Volgende stappen</p>
+         <ol className="space-y-4">
+@@ -68,6 +71,7 @@ export default function SuccessPage({
+         </ol>
+       </div>
+ 
++      {/* Acties */}
+       <div className="flex gap-3">
+         <Link href="/dashboard" className="btn btn-primary flex-1 justify-center">
+           Naar dashboard
+-- 
+2.43.0
+

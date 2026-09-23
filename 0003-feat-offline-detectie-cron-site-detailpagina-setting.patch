@@ -1,0 +1,363 @@
+From 23cbf1ef6715f710faab98d51190195a7f2eaa47 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 22 Sep 2026 21:57:46 +0200
+Subject: [PATCH 3/3] feat: offline-detectie cron, site-detailpagina, settings
+ verbeterd
+
+- vercel.json: cron elk uur op /api/v1/cron/check-offline
+- check-offline route: zet sites op 'offline' als last_ping_at > 2 uur geleden
+- /settings/sites/[id]: detailpagina met WP-versie, PHP, thema, plugins
+- settings: sites zijn klikbaar met link naar detailpagina, + Site toevoegen knop
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0138xyUMTBotJMR8DdLUjKQ5
+---
+ .../src/app/(dashboard)/settings/page.tsx     |  44 ++--
+ .../(dashboard)/settings/sites/[id]/page.tsx  | 189 ++++++++++++++++++
+ .../app/api/v1/cron/check-offline/route.ts    |  47 +++++
+ dashboard/vercel.json                         |   8 +
+ 4 files changed, 268 insertions(+), 20 deletions(-)
+ create mode 100644 dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
+ create mode 100644 dashboard/src/app/api/v1/cron/check-offline/route.ts
+ create mode 100644 dashboard/vercel.json
+
+diff --git a/dashboard/src/app/(dashboard)/settings/page.tsx b/dashboard/src/app/(dashboard)/settings/page.tsx
+index f201932..4ddbd35 100644
+--- a/dashboard/src/app/(dashboard)/settings/page.tsx
++++ b/dashboard/src/app/(dashboard)/settings/page.tsx
+@@ -1,7 +1,7 @@
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
+ import { formatDate } from '@/lib/utils'
+-import { Settings, Key, Globe, Copy } from 'lucide-react'
++import { Settings, Key, Globe, Copy, ChevronRight, Plus } from 'lucide-react'
+ 
+ export const metadata = { title: 'Instellingen' }
+ 
+@@ -76,38 +76,42 @@ export default async function SettingsPage() {
+ 
+       {/* Sites + API keys */}
+       <div className="card p-0 overflow-hidden">
+-        <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+-          <Globe size={15} className="text-accent" />
+-          <h2 className="font-bold text-text">Sites & API-sleutels</h2>
++        <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-2">
++          <div className="flex items-center gap-2">
++            <Globe size={15} className="text-accent" />
++            <h2 className="font-bold text-text">Sites & API-sleutels</h2>
++          </div>
++          <Link href="/settings/sites/new" className="btn btn-ghost btn-sm flex items-center gap-1 text-xs">
++            <Plus size={13} /> Site toevoegen
++          </Link>
+         </div>
+ 
+         {(sites ?? []).length === 0 ? (
+-          <p className="px-5 py-4 text-sm text-muted">Geen sites gevonden.</p>
++          <div className="px-5 py-8 text-center">
++            <p className="text-sm text-muted mb-3">Nog geen sites toegevoegd.</p>
++            <Link href="/settings/sites/new" className="btn btn-primary btn-sm">
++              <Plus size={13} /> Eerste site toevoegen
++            </Link>
++          </div>
+         ) : (
+           <div className="divide-y divide-border">
+             {(sites ?? []).map(site => (
+-              <div key={site.id} className="px-5 py-4">
++              <Link key={site.id} href={`/settings/sites/${site.id}`} className="block px-5 py-4 hover:bg-surface2/50 transition-colors group">
+                 <div className="flex items-start justify-between gap-3 mb-2">
+-                  <div>
++                  <div className="min-w-0">
+                     <p className="text-sm font-semibold text-text">{site.name}</p>
+-                    <p className="text-xs text-subtle">{site.url}</p>
++                    <p className="text-xs text-subtle truncate">{site.url}</p>
++                  </div>
++                  <div className="flex items-center gap-2 flex-shrink-0">
++                    <span className="badge badge-muted capitalize text-[10px]">{site.status}</span>
++                    <ChevronRight size={14} className="text-subtle group-hover:text-muted transition-colors" />
+                   </div>
+-                  <span className="badge badge-muted capitalize text-[10px]">{site.status}</span>
+                 </div>
+                 <div className="bg-surface2 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                   <code className="text-xs font-mono text-muted truncate">{site.api_key}</code>
+-                  <button
+-                    className="text-subtle hover:text-text flex-shrink-0 transition-colors"
+-                    title="Kopieer API-sleutel"
+-                    data-copy={site.api_key}
+-                  >
+-                    <Copy size={13} />
+-                  </button>
++                  <Copy size={13} className="text-subtle flex-shrink-0" />
+                 </div>
+-                <p className="text-[10px] text-subtle mt-1.5">
+-                  Gebruik deze sleutel in de Verploy connector plugin op deze site.
+-                </p>
+-              </div>
++              </Link>
+             ))}
+           </div>
+         )}
+diff --git a/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx b/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
+new file mode 100644
+index 0000000..a0ce8d9
+--- /dev/null
++++ b/dashboard/src/app/(dashboard)/settings/sites/[id]/page.tsx
+@@ -0,0 +1,189 @@
++import { createClient } from '@/lib/supabase/server'
++import { redirect, notFound } from 'next/navigation'
++import Link from 'next/link'
++import {
++  ArrowLeft, Globe, Wifi, WifiOff, Clock, Code2,
++  Puzzle, Palette, Key, Copy,
++} from 'lucide-react'
++import { timeAgo, formatDate, phpSeverity } from '@/lib/utils'
++import CopyButton from '../new/success/CopyButton'
++
++export async function generateMetadata({ params }: { params: { id: string } }) {
++  return { title: 'Site details' }
++}
++
++type WpData = {
++  wp_version?: string | null
++  php_version?: string | null
++  site_url?: string | null
++  theme?: string | null
++  plugins?: string[]
++}
++
++function StatusBadge({ status }: { status: string }) {
++  const map: Record<string, string> = {
++    online:  'badge-accent',
++    offline: 'badge-danger',
++    unknown: 'badge-muted',
++    pending: 'badge-warn',
++  }
++  return (
++    <span className={`badge ${map[status] ?? 'badge-muted'} capitalize`}>
++      {status === 'online' ? <Wifi size={11} className="inline mr-1" /> : <WifiOff size={11} className="inline mr-1" />}
++      {status}
++    </span>
++  )
++}
++
++export default async function SiteDetailPage({ params }: { params: { id: string } }) {
++  const supabase = createClient()
++  const { data: { user } } = await supabase.auth.getUser()
++  if (!user) redirect('/login')
++
++  const { data: membership } = await supabase
++    .from('agency_members')
++    .select('agency_id')
++    .eq('user_id', user.id)
++    .single()
++
++  if (!membership) redirect('/dashboard')
++
++  const { data: site } = await supabase
++    .from('sites')
++    .select('id, name, url, client_name, status, api_key, created_at, last_ping_at, wp_data')
++    .eq('id', params.id)
++    .eq('agency_id', membership.agency_id)
++    .single()
++
++  if (!site) notFound()
++
++  const wp = (site.wp_data ?? {}) as WpData
++  const phpBad = phpSeverity(wp.php_version ?? null)
++
++  return (
++    <div className="p-6 max-w-2xl mx-auto">
++      {/* Header */}
++      <div className="flex items-center gap-3 mb-6">
++        <Link href="/settings" className="text-muted hover:text-text transition-colors">
++          <ArrowLeft size={18} />
++        </Link>
++        <div className="flex-1 min-w-0">
++          <p className="section-label mb-0.5">Instellingen → Sites</p>
++          <h1 className="text-2xl font-extrabold text-text tracking-tight truncate">{site.name}</h1>
++        </div>
++        <StatusBadge status={site.status} />
++      </div>
++
++      {/* Algemeen */}
++      <div className="card mb-4">
++        <div className="flex items-center gap-2 mb-4">
++          <Globe size={15} className="text-accent" />
++          <h2 className="font-bold text-text">Sitegegevens</h2>
++        </div>
++        <div className="grid grid-cols-2 gap-4 text-sm">
++          <div>
++            <p className="label">URL</p>
++            <a href={site.url} target="_blank" rel="noopener" className="text-accent hover:underline font-mono text-xs break-all">
++              {site.url}
++            </a>
++          </div>
++          {site.client_name && (
++            <div>
++              <p className="label">Klant</p>
++              <p className="text-text font-semibold">{site.client_name}</p>
++            </div>
++          )}
++          <div>
++            <p className="label">Toegevoegd</p>
++            <p className="text-text">{formatDate(site.created_at)}</p>
++          </div>
++          <div>
++            <p className="label">Laatste ping</p>
++            <p className="text-text flex items-center gap-1">
++              <Clock size={12} className="text-muted" />
++              {site.last_ping_at ? timeAgo(site.last_ping_at) : <span className="text-muted">Nog niet gepingd</span>}
++            </p>
++          </div>
++        </div>
++      </div>
++
++      {/* API-sleutel */}
++      <div className="card mb-4">
++        <div className="flex items-center gap-2 mb-3">
++          <Key size={15} className="text-accent" />
++          <h2 className="font-bold text-text">API-sleutel</h2>
++        </div>
++        <div className="bg-surface2 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
++          <code className="text-xs font-mono text-muted break-all">{site.api_key}</code>
++          <CopyButton value={site.api_key} />
++        </div>
++      </div>
++
++      {/* WordPress-info */}
++      {Object.keys(wp).length > 0 ? (
++        <div className="card mb-4">
++          <div className="flex items-center gap-2 mb-4">
++            <Code2 size={15} className="text-accent" />
++            <h2 className="font-bold text-text">WordPress omgeving</h2>
++          </div>
++          <div className="grid grid-cols-2 gap-4 text-sm mb-4">
++            <div>
++              <p className="label">WordPress</p>
++              <p className="text-text font-semibold">{wp.wp_version ?? '—'}</p>
++            </div>
++            <div>
++              <p className="label">PHP</p>
++              <p className={`font-semibold ${
++                phpBad === 'danger' ? 'text-danger' :
++                phpBad === 'warn'   ? 'text-warn'   : 'text-text'
++              }`}>
++                {wp.php_version ?? '—'}
++                {phpBad === 'danger' && <span className="ml-1 text-xs font-normal">(verouderd!)</span>}
++                {phpBad === 'warn'   && <span className="ml-1 text-xs font-normal">(update aanbevolen)</span>}
++              </p>
++            </div>
++            {wp.theme && (
++              <div className="col-span-2">
++                <p className="label flex items-center gap-1"><Palette size={11} /> Thema</p>
++                <p className="text-text">{wp.theme}</p>
++              </div>
++            )}
++          </div>
++
++          {/* Plugins */}
++          {wp.plugins && wp.plugins.length > 0 && (
++            <div>
++              <p className="label flex items-center gap-1 mb-2">
++                <Puzzle size={11} /> Actieve plugins ({wp.plugins.length})
++              </p>
++              <div className="bg-surface2 rounded-lg px-3 py-2 max-h-48 overflow-y-auto">
++                <ul className="space-y-1">
++                  {wp.plugins.map((plugin, i) => (
++                    <li key={i} className="text-xs text-muted font-mono">{plugin}</li>
++                  ))}
++                </ul>
++              </div>
++            </div>
++          )}
++        </div>
++      ) : (
++        <div className="card mb-4 bg-surface2/50">
++          <p className="text-sm text-muted text-center py-2">
++            WordPress-data beschikbaar zodra de plugin zijn eerste ping stuurt.
++          </p>
++        </div>
++      )}
++
++      {/* Acties */}
++      <div className="flex gap-3">
++        <Link href="/settings" className="btn btn-ghost flex-1 justify-center">
++          Terug naar instellingen
++        </Link>
++        <a href={site.url} target="_blank" rel="noopener" className="btn btn-primary flex-1 justify-center">
++          Site openen
++          <Globe size={14} />
++        </a>
++      </div>
++    </div>
++  )
++}
+diff --git a/dashboard/src/app/api/v1/cron/check-offline/route.ts b/dashboard/src/app/api/v1/cron/check-offline/route.ts
+new file mode 100644
+index 0000000..6b7fdbf
+--- /dev/null
++++ b/dashboard/src/app/api/v1/cron/check-offline/route.ts
+@@ -0,0 +1,47 @@
++import { createClient } from '@/lib/supabase/server'
++import { NextRequest, NextResponse } from 'next/server'
++
++// Vercel roept deze route elk uur aan via vercel.json crons.
++// Sites die langer dan 2 uur niet gepingd hebben worden op 'offline' gezet.
++
++export async function GET(req: NextRequest) {
++  // Vercel stuurt de CRON_SECRET als Authorization header
++  const authHeader = req.headers.get('authorization')
++  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
++    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
++  }
++
++  const supabase = createClient()
++
++  // Sites die ooit gepingd hebben maar nu te lang stil zijn
++  const { data: staleSites, error } = await supabase
++    .from('sites')
++    .select('id, name')
++    .eq('status', 'online')
++    .lt('last_ping_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
++
++  if (error) {
++    console.error('[verploy cron] query error:', error)
++    return NextResponse.json({ error: 'Server error' }, { status: 500 })
++  }
++
++  if (!staleSites || staleSites.length === 0) {
++    return NextResponse.json({ ok: true, updated: 0 })
++  }
++
++  const staleIds = staleSites.map(s => s.id)
++
++  const { error: updateError } = await supabase
++    .from('sites')
++    .update({ status: 'offline' })
++    .in('id', staleIds)
++
++  if (updateError) {
++    console.error('[verploy cron] update error:', updateError)
++    return NextResponse.json({ error: 'Server error' }, { status: 500 })
++  }
++
++  console.log(`[verploy cron] ${staleSites.length} site(s) offline gezet:`, staleSites.map(s => s.name))
++
++  return NextResponse.json({ ok: true, updated: staleSites.length })
++}
+diff --git a/dashboard/vercel.json b/dashboard/vercel.json
+new file mode 100644
+index 0000000..2c8f3d9
+--- /dev/null
++++ b/dashboard/vercel.json
+@@ -0,0 +1,8 @@
++{
++  "crons": [
++    {
++      "path": "/api/v1/cron/check-offline",
++      "schedule": "0 * * * *"
++    }
++  ]
++}
+-- 
+2.43.0
+
