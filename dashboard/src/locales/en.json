@@ -306,7 +306,8 @@
       "hostname_mismatch": "the certificate belongs to a different domain name",
       "untrusted": "the certificate is not trusted",
       "unreachable": "the site was unreachable"
-    }
+    },
+    "diagnosis": "Diagnosis: {text}"
   },
   "health": {
     "title": "Health",
@@ -488,6 +489,136 @@
       "verdict_error": "Done: failed.",
       "verdict_cancelled": "Done: cancelled.",
       "done": "Done."
+    }
+  },
+  "diagnosis": {
+    "where": {
+      "staging": "on the test copy",
+      "production": "on the live site"
+    },
+    "detail": {
+      "undefined_function": "calls a function that does not exist ({fn})",
+      "undefined_method": "calls a method that does not exist ({method})",
+      "missing_class": "looks for a class that does not exist ({cls})",
+      "memory": "runs out of memory",
+      "redeclare": "defines a function that already exists ({fn})",
+      "php_version": "requires a different PHP version",
+      "syntax": "contains a syntax error",
+      "fatal_other": "throws a fatal error: {message}"
+    },
+    "install_failed": {
+      "summary": "{plugin} could not be updated {where}.",
+      "cause": "WordPress could not install the new version ({status}). Nothing was tested and nothing went live.",
+      "fix": "Check whether the update works manually (Plugins → Update) and whether the licence of premium plugins is active. Then try again."
+    },
+    "no_write_access": {
+      "summary": "WordPress is not allowed to update its own files on this server.",
+      "cause": "{plugin} could not be installed: {status}. WordPress then asks for FTP credentials and automatic updates are not possible.",
+      "fix": "Give the web server write access to wp-content (or set FS_METHOD to direct in wp-config.php) and try again. The hosting provider can help with this."
+    },
+    "crashed": {
+      "summary": "{plugin} {to} crashes the site during installation.",
+      "cause": "Right after installing the new version the site stopped responding {where}. This points to a fatal error in the new version that already occurs while loading.",
+      "fix": "Keep {plugin} on version {from}. Report the problem to the plugin author and try a later version again through Verploy."
+    },
+    "undefined_function": {
+      "summary": "{plugin} {to} calls a function that does not exist ({fn}).",
+      "cause": "After the update PHP threw a fatal error in {file} (line {line}): the function {fn} does not exist. Usually that function belongs to another plugin or to a newer WordPress or PHP version, or this release contains a bug.",
+      "fix": "Keep {plugin} on version {from} for now. Check the changelog to see whether the new version requires another plugin or a newer WordPress version, and update that first. If it says nothing about this, send the error message to the plugin author."
+    },
+    "undefined_method": {
+      "summary": "{plugin} {to} calls a method that does not exist ({method}).",
+      "cause": "After the update PHP threw a fatal error in {file} (line {line}): the method {method} does not exist. Usually the new version expects a newer version of another plugin or of WordPress.",
+      "fix": "Keep {plugin} on version {from} for now. Check the changelog for which other plugin or WordPress version is needed and update that first. If it says nothing about this, send the error message to the plugin author."
+    },
+    "missing_class": {
+      "summary": "{plugin} {to} looks for a class that does not exist ({cls}).",
+      "cause": "After the update PHP threw a fatal error in {file} (line {line}): the class {cls} is not loaded. Often a file is missing from the release, or the plugin expects another plugin (for example WooCommerce or a library) that is inactive or too old.",
+      "fix": "Keep {plugin} on version {from} for now. Check that the plugins it depends on are active and up to date. Otherwise send the error message to the plugin author."
+    },
+    "memory": {
+      "summary": "The site runs out of PHP memory after updating {plugin}.",
+      "cause": "PHP stopped in {file} (line {line}) because memory ran out. The new version uses more memory than the server allows.",
+      "fix": "Raise memory_limit with the hosting provider (256 MB is enough for most sites) or set WP_MEMORY_LIMIT in wp-config.php, then try the update again."
+    },
+    "redeclare": {
+      "summary": "{plugin} {to} defines a function that already exists ({fn}).",
+      "cause": "PHP stopped in {file} (line {line}): the function {fn} is defined twice. Usually the new version clashes with another plugin or with an old copy of the same code.",
+      "fix": "Find out which other plugin provides the same function (often a separate helper or add-on plugin) and update or deactivate it at the same time. Until then keep {plugin} on {from}."
+    },
+    "php_version": {
+      "summary": "{plugin} {to} requires a different PHP version than this server has.",
+      "cause": "The new version reports that the server’s PHP version is not supported ({file}, line {line}).",
+      "fix": "Keep {plugin} on {from}, or upgrade PHP with the hosting provider first and then test again with Verploy."
+    },
+    "syntax": {
+      "summary": "{plugin} {to} contains a programming error (syntax error).",
+      "cause": "PHP could not read {file} (line {line}). This is a bug in the release itself, not in your site.",
+      "fix": "Skip this version: keep {plugin} on {from} and wait for a fixed release. Report the error to the plugin author."
+    },
+    "fatal_other": {
+      "summary": "{plugin} {to} throws a fatal PHP error.",
+      "cause": "After the update PHP stopped {where} with the message: {message} ({file}, line {line}).",
+      "fix": "Keep {plugin} on {from} and send this error message to the plugin author. Try a later version again through Verploy."
+    },
+    "conflict": {
+      "summary": "{plugin} does not work with {updated}.",
+      "cause": "After the update {plugin} threw a fatal error {where}: it {detail} ({file}, line {line}). {plugin} itself was not updated; it clashes with the new version of {updated}.",
+      "fix": "Check whether there is a newer version of {plugin} that works with {updated}, and update it first or at the same time. If not, keep {updated} on the current version and report the problem to both authors."
+    },
+    "fatal_unknown": {
+      "summary": "The site shows a critical error after updating {updated}.",
+      "cause": "WordPress showed the “critical error” message {where}, but the exact PHP error could not be captured.",
+      "fix": "Keep the current version. Enable WP_DEBUG_LOG on a test environment and check wp-content/debug.log for the exact message, or report it to the plugin author."
+    },
+    "http": {
+      "summary": "{page} no longer loads correctly after the update ({viewport}).",
+      "cause": "After the update the page returned HTTP status {status} {where}, while it worked before. This is usually caused by a bug in the plugin or by a changed permalink or route structure.",
+      "fix": "Check the page after the update on a test environment and re-save the permalinks (Settings → Permalinks). If the problem remains, keep {updated} on the current version."
+    },
+    "js": {
+      "summary": "After the update {page} shows new JavaScript errors ({viewport}).",
+      "cause": "New errors occurred in the browser: {errors}. Buttons, forms or sliders may no longer work because of this.",
+      "fix": "Check whether the new version needs other scripts (for example a newer jQuery or another plugin), or exclude the page from optimisation and caching plugins. Otherwise keep {updated} on the current version."
+    },
+    "resources": {
+      "summary": "After the update some of the site’s files no longer load ({page}).",
+      "cause": "These scripts or stylesheets returned an error: {resources}. Often the new version moved files while a caching or optimisation plugin still uses the old paths.",
+      "fix": "Clear the cache of caching and optimisation plugins after the update and test again. If the problem remains, keep {updated} on the current version."
+    },
+    "layout": {
+      "summary": "After the update parts of {page} are missing ({viewport}).",
+      "cause": "Parts of the page (such as the header, menu, content or footer) or a large part of the text had disappeared {where} after the update.",
+      "fix": "Look at the screenshots. Often a block or shortcode of {updated} is no longer rendered; check the plugin’s settings after the update."
+    },
+    "visual": {
+      "summary": "{page} looks different after the update ({percent}% difference, {viewport}).",
+      "cause": "The page worked, but the image differed more than allowed. This can be an intended design change in the new version, but also a broken layout.",
+      "fix": "Look at the difference image. If the change is fine, run the update again with a higher threshold or mask the changing part in the test settings. If not, keep {updated} on the current version."
+    },
+    "login": {
+      "summary": "After the update the WordPress login screen no longer works.",
+      "cause": "The login form (wp-login.php) no longer appeared {where}. Security and login plugins can cause this.",
+      "fix": "Check the settings of security and login plugins and keep {updated} on the current version until it is clear what goes wrong."
+    },
+    "unknown": {
+      "summary": "The tests failed after updating {updated}.",
+      "cause": "A difference was found {where}, but the cause cannot be determined clearly from the measurements.",
+      "fix": "Look at the failed tests and screenshots. Keep {updated} on the current version until it is clear what goes wrong."
+    },
+    "ui": {
+      "title": "Diagnosis",
+      "cause": "Cause",
+      "fix": "What you can do",
+      "culprit": "Caused by",
+      "evidence": "Error message",
+      "sourceRules": "Automatic analysis of the error messages and test results.",
+      "sourceAi": "Analysis by AI ({model}) based on the error messages and test results. Check the conclusion before you change anything.",
+      "confidence": {
+        "high": "Confidence: high",
+        "medium": "Confidence: medium",
+        "low": "Confidence: low"
+      }
     }
   }
 }

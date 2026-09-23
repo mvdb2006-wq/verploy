@@ -2,9 +2,9 @@
 Contributors:      verploy
 Tags:              maintenance, updates, monitoring, agency, wordpress
 Requires at least: 5.8
-Tested up to:      6.8
+Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        2.0.0
+Stable tag:        2.2.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,57 +12,57 @@ Connects your WordPress site to Verploy — automated update testing, server hea
 
 == Description ==
 
-**Verploy** is the site intelligence platform for WordPress agencies. Install this lightweight connector plugin on each client site to unlock:
+**Verploy** helps WordPress agencies update client sites safely. Install this connector on each client site to get:
 
-* **Automated update testing** — Before any plugin, theme, or core update goes live, Verploy clones the site to a staging environment and runs automated browser tests. If something breaks, the update is blocked.
-* **Visual regression detection** — Side-by-side screenshots before and after every update catch layout regressions before your client sees them.
-* **Server health monitoring** — PHP version, MySQL version, memory limits, OPcache status, SSL certificate expiry — all tracked automatically.
-* **AI-powered failure diagnosis** — When a test fails, Verploy's AI explains what broke and how to fix it.
-* **White-label monthly reports** — Professional PDF reports in your client's language, with your agency branding, sent automatically each month.
+* **Tested updates** — Before a plugin, theme or core update goes live, Verploy copies the site to a private staging copy on the same server, applies the update there and runs browser tests (errors, broken files, missing page parts, visual comparison on desktop and mobile). If something breaks, nothing goes live.
+* **Automatic rollback** — Updates that pass go live during a short maintenance window with a backup of files and database. If the check after going live fails, the site is restored automatically.
+* **Failure diagnosis** — When a test fails, Verploy explains the likely cause and how to fix it.
+* **Health monitoring** — WordPress, PHP and plugin versions, available updates, memory limit and free disk space.
 
-This plugin acts as the secure bridge between your WordPress site and the Verploy cloud platform. It sends health data, receives update commands, and enables real-time monitoring — all authenticated with your unique API key.
+This plugin is the secure bridge between your site and the Verploy dashboard at app.verploy.com. Every request in both directions is signed (HMAC-SHA256 with a per-site secret, timestamp and one-time nonce).
 
 = Privacy =
 
-This plugin sends site health data (WordPress version, plugin list, server configuration) to Verploy's servers at api.verploy.com. No personal visitor data is collected or transmitted. See [verploy.com/privacy](https://verploy.com/privacy) for the full privacy policy.
+The plugin sends site health data (WordPress, PHP and plugin/theme versions, memory limit, free disk space) to app.verploy.com. During a tested update the Verploy service loads pages of the site to test them. No visitor data or content is sent.
 
 = Requirements =
 
-* A Verploy account — [sign up at verploy.com](https://verploy.com)
-* WordPress 5.8 or higher
-* PHP 7.4 or higher
+* A Verploy account — app.verploy.com
+* WordPress 5.8 or higher, PHP 7.4 or higher
+* For tested updates: a MySQL or MariaDB database and write access for WordPress to its own files
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/verploy-connector` directory, or install through the WordPress Plugins screen.
-2. Activate the plugin through the **Plugins** screen.
-3. Go to **Settings → Verploy** and paste your API key (found in your Verploy dashboard under Settings → Sites → Add site).
-4. Click **Test connection** to confirm everything is working.
+1. Install and activate the plugin.
+2. In the Verploy dashboard, add the site and click **Create pairing code**.
+3. In WordPress go to **Settings → Verploy**, paste the code and click **Connect**. The code is valid for 30 minutes and works once.
 
 == Frequently Asked Questions ==
 
 = Does this plugin slow down my site? =
 
-No. The plugin sends health data to Verploy every 15 minutes via WordPress cron — this runs in the background and has no impact on page load times for visitors.
+No. Health data is sent every 15 minutes in the background via WordPress cron.
 
-= Is my data secure? =
+= Where is the staging copy stored? =
 
-All communication between the plugin and Verploy's API uses HTTPS with Bearer token authentication. Your API key is stored in the WordPress options table and never exposed publicly.
+In `wp-content/verploy-staging/` and in database tables with the prefix `vpst`. It is only reachable with a secret token, sends no e-mail, is not indexed, and is removed after every update. Backups for rollback (`wp-content/verploy-backups/`, tables with prefix `vpbk`) are removed after 7 days.
 
-= Can I use this without a Verploy account? =
+= What happens if I remove the plugin? =
 
-No. This plugin requires an active Verploy account. [Create one at verploy.com](https://verploy.com).
-
-= What data does the plugin send? =
-
-The plugin sends: WordPress version, active plugins and themes (names, versions, update availability), PHP and MySQL versions, server configuration (memory limits, OPcache status), SSL certificate expiry, and site URL. No visitor data or content is ever transmitted.
+All Verploy settings, staging copies and backups are removed.
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release.
+= 2.2.0 =
+* Diagnosis data after a failed test: fatal errors are recorded during the update and made available to Verploy.
+
+= 2.1.0 =
+* Tested updates: staging copy, update, snapshot, maintenance mode, automatic rollback (also when the update crashes the whole site), cleanup.
+
+= 2.0.0 =
+* Pairing with a one-time code; all requests signed with HMAC-SHA256.
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release.
+= 2.2.0 =
+Adds diagnosis data for failed updates.

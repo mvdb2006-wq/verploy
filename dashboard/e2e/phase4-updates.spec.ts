@@ -85,6 +85,11 @@ test('scenario 2 — kapotte update wordt tegengehouden, niets live', async ({ p
   await waitForVerdict(page, 'Tegengehouden')
   await expect(page.getByText('Niets live gezet: de update gaf problemen op de testkopie.')).toBeVisible()
   await expect(page.getByText(/WordPress meldt een kritieke fout|PHP geeft een fatale fout|gaf HTTP 500/).first()).toBeVisible()
+  // fase 5: diagnose met de schuldige plugin en de ontbrekende functie
+  await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible()
+  await expect(page.getByText('Verploy Lab — vp-lab-fatal 1.1.0 roept een functie aan die niet bestaat (verploy_lab_function_that_does_not_exist).')).toBeVisible()
+  await expect(page.getByText('Zekerheid: hoog')).toBeVisible()
+  await expect(page.getByText(/Laat Verploy Lab — vp-lab-fatal voorlopig op versie 1\.0\.0/)).toBeVisible()
   expect((await footer()).status).toBe(200)
   const c = db(); await c.connect()
   try {
@@ -102,9 +107,11 @@ test('scenario 3 — update die live breekt wordt automatisch teruggedraaid + e-
   await expect(page.getByText(/De site is automatisch teruggezet naar de versie van vóór de update/).first()).toBeVisible()
   await expect(page.getByText('Terugdraaien', { exact: true })).toBeVisible()
   await expect(page.getByText('De site werkt weer zoals vóór de update.')).toBeVisible()
+  await expect(page.getByText('Verploy Lab — vp-lab-prod-only 1.1.0 roept een functie aan die niet bestaat (verploy_lab_function_that_does_not_exist).')).toBeVisible()
   // live site werkt weer, met de footer-update van scenario 1 nog intact
   expect(await footer()).toEqual({ status: 200, footer: 'v1.1.0' })
   await expect.poll(async () => (await sentMails()).filter(m => m.to.includes(owner.email) && m.subject.includes('Update teruggedraaid')).length, { timeout: 30_000 }).toBe(1)
   const mail = (await sentMails()).find(m => m.subject.includes('Update teruggedraaid'))!
   expect(mail.text).toContain(`/sites/${siteId}/runs/`)
+  expect(mail.text).toContain('Diagnose: Verploy Lab — vp-lab-prod-only 1.1.0 roept een functie aan die niet bestaat')
 })

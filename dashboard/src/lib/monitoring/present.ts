@@ -25,9 +25,10 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
     vars.reason = presentReason(t, typeof p.reason_key === 'string' ? p.reason_key : null, p.reason_params)
   }
   const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon') : alert.type
+  const diagnosis = alert.type.startsWith('update_') && typeof p.diagnosis === 'string' && p.diagnosis ? ` ${t('alerts.diagnosis', { text: p.diagnosis })}` : ''
   return {
     title: t(`alerts.types.${key}.title` as MessageKey, vars),
-    body: t(`alerts.types.${key}.body` as MessageKey, vars),
+    body: t(`alerts.types.${key}.body` as MessageKey, vars) + diagnosis,
   }
 }
 

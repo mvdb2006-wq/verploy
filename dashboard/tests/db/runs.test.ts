@@ -251,3 +251,28 @@ describe('Worker-functies', () => {
       expect((await expectError(db, `insert into public.update_run_events (agency_id, run_id, step, message_key) values ($1, $2, 'x', 'x')`, [b.id, id])).message).toBe('agency_mismatch')
     }))
 })
+
+describe('Diagnoses', () => {
+  it('alleen de service role schrijft; de melding neemt de samenvatting mee', () =>
+    inTx(async db => {
+      const { a, site } = await readySite(db)
+      const id = await createRun(db, a, site)
+      await actAs(db, { role: 'authenticated', ...a.owner })
+      expect((await expectError(db, `insert into public.diagnoses (run_id, agency_id, source, locale, summary, cause, fix, confidence) values ($1, $2, 'rules', 'nl', 'x', 'x', 'x', 'low')`, [id, a.id])).code).toBe('42501')
+      await asWorker(db, () => db.query(`select * from public.claim_update_run('w1', 60)`))
+      await asWorker(db, () => db.query(`select public.advance_update_run($1, 'w1', 'done', '{}', 'blocked', 'run.reason.check.php_error', '{}')`, [id]))
+      await asWorker(db, () => db.query(`insert into public.diagnoses (run_id, agency_id, source, locale, summary, cause, fix, confidence) values ($1, $2, 'rules', 'nl', 'Akismet 5.3 roept een ontbrekende functie aan.', 'c', 'f', 'high')`, [id, a.id]))
+      await asWorker(db, () => db.query(`select public.record_run_outcome($1)`, [id]))
+      const alert = await db.query(`select type, params->>'diagnosis' as diagnosis from public.alerts where site_id = $1 and status = 'open' and type = 'update_blocked'`, [site])
+      expect(alert.rows).toEqual([{ type: 'update_blocked', diagnosis: 'Akismet 5.3 roept een ontbrekende functie aan.' }])
+    }))
+
+  it('een diagnose kan niet aan een run van een ander bureau hangen', () =>
+    inTx(async db => {
+      const { a, site } = await readySite(db, 'a')
+      const id = await createRun(db, a, site)
+      const b = await seedAgency(db, 'b')
+      await actAs(db, { role: 'service_role' })
+      expect((await expectError(db, `insert into public.diagnoses (run_id, agency_id, source, locale, summary, cause, fix, confidence) values ($1, $2, 'rules', 'nl', 'x', 'x', 'x', 'low')`, [id, b.id])).message).toBe('agency_mismatch')
+    }))
+})

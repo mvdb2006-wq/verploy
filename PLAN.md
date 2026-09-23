@@ -16,7 +16,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | 3 | Monitoring + dashboard | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
 | 4 | Veilige updates (kernflow 1–7) | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2, #3 | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
-| 5 | AI-diagnose | — | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
+| 5 | AI-diagnose | ✅ klaar lokaal (24-09) · AI-verfijning wacht op BLOCKERS #6 (werkt nu regelgebaseerd) | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
 | 6 | Rapporten | — | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
 | 7 | Stripe | — | Abonneren/upgraden/downgraden/opzeggen in testmodus; tier-limiet server-side afgedwongen |
 | 8 | Afwerking | — | Onboarding, lege staten, foutmeldingen, responsive, plugin volgens WP.org-richtlijnen, README met deploy |
@@ -346,3 +346,19 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 | Playwright, alle fasen | 15/15. Fase 4: koppelen → **scenario 1** goede update live (footer 1.0.0 → 1.1.0 op de echte site) · **scenario 2** fatale update tegengehouden, productie nooit aangeraakt, melding · **scenario 3** update die alleen live breekt (de site crasht volledig, ook de REST-API) → automatisch teruggedraaid, site werkt weer, e-mail met link naar de run |
 
 **Lokaal draaien:** zie README (MySQL-WordPress + `tests/lab/build-lab.sh`, daarna `npm run worker:build` en `npx playwright test`).
+
+---
+
+## 14. Resultaat fase 5 (24-09-2026) — branch `v2`
+
+**Gebouwd:**
+- **Connector 2.2.0** legt fatale PHP-fouten vast op het moment dat het misgaat: op staging via de staging-beveiliging, op productie via de noodroute (tijdens de deploy). De bestandsnamen zijn onvoorspelbaar en afgeleid van het site-secret. De route `/run/diagnostics` geeft fouten zonder serverpaden, het einde van het debuglog van staging en de omgeving (versies, actieve plugins, thema). Die route werkt ook als de site volledig plat ligt.
+- De **worker** haalt deze gegevens op vóór het opruimen of terugzetten en maakt na afloop de diagnose. Die komt mee in de melding en de e-mail.
+- **Diagnose** (`src/lib/diagnosis/`):
+  - Stap 1 is altijd regelgebaseerd: welke plugin of welk thema (uit het foutpad), welk soort fout (ontbrekende functie, methode of klasse, geheugen, dubbele functie, PHP-versie, syntaxfout, conflict met een níet bijgewerkte plugin), of anders de eerste gezakte test.
+  - Het resultaat is een samenvatting, oorzaak, oplossing, schuldige en zekerheid, in de taal van het bureau (5 talen).
+  - Stap 2 (met `ANTHROPIC_API_KEY`) laat Claude (`claude-sonnet-5`, structured outputs met JSON-schema) de diagnose verfijnen op basis van hetzelfde bewijs. Geeft de API een fout, een weigering of een ongeldig antwoord, dan blijft de regelgebaseerde diagnose staan. Een plugin die niet in het bewijs voorkomt, wordt nooit als schuldige genoemd.
+- **Tabel `diagnoses`** (één per run, RLS: lezen voor leden, schrijven alleen door de service role).
+- **UI:** diagnosekaart op de run-pagina (samenvatting, oorzaak, wat je kunt doen, schuldige, zekerheid, foutmelding, bron).
+
+**Bewijs:** engine-test 30/30 (inclusief diagnose op staging en via de noodroute terwijl productie plat ligt) · unit 111/111 (herkenning, alle categorieën in 5 talen, Claude-aanroep en foutpaden met nagebootste API-antwoorden) · DB 130/130 · Playwright 15/15. Scenario 2 en 3 tonen nu een diagnose met de juiste plugin en functie, en de e-mail van scenario 3 bevat de diagnose.

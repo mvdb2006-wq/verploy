@@ -33,6 +33,12 @@ export interface StagingProgress {
   progress?: { phase: string; files_done: number; files_total: number; tables_done: number; tables_total: number }
 }
 
+export interface Diagnostics {
+  fatals: { message: string; file: string; line: number; uri: string }[]
+  log_tail: string[]
+  environment: { wp_version: string; php_version: string; theme: string; plugins: { slug: string; name: string; version: string }[]; staging: boolean }
+}
+
 type FetchLike = typeof fetch
 
 /**
@@ -102,5 +108,6 @@ export class SiteClient {
   }
   rollback(base: string) { return this.call<{ state: 'rolled_back' }>(base, '/rollback', {}, 300_000) }
   cleanup(base: string) { return this.call<{ state: 'cleaned' }>(base, '/cleanup', {}, 120_000) }
+  diagnostics(base: string) { return this.call<Diagnostics>(base, '/run/diagnostics') }
   heartbeatNow(base: string) { return this.call<{ sent: true }>(base, '/heartbeat/now') }
 }

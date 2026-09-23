@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { runMaintenance } from '@/lib/monitoring/maintenance'
 import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { SiteRejectedError, TransientSiteError } from './site-client'
+import { diagnoseRun } from './diagnose'
 import {
   DEFAULT_STEP_TIMEOUT_MS, RunFailure, STEP_TIMEOUT_MS, event, failureTransition, loadContext, step,
   type Admin, type Run, type Transition,
@@ -119,6 +120,9 @@ export async function processRun(admin: Admin, claimed: Run): Promise<void> {
       run = await reload(admin, run.id)
     }
     if (run?.status === 'done') {
+      // Eerst de diagnose (die komt mee in de melding en e-mail), dan de uitkomst melden.
+      await diagnoseRun(admin, run, { apiKey: process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL, log })
+        .catch(e => log('diagnosis_failed', { run: run!.id, error: (e as Error).message }))
       const { error } = await admin.rpc('record_run_outcome', { p_run: run.id })
       if (error) log('outcome_failed', { run: run.id, error: error.message })
       await dispatchNotifications(admin, { limit: 10 }).catch(e => log('notify_failed', { error: (e as Error).message }))

@@ -81,6 +81,12 @@ check( 'zelfde update nogmaals is idempotent', 200 === $r[0] && 'already_current
 $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-fatal' ) ) );
 check( 'staging: fatal-update geïnstalleerd', 200 === $r[0] && 'updated' === $r[1]['status'], json_encode( $r ) );
 check( 'staging geeft nu 500', 500 === page( $surl . '/', array( "X-Verploy-Staging: $token" ) )[0] );
+$r = call( $surl, '/verploy/v2/run/diagnostics', array( 'run_id' => $run ) );
+$f = $r[1]['fatals'][0] ?? array();
+check( 'staging-diagnose: fatale fout vastgelegd, met plugin en zonder serverpad',
+	200 === $r[0] && false !== strpos( $f['message'] ?? '', 'verploy_lab_function_that_does_not_exist' )
+	&& 0 === strpos( $f['file'] ?? '', '…/wp-content/plugins/vp-lab-fatal/' ) && false === strpos( json_encode( $r[1] ), __DIR__ ), json_encode( $r ) );
+check( 'staging-diagnose: omgeving met actieve plugins', in_array( 'vp-lab-fatal/vp-lab-fatal.php', array_column( $r[1]['environment']['plugins'] ?? array(), 'slug' ), true ), json_encode( $r[1]['environment'] ?? null ) );
 
 $r = call( $base, '/verploy/v2/maintenance', array( 'run_id' => $run, 'enabled' => true, 'ttl' => 600 ) );
 check( 'onderhoudsmodus aan', 200 === $r[0] );
@@ -94,6 +100,8 @@ $r = call( $base, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' =
 check( 'productie: prod-only-update uitgevoerd', in_array( $r[0], array( 200, 500 ), true ), json_encode( $r ) );
 check( 'productie geeft nu 500', 500 === page( $base . '/', array( "X-Verploy-Bypass: $bypass" ) )[0] );
 check( 'REST-API ligt er ook uit', 500 === page( $base . '/?rest_route=/verploy/v2/status' )[0] );
+$r = call( $base, '/verploy/v2/run/diagnostics', array( 'run_id' => $run ) );
+check( 'diagnose via noodroute terwijl de site plat ligt', 200 === $r[0] && false !== strpos( json_encode( $r[1]['fatals'] ?? array() ), 'vp-lab-prod-only' ), json_encode( $r ) );
 $r = call( $base, '/verploy/v2/rollback', array( 'run_id' => $other ) );
 check( 'noodroute weigert andere run', 409 === $r[0], json_encode( $r ) );
 $r = call( $base, '/verploy/v2/rollback', array( 'run_id' => $run ) );

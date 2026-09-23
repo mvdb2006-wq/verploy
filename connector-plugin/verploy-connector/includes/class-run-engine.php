@@ -195,13 +195,14 @@ class Verploy_Run_Engine {
 			. 'define( \'WP_SITEURL\', ' . var_export( $p['url'], true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "define( 'WP_CONTENT_DIR', __DIR__ . '/wp-content' );\n"
 			. 'define( \'WP_CONTENT_URL\', ' . var_export( $p['url'] . '/wp-content', true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-			. "define( 'DISABLE_WP_CRON', true );\ndefine( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\ndefine( 'WP_DEBUG_LOG', __DIR__ . '/verploy-debug.log' );\n"
+			. "define( 'DISABLE_WP_CRON', true );\ndefine( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\ndefine( 'WP_DEBUG_LOG', __DIR__ . '/' . " . var_export( self::log_name( 'debug', $run_id ), true ) . " );\n"
 			. 'define( \'VERPLOY_PROD_UPLOADS_URL\', ' . var_export( $uploads['baseurl'], true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. '$table_prefix = ' . var_export( $p['prefix'], true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "if ( ! defined( 'ABSPATH' ) ) { define( 'ABSPATH', __DIR__ . '/' ); }\nrequire_once ABSPATH . 'wp-settings.php';\n";
 		file_put_contents( $p['dir'] . '/wp-config.php', $config ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		$guard = "<?php\n// Verploy staging-beveiliging (automatisch aangemaakt).\nif ( ! defined( 'ABSPATH' ) ) { exit; }\n"
+			. self::fatal_capture_code( $p['dir'] . '/' . self::log_name( 'fatal', $run_id ) )
 			. 'define( \'VERPLOY_STAGING_TOKEN_HASH\', ' . var_export( hash( 'sha256', self::staging_token( $run_id ) ), true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. <<<'PHP'
 header( 'X-Robots-Tag: noindex, nofollow' );
@@ -401,7 +402,7 @@ PHP;
 			);
 			$state['snapshot'] = $snap;
 			self::save_state( $state );
-			self::install_rescue();
+			self::install_rescue( $run_id );
 		}
 
 		if ( 'files' === $snap['phase'] ) {
@@ -481,22 +482,63 @@ PHP;
 	}
 
 	/**
-	 * Installeert tijdens een deploy een must-use-plugin die ondertekende rollback-verzoeken
-	 * afhandelt vóórdat gewone plugins laden. Zo werkt terugdraaien ook als een update
-	 * een fatale fout geeft die de hele site (inclusief de REST-API) onderuit haalt.
+	 * PHP-code die fatale fouten (ook parse-fouten in plugins) als JSON-regel wegschrijft naar $log.
+	 * Gebruikt in de staging-beveiliging en de noodroute; de worker leest ze via /run/diagnostics.
 	 */
-	public static function install_rescue() {
+	public static function fatal_capture_code( $log ) {
+		return '$verploy_fatal_log = ' . var_export( $log, true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			. <<<'PHP'
+register_shutdown_function( function () use ( $verploy_fatal_log ) {
+	$e = error_get_last();
+	if ( ! $e || ! in_array( $e['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+		return;
+	}
+	if ( is_file( $verploy_fatal_log ) && filesize( $verploy_fatal_log ) > 1048576 ) {
+		return;
+	}
+	$line = json_encode( array( 't' => time(), 'type' => $e['type'], 'message' => substr( (string) $e['message'], 0, 4000 ), 'file' => (string) $e['file'], 'line' => (int) $e['line'], 'uri' => substr( isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '', 0, 300 ) ) ); // phpcs:ignore
+	@file_put_contents( $verploy_fatal_log, $line . "\n", FILE_APPEND | LOCK_EX ); // phpcs:ignore
+} );
+PHP;
+	}
+
+	/** Onvoorspelbare bestandsnaam voor foutlogs (afgeleid van het site-secret; niet te raden via de URL). */
+	private static function log_name( $kind, $run_id ) {
+		return 'verploy-' . $kind . '-' . substr( hash_hmac( 'sha256', 'log|' . $kind . '|' . $run_id, Verploy_Connection::secret() ), 0, 32 ) . '.log';
+	}
+
+	/** Pad van het foutlog: op staging in de staging-map, op productie in de (afgeschermde) back-upmap. */
+	public static function fatal_log_path( $run_id ) {
+		if ( defined( 'VERPLOY_STAGING' ) && VERPLOY_STAGING ) {
+			return Verploy_File_Copier::norm( ABSPATH ) . '/' . self::log_name( 'fatal', $run_id );
+		}
+		return Verploy_File_Copier::norm( WP_CONTENT_DIR ) . '/verploy-backups/' . self::log_name( 'fatal', $run_id );
+	}
+
+	/**
+	 * Installeert tijdens een deploy een must-use-plugin die (1) ondertekende rollback- en
+	 * diagnoseverzoeken afhandelt vóórdat gewone plugins laden, en (2) fatale fouten vastlegt.
+	 * Zo werkt terugdraaien ook als een update de hele site (inclusief de REST-API) laat crashen.
+	 */
+	public static function install_rescue( $run_id ) {
 		$dir = dirname( self::rescue_path() );
 		wp_mkdir_p( $dir );
+		self::protect_dir( Verploy_File_Copier::norm( WP_CONTENT_DIR ) . '/verploy-backups' );
 		$includes = var_export( Verploy_File_Copier::norm( __DIR__ ), true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-		$code     = "<?php\n// Verploy rollback-noodroute (automatisch aangemaakt tijdens een deploy en daarna verwijderd).\nif ( ! defined( 'ABSPATH' ) ) { exit; }\n"
+		$code     = "<?php\n// Verploy noodroute (automatisch aangemaakt tijdens een deploy en daarna verwijderd).\nif ( ! defined( 'ABSPATH' ) ) { exit; }\n"
+			. self::fatal_capture_code( self::fatal_log_path( $run_id ) )
 			. '$verploy_includes = ' . $includes . ";\n"
 			. <<<'PHP'
 $verploy_route  = isset( $_GET['rest_route'] ) ? (string) $_GET['rest_route'] : ''; // phpcs:ignore
 $verploy_uri    = isset( $_SERVER['REQUEST_URI'] ) ? (string) strtok( (string) $_SERVER['REQUEST_URI'], '?' ) : ''; // phpcs:ignore
-$verploy_prefix = '/' . trim( function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json', '/' ) . '/verploy/v2/rollback';
-if ( 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : '' ) // phpcs:ignore
-	&& ( '/verploy/v2/rollback' === $verploy_route || substr( $verploy_uri, -strlen( $verploy_prefix ) ) === $verploy_prefix )
+$verploy_prefix = '/' . trim( function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json', '/' );
+$verploy_action = null;
+foreach ( array( '/verploy/v2/rollback' => 'rollback', '/verploy/v2/run/diagnostics' => 'diagnostics' ) as $verploy_path => $verploy_name ) {
+	if ( $verploy_route === $verploy_path || substr( $verploy_uri, -strlen( $verploy_prefix . $verploy_path ) ) === $verploy_prefix . $verploy_path ) {
+		$verploy_action = array( $verploy_path, $verploy_name );
+	}
+}
+if ( $verploy_action && 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD'] : '' ) // phpcs:ignore
 	&& is_file( $verploy_includes . '/class-run-engine.php' ) ) {
 	foreach ( array( 'class-signer', 'class-connection', 'class-heartbeat', 'class-file-copier', 'class-table-copier', 'class-run-lock', 'class-run-engine' ) as $verploy_f ) {
 		require_once $verploy_includes . '/' . $verploy_f . '.php';
@@ -508,7 +550,7 @@ if ( 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD
 		$verploy_headers[ $verploy_h ] = isset( $_SERVER[ $verploy_key ] ) ? (string) $_SERVER[ $verploy_key ] : ''; // phpcs:ignore
 	}
 	$verploy_ok   = Verploy_Connection::is_connected()
-		&& true === Verploy_Signer::verify( Verploy_Connection::site_id(), Verploy_Connection::secret(), $verploy_headers, 'POST', '/verploy/v2/rollback', $verploy_body );
+		&& true === Verploy_Signer::verify( Verploy_Connection::site_id(), Verploy_Connection::secret(), $verploy_headers, 'POST', $verploy_action[0], $verploy_body );
 	$verploy_data = json_decode( $verploy_body, true );
 	$verploy_run  = is_array( $verploy_data ) && isset( $verploy_data['run_id'] ) ? (string) $verploy_data['run_id'] : '';
 	header( 'Content-Type: application/json; charset=utf-8' );
@@ -518,13 +560,13 @@ if ( 'POST' === ( isset( $_SERVER['REQUEST_METHOD'] ) ? $_SERVER['REQUEST_METHOD
 		echo '{"code":"verploy_unauthorized"}';
 		exit;
 	}
-	if ( ! Verploy_Run_Engine::valid_run_id( $verploy_run ) || ! Verploy_Run_Lock::holds( $verploy_run ) ) {
+	if ( ! Verploy_Run_Engine::valid_run_id( $verploy_run ) || ( 'rollback' === $verploy_action[1] && ! Verploy_Run_Lock::holds( $verploy_run ) ) ) {
 		http_response_code( 409 );
 		echo '{"code":"verploy_not_locked"}';
 		exit;
 	}
 	try {
-		$verploy_result = Verploy_Run_Engine::rollback( $verploy_run );
+		$verploy_result = 'rollback' === $verploy_action[1] ? Verploy_Run_Engine::rollback( $verploy_run ) : Verploy_Run_Engine::diagnostics( $verploy_run );
 		http_response_code( 200 );
 		echo wp_json_encode( $verploy_result );
 	} catch ( Throwable $verploy_e ) {
@@ -537,6 +579,85 @@ PHP;
 		if ( false === file_put_contents( self::rescue_path(), $code ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
 			throw new RuntimeException( 'rescue_install_failed' );
 		}
+	}
+
+	// ── Diagnose ─────────────────────────────────────────────────────────────
+
+	/** Maakt serverpaden relatief (…/wp-content/plugins/x/y.php): geen serverindeling naar buiten. */
+	private static function redact( $text ) {
+		$abs = Verploy_File_Copier::norm( ABSPATH );
+		$out = str_replace( array( $abs . '/', $abs ), '…/', str_replace( '\\', '/', (string) $text ) );
+		// Staging draait in een submap; toon paden alsof het de gewone site is.
+		return preg_replace( '#…/wp-content/verploy-staging/[0-9a-f]{8}/#', '…/', $out );
+	}
+
+	/**
+	 * Gegevens voor de diagnose na een gezakte test: vastgelegde fatale fouten, het einde van het
+	 * debuglog (alleen op staging) en de omgeving (versies, actieve plugins, thema).
+	 */
+	public static function diagnostics( $run_id ) {
+		$fatals = array();
+		$log    = self::fatal_log_path( $run_id );
+		if ( is_file( $log ) ) {
+			$lines = array_slice( (array) file( $log, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ), -20 );
+			$seen  = array();
+			foreach ( $lines as $line ) {
+				$e = json_decode( $line, true );
+				if ( ! is_array( $e ) ) {
+					continue;
+				}
+				$key = $e['message'] . '|' . $e['file'] . '|' . $e['line'];
+				if ( isset( $seen[ $key ] ) ) {
+					continue;
+				}
+				$seen[ $key ] = true;
+				$fatals[]     = array(
+					'message' => self::redact( $e['message'] ),
+					'file'    => self::redact( $e['file'] ),
+					'line'    => (int) $e['line'],
+					'uri'     => self::redact( $e['uri'] ),
+				);
+			}
+		}
+		$tail = array();
+		if ( defined( 'VERPLOY_STAGING' ) && VERPLOY_STAGING && defined( 'WP_DEBUG_LOG' ) && is_string( WP_DEBUG_LOG ) && is_file( WP_DEBUG_LOG ) ) {
+			$size = filesize( WP_DEBUG_LOG );
+			$fh   = fopen( WP_DEBUG_LOG, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			if ( $fh ) {
+				fseek( $fh, max( 0, $size - 65536 ) );
+				$chunk = (string) stream_get_contents( $fh );
+				fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				foreach ( explode( "\n", $chunk ) as $line ) {
+					if ( preg_match( '/PHP (Fatal error|Parse error|Warning|Uncaught)/', $line ) ) {
+						$tail[] = substr( self::redact( $line ), 0, 600 );
+					}
+				}
+				$tail = array_slice( array_values( array_unique( $tail ) ), -15 );
+			}
+		}
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$plugins = array();
+		foreach ( (array) get_option( 'active_plugins', array() ) as $slug ) {
+			$file = WP_PLUGIN_DIR . '/' . $slug;
+			if ( is_file( $file ) ) {
+				$data      = get_plugin_data( $file, false, false );
+				$plugins[] = array( 'slug' => $slug, 'name' => $data['Name'], 'version' => $data['Version'] );
+			}
+		}
+		$theme = wp_get_theme();
+		return array(
+			'fatals'      => $fatals,
+			'log_tail'    => $tail,
+			'environment' => array(
+				'wp_version'  => get_bloginfo( 'version' ),
+				'php_version' => PHP_VERSION,
+				'theme'       => $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' ),
+				'plugins'     => $plugins,
+				'staging'     => defined( 'VERPLOY_STAGING' ) && VERPLOY_STAGING,
+			),
+		);
 	}
 
 	public static function remove_rescue() {
@@ -610,6 +731,11 @@ PHP;
 
 	public static function purge_old_backups( $max_age ) {
 		$base = Verploy_File_Copier::norm( WP_CONTENT_DIR ) . '/verploy-backups';
+		foreach ( (array) glob( $base . '/verploy-*.log' ) as $log ) {
+			if ( filemtime( $log ) < time() - $max_age ) {
+				@unlink( $log ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			}
+		}
 		foreach ( (array) glob( $base . '/*', GLOB_ONLYDIR ) as $dir ) {
 			if ( filemtime( $dir ) < time() - $max_age ) {
 				$short = substr( basename( $dir ), 0, 8 );

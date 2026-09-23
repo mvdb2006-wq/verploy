@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Check, Circle, CircleDashed, LoaderCircle, X } from 'lucide-react'
+import { Check, Circle, CircleDashed, LoaderCircle, Stethoscope, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { requireAgency } from '@/lib/session'
@@ -142,6 +142,46 @@ function Steps({ t, status, started, failedSteps }: { t: Translate; status: stri
   )
 }
 
+interface DiagnosisRow { source: string; model: string | null; summary: string; cause: string; fix: string; culprit_name: string | null; confidence: string; evidence: unknown }
+
+function DiagnosisCard({ t, d }: { t: Translate; d: DiagnosisRow }) {
+  const fatal = ((d.evidence as { fatals?: { message: string; file: string; line: number }[] } | null)?.fatals ?? [])[0]
+  return (
+    <section className="rounded-(--radius-card) border border-warn/30 bg-surface" aria-labelledby="diagnosis-title">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <Stethoscope size={18} className="mt-0.5 shrink-0 text-warn" aria-hidden />
+          <div className="min-w-0">
+            <h2 id="diagnosis-title" className="font-bold">{t('diagnosis.ui.title')}</h2>
+            <p className="mt-1 text-sm">{d.summary}</p>
+          </div>
+        </div>
+        <span className="badge badge-muted">{t(`diagnosis.ui.confidence.${d.confidence}` as MessageKey)}</span>
+      </header>
+      <div className="grid gap-5 px-5 py-4 md:grid-cols-2">
+        <div>
+          <h3 className="label">{t('diagnosis.ui.cause')}</h3>
+          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90">{d.cause}</p>
+          {d.culprit_name && <p className="mt-2 text-xs text-muted">{t('diagnosis.ui.culprit')}: <span className="font-semibold text-text">{d.culprit_name}</span></p>}
+        </div>
+        <div>
+          <h3 className="label">{t('diagnosis.ui.fix')}</h3>
+          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90">{d.fix}</p>
+        </div>
+      </div>
+      {fatal && (
+        <details className="border-t border-border px-5 py-3">
+          <summary className="cursor-pointer text-xs font-semibold text-muted">{t('diagnosis.ui.evidence')}</summary>
+          <pre className="mt-2 overflow-x-auto rounded-md bg-bg p-3 font-mono text-xs whitespace-pre-wrap text-danger/90">{fatal.message}{'\n'}{fatal.file}:{fatal.line}</pre>
+        </details>
+      )}
+      <p className="border-t border-border px-5 py-2.5 text-xs text-subtle">
+        {d.source === 'ai' ? t('diagnosis.ui.sourceAi', { model: d.model ?? '' }) : t('diagnosis.ui.sourceRules')}
+      </p>
+    </section>
+  )
+}
+
 function duration(from: string | null, to: string | null, locale: Locale): string | null {
   if (!from) return null
   const ms = (to ? Date.parse(to) : Date.now()) - Date.parse(from)
@@ -157,10 +197,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
   const { data: run } = await supabase.from('update_runs').select('*').eq('id', runId).eq('site_id', id).maybeSingle()
   if (!run) notFound()
-  const [{ data: site }, { data: events }, { data: results }] = await Promise.all([
+  const [{ data: site }, { data: events }, { data: results }, { data: diagnosis }] = await Promise.all([
     supabase.from('sites').select('id, name, url').eq('id', id).single(),
     supabase.from('update_run_events').select('id, step, level, message_key, params, created_at').eq('run_id', runId).order('id'),
     supabase.from('test_results').select('phase, page_key, page_label, page_url, viewport, http_status, passed, checks, screenshot_path, diff_path, diff_ratio').eq('run_id', runId).order('id'),
+    supabase.from('diagnoses').select('source, model, summary, cause, fix, culprit_name, confidence, evidence').eq('run_id', runId).maybeSingle(),
   ])
   const items = run.items as unknown as Item[]
   const badge = runBadge(t, run)
@@ -199,6 +240,8 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </Alert>
       )}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
+
+      {diagnosis && <DiagnosisCard t={t} d={diagnosis} />}
 
       <div className="grid gap-6 md:grid-cols-[1fr_18rem]">
         <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="items-title">

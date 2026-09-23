@@ -3,7 +3,7 @@ import type { Browser } from 'playwright-core'
 import type { Database, Json, Tables } from '@/lib/database.types'
 import { decryptSecret } from '@/lib/security/secretbox'
 import { keyMaterial } from '@/lib/security/keys'
-import { SiteClient, SiteRejectedError, TransientSiteError, type PageTarget } from './site-client'
+import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
 import { comparePage, firstFailure, healthy, visualDiff, type CheckOutcome } from './compare'
 
@@ -36,6 +36,8 @@ interface StepState {
   pending_verdict?: Verdict
   pending_reason?: { key: string; params: Record<string, Json> }
   rollback_verified?: boolean
+  /** Foutgegevens van de site op het moment dat het misging (voor de diagnose, fase 5). */
+  diagnostics?: (Diagnostics & { where: 'staging' | 'production' }) | null
 }
 
 export interface Transition {
@@ -212,6 +214,21 @@ async function untilReady<T extends { state: string }>(ctx: RunContext, fn: () =
 
 // ── Stappen ───────────────────────────────────────────────────────────────────
 
+/** Haalt foutgegevens op (fatale fouten, log, omgeving). Mag nooit de run laten mislukken. */
+async function collectDiagnostics(ctx: RunContext, base: string, where: 'staging' | 'production'): Promise<StepState['diagnostics']> {
+  try {
+    const d = await ctx.client.diagnostics(base)
+    return {
+      where,
+      fatals: (d.fatals ?? []).slice(0, 5),
+      log_tail: (d.log_tail ?? []).slice(-10),
+      environment: { ...d.environment, plugins: (d.environment?.plugins ?? []).slice(0, 80) },
+    }
+  } catch {
+    return null
+  }
+}
+
 const items = (run: Run) => run.items as unknown as Item[]
 const state = (run: Run) => (run.step_state ?? {}) as StepState
 const toCleanup = (verdict: Verdict, reason?: { key: string; params: Record<string, Json> }): Transition =>
@@ -300,7 +317,10 @@ export async function step(ctx: RunContext): Promise<Transition> {
 
     case 'staging_update': {
       const { list, failed } = await applyAll(ctx, st.staging_url!, 'staging')
-      if (failed) return { ...toCleanup('blocked', { key: 'run.reason.update_failed', params: { name: failed.name, status: failed.staging ?? '' } }), items: list }
+      if (failed) {
+        const t = toCleanup('blocked', { key: 'run.reason.update_failed', params: { name: failed.name, status: failed.staging ?? '' } })
+        return { ...t, items: list, state: { ...t.state, diagnostics: await collectDiagnostics(ctx, st.staging_url!, 'staging') } }
+      }
       return cancelIfAsked() ?? { next: 'staging_test', items: list }
     }
 
@@ -311,7 +331,8 @@ export async function step(ctx: RunContext): Promise<Transition> {
       if (failures.length) {
         const reason = failureReason(failures)
         await event(ctx, 'staging_test', 'run.staging.failed', reason.params, 'warning')
-        return toCleanup('blocked', reason)
+        const t = toCleanup('blocked', reason)
+        return { ...t, state: { ...t.state, diagnostics: await collectDiagnostics(ctx, url, 'staging') } }
       }
       await event(ctx, 'staging_test', 'run.staging.passed')
       return cancelIfAsked() ?? { next: 'deploy_snapshot' }
@@ -332,7 +353,13 @@ export async function step(ctx: RunContext): Promise<Transition> {
     case 'deploy_apply': {
       await ctx.client.maintenance(prod, true, 1800)
       const { list, failed } = await applyAll(ctx, prod, 'production')
-      if (failed) return { next: 'rollback', items: list, state: { pending_verdict: 'rolled_back', pending_reason: { key: 'run.reason.update_failed_production', params: { name: failed.name, status: failed.production ?? '' } } } }
+      if (failed) {
+        return { next: 'rollback', items: list, state: {
+          pending_verdict: 'rolled_back',
+          pending_reason: { key: 'run.reason.update_failed_production', params: { name: failed.name, status: failed.production ?? '' } },
+          diagnostics: await collectDiagnostics(ctx, prod, 'production'),
+        } }
+      }
       return { next: 'postcheck', items: list }
     }
 
@@ -342,7 +369,8 @@ export async function step(ctx: RunContext): Promise<Transition> {
       if (failures.length) {
         const reason = failureReason(failures)
         await event(ctx, 'postcheck', 'run.postcheck.failed', reason.params, 'error')
-        return { next: 'rollback', state: { pending_verdict: 'rolled_back', pending_reason: reason } }
+        // Eerst de foutgegevens ophalen (via de noodroute als de site plat ligt), dan pas terugzetten.
+        return { next: 'rollback', state: { pending_verdict: 'rolled_back', pending_reason: reason, diagnostics: await collectDiagnostics(ctx, prod, 'production') } }
       }
       await event(ctx, 'postcheck', 'run.postcheck.passed')
       return toCleanup('deployed')

@@ -169,6 +169,57 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnoses: {
+        Row: {
+          run_id: string
+          agency_id: string
+          source: string
+          model: string | null
+          locale: string
+          summary: string
+          cause: string
+          fix: string
+          culprit_slug: string | null
+          culprit_name: string | null
+          confidence: string
+          evidence: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          run_id: string
+          agency_id: string
+          source: string
+          model?: string | null
+          locale: string
+          summary: string
+          cause: string
+          fix: string
+          culprit_slug?: string | null
+          culprit_name?: string | null
+          confidence: string
+          evidence?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          run_id?: string
+          agency_id?: string
+          source?: string
+          model?: string | null
+          locale?: string
+          summary?: string
+          cause?: string
+          fix?: string
+          culprit_slug?: string | null
+          culprit_name?: string | null
+          confidence?: string
+          evidence?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       health_snapshots: {
         Row: {
           id: number

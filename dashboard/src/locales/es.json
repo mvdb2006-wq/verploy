@@ -306,7 +306,8 @@
       "hostname_mismatch": "el certificado pertenece a otro dominio",
       "untrusted": "el certificado no es de confianza",
       "unreachable": "el sitio no estaba accesible"
-    }
+    },
+    "diagnosis": "Diagnóstico: {text}"
   },
   "health": {
     "title": "Estado",
@@ -488,6 +489,136 @@
       "verdict_error": "Terminado: fallida.",
       "verdict_cancelled": "Terminado: cancelada.",
       "done": "Terminado."
+    }
+  },
+  "diagnosis": {
+    "where": {
+      "staging": "en la copia de prueba",
+      "production": "en el sitio en producción"
+    },
+    "detail": {
+      "undefined_function": "llama a una función que no existe ({fn})",
+      "undefined_method": "llama a un método que no existe ({method})",
+      "missing_class": "busca una clase que no existe ({cls})",
+      "memory": "se queda sin memoria",
+      "redeclare": "define una función que ya existe ({fn})",
+      "php_version": "requiere otra versión de PHP",
+      "syntax": "contiene un error de sintaxis",
+      "fatal_other": "provoca un error fatal: {message}"
+    },
+    "install_failed": {
+      "summary": "No se pudo actualizar {plugin} {where}.",
+      "cause": "WordPress no pudo instalar la nueva versión ({status}). No se ha probado ni publicado nada.",
+      "fix": "Comprueba si la actualización funciona manualmente (Plugins → Actualizar) y si la licencia de los plugins de pago está activa. Después, vuelve a intentarlo."
+    },
+    "no_write_access": {
+      "summary": "WordPress no tiene permiso para actualizar sus propios archivos en este servidor.",
+      "cause": "No se pudo instalar {plugin}: {status}. WordPress pide entonces datos FTP y las actualizaciones automáticas no son posibles.",
+      "fix": "Da al servidor web permisos de escritura en wp-content (o define FS_METHOD como direct en wp-config.php) y vuelve a intentarlo. Tu proveedor de hosting puede ayudarte."
+    },
+    "crashed": {
+      "summary": "{plugin} {to} hace que el sitio falle durante la instalación.",
+      "cause": "Justo después de instalar la nueva versión, el sitio dejó de responder {where}. Esto indica un error fatal en la nueva versión que ya ocurre al cargar.",
+      "fix": "Mantén {plugin} en la versión {from}. Informa del problema al autor del plugin y prueba una versión posterior de nuevo con Verploy."
+    },
+    "undefined_function": {
+      "summary": "{plugin} {to} llama a una función que no existe ({fn}).",
+      "cause": "Tras la actualización, PHP dio un error fatal en {file} (línea {line}): la función {fn} no existe. Normalmente esa función pertenece a otro plugin o a una versión más reciente de WordPress o PHP, o esta versión tiene un fallo.",
+      "fix": "Mantén {plugin} en la versión {from} por ahora. Revisa en el registro de cambios si la nueva versión requiere otro plugin o una versión más reciente de WordPress y actualízalo primero. Si no dice nada, envía el mensaje de error al autor del plugin."
+    },
+    "undefined_method": {
+      "summary": "{plugin} {to} llama a un método que no existe ({method}).",
+      "cause": "Tras la actualización, PHP dio un error fatal en {file} (línea {line}): el método {method} no existe. Normalmente la nueva versión espera una versión más reciente de otro plugin o de WordPress.",
+      "fix": "Mantén {plugin} en la versión {from} por ahora. Revisa en el registro de cambios qué plugin o versión de WordPress hace falta y actualízalo primero. Si no dice nada, envía el mensaje de error al autor del plugin."
+    },
+    "missing_class": {
+      "summary": "{plugin} {to} busca una clase que no existe ({cls}).",
+      "cause": "Tras la actualización, PHP dio un error fatal en {file} (línea {line}): la clase {cls} no está cargada. A menudo falta un archivo en la versión, o el plugin espera otro plugin (por ejemplo WooCommerce o una librería) que no está activo o es demasiado antiguo.",
+      "fix": "Mantén {plugin} en la versión {from} por ahora. Comprueba que los plugins de los que depende estén activos y actualizados. Si no, envía el mensaje de error al autor del plugin."
+    },
+    "memory": {
+      "summary": "El sitio se queda sin memoria PHP tras actualizar {plugin}.",
+      "cause": "PHP se detuvo en {file} (línea {line}) porque se agotó la memoria. La nueva versión usa más memoria de la que permite el servidor.",
+      "fix": "Aumenta memory_limit en el hosting (256 MB bastan para la mayoría de los sitios) o define WP_MEMORY_LIMIT en wp-config.php y vuelve a intentar la actualización."
+    },
+    "redeclare": {
+      "summary": "{plugin} {to} define una función que ya existe ({fn}).",
+      "cause": "PHP se detuvo en {file} (línea {line}): la función {fn} está definida dos veces. Normalmente la nueva versión choca con otro plugin o con una copia antigua del mismo código.",
+      "fix": "Averigua qué otro plugin ofrece la misma función (a menudo un plugin auxiliar o complemento) y actualízalo o desactívalo a la vez. Mientras tanto, mantén {plugin} en {from}."
+    },
+    "php_version": {
+      "summary": "{plugin} {to} requiere otra versión de PHP distinta de la del servidor.",
+      "cause": "La nueva versión indica que la versión de PHP del servidor no es compatible ({file}, línea {line}).",
+      "fix": "Mantén {plugin} en {from}, o actualiza primero PHP en el hosting y vuelve a probar con Verploy."
+    },
+    "syntax": {
+      "summary": "{plugin} {to} contiene un error de programación (error de sintaxis).",
+      "cause": "PHP no pudo leer {file} (línea {line}). Es un fallo de la propia versión, no de tu sitio.",
+      "fix": "Sáltate esta versión: mantén {plugin} en {from} y espera una versión corregida. Informa del fallo al autor del plugin."
+    },
+    "fatal_other": {
+      "summary": "{plugin} {to} provoca un error fatal de PHP.",
+      "cause": "Tras la actualización, PHP se detuvo {where} con el mensaje: {message} ({file}, línea {line}).",
+      "fix": "Mantén {plugin} en {from} y envía este mensaje de error al autor del plugin. Prueba una versión posterior de nuevo con Verploy."
+    },
+    "conflict": {
+      "summary": "{plugin} no funciona con {updated}.",
+      "cause": "Tras la actualización, {plugin} dio un error fatal {where}: {detail} ({file}, línea {line}). {plugin} no se ha actualizado; choca con la nueva versión de {updated}.",
+      "fix": "Comprueba si hay una versión más reciente de {plugin} compatible con {updated} y actualízala primero o a la vez. Si no, mantén {updated} en la versión actual e informa del problema a ambos autores."
+    },
+    "fatal_unknown": {
+      "summary": "El sitio muestra un error crítico tras actualizar {updated}.",
+      "cause": "WordPress mostró el mensaje «error crítico» {where}, pero no se pudo registrar el mensaje de error exacto de PHP.",
+      "fix": "Mantén la versión actual. Activa WP_DEBUG_LOG en un entorno de prueba y consulta wp-content/debug.log para ver el mensaje exacto, o infórmalo al autor del plugin."
+    },
+    "http": {
+      "summary": "{page} ya no carga bien tras la actualización ({viewport}).",
+      "cause": "Tras la actualización, la página devolvió el estado HTTP {status} {where}, aunque antes funcionaba. Suele deberse a un fallo del plugin o a un cambio en la estructura de enlaces permanentes o rutas.",
+      "fix": "Revisa la página tras la actualización en un entorno de prueba y vuelve a guardar los enlaces permanentes (Ajustes → Enlaces permanentes). Si el problema continúa, mantén {updated} en la versión actual."
+    },
+    "js": {
+      "summary": "Tras la actualización, {page} muestra nuevos errores de JavaScript ({viewport}).",
+      "cause": "Aparecieron nuevos errores en el navegador: {errors}. Es posible que botones, formularios o sliders ya no funcionen.",
+      "fix": "Comprueba si la nueva versión necesita otros scripts (por ejemplo un jQuery más reciente u otro plugin), o excluye la página de los plugins de optimización y caché. Si no, mantén {updated} en la versión actual."
+    },
+    "resources": {
+      "summary": "Tras la actualización, algunos archivos del sitio ya no cargan ({page}).",
+      "cause": "Estos scripts u hojas de estilo dieron error: {resources}. A menudo la nueva versión movió archivos mientras un plugin de caché u optimización sigue usando las rutas antiguas.",
+      "fix": "Vacía la caché de los plugins de caché y optimización tras la actualización y vuelve a probar. Si el problema continúa, mantén {updated} en la versión actual."
+    },
+    "layout": {
+      "summary": "Tras la actualización faltan partes de {page} ({viewport}).",
+      "cause": "Partes de la página (como la cabecera, el menú, el contenido o el pie) o gran parte del texto habían desaparecido {where} tras la actualización.",
+      "fix": "Revisa las capturas de pantalla. A menudo un bloque o shortcode de {updated} ya no se muestra; revisa los ajustes del plugin tras la actualización."
+    },
+    "visual": {
+      "summary": "{page} se ve distinta tras la actualización ({percent} % de diferencia, {viewport}).",
+      "cause": "La página funcionaba, pero la imagen difería más de lo permitido. Puede ser un cambio de diseño intencionado de la nueva versión, pero también un diseño roto.",
+      "fix": "Revisa la imagen de diferencias. Si el cambio es correcto, vuelve a ejecutar la actualización con un umbral más alto o enmascara la parte que cambia en los ajustes de prueba. Si no, mantén {updated} en la versión actual."
+    },
+    "login": {
+      "summary": "Tras la actualización, la pantalla de acceso de WordPress ya no funciona.",
+      "cause": "El formulario de acceso (wp-login.php) ya no aparecía {where}. Los plugins de seguridad y de acceso pueden causar esto.",
+      "fix": "Revisa los ajustes de los plugins de seguridad y de acceso y mantén {updated} en la versión actual hasta que quede claro qué falla."
+    },
+    "unknown": {
+      "summary": "Las pruebas fallaron tras actualizar {updated}.",
+      "cause": "Se encontró una diferencia {where}, pero la causa no se deduce con claridad de las mediciones.",
+      "fix": "Revisa las pruebas fallidas y las capturas de pantalla. Mantén {updated} en la versión actual hasta que quede claro qué falla."
+    },
+    "ui": {
+      "title": "Diagnóstico",
+      "cause": "Causa",
+      "fix": "Qué puedes hacer",
+      "culprit": "Causado por",
+      "evidence": "Mensaje de error",
+      "sourceRules": "Análisis automático de los mensajes de error y los resultados de las pruebas.",
+      "sourceAi": "Análisis por IA ({model}) basado en los mensajes de error y los resultados de las pruebas. Comprueba la conclusión antes de cambiar nada.",
+      "confidence": {
+        "high": "Fiabilidad: alta",
+        "medium": "Fiabilidad: media",
+        "low": "Fiabilidad: baja"
+      }
     }
   }
 }

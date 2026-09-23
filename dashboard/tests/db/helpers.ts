@@ -114,6 +114,10 @@ export async function seedAgency(db: Db, label: string, opts: { plan?: string; p
     [ag.id, run!.id],
   )
   await db.query(
+    `insert into public.diagnoses (run_id, agency_id, source, locale, summary, cause, fix, confidence) values ($2, $1, 'rules', 'nl', 'x', 'x', 'x', 'low')`,
+    [ag.id, run!.id],
+  )
+  await db.query(
     `insert into public.agency_invitations (agency_id, email, role, token_hash) values ($1, $2, 'member', $3)`,
     [ag.id, `invitee-${label}@example.test`, randomUUID()],
   )

@@ -306,7 +306,8 @@
       "hostname_mismatch": "het certificaat hoort bij een andere domeinnaam",
       "untrusted": "het certificaat wordt niet vertrouwd",
       "unreachable": "de site was niet bereikbaar"
-    }
+    },
+    "diagnosis": "Diagnose: {text}"
   },
   "health": {
     "title": "Gezondheid",
@@ -488,6 +489,136 @@
       "verdict_error": "Klaar: mislukt.",
       "verdict_cancelled": "Klaar: geannuleerd.",
       "done": "Klaar."
+    }
+  },
+  "diagnosis": {
+    "where": {
+      "staging": "op de testkopie",
+      "production": "op de live site"
+    },
+    "detail": {
+      "undefined_function": "roept een functie aan die niet bestaat ({fn})",
+      "undefined_method": "roept een methode aan die niet bestaat ({method})",
+      "missing_class": "zoekt een klasse die niet bestaat ({cls})",
+      "memory": "heeft te weinig geheugen",
+      "redeclare": "definieert een functie die al bestaat ({fn})",
+      "php_version": "vraagt een andere PHP-versie",
+      "syntax": "bevat een syntaxfout",
+      "fatal_other": "geeft een fatale fout: {message}"
+    },
+    "install_failed": {
+      "summary": "{plugin} kon niet worden bijgewerkt {where}.",
+      "cause": "WordPress kon de nieuwe versie niet installeren ({status}). Er is nog niets getest en niets live gezet.",
+      "fix": "Controleer of de update handmatig wel lukt (Plugins → Bijwerken) en of de licentie van betaalde plugins actief is. Probeer het daarna opnieuw."
+    },
+    "no_write_access": {
+      "summary": "WordPress mag zijn eigen bestanden niet bijwerken op deze server.",
+      "cause": "{plugin} kon niet worden geïnstalleerd: {status}. WordPress vraagt dan om FTP-gegevens en automatische updates zijn niet mogelijk.",
+      "fix": "Geef de webserver schrijfrechten op wp-content (of zet FS_METHOD op direct in wp-config.php) en probeer het opnieuw. De hostingpartij kan hierbij helpen."
+    },
+    "crashed": {
+      "summary": "{plugin} {to} laat de site crashen tijdens het installeren.",
+      "cause": "Direct na het installeren van de nieuwe versie reageerde de site niet meer {where}. Dat wijst op een fatale fout in de nieuwe versie die al bij het laden optreedt.",
+      "fix": "Laat {plugin} op versie {from} staan. Meld het probleem bij de maker van de plugin en probeer een volgende versie opnieuw via Verploy."
+    },
+    "undefined_function": {
+      "summary": "{plugin} {to} roept een functie aan die niet bestaat ({fn}).",
+      "cause": "Na de update gaf PHP een fatale fout in {file} (regel {line}): de functie {fn} bestaat niet. Meestal hoort die functie bij een andere plugin of een nieuwere WordPress- of PHP-versie, of zit er een fout in deze release.",
+      "fix": "Laat {plugin} voorlopig op versie {from}. Kijk in het changelog of de nieuwe versie een andere plugin of een nieuwere WordPress-versie vereist, en werk die eerst bij. Staat daar niets over, meld de foutmelding dan bij de maker van de plugin."
+    },
+    "undefined_method": {
+      "summary": "{plugin} {to} roept een methode aan die niet bestaat ({method}).",
+      "cause": "Na de update gaf PHP een fatale fout in {file} (regel {line}): de methode {method} bestaat niet. Meestal verwacht de nieuwe versie een nieuwere versie van een andere plugin of van WordPress.",
+      "fix": "Laat {plugin} voorlopig op versie {from}. Kijk in het changelog welke andere plugin of WordPress-versie nodig is en werk die eerst bij. Staat daar niets over, meld de foutmelding dan bij de maker van de plugin."
+    },
+    "missing_class": {
+      "summary": "{plugin} {to} zoekt een klasse die niet bestaat ({cls}).",
+      "cause": "Na de update gaf PHP een fatale fout in {file} (regel {line}): de klasse {cls} is niet geladen. Vaak ontbreekt er een bestand in de release, of verwacht de plugin een andere plugin (bijvoorbeeld WooCommerce of een bibliotheek) die niet actief of te oud is.",
+      "fix": "Laat {plugin} voorlopig op versie {from}. Controleer of de plugins waar hij van afhankelijk is actief en actueel zijn. Meld de foutmelding anders bij de maker van de plugin."
+    },
+    "memory": {
+      "summary": "De site heeft te weinig PHP-geheugen na de update van {plugin}.",
+      "cause": "PHP stopte in {file} (regel {line}) omdat het geheugen op was. De nieuwe versie gebruikt meer geheugen dan de server toestaat.",
+      "fix": "Verhoog memory_limit bij de hosting (256 MB is voor de meeste sites genoeg) of zet WP_MEMORY_LIMIT in wp-config.php, en probeer de update daarna opnieuw."
+    },
+    "redeclare": {
+      "summary": "{plugin} {to} definieert een functie die al bestaat ({fn}).",
+      "cause": "PHP stopte in {file} (regel {line}): de functie {fn} is twee keer gedefinieerd. Meestal botst de nieuwe versie met een andere plugin of met een oude kopie van dezelfde code.",
+      "fix": "Kijk welke andere plugin dezelfde functie levert (vaak een losse helper- of add-on-plugin) en werk die tegelijk bij of schakel hem uit. Laat {plugin} tot die tijd op {from}."
+    },
+    "php_version": {
+      "summary": "{plugin} {to} vraagt een andere PHP-versie dan deze server heeft.",
+      "cause": "De nieuwe versie meldt dat de PHP-versie van de server niet wordt ondersteund ({file}, regel {line}).",
+      "fix": "Laat {plugin} op {from}, of upgrade PHP eerst via de hosting en test daarna opnieuw met Verploy."
+    },
+    "syntax": {
+      "summary": "{plugin} {to} bevat een programmeerfout (syntaxfout).",
+      "cause": "PHP kon {file} niet lezen (regel {line}). Dat is een fout in de release zelf, niet in je site.",
+      "fix": "Sla deze versie over: laat {plugin} op {from} en wacht op een herstelde versie. Meld de fout bij de maker van de plugin."
+    },
+    "fatal_other": {
+      "summary": "{plugin} {to} geeft een fatale PHP-fout.",
+      "cause": "Na de update stopte PHP {where} met de melding: {message} ({file}, regel {line}).",
+      "fix": "Laat {plugin} op {from} staan en stuur deze foutmelding naar de maker van de plugin. Probeer een volgende versie opnieuw via Verploy."
+    },
+    "conflict": {
+      "summary": "{plugin} werkt niet samen met {updated}.",
+      "cause": "Na de update gaf {plugin} {where} een fatale fout: hij {detail} ({file}, regel {line}). {plugin} zelf is niet bijgewerkt; hij botst met de nieuwe versie van {updated}.",
+      "fix": "Kijk of er een nieuwere versie van {plugin} is die met {updated} samenwerkt, en werk die eerst of tegelijk bij. Lukt dat niet, laat {updated} dan op de huidige versie en meld het probleem bij beide makers."
+    },
+    "fatal_unknown": {
+      "summary": "De site geeft een kritieke fout na de update van {updated}.",
+      "cause": "WordPress toonde de melding ‘kritieke fout’ {where}, maar de precieze PHP-foutmelding kon niet worden vastgelegd.",
+      "fix": "Laat de huidige versie staan. Zet op een testomgeving WP_DEBUG_LOG aan en bekijk wp-content/debug.log voor de exacte melding, of meld het bij de maker van de plugin."
+    },
+    "http": {
+      "summary": "{page} laadt niet goed meer na de update ({viewport}).",
+      "cause": "De pagina gaf na de update HTTP-status {status} {where}, terwijl hij daarvoor werkte. Dat komt meestal door een fout in de plugin of door een gewijzigde permalink- of routestructuur.",
+      "fix": "Controleer de pagina na de update op een testomgeving en sla de permalinks opnieuw op (Instellingen → Permalinks). Blijft het probleem, laat {updated} dan op de huidige versie."
+    },
+    "js": {
+      "summary": "Na de update geeft {page} nieuwe JavaScript-fouten ({viewport}).",
+      "cause": "In de browser traden nieuwe fouten op: {errors}. Knoppen, formulieren of sliders werken daardoor mogelijk niet meer.",
+      "fix": "Controleer of de nieuwe versie andere scripts nodig heeft (bijvoorbeeld een nieuwere jQuery of een andere plugin), of sluit de pagina uit van optimalisatie- en cacheplugins. Laat {updated} anders op de huidige versie."
+    },
+    "resources": {
+      "summary": "Na de update laden bestanden van de site niet meer ({page}).",
+      "cause": "Deze scripts of stylesheets gaven een fout: {resources}. Vaak heeft de nieuwe versie bestanden verplaatst terwijl een cache- of optimalisatieplugin nog de oude paden gebruikt.",
+      "fix": "Leeg na de update de cache van cache- en optimalisatieplugins en test opnieuw. Blijft het probleem, laat {updated} dan op de huidige versie."
+    },
+    "layout": {
+      "summary": "Na de update ontbreken onderdelen op {page} ({viewport}).",
+      "cause": "Delen van de pagina (zoals header, menu, inhoud of footer) of een groot deel van de tekst waren na de update verdwenen {where}.",
+      "fix": "Bekijk de schermafbeeldingen. Vaak gaat het om een blok of shortcode van {updated} dat niet meer wordt weergegeven; controleer de instellingen van de plugin na de update."
+    },
+    "visual": {
+      "summary": "{page} ziet er na de update anders uit ({percent}% verschil, {viewport}).",
+      "cause": "De pagina werkte, maar het beeld week meer af dan is toegestaan. Dat kan een bedoelde ontwerpwijziging in de nieuwe versie zijn, maar ook een kapotte lay-out.",
+      "fix": "Bekijk het verschilbeeld. Is de wijziging in orde, voer de update dan opnieuw uit met een hogere drempel of maskeer het veranderende onderdeel in de testinstellingen. Is hij niet in orde, laat {updated} dan op de huidige versie."
+    },
+    "login": {
+      "summary": "Na de update werkt het inlogscherm van WordPress niet meer.",
+      "cause": "Het inlogformulier (wp-login.php) verscheen niet meer {where}. Beveiligings- en loginplugins kunnen dit veroorzaken.",
+      "fix": "Controleer de instellingen van beveiligings- en loginplugins en laat {updated} op de huidige versie tot duidelijk is wat er misgaat."
+    },
+    "unknown": {
+      "summary": "De tests na de update van {updated} zijn gezakt.",
+      "cause": "Er werd een afwijking gevonden {where}, maar de oorzaak is niet eenduidig uit de meetgegevens op te maken.",
+      "fix": "Bekijk de gezakte tests en schermafbeeldingen. Laat {updated} op de huidige versie tot duidelijk is wat er misgaat."
+    },
+    "ui": {
+      "title": "Diagnose",
+      "cause": "Oorzaak",
+      "fix": "Wat kun je doen?",
+      "culprit": "Veroorzaakt door",
+      "evidence": "Foutmelding",
+      "sourceRules": "Automatische analyse van de foutmeldingen en testresultaten.",
+      "sourceAi": "Analyse door AI ({model}) op basis van de foutmeldingen en testresultaten. Controleer de conclusie voordat je iets aanpast.",
+      "confidence": {
+        "high": "Zekerheid: hoog",
+        "medium": "Zekerheid: gemiddeld",
+        "low": "Zekerheid: laag"
+      }
     }
   }
 }

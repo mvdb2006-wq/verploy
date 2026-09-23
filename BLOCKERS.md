@@ -101,13 +101,13 @@ Of zeg: *"Je mag Railway instellen."* Dan doe ik stap 2 en 3 zelf in de browser,
 
 ---
 
-## 6. 🟡 Anthropic API-key — nodig in fase 5
+## 6. 🟡 Anthropic API-key — voor de AI-verfijning van de diagnose (fase 5 is klaar)
 
-**Wat je moet doen:** maak op console.anthropic.com een API-key aan en zet hem in Railway als `ANTHROPIC_API_KEY`.
+**Waarom:** de diagnose werkt nu al regelgebaseerd (schuldige plugin, soort fout, oplossing, in 5 talen). Met een sleutel verfijnt Claude die uitleg, zeker bij fouten die niet in een standaardpatroon vallen.
 
-**Ondertussen:** de diagnoselogica wordt getest met opgenomen, echte API-antwoorden.
+**Wat je moet doen:** maak op console.anthropic.com een API-key aan (Settings → API Keys) en zet hem bij de worker in Railway als `ANTHROPIC_API_KEY` (na #3). Of zeg *"Je mag de Anthropic-sleutel in Railway zetten"*, dan doe ik dat in de browser zodra jij bent ingelogd.
 
----
+**Ondertussen:** de aanroep is getest met nagebootste API-antwoorden in het gedocumenteerde formaat, inclusief weigering, afgebroken antwoord, fout en ongeldige JSON. Een echte aanroep is pas mogelijk met de sleutel; de eerste echte run controleer ik zelf.
 
 ## 7. 🟡 Stripe — nodig in fase 7
 

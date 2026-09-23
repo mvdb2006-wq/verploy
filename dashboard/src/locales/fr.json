@@ -306,7 +306,8 @@
       "hostname_mismatch": "le certificat appartient à un autre nom de domaine",
       "untrusted": "le certificat n'est pas reconnu comme fiable",
       "unreachable": "le site n'était pas joignable"
-    }
+    },
+    "diagnosis": "Diagnostic : {text}"
   },
   "health": {
     "title": "État de santé",
@@ -488,6 +489,136 @@
       "verdict_error": "Terminé : échec.",
       "verdict_cancelled": "Terminé : annulée.",
       "done": "Terminé."
+    }
+  },
+  "diagnosis": {
+    "where": {
+      "staging": "sur la copie de test",
+      "production": "sur le site en ligne"
+    },
+    "detail": {
+      "undefined_function": "appelle une fonction qui n’existe pas ({fn})",
+      "undefined_method": "appelle une méthode qui n’existe pas ({method})",
+      "missing_class": "cherche une classe qui n’existe pas ({cls})",
+      "memory": "manque de mémoire",
+      "redeclare": "définit une fonction qui existe déjà ({fn})",
+      "php_version": "exige une autre version de PHP",
+      "syntax": "contient une erreur de syntaxe",
+      "fatal_other": "provoque une erreur fatale : {message}"
+    },
+    "install_failed": {
+      "summary": "{plugin} n’a pas pu être mis à jour {where}.",
+      "cause": "WordPress n’a pas pu installer la nouvelle version ({status}). Rien n’a été testé ni mis en ligne.",
+      "fix": "Vérifiez si la mise à jour fonctionne manuellement (Extensions → Mettre à jour) et si la licence des extensions premium est active. Réessayez ensuite."
+    },
+    "no_write_access": {
+      "summary": "WordPress n’a pas le droit de mettre à jour ses propres fichiers sur ce serveur.",
+      "cause": "{plugin} n’a pas pu être installé : {status}. WordPress demande alors des identifiants FTP et les mises à jour automatiques sont impossibles.",
+      "fix": "Donnez au serveur web les droits d’écriture sur wp-content (ou définissez FS_METHOD sur direct dans wp-config.php) et réessayez. L’hébergeur peut vous aider."
+    },
+    "crashed": {
+      "summary": "{plugin} {to} fait planter le site pendant l’installation.",
+      "cause": "Juste après l’installation de la nouvelle version, le site ne répondait plus {where}. Cela indique une erreur fatale dans la nouvelle version, dès le chargement.",
+      "fix": "Gardez {plugin} en version {from}. Signalez le problème à l’auteur de l’extension et réessayez une version ultérieure via Verploy."
+    },
+    "undefined_function": {
+      "summary": "{plugin} {to} appelle une fonction qui n’existe pas ({fn}).",
+      "cause": "Après la mise à jour, PHP a renvoyé une erreur fatale dans {file} (ligne {line}) : la fonction {fn} n’existe pas. En général, cette fonction appartient à une autre extension ou à une version plus récente de WordPress ou de PHP, ou cette version contient un bug.",
+      "fix": "Gardez {plugin} en version {from} pour l’instant. Vérifiez dans le journal des modifications si la nouvelle version exige une autre extension ou une version plus récente de WordPress, et mettez-la à jour d’abord. Sinon, envoyez le message d’erreur à l’auteur de l’extension."
+    },
+    "undefined_method": {
+      "summary": "{plugin} {to} appelle une méthode qui n’existe pas ({method}).",
+      "cause": "Après la mise à jour, PHP a renvoyé une erreur fatale dans {file} (ligne {line}) : la méthode {method} n’existe pas. En général, la nouvelle version attend une version plus récente d’une autre extension ou de WordPress.",
+      "fix": "Gardez {plugin} en version {from} pour l’instant. Vérifiez dans le journal des modifications quelle extension ou version de WordPress est nécessaire et mettez-la à jour d’abord. Sinon, envoyez le message d’erreur à l’auteur de l’extension."
+    },
+    "missing_class": {
+      "summary": "{plugin} {to} cherche une classe qui n’existe pas ({cls}).",
+      "cause": "Après la mise à jour, PHP a renvoyé une erreur fatale dans {file} (ligne {line}) : la classe {cls} n’est pas chargée. Souvent, un fichier manque dans la version, ou l’extension attend une autre extension (par exemple WooCommerce ou une bibliothèque) inactive ou trop ancienne.",
+      "fix": "Gardez {plugin} en version {from} pour l’instant. Vérifiez que les extensions dont elle dépend sont actives et à jour. Sinon, envoyez le message d’erreur à l’auteur de l’extension."
+    },
+    "memory": {
+      "summary": "Le site manque de mémoire PHP après la mise à jour de {plugin}.",
+      "cause": "PHP s’est arrêté dans {file} (ligne {line}) faute de mémoire. La nouvelle version utilise plus de mémoire que le serveur ne l’autorise.",
+      "fix": "Augmentez memory_limit chez l’hébergeur (256 Mo suffisent pour la plupart des sites) ou définissez WP_MEMORY_LIMIT dans wp-config.php, puis réessayez la mise à jour."
+    },
+    "redeclare": {
+      "summary": "{plugin} {to} définit une fonction qui existe déjà ({fn}).",
+      "cause": "PHP s’est arrêté dans {file} (ligne {line}) : la fonction {fn} est définie deux fois. En général, la nouvelle version entre en conflit avec une autre extension ou avec une ancienne copie du même code.",
+      "fix": "Identifiez l’autre extension qui fournit la même fonction (souvent une extension d’aide ou un module complémentaire) et mettez-la à jour ou désactivez-la en même temps. D’ici là, gardez {plugin} en {from}."
+    },
+    "php_version": {
+      "summary": "{plugin} {to} exige une autre version de PHP que celle du serveur.",
+      "cause": "La nouvelle version indique que la version de PHP du serveur n’est pas prise en charge ({file}, ligne {line}).",
+      "fix": "Gardez {plugin} en {from}, ou mettez d’abord PHP à jour chez l’hébergeur puis testez à nouveau avec Verploy."
+    },
+    "syntax": {
+      "summary": "{plugin} {to} contient une erreur de programmation (erreur de syntaxe).",
+      "cause": "PHP n’a pas pu lire {file} (ligne {line}). C’est une erreur dans la version elle-même, pas dans votre site.",
+      "fix": "Ignorez cette version : gardez {plugin} en {from} et attendez une version corrigée. Signalez l’erreur à l’auteur de l’extension."
+    },
+    "fatal_other": {
+      "summary": "{plugin} {to} provoque une erreur PHP fatale.",
+      "cause": "Après la mise à jour, PHP s’est arrêté {where} avec le message : {message} ({file}, ligne {line}).",
+      "fix": "Gardez {plugin} en {from} et envoyez ce message d’erreur à l’auteur de l’extension. Réessayez une version ultérieure via Verploy."
+    },
+    "conflict": {
+      "summary": "{plugin} ne fonctionne pas avec {updated}.",
+      "cause": "Après la mise à jour, {plugin} a provoqué une erreur fatale {where} : il {detail} ({file}, ligne {line}). {plugin} lui-même n’a pas été mis à jour ; il entre en conflit avec la nouvelle version de {updated}.",
+      "fix": "Vérifiez s’il existe une version plus récente de {plugin} compatible avec {updated}, et mettez-la à jour d’abord ou en même temps. Sinon, gardez {updated} dans sa version actuelle et signalez le problème aux deux auteurs."
+    },
+    "fatal_unknown": {
+      "summary": "Le site affiche une erreur critique après la mise à jour de {updated}.",
+      "cause": "WordPress a affiché le message « erreur critique » {where}, mais le message d’erreur PHP exact n’a pas pu être capturé.",
+      "fix": "Gardez la version actuelle. Activez WP_DEBUG_LOG sur un environnement de test et consultez wp-content/debug.log pour le message exact, ou signalez-le à l’auteur de l’extension."
+    },
+    "http": {
+      "summary": "{page} ne se charge plus correctement après la mise à jour ({viewport}).",
+      "cause": "Après la mise à jour, la page a renvoyé le statut HTTP {status} {where}, alors qu’elle fonctionnait avant. Cela vient généralement d’un bug de l’extension ou d’une structure de permaliens ou de routes modifiée.",
+      "fix": "Vérifiez la page après la mise à jour sur un environnement de test et réenregistrez les permaliens (Réglages → Permaliens). Si le problème persiste, gardez {updated} dans sa version actuelle."
+    },
+    "js": {
+      "summary": "Après la mise à jour, {page} présente de nouvelles erreurs JavaScript ({viewport}).",
+      "cause": "De nouvelles erreurs sont apparues dans le navigateur : {errors}. Des boutons, formulaires ou carrousels peuvent ne plus fonctionner.",
+      "fix": "Vérifiez si la nouvelle version a besoin d’autres scripts (par exemple un jQuery plus récent ou une autre extension), ou excluez la page des extensions d’optimisation et de cache. Sinon, gardez {updated} dans sa version actuelle."
+    },
+    "resources": {
+      "summary": "Après la mise à jour, des fichiers du site ne se chargent plus ({page}).",
+      "cause": "Ces scripts ou feuilles de style ont renvoyé une erreur : {resources}. Souvent, la nouvelle version a déplacé des fichiers alors qu’une extension de cache ou d’optimisation utilise encore les anciens chemins.",
+      "fix": "Videz le cache des extensions de cache et d’optimisation après la mise à jour et testez à nouveau. Si le problème persiste, gardez {updated} dans sa version actuelle."
+    },
+    "layout": {
+      "summary": "Après la mise à jour, des éléments de {page} ont disparu ({viewport}).",
+      "cause": "Des parties de la page (en-tête, menu, contenu ou pied de page) ou une grande partie du texte avaient disparu {where} après la mise à jour.",
+      "fix": "Regardez les captures d’écran. Souvent, un bloc ou un shortcode de {updated} ne s’affiche plus ; vérifiez les réglages de l’extension après la mise à jour."
+    },
+    "visual": {
+      "summary": "{page} a un autre aspect après la mise à jour ({percent} % de différence, {viewport}).",
+      "cause": "La page fonctionnait, mais l’image différait plus que le seuil autorisé. Il peut s’agir d’un changement de design voulu dans la nouvelle version, mais aussi d’une mise en page cassée.",
+      "fix": "Regardez l’image des différences. Si le changement est correct, relancez la mise à jour avec un seuil plus élevé ou masquez la zone qui change dans les paramètres de test. Sinon, gardez {updated} dans sa version actuelle."
+    },
+    "login": {
+      "summary": "Après la mise à jour, l’écran de connexion de WordPress ne fonctionne plus.",
+      "cause": "Le formulaire de connexion (wp-login.php) n’apparaissait plus {where}. Les extensions de sécurité et de connexion peuvent en être la cause.",
+      "fix": "Vérifiez les réglages des extensions de sécurité et de connexion et gardez {updated} dans sa version actuelle jusqu’à ce que le problème soit identifié."
+    },
+    "unknown": {
+      "summary": "Les tests ont échoué après la mise à jour de {updated}.",
+      "cause": "Une anomalie a été détectée {where}, mais la cause ne ressort pas clairement des mesures.",
+      "fix": "Regardez les tests échoués et les captures d’écran. Gardez {updated} dans sa version actuelle jusqu’à ce que le problème soit identifié."
+    },
+    "ui": {
+      "title": "Diagnostic",
+      "cause": "Cause",
+      "fix": "Que faire ?",
+      "culprit": "Causé par",
+      "evidence": "Message d’erreur",
+      "sourceRules": "Analyse automatique des messages d’erreur et des résultats de test.",
+      "sourceAi": "Analyse par IA ({model}) à partir des messages d’erreur et des résultats de test. Vérifiez la conclusion avant de modifier quoi que ce soit.",
+      "confidence": {
+        "high": "Fiabilité : élevée",
+        "medium": "Fiabilité : moyenne",
+        "low": "Fiabilité : faible"
+      }
     }
   }
 }

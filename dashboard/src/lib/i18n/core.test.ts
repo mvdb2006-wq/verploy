@@ -32,7 +32,7 @@ describe('i18n: alle vijf talen volledig', () => {
     const placeholdersOnly = ['runs.reason.check.php_error', 'runs.events.item_updated', 'runs.events.item_failed']
     const identicalOk: Partial<Record<string, string[]>> = {
       en: ['dashboard.summary', 'email.alertSubject', 'alerts.types.site_offline.title', ...placeholdersOnly],
-      de: ['email.alertSubject', ...placeholdersOnly], fr: ['email.alertSubject', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
+      de: ['email.alertSubject', 'alerts.diagnosis', ...placeholdersOnly], fr: ['email.alertSubject', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
     }
     for (const locale of LOCALES.filter(l => l !== 'nl')) {
       const m = flatten(MESSAGES[locale])

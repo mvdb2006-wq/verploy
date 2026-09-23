@@ -37,7 +37,7 @@ export function runBadge(t: Translate, run: { status: string; verdict: string | 
 type Params = Record<string, unknown>
 
 /** Leesbare uitleg van een reden (reason_key + params) — voor run-pagina, meldingen en e-mail. */
-export function presentReason(t: Translate, key: string | null | undefined, params: unknown): string {
+export function presentReason(t: Translate, key: string | null | undefined, params: unknown, locale?: string): string {
   if (!key) return ''
   const p = (params ?? {}) as Params
   const vars: Record<string, string | number> = {}
@@ -46,8 +46,8 @@ export function presentReason(t: Translate, key: string | null | undefined, para
     else if (Array.isArray(v)) vars[k] = v.map(String).join(', ')
   }
   if (typeof p.viewport === 'string') vars.viewport = t(`runs.viewport.${p.viewport}` as MessageKey)
-  if (typeof p.ratio === 'number') vars.percent = (p.ratio * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })
-  if (typeof p.threshold === 'number') vars.limit = (p.threshold * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })
+  if (typeof p.ratio === 'number') vars.percent = (p.ratio * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
+  if (typeof p.threshold === 'number') vars.limit = (p.threshold * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
   if (typeof p.step === 'string') vars.step = t(`runs.steps.${p.step}` as MessageKey)
   if (typeof p.error === 'string' && /^(wp_critical_error|php_fatal|db_connection|maintenance)$/.test(p.error)) {
     vars.error = t(`runs.phpError.${p.error}` as MessageKey)

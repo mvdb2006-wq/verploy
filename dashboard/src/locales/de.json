@@ -306,7 +306,8 @@
       "hostname_mismatch": "das Zertifikat gehört zu einer anderen Domain",
       "untrusted": "dem Zertifikat wird nicht vertraut",
       "unreachable": "die Website war nicht erreichbar"
-    }
+    },
+    "diagnosis": "Diagnose: {text}"
   },
   "health": {
     "title": "Zustand",
@@ -488,6 +489,136 @@
       "verdict_error": "Fertig: fehlgeschlagen.",
       "verdict_cancelled": "Fertig: abgebrochen.",
       "done": "Fertig."
+    }
+  },
+  "diagnosis": {
+    "where": {
+      "staging": "auf der Testkopie",
+      "production": "auf der Live-Website"
+    },
+    "detail": {
+      "undefined_function": "ruft eine Funktion auf, die nicht existiert ({fn})",
+      "undefined_method": "ruft eine Methode auf, die nicht existiert ({method})",
+      "missing_class": "sucht eine Klasse, die nicht existiert ({cls})",
+      "memory": "hat zu wenig Speicher",
+      "redeclare": "definiert eine Funktion, die bereits existiert ({fn})",
+      "php_version": "verlangt eine andere PHP-Version",
+      "syntax": "enthält einen Syntaxfehler",
+      "fatal_other": "löst einen fatalen Fehler aus: {message}"
+    },
+    "install_failed": {
+      "summary": "{plugin} konnte {where} nicht aktualisiert werden.",
+      "cause": "WordPress konnte die neue Version nicht installieren ({status}). Es wurde nichts getestet und nichts live geschaltet.",
+      "fix": "Prüfe, ob das Update manuell funktioniert (Plugins → Aktualisieren) und ob die Lizenz von Premium-Plugins aktiv ist. Versuche es danach erneut."
+    },
+    "no_write_access": {
+      "summary": "WordPress darf seine eigenen Dateien auf diesem Server nicht aktualisieren.",
+      "cause": "{plugin} konnte nicht installiert werden: {status}. WordPress fragt dann nach FTP-Zugangsdaten, automatische Updates sind nicht möglich.",
+      "fix": "Gib dem Webserver Schreibrechte auf wp-content (oder setze FS_METHOD in der wp-config.php auf direct) und versuche es erneut. Der Hosting-Anbieter kann dabei helfen."
+    },
+    "crashed": {
+      "summary": "{plugin} {to} lässt die Website bei der Installation abstürzen.",
+      "cause": "Direkt nach der Installation der neuen Version reagierte die Website {where} nicht mehr. Das deutet auf einen fatalen Fehler in der neuen Version hin, der bereits beim Laden auftritt.",
+      "fix": "Belasse {plugin} auf Version {from}. Melde das Problem dem Entwickler des Plugins und versuche eine spätere Version erneut über Verploy."
+    },
+    "undefined_function": {
+      "summary": "{plugin} {to} ruft eine Funktion auf, die nicht existiert ({fn}).",
+      "cause": "Nach dem Update meldete PHP einen fatalen Fehler in {file} (Zeile {line}): Die Funktion {fn} existiert nicht. Meist gehört diese Funktion zu einem anderen Plugin oder zu einer neueren WordPress- oder PHP-Version, oder die Version enthält einen Fehler.",
+      "fix": "Belasse {plugin} vorerst auf Version {from}. Prüfe im Changelog, ob die neue Version ein anderes Plugin oder eine neuere WordPress-Version voraussetzt, und aktualisiere dieses zuerst. Steht dort nichts dazu, sende die Fehlermeldung an den Entwickler des Plugins."
+    },
+    "undefined_method": {
+      "summary": "{plugin} {to} ruft eine Methode auf, die nicht existiert ({method}).",
+      "cause": "Nach dem Update meldete PHP einen fatalen Fehler in {file} (Zeile {line}): Die Methode {method} existiert nicht. Meist erwartet die neue Version eine neuere Version eines anderen Plugins oder von WordPress.",
+      "fix": "Belasse {plugin} vorerst auf Version {from}. Prüfe im Changelog, welches Plugin oder welche WordPress-Version nötig ist, und aktualisiere diese zuerst. Steht dort nichts dazu, sende die Fehlermeldung an den Entwickler des Plugins."
+    },
+    "missing_class": {
+      "summary": "{plugin} {to} sucht eine Klasse, die nicht existiert ({cls}).",
+      "cause": "Nach dem Update meldete PHP einen fatalen Fehler in {file} (Zeile {line}): Die Klasse {cls} ist nicht geladen. Oft fehlt eine Datei in der Version, oder das Plugin erwartet ein anderes Plugin (zum Beispiel WooCommerce oder eine Bibliothek), das nicht aktiv oder zu alt ist.",
+      "fix": "Belasse {plugin} vorerst auf Version {from}. Prüfe, ob die Plugins, von denen es abhängt, aktiv und aktuell sind. Sende sonst die Fehlermeldung an den Entwickler des Plugins."
+    },
+    "memory": {
+      "summary": "Die Website hat nach dem Update von {plugin} zu wenig PHP-Speicher.",
+      "cause": "PHP brach in {file} (Zeile {line}) ab, weil der Speicher voll war. Die neue Version braucht mehr Speicher, als der Server erlaubt.",
+      "fix": "Erhöhe memory_limit beim Hosting-Anbieter (256 MB reichen für die meisten Websites) oder setze WP_MEMORY_LIMIT in der wp-config.php und versuche das Update danach erneut."
+    },
+    "redeclare": {
+      "summary": "{plugin} {to} definiert eine Funktion, die bereits existiert ({fn}).",
+      "cause": "PHP brach in {file} (Zeile {line}) ab: Die Funktion {fn} ist doppelt definiert. Meist kollidiert die neue Version mit einem anderen Plugin oder mit einer alten Kopie desselben Codes.",
+      "fix": "Finde heraus, welches andere Plugin dieselbe Funktion bereitstellt (oft ein separates Hilfs- oder Add-on-Plugin), und aktualisiere oder deaktiviere es gleichzeitig. Belasse {plugin} bis dahin auf {from}."
+    },
+    "php_version": {
+      "summary": "{plugin} {to} verlangt eine andere PHP-Version, als dieser Server hat.",
+      "cause": "Die neue Version meldet, dass die PHP-Version des Servers nicht unterstützt wird ({file}, Zeile {line}).",
+      "fix": "Belasse {plugin} auf {from} oder aktualisiere PHP zuerst beim Hosting-Anbieter und teste danach erneut mit Verploy."
+    },
+    "syntax": {
+      "summary": "{plugin} {to} enthält einen Programmierfehler (Syntaxfehler).",
+      "cause": "PHP konnte {file} nicht lesen (Zeile {line}). Das ist ein Fehler in der Version selbst, nicht in deiner Website.",
+      "fix": "Überspringe diese Version: Belasse {plugin} auf {from} und warte auf eine korrigierte Version. Melde den Fehler dem Entwickler des Plugins."
+    },
+    "fatal_other": {
+      "summary": "{plugin} {to} löst einen fatalen PHP-Fehler aus.",
+      "cause": "Nach dem Update brach PHP {where} mit folgender Meldung ab: {message} ({file}, Zeile {line}).",
+      "fix": "Belasse {plugin} auf {from} und sende diese Fehlermeldung an den Entwickler des Plugins. Versuche eine spätere Version erneut über Verploy."
+    },
+    "conflict": {
+      "summary": "{plugin} funktioniert nicht mit {updated}.",
+      "cause": "Nach dem Update löste {plugin} {where} einen fatalen Fehler aus: Es {detail} ({file}, Zeile {line}). {plugin} selbst wurde nicht aktualisiert; es kollidiert mit der neuen Version von {updated}.",
+      "fix": "Prüfe, ob es eine neuere Version von {plugin} gibt, die mit {updated} funktioniert, und aktualisiere sie zuerst oder gleichzeitig. Falls nicht, belasse {updated} auf der aktuellen Version und melde das Problem beiden Entwicklern."
+    },
+    "fatal_unknown": {
+      "summary": "Die Website zeigt nach dem Update von {updated} einen kritischen Fehler.",
+      "cause": "WordPress zeigte {where} die Meldung „kritischer Fehler“, aber die genaue PHP-Fehlermeldung konnte nicht erfasst werden.",
+      "fix": "Belasse die aktuelle Version. Aktiviere in einer Testumgebung WP_DEBUG_LOG und sieh in wp-content/debug.log nach der genauen Meldung, oder melde es dem Entwickler des Plugins."
+    },
+    "http": {
+      "summary": "{page} lädt nach dem Update nicht mehr richtig ({viewport}).",
+      "cause": "Die Seite lieferte nach dem Update {where} den HTTP-Status {status}, obwohl sie vorher funktionierte. Meist liegt das an einem Fehler im Plugin oder an einer geänderten Permalink- oder Routenstruktur.",
+      "fix": "Prüfe die Seite nach dem Update in einer Testumgebung und speichere die Permalinks erneut (Einstellungen → Permalinks). Bleibt das Problem, belasse {updated} auf der aktuellen Version."
+    },
+    "js": {
+      "summary": "Nach dem Update zeigt {page} neue JavaScript-Fehler ({viewport}).",
+      "cause": "Im Browser traten neue Fehler auf: {errors}. Buttons, Formulare oder Slider funktionieren dadurch möglicherweise nicht mehr.",
+      "fix": "Prüfe, ob die neue Version andere Skripte braucht (zum Beispiel ein neueres jQuery oder ein anderes Plugin), oder schließe die Seite von Optimierungs- und Cache-Plugins aus. Belasse {updated} sonst auf der aktuellen Version."
+    },
+    "resources": {
+      "summary": "Nach dem Update laden Dateien der Website nicht mehr ({page}).",
+      "cause": "Diese Skripte oder Stylesheets lieferten einen Fehler: {resources}. Oft hat die neue Version Dateien verschoben, während ein Cache- oder Optimierungs-Plugin noch die alten Pfade verwendet.",
+      "fix": "Leere nach dem Update den Cache von Cache- und Optimierungs-Plugins und teste erneut. Bleibt das Problem, belasse {updated} auf der aktuellen Version."
+    },
+    "layout": {
+      "summary": "Nach dem Update fehlen Teile von {page} ({viewport}).",
+      "cause": "Teile der Seite (etwa Header, Menü, Inhalt oder Footer) oder ein großer Teil des Textes waren nach dem Update {where} verschwunden.",
+      "fix": "Sieh dir die Screenshots an. Oft wird ein Block oder Shortcode von {updated} nicht mehr angezeigt; prüfe nach dem Update die Einstellungen des Plugins."
+    },
+    "visual": {
+      "summary": "{page} sieht nach dem Update anders aus ({percent} % Unterschied, {viewport}).",
+      "cause": "Die Seite funktionierte, aber das Bild wich stärker ab als erlaubt. Das kann eine gewollte Designänderung der neuen Version sein, aber auch ein kaputtes Layout.",
+      "fix": "Sieh dir das Differenzbild an. Ist die Änderung in Ordnung, führe das Update mit einer höheren Schwelle erneut aus oder maskiere den veränderlichen Bereich in den Testeinstellungen. Wenn nicht, belasse {updated} auf der aktuellen Version."
+    },
+    "login": {
+      "summary": "Nach dem Update funktioniert die WordPress-Anmeldung nicht mehr.",
+      "cause": "Das Anmeldeformular (wp-login.php) erschien {where} nicht mehr. Sicherheits- und Login-Plugins können das verursachen.",
+      "fix": "Prüfe die Einstellungen von Sicherheits- und Login-Plugins und belasse {updated} auf der aktuellen Version, bis klar ist, was schiefgeht."
+    },
+    "unknown": {
+      "summary": "Die Tests nach dem Update von {updated} sind fehlgeschlagen.",
+      "cause": "Es wurde {where} eine Abweichung gefunden, aber die Ursache lässt sich aus den Messdaten nicht eindeutig ablesen.",
+      "fix": "Sieh dir die fehlgeschlagenen Tests und Screenshots an. Belasse {updated} auf der aktuellen Version, bis klar ist, was schiefgeht."
+    },
+    "ui": {
+      "title": "Diagnose",
+      "cause": "Ursache",
+      "fix": "Was du tun kannst",
+      "culprit": "Verursacht durch",
+      "evidence": "Fehlermeldung",
+      "sourceRules": "Automatische Analyse der Fehlermeldungen und Testergebnisse.",
+      "sourceAi": "Analyse durch KI ({model}) auf Basis der Fehlermeldungen und Testergebnisse. Prüfe die Schlussfolgerung, bevor du etwas änderst.",
+      "confidence": {
+        "high": "Sicherheit: hoch",
+        "medium": "Sicherheit: mittel",
+        "low": "Sicherheit: niedrig"
+      }
     }
   }
 }
