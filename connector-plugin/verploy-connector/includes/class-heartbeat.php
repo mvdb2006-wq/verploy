@@ -20,11 +20,24 @@ class Verploy_Heartbeat {
 
 		$response = $client->post( '/sites/heartbeat', $payload );
 
+		$is_error    = is_wp_error( $response );
+		$pending_jobs = [];
+
+		if ( ! $is_error && ! empty( $response['pending_jobs'] ) ) {
+			$pending_jobs = $response['pending_jobs'];
+		}
+
 		// Store last heartbeat time and result for admin UI
 		update_option( 'verploy_last_heartbeat', [
-			'timestamp' => gmdate( 'c' ),
-			'success'   => ! is_wp_error( $response ),
-			'error'     => is_wp_error( $response ) ? $response->get_error_message() : null,
+			'timestamp'    => gmdate( 'c' ),
+			'success'      => ! $is_error,
+			'error'        => $is_error ? $response->get_error_message() : null,
+			'pending_jobs' => count( $pending_jobs ),
 		], false );
+
+		// Execute any pending update jobs returned by the cloud
+		if ( ! empty( $pending_jobs ) ) {
+			Verploy_Job_Runner::run( $pending_jobs, $api_key );
+		}
 	}
 }

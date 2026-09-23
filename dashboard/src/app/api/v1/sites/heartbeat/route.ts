@@ -161,10 +161,27 @@ export async function POST(req: NextRequest) {
     // 7. Auto-alerts + emails (fire-and-forget, non-fatal)
     await createAutoAlerts(supabase, site.id, site.agency_id, site.name, site.url, wp, server, ssl, sslExpiresAt)
 
+    // 8. Fetch pending update jobs for this site
+    const { data: pendingJobs } = await supabase
+      .from('update_jobs')
+      .select('id, type, slug, name, to_version')
+      .eq('site_id', site.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true })
+
+    // Mark fetched jobs as 'running' so they aren't re-sent on the next heartbeat
+    if (pendingJobs && pendingJobs.length > 0) {
+      await supabase
+        .from('update_jobs')
+        .update({ status: 'running', started_at: now.toISOString() })
+        .in('id', pendingJobs.map(j => j.id))
+    }
+
     return NextResponse.json({
       ok: true,
       site_id: site.id,
       snapshot_id: snapshot.id,
+      pending_jobs: pendingJobs ?? [],
     })
   } catch (err) {
     console.error('[verploy heartbeat] unexpected error:', err)

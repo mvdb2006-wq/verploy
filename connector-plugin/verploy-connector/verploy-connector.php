@@ -3,7 +3,7 @@
  * Plugin Name: Verploy Connector
  * Plugin URI:  https://verploy.com
  * Description: Connects your WordPress site to Verploy — automated update testing, server health monitoring, and client reporting for agencies.
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      Verploy
  * Author URI:  https://verploy.com
  * License:     GPL-2.0-or-later
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'VERPLOY_VERSION',    '1.2.0' );
+define( 'VERPLOY_VERSION',    '1.3.0' );
 define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VERPLOY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'VERPLOY_API_BASE',   'https://app.verploy.com/api/v1' );
@@ -27,6 +27,7 @@ require_once VERPLOY_PLUGIN_DIR . 'includes/class-updater.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-health-collector.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-rest-endpoints.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-admin.php';
+require_once VERPLOY_PLUGIN_DIR . 'includes/class-job-runner.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-heartbeat.php';
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
