@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const PLUGIN_VERSION  = '1.3.0'
-const PLUGIN_DOWNLOAD = `https://app.verploy.com/downloads/verploy-connector-${PLUGIN_VERSION}.zip`
+const PLUGIN_DOWNLOAD = `https://app.verploy.com/api/v1/plugin/download`
 const PLUGIN_DETAILS  = 'https://verploy.com/docs/connector'
 
 // Cache for 1 hour on Vercel Edge
