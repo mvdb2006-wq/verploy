@@ -144,6 +144,7 @@ export async function POST(req: NextRequest) {
       .update({
         status:             'online',
         last_seen_at:       now.toISOString(),
+        last_ping_at:       now.toISOString(),
         last_heartbeat_at:  now.toISOString(),
         wp_version:         wp.version          ?? null,
         php_version:        server.php_version  ?? null,
