@@ -25,7 +25,8 @@
     "team": "Team",
     "signOut": "Sign out",
     "agency": "Agency",
-    "mainNav": "Main menu"
+    "mainNav": "Main menu",
+    "alerts": "Alerts"
   },
   "auth": {
     "email": "Email address",
@@ -217,6 +218,97 @@
     "inviteSubject": "Invitation to {agency} on Verploy",
     "inviteBody": "{inviter} invites you to join {agency} on Verploy as {role}.",
     "inviteCta": "View invitation",
-    "inviteFooter": "This link is valid for 7 days. Weren't expecting this email? You can ignore it."
+    "inviteFooter": "This link is valid for 7 days. Weren't expecting this email? You can ignore it.",
+    "alertSubject": "[{severity}] {title} — {site}",
+    "alertIntro": "Verploy has an alert for {site} ({url}).",
+    "alertCta": "View in Verploy",
+    "alertFooter": "You receive this because you are an owner or admin of {agency} in Verploy.",
+    "recoveredSubject": "Resolved: {site} is back online",
+    "recoveredBody": "{site} is responding again. The site had been offline since {since}."
+  },
+  "alerts": {
+    "title": "Alerts",
+    "intro": "Verploy checks every site continuously. Everything that needs attention appears here.",
+    "empty": "No open alerts. Everything is fine.",
+    "openTab": "Open",
+    "resolvedTab": "Resolved (30 days)",
+    "emptyResolved": "No resolved alerts in the past 30 days.",
+    "acknowledge": "Mark as seen",
+    "acknowledged": "Seen",
+    "since": "since {date}",
+    "resolvedAt": "resolved {date}",
+    "severity": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "types": {
+      "site_offline": {
+        "title": "Site is offline",
+        "body": "No contact with the site since {since}. Check whether the site and server are reachable."
+      },
+      "ssl_expiring": {
+        "title": "{days, plural, =0 {SSL certificate has expired} one {SSL certificate expires in # day} other {SSL certificate expires in # days}}",
+        "body": "The certificate is valid until {date}. Renew it or check that automatic renewal works."
+      },
+      "ssl_invalid": {
+        "title": "SSL certificate is invalid",
+        "body": "Visitors see a security warning. Cause: {reason}."
+      },
+      "ssl_missing": {
+        "title": "Site does not use HTTPS",
+        "body": "The site is set to http://. Install an SSL certificate and change the address to https://."
+      },
+      "domain_expiring": {
+        "title": "{days, plural, =0 {Domain name has expired} one {Domain name expires in # day} other {Domain name expires in # days}}",
+        "body": "The registration ends on {date}. Renew the domain with the registrar."
+      },
+      "php_eol_past": {
+        "title": "PHP {version} no longer receives security updates",
+        "body": "Support ended on {date}. Upgrade to a supported PHP version."
+      },
+      "php_eol_soon": {
+        "title": "PHP {version} receives security updates until {date}",
+        "body": "Plan the upgrade to a newer PHP version before that date."
+      },
+      "memory_low": {
+        "title": "Memory limit is low ({mb} MB)",
+        "body": "WordPress recommends at least 128 MB, and 256 MB for heavier sites. Increase memory_limit with the host."
+      },
+      "disk_low": {
+        "title": "Low disk space ({mb} MB free)",
+        "body": "When the disk is full, updates, uploads and backups fail. Clean up or increase storage."
+      },
+      "core_update": {
+        "title": "WordPress {version} is available",
+        "body": "A new version of WordPress is available. Safe updating follows in the Verploy update flow."
+      },
+      "plugin_updates": {
+        "title": "{count, plural, one {# plugin or theme update available} other {# plugin and theme updates available}}",
+        "body": "See the list on the site's page."
+      }
+    },
+    "sslError": {
+      "expired": "the certificate has expired",
+      "self_signed": "the certificate is self-signed",
+      "hostname_mismatch": "the certificate belongs to a different domain name",
+      "untrusted": "the certificate is not trusted",
+      "unreachable": "the site was unreachable"
+    }
+  },
+  "health": {
+    "title": "Health",
+    "ssl": "SSL certificate",
+    "sslUntil": "valid until {date}",
+    "sslPending": "not checked yet",
+    "domain": "Domain name",
+    "domainUntil": "expires {date}",
+    "domainNotPublished": "expiry date not published by the registry",
+    "domainFailed": "could not be retrieved",
+    "php": "PHP support",
+    "phpOk": "supported",
+    "disk": "Free disk space",
+    "noHttps": "no HTTPS",
+    "openAlerts": "Open alerts"
   }
 }

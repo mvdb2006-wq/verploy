@@ -28,7 +28,10 @@ describe('i18n: alle vijf talen volledig', () => {
   it('vertalingen zijn niet stiekem Nederlands gebleven', () => {
     const nl = flatten(MESSAGES.nl)
     // Teksten die in die taal écht identiek zijn aan het Nederlands.
-    const identicalOk: Partial<Record<string, string[]>> = { en: ['dashboard.summary'] }
+    const identicalOk: Partial<Record<string, string[]>> = {
+      en: ['dashboard.summary', 'email.alertSubject', 'alerts.types.site_offline.title'],
+      de: ['email.alertSubject'], fr: ['email.alertSubject'], es: ['email.alertSubject'],
+    }
     for (const locale of LOCALES.filter(l => l !== 'nl')) {
       const m = flatten(MESSAGES[locale])
       const same = Object.keys(nl).filter(k => nl[k] === m[k] && nl[k]!.length > 12 && !identicalOk[locale]?.includes(k))

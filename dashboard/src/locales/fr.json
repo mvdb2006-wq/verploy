@@ -25,7 +25,8 @@
     "team": "Équipe",
     "signOut": "Se déconnecter",
     "agency": "Agence",
-    "mainNav": "Menu principal"
+    "mainNav": "Menu principal",
+    "alerts": "Alertes"
   },
   "auth": {
     "email": "Adresse e-mail",
@@ -217,6 +218,97 @@
     "inviteSubject": "Invitation à rejoindre {agency} sur Verploy",
     "inviteBody": "{inviter} vous invite à rejoindre {agency} sur Verploy en tant que {role}.",
     "inviteCta": "Voir l'invitation",
-    "inviteFooter": "Ce lien est valable 7 jours. Vous n'attendiez pas cet e-mail ? Vous pouvez l'ignorer."
+    "inviteFooter": "Ce lien est valable 7 jours. Vous n'attendiez pas cet e-mail ? Vous pouvez l'ignorer.",
+    "alertSubject": "[{severity}] {title} — {site}",
+    "alertIntro": "Verploy a une alerte pour {site} ({url}).",
+    "alertCta": "Voir dans Verploy",
+    "alertFooter": "Vous recevez ce message en tant que propriétaire ou administrateur de {agency} dans Verploy.",
+    "recoveredSubject": "Résolu : {site} est de nouveau en ligne",
+    "recoveredBody": "{site} répond de nouveau. Le site était hors ligne depuis le {since}."
+  },
+  "alerts": {
+    "title": "Alertes",
+    "intro": "Verploy surveille chaque site en continu. Tout ce qui demande votre attention apparaît ici.",
+    "empty": "Aucune alerte ouverte. Tout va bien.",
+    "openTab": "Ouvertes",
+    "resolvedTab": "Résolues (30 jours)",
+    "emptyResolved": "Aucune alerte résolue au cours des 30 derniers jours.",
+    "acknowledge": "Marquer comme vu",
+    "acknowledged": "Vu",
+    "since": "depuis le {date}",
+    "resolvedAt": "résolue le {date}",
+    "severity": {
+      "critical": "Critique",
+      "warning": "Avertissement",
+      "info": "Info"
+    },
+    "types": {
+      "site_offline": {
+        "title": "Le site est hors ligne",
+        "body": "Aucun contact avec le site depuis le {since}. Vérifiez que le site et le serveur sont joignables."
+      },
+      "ssl_expiring": {
+        "title": "{days, plural, =0 {Le certificat SSL a expiré} one {Le certificat SSL expire dans # jour} other {Le certificat SSL expire dans # jours}}",
+        "body": "Le certificat est valable jusqu'au {date}. Renouvelez-le ou vérifiez que le renouvellement automatique fonctionne."
+      },
+      "ssl_invalid": {
+        "title": "Le certificat SSL n'est pas valide",
+        "body": "Les visiteurs voient un avertissement de sécurité. Cause : {reason}."
+      },
+      "ssl_missing": {
+        "title": "Le site n'utilise pas HTTPS",
+        "body": "Le site est configuré en http://. Installez un certificat SSL et remplacez l'adresse par https://."
+      },
+      "domain_expiring": {
+        "title": "{days, plural, =0 {Le nom de domaine a expiré} one {Le nom de domaine expire dans # jour} other {Le nom de domaine expire dans # jours}}",
+        "body": "L'enregistrement se termine le {date}. Renouvelez le domaine auprès du registrar."
+      },
+      "php_eol_past": {
+        "title": "PHP {version} ne reçoit plus de mises à jour de sécurité",
+        "body": "Le support a pris fin le {date}. Passez à une version de PHP prise en charge."
+      },
+      "php_eol_soon": {
+        "title": "PHP {version} reçoit des mises à jour de sécurité jusqu'au {date}",
+        "body": "Planifiez la migration vers une version plus récente de PHP avant cette date."
+      },
+      "memory_low": {
+        "title": "La limite de mémoire est basse ({mb} Mo)",
+        "body": "WordPress recommande au moins 128 Mo, et 256 Mo pour les sites plus lourds. Augmentez memory_limit chez l'hébergeur."
+      },
+      "disk_low": {
+        "title": "Espace disque faible ({mb} Mo libres)",
+        "body": "Quand le disque est plein, les mises à jour, les envois et les sauvegardes échouent. Faites du ménage ou augmentez le stockage."
+      },
+      "core_update": {
+        "title": "WordPress {version} est disponible",
+        "body": "Une nouvelle version de WordPress est disponible. La mise à jour sécurisée suit dans le flux de mise à jour de Verploy."
+      },
+      "plugin_updates": {
+        "title": "{count, plural, one {# mise à jour d'extension ou de thème disponible} other {# mises à jour d'extensions et de thèmes disponibles}}",
+        "body": "Consultez la liste sur la page du site."
+      }
+    },
+    "sslError": {
+      "expired": "le certificat a expiré",
+      "self_signed": "le certificat est auto-signé",
+      "hostname_mismatch": "le certificat appartient à un autre nom de domaine",
+      "untrusted": "le certificat n'est pas reconnu comme fiable",
+      "unreachable": "le site n'était pas joignable"
+    }
+  },
+  "health": {
+    "title": "État de santé",
+    "ssl": "Certificat SSL",
+    "sslUntil": "valable jusqu'au {date}",
+    "sslPending": "pas encore vérifié",
+    "domain": "Nom de domaine",
+    "domainUntil": "expire le {date}",
+    "domainNotPublished": "date d'expiration non publiée par le registre",
+    "domainFailed": "n'a pas pu être récupéré",
+    "php": "Support PHP",
+    "phpOk": "pris en charge",
+    "disk": "Espace disque libre",
+    "noHttps": "pas de HTTPS",
+    "openAlerts": "Alertes ouvertes"
   }
 }

@@ -112,6 +112,63 @@ export type Database = {
         }
         Relationships: []
       }
+      alerts: {
+        Row: {
+          id: string
+          agency_id: string
+          site_id: string
+          type: string
+          severity: string
+          status: string
+          params: Json
+          opened_at: string
+          updated_at: string
+          resolved_at: string | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          notified_at: string | null
+          resolved_notified_at: string | null
+          notify_attempts: number
+          notify_claimed_at: string | null
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          site_id: string
+          type: string
+          severity: string
+          status?: string
+          params?: Json
+          opened_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          notified_at?: string | null
+          resolved_notified_at?: string | null
+          notify_attempts?: number
+          notify_claimed_at?: string | null
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          site_id?: string
+          type?: string
+          severity?: string
+          status?: string
+          params?: Json
+          opened_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          notified_at?: string | null
+          resolved_notified_at?: string | null
+          notify_attempts?: number
+          notify_claimed_at?: string | null
+        }
+        Relationships: []
+      }
       health_snapshots: {
         Row: {
           id: number
@@ -308,6 +365,14 @@ export type Database = {
           paired_at: string | null
           created_at: string
           updated_at: string
+          ssl_valid: boolean | null
+          ssl_expires_at: string | null
+          ssl_issuer: string | null
+          ssl_error: string | null
+          ssl_checked_at: string | null
+          domain_expires_at: string | null
+          domain_error: string | null
+          domain_checked_at: string | null
         }
         Insert: {
           id?: string
@@ -326,6 +391,14 @@ export type Database = {
           paired_at?: string | null
           created_at?: string
           updated_at?: string
+          ssl_valid?: boolean | null
+          ssl_expires_at?: string | null
+          ssl_issuer?: string | null
+          ssl_error?: string | null
+          ssl_checked_at?: string | null
+          domain_expires_at?: string | null
+          domain_error?: string | null
+          domain_checked_at?: string | null
         }
         Update: {
           id?: string
@@ -344,22 +417,35 @@ export type Database = {
           paired_at?: string | null
           created_at?: string
           updated_at?: string
+          ssl_valid?: boolean | null
+          ssl_expires_at?: string | null
+          ssl_issuer?: string | null
+          ssl_error?: string | null
+          ssl_checked_at?: string | null
+          domain_expires_at?: string | null
+          domain_error?: string | null
+          domain_checked_at?: string | null
         }
         Relationships: []
       }
     }
     Views: { [_ in never]: never }
     Functions: {
-      accept_invitation: { Args: { p_token: string }; Returns: string }
-      consume_pairing_code: { Args: { p_code_hash: string; p_secret_box: string; p_connector_version: string }; Returns: { site_id: string; agency_id: string; secret_version: number }[] }
-      create_agency: { Args: { p_name: string }; Returns: string }
-      create_pairing_code: { Args: { p_site: string }; Returns: string }
-      ingest_heartbeat: { Args: { p_site: string; p_snapshot: Json; p_components: Json }; Returns: number }
-      invite_member: { Args: { p_email: string; p_role: string }; Returns: string }
+      accept_invitation: { Args: { p_token: string | null }; Returns: string }
+      acknowledge_alert: { Args: { p_alert: string | null }; Returns: undefined }
+      claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
+      complete_alert_notification: { Args: { p_alert: string | null; p_kind: string | null; p_sent: boolean | null }; Returns: undefined }
+      consume_pairing_code: { Args: { p_code_hash: string | null; p_secret_box: string | null; p_connector_version: string | null }; Returns: { site_id: string; agency_id: string; secret_version: number }[] }
+      create_agency: { Args: { p_name: string | null }; Returns: string }
+      create_pairing_code: { Args: { p_site: string | null }; Returns: string }
+      ingest_heartbeat: { Args: { p_site: string | null; p_snapshot: Json | null; p_components: Json | null }; Returns: number }
+      invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
-      peek_invitation: { Args: { p_token: string }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
-      remove_member: { Args: { p_user: string }; Returns: undefined }
-      update_member_role: { Args: { p_user: string; p_role: string }; Returns: undefined }
+      peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
+      record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
+      remove_member: { Args: { p_user: string | null }; Returns: undefined }
+      sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
+      update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }

@@ -11,7 +11,7 @@ const PG_TO_TS = {
   date: 'string', integer: 'number', bigint: 'number', smallint: 'number', numeric: 'number',
   boolean: 'boolean', jsonb: 'Json', json: 'Json', bytea: 'string',
 }
-const tsType = t => PG_TO_TS[t] ?? (() => { throw new Error(`Onbekend Postgres-type: ${t}`) })()
+const tsType = t => t.endsWith('[]') ? `${tsType(t.slice(0, -2))}[]` : PG_TO_TS[t] ?? (() => { throw new Error(`Onbekend Postgres-type: ${t}`) })()
 
 export async function generate(client) {
   const cols = (await client.query(`
@@ -23,7 +23,7 @@ export async function generate(client) {
      where c.table_schema = 'public' and t.table_type = 'BASE TABLE'
      order by c.table_name, c.ordinal_position`)).rows
   const fns = (await client.query(`
-    select p.proname, pg_get_function_identity_arguments(p.oid) as args,
+    select p.proname, pg_get_function_arguments(p.oid) as args,
            pg_get_function_result(p.oid) as ret
       from pg_proc p
      where p.pronamespace = 'public'::regnamespace
@@ -49,9 +49,11 @@ export async function generate(client) {
   }
   lines.push('    }', '    Views: { [_ in never]: never }', '    Functions: {')
   for (const f of fns) {
+    // Postgres-argumenten mogen altijd NULL zijn; argumenten met DEFAULT zijn optioneel.
     const args = f.args ? f.args.split(', ').map(a => {
-      const [n, ...t] = a.split(' ')
-      return `${n}: ${tsType(t.join(' '))}`
+      const [decl, dflt] = a.split(' DEFAULT ')
+      const [n, ...t] = decl.split(' ')
+      return `${n}${dflt ? '?' : ''}: ${tsType(t.join(' '))} | null`
     }) : []
     const table = /^TABLE\((.*)\)$/.exec(f.ret)
     const ret = f.ret === 'void'

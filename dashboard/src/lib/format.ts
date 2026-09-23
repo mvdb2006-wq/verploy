@@ -30,3 +30,8 @@ export function effectiveStatus(site: { status: string; connection_status: strin
   if (site.connection_status !== 'connected' || !site.last_heartbeat_at) return 'pending'
   return now - new Date(site.last_heartbeat_at).getTime() > OFFLINE_AFTER_MS ? 'offline' : 'online'
 }
+
+/** ISO-tijdstip van `days` dagen geleden (voor filters in queries). */
+export function daysAgoIso(days: number, now = Date.now()): string {
+  return new Date(now - days * 86_400_000).toISOString()
+}

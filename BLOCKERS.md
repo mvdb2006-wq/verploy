@@ -57,6 +57,16 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 
 ---
 
+## 2c. 🟠 Twee omgevingsvariabelen in Vercel — samen met #2
+
+**Waarom:** de onderhouds-cron (drempels, SSL/domein, e-mails) werkt alleen met een geheim. E-mail vanaf verploy.com kan pas na #5.
+
+**Wat je moet doen (één van de twee):**
+- **A.** Zeg: *"Je mag de omgevingsvariabelen in Vercel zetten."* Dan zet ik `CRON_SECRET` (een willekeurige waarde die ik genereer) en `NEXT_PUBLIC_APP_URL=https://app.verploy.com` zelf via de browser.
+- **B.** Vercel → project → Settings → Environment Variables → voeg `CRON_SECRET` toe met een willekeurige lange waarde (minstens 32 tekens), en controleer `NEXT_PUBLIC_APP_URL = https://app.verploy.com`.
+
+---
+
 ## 3. 🟠 Railway voor de worker — nodig in fase 4
 
 **Waarom:** de worker (staging, Playwright-tests, rollback, later PDF's) moet ergens 24/7 draaien. Er bestaat nog geen Railway-project.
@@ -87,9 +97,9 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 **Wat je moet doen:**
 1. Maak een account op resend.com → Domains → Add domain → `verploy.com`.
 2. Zet de DNS-records die Resend toont (SPF/DKIM, 3–4 records) bij Vimexx. Ik kan je stap voor stap begeleiden als je dat scherm open hebt.
-3. API Keys → Create → zet hem in Vercel als `RESEND_API_KEY`.
+3. API Keys → Create → zet hem in Vercel als `RESEND_API_KEY`, en `RESEND_FROM` als `Verploy <meldingen@verploy.com>`.
 
-**Ondertussen:** e-mails worden gebouwd en getest met een lokale mock die de exacte Resend-API-aanroep vastlegt.
+**Ondertussen:** e-mails worden gebouwd en getest met een lokale mock die de exacte Resend-API-aanroep vastlegt (fase 3: 3 e-mailscenario's groen). Zonder sleutel blijven meldingen in-app zichtbaar en wachten de e-mails in de wachtrij.
 
 ---
 

@@ -13,8 +13,8 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 |---|------|--------|-----------|
 | 1 | Inventarisatie + architectuur | ✅ klaar (23-09-2026) | PLAN.md bevat datamodel, services, jobflow en fasering |
 | 2 | Fundament: auth, bureaus, teamleden, site koppelen | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Nieuw bureau registreert, koppelt site, plugin stuurt aantoonbaar data. RLS-tests groen |
-| 3 | Monitoring + dashboard | ⏳ volgende | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
-| 4 | Veilige updates (kernflow 1–7) | — | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
+| 3 | Monitoring + dashboard | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2 | Health-data opgeslagen, getoond, drempels → in-app + e-mail (Resend) |
+| 4 | Veilige updates (kernflow 1–7) | ⏳ volgende | E2E op echte test-WordPress: geslaagd → live, gebroken → tegengehouden, gezakte post-check → teruggedraaid |
 | ⛔ | **Controlemoment** | — | Stop, oplevering aan Martijn, wacht op "ga door" |
 | 5 | AI-diagnose | — | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
 | 6 | Rapporten | — | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
@@ -276,3 +276,47 @@ Plugin-endpoints (lock, staging, update, snapshot, rollback, onderhoudsmodus, cl
 ## 11. Lokaal ontwikkelen en testen
 
 Zie `README.md`.
+
+## 12. Resultaat fase 3 (24-09-2026) — branch `v2`
+
+**Gebouwd:** migratie `20260925000000_monitoring.sql`:
+- `alerts` met één open melding per site+type
+- `app.evaluate_site` als enige plek voor alle drempels
+- `sweep_alerts`, met pg_cron elke 5 min als de extensie beschikbaar is
+- e-mailwachtrij met claim/bevestig/opnieuw, max. 5 pogingen
+- `record_site_checks`
+
+Daarnaast:
+- SSL-controle via een echte TLS-handshake (`src/lib/monitoring/ssl.ts`)
+- domeinverloop via RDAP en de IANA-bootstrap (`rdap.ts`)
+- e-mail via Resend in de taal van het bureau (`notify.ts`)
+- onderhoud met `/api/cron/maintenance` (Vercel Cron dagelijks, beveiligd met `CRON_SECRET`)
+- directe mail na een heartbeat via `after()`
+- UI: meldingenpagina (open/opgelost), teller in de zijbalk, "Gezien", gezondheidspaneel en open meldingen per site, ernst per site in het overzicht
+
+**Drempels (defaults, in SQL):**
+
+| Onderwerp | Waarschuwing | Kritiek |
+|---|---|---|
+| Offline | — | 45 min geen heartbeat |
+| SSL | verloopt < 14 d, of geen HTTPS | verloopt < 3 d, of ongeldig |
+| Domein | < 30 d | < 7 d (alleen als de registry een verloopdatum publiceert) |
+| PHP | EOL binnen 180 d | EOL verstreken (php.net: 8.1 en ouder) |
+| Geheugenlimiet | < 128 MB | < 64 MB |
+| Schijf | < 1 GB | < 256 MB |
+| Updates | core-update | — |
+
+Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor nieuwe waarschuwingen en kritieke meldingen, bij escalatie, en bij herstel na offline.
+
+**Bewijs:**
+
+| Suite | Resultaat |
+|---|---|
+| vitest (unit + DB) | 176/176 |
+| DB-tests monitoring | 16 nieuw: alle drempels, escalatie, herstel, wachtrij, rechten |
+| SSL | echte TLS-handshake met gegenereerd certificaat (verloop, uitgever, zelf-ondertekend, verkeerde host, onbereikbaar) |
+| RDAP | .com met datum, .nl zonder datum, co.uk, netwerkfout |
+| Playwright fase 3 | 5/5: http-site → waarschuwing in-app + e-mail (via mock van de Resend-API, echte SDK); cron zonder geheim → 401; 2 uur geen heartbeat → cron → kritieke offline-melding + e-mail + teller; heartbeat → herstelmail en "Opgelost"; "Gezien"; ernst in overzicht |
+
+**Bekende beperking tot de worker draait (fase 4 / BLOCKERS #3):** pg_cron maakt offline-meldingen elke 5 min in-app aan. De e-mail daarvoor gaat mee met de eerstvolgende heartbeat van een willekeurige site, of met de dagelijkse cron. Liggen álle sites tegelijk plat, dan kan de e-mail tot de dagelijkse run uitblijven. De worker roept `/api/cron/maintenance` elke 5 min aan en heft dit op.
+

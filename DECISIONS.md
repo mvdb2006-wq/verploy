@@ -83,3 +83,19 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **Eigen typegenerator (`scripts/gen-db-types.mjs`) i.p.v. `supabase gen types`.** De CLI heeft Docker nodig; een DB-test bewaakt dat de typen actueel zijn.
 - **Plugin-releaseregel in `connector-plugin/build.sh`.** Publiceren naar `dashboard/public/downloads/` kan alleen na groene PHP-tests en PHP 7.4-check.
 
+## Fase 3
+
+- **Alle drempelregels in één SQL-functie (`app.evaluate_site`).** Heartbeat, pg_cron en de cron-route gebruiken exact dezelfde logica, en de DB-tests dekken hem volledig.
+- **Evaluatie aan het einde van `ingest_heartbeat`, niet via een trigger op snapshots.** Anders ziet de evaluatie nog de oude site-status en componenten.
+- **"Laatste snapshot" = hoogste id (laatst ontvangen), niet `captured_at`.** De klok van de plugin is niet leidend.
+- **SSL en domein controleert de backend zelf, niet de plugin.** Dan meten we wat bezoekers zien (certificaatketen, hostnaam) en werkt het ook als PHP uitgaand verkeer blokkeert.
+- **Domeinverloop via RDAP met IANA-bootstrap in plaats van WHOIS-parsing.** RDAP is gestructureerd en gestandaardiseerd. Registries zonder verloopdatum (zoals .nl) krijgen eerlijk "niet gepubliceerd" in plaats van een gok.
+- **PHP-EOL-data van php.net (opgehaald 24-09-2026) in `app.php_security_eol`.** Wijzigt alleen bij een nieuwe PHP-release: één regel per branch.
+- **Offline pas na 45 min (3 gemiste heartbeats), en gerekend vanaf `paired_at` voor nieuwe sites.** Voorkomt vals alarm door één trage WP-Cron-run of vlak na het koppelen.
+- **Plugin-/thema-updates zijn info (geen e-mail).** Ze komen dagelijks voor; mailen zou de echte waarschuwingen laten verdrinken.
+- **E-mail naar eigenaren en beheerders, niet naar leden.** Leden zijn meelezers.
+- **Wachtrij: claimen met `SKIP LOCKED` + claim-verloop 10 min, bevestigen na versturen, max. 5 pogingen.** Geen dubbele mails bij parallelle runs; een crash laat niets liggen.
+- **Zonder `RESEND_API_KEY` wordt niets geclaimd.** Meldingen blijven wachten tot e-mail werkt, in plaats van pogingen te verbranden.
+- **Cron-route alleen met `CRON_SECRET` (constante-tijd vergelijking); zonder geheim 503.** Een onbeveiligde onderhoudsroute kan niet per ongeluk live gaan.
+- **E2E-mail via een lokale mock van de Resend-API (`RESEND_BASE_URL`) met de echte SDK.** Test het echte verzendpad inclusief onderwerp, ontvangers en taal.
+

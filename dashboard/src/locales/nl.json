@@ -25,7 +25,8 @@
     "team": "Team",
     "signOut": "Uitloggen",
     "agency": "Bureau",
-    "mainNav": "Hoofdmenu"
+    "mainNav": "Hoofdmenu",
+    "alerts": "Meldingen"
   },
   "auth": {
     "email": "E-mailadres",
@@ -217,6 +218,97 @@
     "inviteSubject": "Uitnodiging voor {agency} op Verploy",
     "inviteBody": "{inviter} nodigt je uit om als {role} lid te worden van {agency} op Verploy.",
     "inviteCta": "Uitnodiging bekijken",
-    "inviteFooter": "Deze link is 7 dagen geldig. Verwachtte je deze e-mail niet? Dan kun je hem negeren."
+    "inviteFooter": "Deze link is 7 dagen geldig. Verwachtte je deze e-mail niet? Dan kun je hem negeren.",
+    "alertSubject": "[{severity}] {title} — {site}",
+    "alertIntro": "Verploy heeft een melding voor {site} ({url}).",
+    "alertCta": "Bekijk in Verploy",
+    "alertFooter": "Je ontvangt dit omdat je eigenaar of beheerder bent van {agency} in Verploy.",
+    "recoveredSubject": "Opgelost: {site} is weer online",
+    "recoveredBody": "{site} reageert weer. De site was offline sinds {since}."
+  },
+  "alerts": {
+    "title": "Meldingen",
+    "intro": "Verploy controleert elke site continu. Hier staat alles wat aandacht nodig heeft.",
+    "empty": "Geen open meldingen. Alles is in orde.",
+    "openTab": "Open",
+    "resolvedTab": "Opgelost (30 dagen)",
+    "emptyResolved": "Geen opgeloste meldingen in de afgelopen 30 dagen.",
+    "acknowledge": "Gezien",
+    "acknowledged": "Gezien",
+    "since": "sinds {date}",
+    "resolvedAt": "opgelost {date}",
+    "severity": {
+      "critical": "Kritiek",
+      "warning": "Waarschuwing",
+      "info": "Info"
+    },
+    "types": {
+      "site_offline": {
+        "title": "Site is offline",
+        "body": "Sinds {since} geen contact meer met de site. Controleer of de site en de server bereikbaar zijn."
+      },
+      "ssl_expiring": {
+        "title": "{days, plural, =0 {SSL-certificaat is verlopen} one {SSL-certificaat verloopt over # dag} other {SSL-certificaat verloopt over # dagen}}",
+        "body": "Het certificaat is geldig tot {date}. Verleng het of controleer of automatisch verlengen werkt."
+      },
+      "ssl_invalid": {
+        "title": "SSL-certificaat is ongeldig",
+        "body": "Bezoekers krijgen een beveiligingswaarschuwing. Oorzaak: {reason}."
+      },
+      "ssl_missing": {
+        "title": "Site gebruikt geen HTTPS",
+        "body": "De site is ingesteld op http://. Zet een SSL-certificaat op de site en wijzig het adres naar https://."
+      },
+      "domain_expiring": {
+        "title": "{days, plural, =0 {Domeinnaam is verlopen} one {Domeinnaam verloopt over # dag} other {Domeinnaam verloopt over # dagen}}",
+        "body": "De registratie loopt af op {date}. Verleng de domeinnaam bij de registrar."
+      },
+      "php_eol_past": {
+        "title": "PHP {version} krijgt geen beveiligingsupdates meer",
+        "body": "De ondersteuning stopte op {date}. Upgrade naar een ondersteunde PHP-versie."
+      },
+      "php_eol_soon": {
+        "title": "PHP {version} krijgt nog beveiligingsupdates tot {date}",
+        "body": "Plan de upgrade naar een nieuwere PHP-versie vóór die datum."
+      },
+      "memory_low": {
+        "title": "Geheugenlimiet is laag ({mb} MB)",
+        "body": "WordPress adviseert minimaal 128 MB, en 256 MB voor zwaardere sites. Verhoog memory_limit bij de hosting."
+      },
+      "disk_low": {
+        "title": "Weinig schijfruimte ({mb} MB vrij)",
+        "body": "Bij een volle schijf mislukken updates, uploads en back-ups. Ruim op of vergroot de opslag."
+      },
+      "core_update": {
+        "title": "WordPress {version} is beschikbaar",
+        "body": "Er is een nieuwe versie van WordPress. Veilig updaten volgt in de update-flow van Verploy."
+      },
+      "plugin_updates": {
+        "title": "{count, plural, one {# plugin- of thema-update beschikbaar} other {# plugin- en thema-updates beschikbaar}}",
+        "body": "Bekijk de lijst op de pagina van de site."
+      }
+    },
+    "sslError": {
+      "expired": "het certificaat is verlopen",
+      "self_signed": "het certificaat is zelf-ondertekend",
+      "hostname_mismatch": "het certificaat hoort bij een andere domeinnaam",
+      "untrusted": "het certificaat wordt niet vertrouwd",
+      "unreachable": "de site was niet bereikbaar"
+    }
+  },
+  "health": {
+    "title": "Gezondheid",
+    "ssl": "SSL-certificaat",
+    "sslUntil": "geldig tot {date}",
+    "sslPending": "nog niet gecontroleerd",
+    "domain": "Domeinnaam",
+    "domainUntil": "verloopt {date}",
+    "domainNotPublished": "verloopdatum niet gepubliceerd door de registry",
+    "domainFailed": "kon niet worden opgevraagd",
+    "php": "PHP-ondersteuning",
+    "phpOk": "ondersteund",
+    "disk": "Vrije schijfruimte",
+    "noHttps": "geen HTTPS",
+    "openAlerts": "Open meldingen"
   }
 }

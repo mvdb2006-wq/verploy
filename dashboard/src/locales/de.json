@@ -25,7 +25,8 @@
     "team": "Team",
     "signOut": "Abmelden",
     "agency": "Agentur",
-    "mainNav": "Hauptmenü"
+    "mainNav": "Hauptmenü",
+    "alerts": "Meldungen"
   },
   "auth": {
     "email": "E-Mail-Adresse",
@@ -217,6 +218,97 @@
     "inviteSubject": "Einladung zu {agency} auf Verploy",
     "inviteBody": "{inviter} lädt dich ein, {agency} auf Verploy als {role} beizutreten.",
     "inviteCta": "Einladung ansehen",
-    "inviteFooter": "Dieser Link ist 7 Tage gültig. Hast du diese E-Mail nicht erwartet? Dann kannst du sie ignorieren."
+    "inviteFooter": "Dieser Link ist 7 Tage gültig. Hast du diese E-Mail nicht erwartet? Dann kannst du sie ignorieren.",
+    "alertSubject": "[{severity}] {title} — {site}",
+    "alertIntro": "Verploy hat eine Meldung für {site} ({url}).",
+    "alertCta": "In Verploy ansehen",
+    "alertFooter": "Du erhältst diese E-Mail als Inhaber oder Admin von {agency} in Verploy.",
+    "recoveredSubject": "Behoben: {site} ist wieder online",
+    "recoveredBody": "{site} antwortet wieder. Die Website war seit {since} offline."
+  },
+  "alerts": {
+    "title": "Meldungen",
+    "intro": "Verploy überwacht jede Website fortlaufend. Hier steht alles, was Aufmerksamkeit braucht.",
+    "empty": "Keine offenen Meldungen. Alles in Ordnung.",
+    "openTab": "Offen",
+    "resolvedTab": "Behoben (30 Tage)",
+    "emptyResolved": "Keine behobenen Meldungen in den letzten 30 Tagen.",
+    "acknowledge": "Gesehen",
+    "acknowledged": "Gesehen",
+    "since": "seit {date}",
+    "resolvedAt": "behoben {date}",
+    "severity": {
+      "critical": "Kritisch",
+      "warning": "Warnung",
+      "info": "Info"
+    },
+    "types": {
+      "site_offline": {
+        "title": "Website ist offline",
+        "body": "Seit {since} kein Kontakt zur Website. Prüfe, ob Website und Server erreichbar sind."
+      },
+      "ssl_expiring": {
+        "title": "{days, plural, =0 {SSL-Zertifikat ist abgelaufen} one {SSL-Zertifikat läuft in # Tag ab} other {SSL-Zertifikat läuft in # Tagen ab}}",
+        "body": "Das Zertifikat ist gültig bis {date}. Verlängere es oder prüfe die automatische Verlängerung."
+      },
+      "ssl_invalid": {
+        "title": "SSL-Zertifikat ist ungültig",
+        "body": "Besucher sehen eine Sicherheitswarnung. Ursache: {reason}."
+      },
+      "ssl_missing": {
+        "title": "Website verwendet kein HTTPS",
+        "body": "Die Website ist auf http:// eingestellt. Installiere ein SSL-Zertifikat und ändere die Adresse auf https://."
+      },
+      "domain_expiring": {
+        "title": "{days, plural, =0 {Domain ist abgelaufen} one {Domain läuft in # Tag ab} other {Domain läuft in # Tagen ab}}",
+        "body": "Die Registrierung endet am {date}. Verlängere die Domain beim Registrar."
+      },
+      "php_eol_past": {
+        "title": "PHP {version} erhält keine Sicherheitsupdates mehr",
+        "body": "Der Support endete am {date}. Aktualisiere auf eine unterstützte PHP-Version."
+      },
+      "php_eol_soon": {
+        "title": "PHP {version} erhält Sicherheitsupdates bis {date}",
+        "body": "Plane das Upgrade auf eine neuere PHP-Version vor diesem Datum."
+      },
+      "memory_low": {
+        "title": "Speicherlimit ist niedrig ({mb} MB)",
+        "body": "WordPress empfiehlt mindestens 128 MB, für größere Websites 256 MB. Erhöhe memory_limit beim Hoster."
+      },
+      "disk_low": {
+        "title": "Wenig Speicherplatz ({mb} MB frei)",
+        "body": "Bei voller Festplatte schlagen Updates, Uploads und Backups fehl. Räume auf oder erweitere den Speicher."
+      },
+      "core_update": {
+        "title": "WordPress {version} ist verfügbar",
+        "body": "Eine neue WordPress-Version ist verfügbar. Sicheres Aktualisieren folgt im Update-Ablauf von Verploy."
+      },
+      "plugin_updates": {
+        "title": "{count, plural, one {# Plugin- oder Theme-Update verfügbar} other {# Plugin- und Theme-Updates verfügbar}}",
+        "body": "Die Liste steht auf der Seite der Website."
+      }
+    },
+    "sslError": {
+      "expired": "das Zertifikat ist abgelaufen",
+      "self_signed": "das Zertifikat ist selbstsigniert",
+      "hostname_mismatch": "das Zertifikat gehört zu einer anderen Domain",
+      "untrusted": "dem Zertifikat wird nicht vertraut",
+      "unreachable": "die Website war nicht erreichbar"
+    }
+  },
+  "health": {
+    "title": "Zustand",
+    "ssl": "SSL-Zertifikat",
+    "sslUntil": "gültig bis {date}",
+    "sslPending": "noch nicht geprüft",
+    "domain": "Domain",
+    "domainUntil": "läuft ab {date}",
+    "domainNotPublished": "Ablaufdatum wird von der Registry nicht veröffentlicht",
+    "domainFailed": "konnte nicht abgefragt werden",
+    "php": "PHP-Support",
+    "phpOk": "unterstützt",
+    "disk": "Freier Speicherplatz",
+    "noHttps": "kein HTTPS",
+    "openAlerts": "Offene Meldungen"
   }
 }

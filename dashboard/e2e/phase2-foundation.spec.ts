@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const WP = process.env.E2E_WP_URL ?? 'http://127.0.0.1:8088'
-const WP_USER = process.env.E2E_WP_USER ?? 'admin'
-const WP_PASS = process.env.E2E_WP_PASS ?? 'adminpass123'
+import { WP, WP_PASS, WP_USER } from './support/env'
 const run = Date.now().toString(36)
 const owner = { email: `owner-${run}@example.test`, password: 'correct-horse-battery' }
 const colleague = { email: `collega-${run}@example.test`, password: 'correct-horse-battery-2' }

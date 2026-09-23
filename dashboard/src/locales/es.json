@@ -25,7 +25,8 @@
     "team": "Equipo",
     "signOut": "Cerrar sesión",
     "agency": "Agencia",
-    "mainNav": "Menú principal"
+    "mainNav": "Menú principal",
+    "alerts": "Alertas"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -217,6 +218,97 @@
     "inviteSubject": "Invitación a {agency} en Verploy",
     "inviteBody": "{inviter} te invita a unirte a {agency} en Verploy como {role}.",
     "inviteCta": "Ver invitación",
-    "inviteFooter": "Este enlace es válido durante 7 días. ¿No esperabas este correo? Puedes ignorarlo."
+    "inviteFooter": "Este enlace es válido durante 7 días. ¿No esperabas este correo? Puedes ignorarlo.",
+    "alertSubject": "[{severity}] {title} — {site}",
+    "alertIntro": "Verploy tiene una alerta para {site} ({url}).",
+    "alertCta": "Ver en Verploy",
+    "alertFooter": "Recibes este correo porque eres propietario o administrador de {agency} en Verploy.",
+    "recoveredSubject": "Resuelto: {site} vuelve a estar en línea",
+    "recoveredBody": "{site} vuelve a responder. El sitio estaba sin conexión desde el {since}."
+  },
+  "alerts": {
+    "title": "Alertas",
+    "intro": "Verploy supervisa cada sitio de forma continua. Aquí aparece todo lo que requiere atención.",
+    "empty": "No hay alertas abiertas. Todo está en orden.",
+    "openTab": "Abiertas",
+    "resolvedTab": "Resueltas (30 días)",
+    "emptyResolved": "No hay alertas resueltas en los últimos 30 días.",
+    "acknowledge": "Marcar como vista",
+    "acknowledged": "Vista",
+    "since": "desde el {date}",
+    "resolvedAt": "resuelta el {date}",
+    "severity": {
+      "critical": "Crítica",
+      "warning": "Aviso",
+      "info": "Info"
+    },
+    "types": {
+      "site_offline": {
+        "title": "El sitio está sin conexión",
+        "body": "Sin contacto con el sitio desde el {since}. Comprueba que el sitio y el servidor estén accesibles."
+      },
+      "ssl_expiring": {
+        "title": "{days, plural, =0 {El certificado SSL ha caducado} one {El certificado SSL caduca en # día} other {El certificado SSL caduca en # días}}",
+        "body": "El certificado es válido hasta el {date}. Renuévalo o comprueba que la renovación automática funcione."
+      },
+      "ssl_invalid": {
+        "title": "El certificado SSL no es válido",
+        "body": "Los visitantes ven un aviso de seguridad. Causa: {reason}."
+      },
+      "ssl_missing": {
+        "title": "El sitio no usa HTTPS",
+        "body": "El sitio está configurado con http://. Instala un certificado SSL y cambia la dirección a https://."
+      },
+      "domain_expiring": {
+        "title": "{days, plural, =0 {El dominio ha caducado} one {El dominio caduca en # día} other {El dominio caduca en # días}}",
+        "body": "El registro termina el {date}. Renueva el dominio con el registrador."
+      },
+      "php_eol_past": {
+        "title": "PHP {version} ya no recibe actualizaciones de seguridad",
+        "body": "El soporte terminó el {date}. Actualiza a una versión de PHP con soporte."
+      },
+      "php_eol_soon": {
+        "title": "PHP {version} recibe actualizaciones de seguridad hasta el {date}",
+        "body": "Planifica la actualización a una versión más reciente de PHP antes de esa fecha."
+      },
+      "memory_low": {
+        "title": "El límite de memoria es bajo ({mb} MB)",
+        "body": "WordPress recomienda al menos 128 MB, y 256 MB para sitios más pesados. Aumenta memory_limit en el hosting."
+      },
+      "disk_low": {
+        "title": "Poco espacio en disco ({mb} MB libres)",
+        "body": "Con el disco lleno fallan las actualizaciones, las subidas y las copias de seguridad. Libera espacio o amplía el almacenamiento."
+      },
+      "core_update": {
+        "title": "WordPress {version} está disponible",
+        "body": "Hay una nueva versión de WordPress. La actualización segura se realiza en el flujo de actualización de Verploy."
+      },
+      "plugin_updates": {
+        "title": "{count, plural, one {# actualización de plugin o tema disponible} other {# actualizaciones de plugins y temas disponibles}}",
+        "body": "Consulta la lista en la página del sitio."
+      }
+    },
+    "sslError": {
+      "expired": "el certificado ha caducado",
+      "self_signed": "el certificado está autofirmado",
+      "hostname_mismatch": "el certificado pertenece a otro dominio",
+      "untrusted": "el certificado no es de confianza",
+      "unreachable": "el sitio no estaba accesible"
+    }
+  },
+  "health": {
+    "title": "Estado",
+    "ssl": "Certificado SSL",
+    "sslUntil": "válido hasta el {date}",
+    "sslPending": "aún no comprobado",
+    "domain": "Dominio",
+    "domainUntil": "caduca el {date}",
+    "domainNotPublished": "el registro no publica la fecha de caducidad",
+    "domainFailed": "no se pudo consultar",
+    "php": "Soporte de PHP",
+    "phpOk": "con soporte",
+    "disk": "Espacio libre en disco",
+    "noHttps": "sin HTTPS",
+    "openAlerts": "Alertas abiertas"
   }
 }

@@ -1,4 +1,6 @@
+import { after } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { authenticateSigned } from '@/lib/connector/auth'
 import { heartbeatSchema, toRows } from '@/lib/connector/payload'
 import { json, readBody } from '@/lib/connector/http'
@@ -39,5 +41,9 @@ export async function POST(req: Request) {
     if (error.message.includes('site_not_connected')) return json({ error: 'site_not_connected' }, 409)
     throw error
   }
+  // Nieuwe meldingen uit deze heartbeat meteen mailen, zonder de plugin te laten wachten.
+  after(async () => {
+    try { await dispatchNotifications(admin, { limit: 10 }) } catch (e) { console.error('[heartbeat] meldingen versturen mislukt', e) }
+  })
   return json({ ok: true, next_heartbeat_in: HEARTBEAT_INTERVAL_SECONDS })
 }

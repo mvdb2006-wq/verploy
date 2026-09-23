@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Alert } from '@/components/Alert'
 import { StatusBadge } from '@/components/StatusBadge'
+import { SeverityBadge } from '@/components/SeverityBadge'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { agencyIsWritable, canManage, requireAgency, trialDaysLeft } from '@/lib/session'
@@ -20,6 +21,12 @@ export default async function SitesPage() {
     .select('id, name, url, client_name, status, connection_status, wp_version, php_version, last_heartbeat_at')
     .order('name')
   const { data: updates } = await supabase.from('site_components').select('site_id').eq('update_available', true)
+  const { data: openAlerts } = await supabase.from('alerts').select('site_id, severity').eq('status', 'open').in('severity', ['warning', 'critical'])
+  const worst = new Map<string, { severity: string; count: number }>()
+  for (const a of openAlerts ?? []) {
+    const cur = worst.get(a.site_id)
+    worst.set(a.site_id, { severity: cur?.severity === 'critical' || a.severity === 'critical' ? 'critical' : 'warning', count: (cur?.count ?? 0) + 1 })
+  }
   const updateCount = new Map<string, number>()
   for (const u of updates ?? []) updateCount.set(u.site_id, (updateCount.get(u.site_id) ?? 0) + 1)
 
@@ -74,8 +81,13 @@ export default async function SitesPage() {
                     </td>
                     <td className="px-5 py-3.5">
                       <StatusBadge status={s.effective} label={t(`site.status.${s.effective}` as MessageKey)} />
+                      {worst.get(s.id) && (
+                        <Link href={`/sites/${s.id}`} className="ml-2 align-middle">
+                          <SeverityBadge severity={worst.get(s.id)!.severity} label={`${worst.get(s.id)!.count} · ${t(`alerts.severity.${worst.get(s.id)!.severity}` as MessageKey)}`} />
+                        </Link>
+                      )}
                       {updatesForSite > 0 && (
-                        <span className="badge badge-warn ml-2">{t('siteDetail.updatesAvailable', { count: updatesForSite })}</span>
+                        <span className="badge badge-muted ml-2">{t('siteDetail.updatesAvailable', { count: updatesForSite })}</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 font-mono tabular-nums">{s.wp_version ?? '—'}</td>
