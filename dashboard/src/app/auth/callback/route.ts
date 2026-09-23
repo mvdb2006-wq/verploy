@@ -23,14 +23,25 @@ async function provisionAgency(userId: string, userEmail: string) {
   const suffix = Math.random().toString(36).slice(2, 6)
   const slug = `${emailPrefix}-${suffix}`
 
-  // Insert the agency — the DB trigger `agency_owner_member` auto-inserts
-  // the agency_members row so we don't need to do it manually.
-  const { error } = await service
+  // Insert the agency (no owner_id column in production schema)
+  const { data: agency, error } = await service
     .from('agencies')
-    .insert({ owner_id: userId, name: emailPrefix, slug })
+    .insert({ name: emailPrefix, slug })
+    .select('id')
+    .single()
 
-  if (error) {
+  if (error || !agency) {
     console.error('[verploy] provisionAgency failed:', error)
+    return
+  }
+
+  // Explicitly insert owner row (no DB trigger in production schema)
+  const { error: memberError } = await service
+    .from('agency_members')
+    .insert({ agency_id: agency.id, user_id: userId, role: 'owner' })
+
+  if (memberError) {
+    console.error('[verploy] provisionAgency member insert failed:', memberError)
   }
 }
 

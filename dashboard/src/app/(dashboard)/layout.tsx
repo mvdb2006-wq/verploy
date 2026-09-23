@@ -27,18 +27,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
       .slice(0, 20)
     const slug = `${emailPrefix}-${Math.random().toString(36).slice(2, 6)}`
 
-    const { error: agencyError } = await service
+    const { data: newAgency, error: agencyError } = await service
       .from('agencies')
-      .insert({ owner_id: user.id, name: emailPrefix, slug })
+      .insert({ name: emailPrefix, slug })
+      .select('id')
+      .single()
 
-    if (!agencyError) {
-      // Re-fetch now that the trigger has created the agency_members row
-      const { data: m } = await supabase
+    if (!agencyError && newAgency) {
+      // Explicitly create owner membership (no DB trigger in production schema)
+      const { error: memberError } = await service
         .from('agency_members')
-        .select('agency_id, role, agencies(id, name, slug)')
-        .eq('user_id', user.id)
-        .single()
-      membership = m
+        .insert({ agency_id: newAgency.id, user_id: user.id, role: 'owner' })
+
+      if (memberError) {
+        console.error('[verploy] auto-provision member insert failed:', memberError)
+      } else {
+        // Re-fetch now that membership row exists
+        const { data: m } = await supabase
+          .from('agency_members')
+          .select('agency_id, role, agencies(id, name, slug)')
+          .eq('user_id', user.id)
+          .single()
+        membership = m
+      }
     } else {
       console.error('[verploy] auto-provision agency failed:', agencyError)
     }
