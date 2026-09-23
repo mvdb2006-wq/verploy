@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Globe, Wifi, WifiOff, Clock, Code2,
-  Puzzle, Palette, Key, Copy,
+  Puzzle, Palette, Key, Copy, RefreshCw,
 } from 'lucide-react'
 import { timeAgo, formatDate, phpSeverity } from '@/lib/utils'
 import CopyButton from '../new/success/CopyButton'
@@ -100,6 +100,13 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           <h1 className="text-2xl font-extrabold text-text tracking-tight truncate">{site.name}</h1>
         </div>
         <StatusBadge status={site.status} />
+        <a
+          href={`/settings/sites/${site.id}`}
+          className="text-muted hover:text-text transition-colors"
+          title="Pagina verversen"
+        >
+          <RefreshCw size={16} />
+        </a>
       </div>
 
       {/* Algemeen */}

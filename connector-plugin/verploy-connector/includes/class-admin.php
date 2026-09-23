@@ -68,6 +68,15 @@ class Verploy_Admin {
 				? [ 'ok' => false, 'message' => $response->get_error_message() ]
 				: [ 'ok' => true,  'message' => __( 'Connected successfully.', 'verploy-connector' ) ];
 		}
+
+		// Handle manual heartbeat
+		$heartbeat_sent = false;
+		if ( isset( $_POST['verploy_send_heartbeat'] ) && $connected ) {
+			check_admin_referer( 'verploy_heartbeat_now' );
+			Verploy_Heartbeat::send();
+			$heartbeat      = get_option( 'verploy_last_heartbeat', null );
+			$heartbeat_sent = true;
+		}
 		?>
 		<div class="wrap">
 			<h1 style="display:flex;align-items:center;gap:10px;">
@@ -79,6 +88,11 @@ class Verploy_Admin {
 				<?php esc_html_e( 'Verploy Connector', 'verploy-connector' ); ?>
 			</h1>
 
+			<?php if ( $heartbeat_sent ) : ?>
+				<div class="notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'Heartbeat verstuurd naar Verploy.', 'verploy-connector' ); ?></p>
+				</div>
+			<?php endif; ?>
 			<?php if ( $test_result ) : ?>
 				<div class="notice notice-<?php echo $test_result['ok'] ? 'success' : 'error'; ?> is-dismissible">
 					<p><?php echo esc_html( $test_result['message'] ); ?></p>
@@ -147,13 +161,22 @@ class Verploy_Admin {
 			</form>
 
 			<?php if ( $connected ) : ?>
-				<form method="post" style="margin-top:0;max-width:640px;">
-					<?php wp_nonce_field( 'verploy_test' ); ?>
-					<input type="hidden" name="verploy_test_connection" value="1">
-					<button type="submit" class="button button-secondary">
-						<?php esc_html_e( 'Test connection', 'verploy-connector' ); ?>
-					</button>
-				</form>
+				<div style="display:flex;gap:10px;margin-top:0;max-width:640px;flex-wrap:wrap;">
+					<form method="post">
+						<?php wp_nonce_field( 'verploy_test' ); ?>
+						<input type="hidden" name="verploy_test_connection" value="1">
+						<button type="submit" class="button button-secondary">
+							<?php esc_html_e( 'Test connection', 'verploy-connector' ); ?>
+						</button>
+					</form>
+					<form method="post">
+						<?php wp_nonce_field( 'verploy_heartbeat_now' ); ?>
+						<input type="hidden" name="verploy_send_heartbeat" value="1">
+						<button type="submit" class="button button-primary">
+							&#8635; <?php esc_html_e( 'Nu versturen naar Verploy', 'verploy-connector' ); ?>
+						</button>
+					</form>
+				</div>
 			<?php endif; ?>
 
 			<hr style="margin:32px 0;">

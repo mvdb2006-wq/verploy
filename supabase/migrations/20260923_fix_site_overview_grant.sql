@@ -39,3 +39,10 @@ LEFT JOIN LATERAL (
 ) h ON true;
 
 GRANT SELECT ON public.site_overview TO authenticated;
+
+-- RLS: agency members mogen hun eigen sites verwijderen
+CREATE POLICY "agency admins can delete sites"
+ON public.sites
+FOR DELETE
+TO authenticated
+USING (is_agency_member(agency_id));
