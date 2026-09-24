@@ -27,7 +27,11 @@
     "agency": "Agence",
     "mainNav": "Menu principal",
     "alerts": "Alertes",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "overview": "Vue d’ensemble",
+    "inbox": "Boîte de réception",
+    "security": "Sécurité",
+    "version": "Version de Verploy"
   },
   "auth": {
     "email": "Adresse e-mail",
@@ -187,7 +191,9 @@
     "planComped": "Compte offert",
     "planActive": "Actif",
     "usage": "{used} sites utilisés sur {limit}",
-    "manageBilling": "Gérer l’abonnement"
+    "manageBilling": "Gérer l’abonnement",
+    "tabGeneral": "Général",
+    "version": "Verploy version {version}"
   },
   "team": {
     "title": "Équipe",
@@ -862,6 +868,100 @@
       "autoTitle": "Corriger automatiquement, tout de suite",
       "autoBody": "Verploy lance immédiatement une mise à jour sécurisée : testée d’abord sur une copie de test, mise en ligne seulement si tout fonctionne. Si le test échoue, le site reste inchangé et vous recevez une alerte.",
       "note": "Les vulnérabilités faibles ou moyennes sont toujours uniquement signalées."
+    }
+  },
+  "ops": {
+    "title": "Vue d’ensemble",
+    "allGood": "Tout va bien : {healthy} sites sur {total} en bonne santé.",
+    "summary": "{inbox, plural, =0 {Rien ne vous attend} one {# élément vous attend} other {# éléments vous attendent}} · {active, plural, =0 {aucune mise à jour en cours} one {# mise à jour en cours} other {# mises à jour en cours}} · {offline, plural, =0 {tous les sites en ligne} one {# site hors ligne} other {# sites hors ligne}}",
+    "system": "Liste des vulnérabilités connues mise à jour {time}.",
+    "systemNever": "La liste des vulnérabilités connues n’a pas encore été récupérée.",
+    "tiles": {
+      "label": "Résumé",
+      "running": "En cours",
+      "runningSub": "{queued, plural, =0 {rien en file d’attente} one {# en file d’attente} other {# en file d’attente}}",
+      "runningIdle": "aucune mise à jour en cours",
+      "inbox": "Vous attend",
+      "inboxSub": "{count, plural, =0 {aucune décision} one {# décision} other {# décisions}}",
+      "inboxEmpty": "rien à faire",
+      "security": "Vulnérabilités ouvertes",
+      "securitySub": "{count, plural, =0 {aucun site touché} one {sur # site} other {sur # sites}}",
+      "healthy": "Sites en bonne santé",
+      "healthySub": "{offline} hors ligne · {pending} non connectés"
+    },
+    "running": {
+      "title": "En cours",
+      "empty": "Aucune mise à jour en cours.",
+      "queued": "En file d’attente",
+      "security": "Faille de sécurité",
+      "progress": "Progression de la mise à jour sur {site}"
+    },
+    "inbox": {
+      "title": "Vous attend",
+      "pageTitle": "Boîte de réception",
+      "intro": "Tout ce pour quoi Verploy a besoin d’une décision ou de votre regard. Verploy s’occupe du reste.",
+      "empty": "Rien à faire. Verploy garde un œil sur tout.",
+      "all": "Les {count}",
+      "waiting": "en attente depuis {time}",
+      "details": "Détails",
+      "viewDiagnosis": "Voir le diagnostic",
+      "openTab": "Ouverts",
+      "resolvedTab": "Traités (30 jours)",
+      "approveTitle": "{component} : correctif prêt",
+      "approveBody": "{title}. Mise à jour sécurisée vers {version} pour {count, plural, one {# site} other {# sites}} : {sites}.",
+      "approveButton": "Corriger en sécurité sur {count, plural, one {# site} other {# sites}}",
+      "blockedTitle": "{component} : correction automatique bloquée",
+      "blockedBody": "{title}. La mise à jour sécurisée n’a pas abouti sur {count, plural, one {# site} other {# sites}} : {sites}.",
+      "noFixTitle": "{component} : pas encore de correctif",
+      "noFixBody": "{title}. Aucune version sans cette faille n’existe encore ({count, plural, one {# site} other {# sites}} : {sites}). Envisagez de désactiver ou remplacer l’extension.",
+      "started": "{count, plural, one {# mise à jour sécurisée lancée} other {# mises à jour sécurisées lancées}}.",
+      "startFailed": "{count, plural, one {# site n’a pas pu démarrer} other {# sites n’ont pas pu démarrer}} : une mise à jour est déjà en cours ou le site n’est pas connecté.",
+      "kind": {
+        "decision": "Décision",
+        "problem": "Problème"
+      }
+    },
+    "security": {
+      "title": "Sécurité",
+      "all": "Tout voir",
+      "intro": "Vulnérabilités connues sur tous vos sites, par vulnérabilité. Ouverte depuis = depuis combien de temps un site est exposé.",
+      "notActive": "La vérification des vulnérabilités connues n’est pas encore active.",
+      "empty": "Aucune vulnérabilité connue sur vos sites.",
+      "noSerious": "Aucune vulnérabilité élevée ou critique.",
+      "affected": "{count, plural, one {# site} other {# sites}}",
+      "exposure": "ouverte depuis {time}",
+      "medianLine": "Sur les 30 derniers jours, les vulnérabilités élevées et critiques sont restées ouvertes {time} en médiane ({count, plural, one {# corrigée} other {# corrigées}}).",
+      "kpiOpen": "Vulnérabilités ouvertes (élevées/critiques)",
+      "kpiSites": "Sites avec une vulnérabilité connue",
+      "kpiMedian": "Exposition médiane (30 jours)",
+      "kpiMode": "Vulnérabilités élevées/critiques",
+      "modeAuto": "Corriger automatiquement",
+      "modeApprove": "Demander d’abord"
+    },
+    "state": {
+      "fixing": "En cours de correction",
+      "awaiting": "En attente d’accord",
+      "scheduled": "Verploy corrige",
+      "blocked": "Bloquée",
+      "fixable": "Correctif disponible",
+      "no_fix": "Pas encore de correctif"
+    },
+    "activity": {
+      "title": "Dernières 24 heures",
+      "empty": "Rien ne s’est passé ces dernières 24 heures.",
+      "runDeployed": "{items} mis en ligne",
+      "runBlocked": "{items} bloqué",
+      "runRolledBack": "{items} annulé (retour arrière)",
+      "runError": "{items} : échec de la mise à jour",
+      "runCancelled": "{items} : annulé",
+      "alertOpened": "Alerte : {title}",
+      "alertResolved": "Résolu : {title}",
+      "auto": "automatique"
+    },
+    "dur": {
+      "d": "{n} j",
+      "h": "{n} h",
+      "m": "{n} min"
     }
   }
 }

@@ -11,7 +11,7 @@ export async function signupWithAgency(page: Page, who: Account, agencyName: str
   await expect(page).toHaveURL(/\/onboarding/)
   await page.getByLabel('Naam van je bureau').fill(agencyName)
   await page.getByRole('button', { name: 'Bureau aanmaken' }).click()
-  await expect(page.getByRole('heading', { name: 'Sites', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Overzicht', level: 1 })).toBeVisible()
 }
 
 export async function login(page: Page, who: Account) {

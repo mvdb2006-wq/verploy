@@ -27,7 +27,11 @@
     "agency": "Agentur",
     "mainNav": "Hauptmenü",
     "alerts": "Meldungen",
-    "reports": "Berichte"
+    "reports": "Berichte",
+    "overview": "Übersicht",
+    "inbox": "Inbox",
+    "security": "Sicherheit",
+    "version": "Verploy-Version"
   },
   "auth": {
     "email": "E-Mail-Adresse",
@@ -187,7 +191,9 @@
     "planComped": "Kostenloses Konto",
     "planActive": "Aktiv",
     "usage": "{used} von {limit} Websites genutzt",
-    "manageBilling": "Abo verwalten"
+    "manageBilling": "Abo verwalten",
+    "tabGeneral": "Allgemein",
+    "version": "Verploy-Version {version}"
   },
   "team": {
     "title": "Team",
@@ -862,6 +868,100 @@
       "autoTitle": "Sofort automatisch beheben",
       "autoBody": "Verploy startet sofort ein sicheres Update: zuerst auf einer Testkopie getestet, erst live, wenn alles funktioniert. Schlägt der Test fehl, bleibt die Site unverändert und du bekommst eine Meldung.",
       "note": "Lücken mit niedrigem oder mittlerem Schweregrad werden immer nur gemeldet."
+    }
+  },
+  "ops": {
+    "title": "Übersicht",
+    "allGood": "Alles in Ordnung: {healthy} von {total} Sites gesund.",
+    "summary": "{inbox, plural, =0 {Nichts wartet auf dich} one {# Punkt wartet auf dich} other {# Punkte warten auf dich}} · {active, plural, =0 {keine Updates aktiv} one {# Update aktiv} other {# Updates aktiv}} · {offline, plural, =0 {alle Sites online} one {# Site offline} other {# Sites offline}}",
+    "system": "Liste bekannter Sicherheitslücken aktualisiert {time}.",
+    "systemNever": "Die Liste bekannter Sicherheitslücken wurde noch nicht abgerufen.",
+    "tiles": {
+      "label": "Zusammenfassung",
+      "running": "Läuft gerade",
+      "runningSub": "{queued, plural, =0 {nichts in der Warteschlange} one {# in der Warteschlange} other {# in der Warteschlange}}",
+      "runningIdle": "keine Updates aktiv",
+      "inbox": "Wartet auf dich",
+      "inboxSub": "{count, plural, =0 {keine Entscheidungen} one {# Entscheidung} other {# Entscheidungen}}",
+      "inboxEmpty": "nichts zu tun",
+      "security": "Offene Lücken",
+      "securitySub": "{count, plural, =0 {keine Sites betroffen} one {auf # Site} other {auf # Sites}}",
+      "healthy": "Gesunde Sites",
+      "healthySub": "{offline} offline · {pending} nicht verbunden"
+    },
+    "running": {
+      "title": "Läuft gerade",
+      "empty": "Gerade laufen keine Updates.",
+      "queued": "In der Warteschlange",
+      "security": "Sicherheitslücke",
+      "progress": "Fortschritt des Updates auf {site}"
+    },
+    "inbox": {
+      "title": "Wartet auf dich",
+      "pageTitle": "Inbox",
+      "intro": "Alles, wofür Verploy eine Entscheidung oder einen Blick von dir braucht. Den Rest erledigt Verploy selbst.",
+      "empty": "Nichts zu tun. Verploy behält alles im Blick.",
+      "all": "Alle {count}",
+      "waiting": "wartet {time}",
+      "details": "Details",
+      "viewDiagnosis": "Diagnose ansehen",
+      "openTab": "Offen",
+      "resolvedTab": "Erledigt (30 Tage)",
+      "approveTitle": "{component}: Lösung bereit",
+      "approveBody": "{title}. Sicheres Update auf {version} für {count, plural, one {# Site} other {# Sites}}: {sites}.",
+      "approveButton": "Sicher beheben auf {count, plural, one {# Site} other {# Sites}}",
+      "blockedTitle": "{component}: automatische Behebung zurückgehalten",
+      "blockedBody": "{title}. Das sichere Update ging auf {count, plural, one {# Site} other {# Sites}} nicht durch: {sites}.",
+      "noFixTitle": "{component}: noch keine Lösung",
+      "noFixBody": "{title}. Es gibt noch keine Version ohne diese Lücke ({count, plural, one {# Site} other {# Sites}}: {sites}). Plugin deaktivieren oder ersetzen erwägen.",
+      "started": "{count, plural, one {# sicheres Update gestartet} other {# sichere Updates gestartet}}.",
+      "startFailed": "{count, plural, one {# Site konnte nicht starten} other {# Sites konnten nicht starten}}: Es läuft bereits ein Update oder die Site ist nicht verbunden.",
+      "kind": {
+        "decision": "Entscheidung",
+        "problem": "Problem"
+      }
+    },
+    "security": {
+      "title": "Sicherheit",
+      "all": "Alle ansehen",
+      "intro": "Bekannte Sicherheitslücken auf all deinen Sites, pro Lücke. Offen seit = wie lange eine Site die Lücke schon hat.",
+      "notActive": "Die Prüfung auf bekannte Lücken ist noch nicht aktiv.",
+      "empty": "Keine bekannten Lücken auf deinen Sites.",
+      "noSerious": "Keine hohen oder kritischen Lücken.",
+      "affected": "{count, plural, one {# Site} other {# Sites}}",
+      "exposure": "offen seit {time}",
+      "medianLine": "In den letzten 30 Tagen waren hohe und kritische Lücken im Median {time} offen ({count, plural, one {# behoben} other {# behoben}}).",
+      "kpiOpen": "Offene Lücken (hoch/kritisch)",
+      "kpiSites": "Sites mit bekannter Lücke",
+      "kpiMedian": "Mediane Exposition (30 Tage)",
+      "kpiMode": "Hohe/kritische Lücken",
+      "modeAuto": "Automatisch beheben",
+      "modeApprove": "Erst zustimmen"
+    },
+    "state": {
+      "fixing": "Wird behoben",
+      "awaiting": "Wartet auf Zustimmung",
+      "scheduled": "Verploy behebt",
+      "blocked": "Zurückgehalten",
+      "fixable": "Lösung verfügbar",
+      "no_fix": "Noch keine Lösung"
+    },
+    "activity": {
+      "title": "Letzte 24 Stunden",
+      "empty": "In den letzten 24 Stunden ist nichts passiert.",
+      "runDeployed": "{items} live gesetzt",
+      "runBlocked": "{items} zurückgehalten",
+      "runRolledBack": "{items} zurückgesetzt",
+      "runError": "{items}: Update fehlgeschlagen",
+      "runCancelled": "{items}: abgebrochen",
+      "alertOpened": "Meldung: {title}",
+      "alertResolved": "Behoben: {title}",
+      "auto": "automatisch"
+    },
+    "dur": {
+      "d": "{n} T",
+      "h": "{n} Std",
+      "m": "{n} Min"
     }
   }
 }

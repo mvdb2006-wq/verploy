@@ -26,7 +26,7 @@ export async function deleteSite(_: { error?: string }, form: FormData): Promise
   const { error, count } = await supabase.from('sites').delete({ count: 'exact' }).eq('id', siteId)
   if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
   revalidatePath('/')
-  redirect('/')
+  redirect('/sites')
 }
 
 export interface RunState { error?: string }

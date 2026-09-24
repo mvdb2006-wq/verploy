@@ -47,7 +47,7 @@ test('mobiel (390 px): geen horizontaal scrollen op de hoofdpagina’s', async (
   await page.getByLabel('Wachtwoord').fill(owner.password)
   await page.getByRole('button', { name: 'Inloggen' }).click()
   await expect(page).not.toHaveURL(/\/login/)
-  for (const path of ['/', '/alerts', '/reports', '/settings', '/settings/team', '/settings/billing', '/sites/new']) {
+  for (const path of ['/', '/inbox', '/sites', '/security', '/reports', '/settings', '/settings/team', '/settings/billing', '/sites/new']) {
     await page.goto(path)
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow, path).toBeLessThanOrEqual(0)

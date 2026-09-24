@@ -63,6 +63,13 @@ test('koppelen: labsite toont de drie beschikbare updates', async ({ page, conte
 
 test('scenario 1 — goede update gaat live', async ({ page }) => {
   await startUpdate(page, 'vp-lab-footer')
+  const runUrl = page.url()
+  // Overzicht toont de lopende update met stap en voortgang.
+  await page.goto('/')
+  const running = page.getByRole('region', { name: 'Nu bezig' })
+  await expect(running.getByRole('link', { name: 'Lab-WordPress' })).toBeVisible()
+  await expect(running.getByRole('progressbar', { name: 'Voortgang van de update op Lab-WordPress' })).toBeVisible()
+  await page.goto(runUrl)
   await waitForVerdict(page, 'Live gezet')
   await expect(page.getByText('Alle updates staan live en de controle na livegang is geslaagd.')).toBeVisible()
   // tests op staging en productie zijn zichtbaar, met screenshots

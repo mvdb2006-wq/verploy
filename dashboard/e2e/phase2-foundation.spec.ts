@@ -35,7 +35,7 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await expect(page).toHaveURL(/\/onboarding/)
     await page.getByLabel('Naam van je bureau').fill(`E2E Webbureau ${run}`)
     await page.getByRole('button', { name: 'Bureau aanmaken' }).click()
-    await expect(page.getByRole('heading', { name: 'Sites', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Overzicht', level: 1 })).toBeVisible()
     await expect(page.getByText('Nog geen sites')).toBeVisible()
     await expect(page.getByText(/Proefperiode: nog 14 dagen/)).toBeVisible()
   })
@@ -99,7 +99,7 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await wp.getByRole('button', { name: 'Koppelen', exact: true }).click()
     await expect(wp.locator('.notice-error')).toContainText('ongeldig, verlopen of al gebruikt')
 
-    await page.goto('/')
+    await page.goto('/sites')
     await expect(page.getByRole('link', { name: 'Test-WordPress' })).toBeVisible()
     await expect(page.getByText('1 site · 1 online')).toBeVisible()
   })
@@ -121,6 +121,8 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await page.getByRole('button', { name: 'Account aanmaken' }).click()
     await expect(page).toHaveURL(/\/invite\//)
     await page.getByRole('button', { name: 'Uitnodiging accepteren' }).click()
+    await expect(page.getByRole('heading', { name: 'Overzicht', level: 1 })).toBeVisible()
+    await page.goto('/sites')
     await expect(page.getByRole('link', { name: 'Test-WordPress' })).toBeVisible()
     // Een lid mag niets beheren
     await expect(page.getByRole('link', { name: 'Site toevoegen' })).toHaveCount(0)

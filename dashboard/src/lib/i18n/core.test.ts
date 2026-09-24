@@ -31,8 +31,8 @@ describe('i18n: alle vijf talen volledig', () => {
     // Alleen variabelen en leestekens: in elke taal hetzelfde.
     const placeholdersOnly = ['runs.reason.check.php_error', 'runs.events.item_updated', 'runs.events.item_failed', 'report.period']
     const identicalOk: Partial<Record<string, string[]>> = {
-      en: ['dashboard.summary', 'email.alertSubject', 'alerts.types.site_offline.title', 'report.health.pendingCount', ...placeholdersOnly],
-      de: ['email.alertSubject', 'alerts.diagnosis', ...placeholdersOnly], fr: ['email.alertSubject', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
+      en: ['dashboard.summary', 'ops.security.affected', 'email.alertSubject', 'alerts.types.site_offline.title', 'report.health.pendingCount', ...placeholdersOnly],
+      de: ['email.alertSubject', 'alerts.diagnosis', ...placeholdersOnly], fr: ['email.alertSubject', 'ops.security.affected', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
     }
     for (const locale of LOCALES.filter(l => l !== 'nl')) {
       const m = flatten(MESSAGES[locale])

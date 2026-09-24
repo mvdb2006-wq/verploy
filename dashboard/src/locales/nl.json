@@ -27,7 +27,11 @@
     "agency": "Bureau",
     "mainNav": "Hoofdmenu",
     "alerts": "Meldingen",
-    "reports": "Rapporten"
+    "reports": "Rapporten",
+    "overview": "Overzicht",
+    "inbox": "Inbox",
+    "security": "Beveiliging",
+    "version": "Versie van Verploy"
   },
   "auth": {
     "email": "E-mailadres",
@@ -187,7 +191,9 @@
     "planComped": "Gratis account",
     "planActive": "Actief",
     "usage": "{used} van {limit} sites in gebruik",
-    "manageBilling": "Abonnement beheren"
+    "manageBilling": "Abonnement beheren",
+    "tabGeneral": "Algemeen",
+    "version": "Verploy versie {version}"
   },
   "team": {
     "title": "Team",
@@ -862,6 +868,100 @@
       "autoTitle": "Direct automatisch oplossen",
       "autoBody": "Verploy start meteen een veilige update: eerst getest op een testkopie, pas live als alles werkt. Mislukt de test, dan blijft de site ongewijzigd en krijg je een melding.",
       "note": "Lekken met ernst laag of middel worden altijd alleen gemeld."
+    }
+  },
+  "ops": {
+    "title": "Overzicht",
+    "allGood": "Alles in orde: {healthy} van {total} sites gezond.",
+    "summary": "{inbox, plural, =0 {Niets wacht op jou} one {# punt wacht op jou} other {# punten wachten op jou}} · {active, plural, =0 {geen updates bezig} one {# update bezig} other {# updates bezig}} · {offline, plural, =0 {alle sites online} one {# site offline} other {# sites offline}}",
+    "system": "Lijst met bekende lekken bijgewerkt {time}.",
+    "systemNever": "De lijst met bekende lekken is nog niet opgehaald.",
+    "tiles": {
+      "label": "Samenvatting",
+      "running": "Nu bezig",
+      "runningSub": "{queued, plural, =0 {niets in de wachtrij} one {# in de wachtrij} other {# in de wachtrij}}",
+      "runningIdle": "geen updates bezig",
+      "inbox": "Wacht op jou",
+      "inboxSub": "{count, plural, =0 {geen beslissingen} one {# beslissing} other {# beslissingen}}",
+      "inboxEmpty": "niets te doen",
+      "security": "Open lekken",
+      "securitySub": "{count, plural, =0 {geen sites geraakt} one {op # site} other {op # sites}}",
+      "healthy": "Gezonde sites",
+      "healthySub": "{offline} offline · {pending} niet gekoppeld"
+    },
+    "running": {
+      "title": "Nu bezig",
+      "empty": "Er lopen nu geen updates.",
+      "queued": "In de wachtrij",
+      "security": "Beveiligingslek",
+      "progress": "Voortgang van de update op {site}"
+    },
+    "inbox": {
+      "title": "Wacht op jou",
+      "pageTitle": "Inbox",
+      "intro": "Alles waarvoor Verploy een beslissing of een blik van jou nodig heeft. De rest doet Verploy zelf.",
+      "empty": "Niets te doen. Verploy houdt alles in de gaten.",
+      "all": "Alle {count}",
+      "waiting": "wacht {time}",
+      "details": "Details",
+      "viewDiagnosis": "Diagnose bekijken",
+      "openTab": "Open",
+      "resolvedTab": "Afgehandeld (30 dagen)",
+      "approveTitle": "{component}: oplossing klaar",
+      "approveBody": "{title}. Veilige update naar {version} voor {count, plural, one {# site} other {# sites}}: {sites}.",
+      "approveButton": "Veilig oplossen op {count, plural, one {# site} other {# sites}}",
+      "blockedTitle": "{component}: automatische oplossing tegengehouden",
+      "blockedBody": "{title}. De veilige update ging niet door op {count, plural, one {# site} other {# sites}}: {sites}.",
+      "noFixTitle": "{component}: nog geen oplossing",
+      "noFixBody": "{title}. Er is nog geen versie zonder dit lek ({count, plural, one {# site} other {# sites}}: {sites}). Overweeg de plugin uit te schakelen of te vervangen.",
+      "started": "{count, plural, one {# veilige update gestart} other {# veilige updates gestart}}.",
+      "startFailed": "{count, plural, one {# site kon niet starten} other {# sites konden niet starten}}: er loopt al een update, of de site is niet gekoppeld.",
+      "kind": {
+        "decision": "Beslissing",
+        "problem": "Probleem"
+      }
+    },
+    "security": {
+      "title": "Beveiliging",
+      "all": "Alles bekijken",
+      "intro": "Bekende lekken op al je sites, per kwetsbaarheid. Open sinds = hoe lang een site het lek al heeft.",
+      "notActive": "De controle op bekende lekken is nog niet actief.",
+      "empty": "Geen bekende lekken op je sites.",
+      "noSerious": "Geen ernstige of kritieke lekken.",
+      "affected": "{count, plural, one {# site} other {# sites}}",
+      "exposure": "open sinds {time}",
+      "medianLine": "Ernstige lekken waren de afgelopen 30 dagen gemiddeld (mediaan) {time} open ({count, plural, one {# opgelost} other {# opgelost}}).",
+      "kpiOpen": "Open lekken (ernstig/kritiek)",
+      "kpiSites": "Sites met een bekend lek",
+      "kpiMedian": "Mediane blootstelling (30 dagen)",
+      "kpiMode": "Ernstige lekken",
+      "modeAuto": "Automatisch oplossen",
+      "modeApprove": "Eerst toestemming"
+    },
+    "state": {
+      "fixing": "Wordt opgelost",
+      "awaiting": "Wacht op akkoord",
+      "scheduled": "Verploy lost op",
+      "blocked": "Tegengehouden",
+      "fixable": "Oplossing beschikbaar",
+      "no_fix": "Nog geen oplossing"
+    },
+    "activity": {
+      "title": "Afgelopen 24 uur",
+      "empty": "Nog niets gebeurd in de afgelopen 24 uur.",
+      "runDeployed": "{items} live gezet",
+      "runBlocked": "{items} tegengehouden",
+      "runRolledBack": "{items} teruggedraaid",
+      "runError": "{items}: update mislukt",
+      "runCancelled": "{items}: geannuleerd",
+      "alertOpened": "Melding: {title}",
+      "alertResolved": "Opgelost: {title}",
+      "auto": "automatisch"
+    },
+    "dur": {
+      "d": "{n} d",
+      "h": "{n} u",
+      "m": "{n} min"
     }
   }
 }

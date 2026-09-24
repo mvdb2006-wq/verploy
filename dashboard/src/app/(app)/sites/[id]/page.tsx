@@ -16,6 +16,7 @@ import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
 import { ClientReports } from './client-reports'
 import { MIN_CONNECTOR_FOR_RUNS, runBadge, versionAtLeast } from '@/lib/runs'
+import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 import { SecurityPanel, type Attribution, type SecurityFinding } from './security'
 
 function memoryRaw(raw: unknown): string | null {
@@ -103,14 +104,16 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   const facts: Array<[string, string]> = [
     [t('siteDetail.wordpress'), site.wp_version ?? '—'],
     [t('siteDetail.php'), site.php_version ?? '—'],
-    [t('siteDetail.connector'), site.connector_version ?? '—'],
+    [t('siteDetail.connector'), site.connector_version
+      ? (versionAtLeast(site.connector_version, CONNECTOR_RELEASE.version.split('.').map(Number)) ? site.connector_version : `${site.connector_version} → ${CONNECTOR_RELEASE.version}`)
+      : '—'],
     [t('siteDetail.memoryLimit'), snap?.memory_limit_mb ? `${snap.memory_limit_mb} MB` : memoryRaw(snap?.raw) === '-1' ? t('siteDetail.unlimited') : '—'],
   ]
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
-        <Link href="/" className="text-sm text-muted hover:text-text">← {t('siteDetail.back')}</Link>
+        <Link href="/sites" className="text-sm text-muted hover:text-text">← {t('siteDetail.back')}</Link>
         <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-extrabold tracking-tight">{site.name}</h1>

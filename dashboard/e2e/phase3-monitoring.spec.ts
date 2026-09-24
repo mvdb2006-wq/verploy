@@ -49,30 +49,33 @@ test.describe.serial('Fase 3: monitoring en waarschuwingen', () => {
     await page.goto('/alerts')
     await expect(page.getByText('Site is offline')).toBeVisible()
     await expect(page.getByText('Kritiek').first()).toBeVisible()
-    await expect(page.getByRole('link', { name: /Meldingen/ }).getByText('2')).toBeVisible()   // offline + geen HTTPS
+    await expect(page.getByRole('link', { name: /Inbox/ }).getByText('2')).toBeVisible()   // offline + geen HTTPS
 
     await sendHeartbeat(context)
     await waitForMail(m => m.subject === 'Opgelost: Test-WordPress is weer online')
     await page.reload()
     await expect(page.getByText('Site is offline')).toHaveCount(0)
-    await page.getByRole('link', { name: 'Opgelost (30 dagen)' }).click()
+    await page.getByRole('link', { name: 'Afgehandeld (30 dagen)' }).click()
     await expect(page.getByText('Site is offline')).toBeVisible()
     await expect(page.getByText(/opgelost/).first()).toBeVisible()
   })
 
-  test('"Gezien" haalt de melding uit de teller maar laat hem open', async ({ page }) => {
+  test('"Gezien" haalt de melding uit de inbox en de teller, maar laat hem open op de site', async ({ page }) => {
     await login(page, owner)
-    await page.goto('/alerts')
-    await expect(page.getByRole('link', { name: /Meldingen/ }).getByText('1')).toBeVisible()
+    await page.goto('/alerts')   // oude adres → inbox
+    await expect(page).toHaveURL(/\/inbox$/)
+    await expect(page.getByRole('link', { name: /Inbox/ }).getByText('1')).toBeVisible()
     await page.getByRole('button', { name: 'Gezien' }).first().click()
-    await expect(page.getByText('Gezien', { exact: true })).toBeVisible()
-    await expect(page.getByText('Site gebruikt geen HTTPS')).toBeVisible()
-    await expect(page.getByRole('link', { name: /Meldingen/ }).locator('span.rounded-full')).toHaveCount(0)
+    await expect(page.getByText('Site gebruikt geen HTTPS')).toHaveCount(0)
+    await expect(page.getByText('Niets te doen. Verploy houdt alles in de gaten.')).toBeVisible()
+    await expect(page.getByRole('link', { name: /Inbox/ }).locator('span.rounded-full')).toHaveCount(0)
+    await page.goto('/sites')
+    await expect(page.getByText('1 · Waarschuwing')).toBeVisible()
   })
 
   test('sitesoverzicht toont de ernst per site', async ({ page }) => {
     await login(page, owner)
-    await page.goto('/')
+    await page.goto('/sites')
     await expect(page.getByText('1 · Waarschuwing')).toBeVisible()
   })
 })

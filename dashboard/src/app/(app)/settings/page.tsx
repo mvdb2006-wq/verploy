@@ -3,6 +3,7 @@ import { getLocale, getT } from '@/lib/i18n/server'
 import { canManage, requireAgency } from '@/lib/session'
 import { formatDate } from '@/lib/format'
 import { AgencyForm, LogoForm, SecurityForm } from './form'
+import { appVersion } from '@/lib/version'
 
 export async function generateMetadata() {
   return { title: (await getT())('settings.title') }
@@ -44,6 +45,9 @@ export default async function SettingsPage() {
         </div>
         <a href="/settings/billing" className="btn btn-ghost mt-4">{t('settings.manageBilling')}</a>
       </section>
+      <p className="text-xs text-subtle">
+        {t('settings.version', { version: appVersion().version })}{appVersion().build ? ` · build ${appVersion().build}` : ''}
+      </p>
     </div>
   )
 }

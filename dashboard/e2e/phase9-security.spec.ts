@@ -56,9 +56,20 @@ test('lek gevonden: melding, uitleg met bron, en de oplossing staat klaar — zo
   await expect(security.getByText(/Copyright 2012-2026 Defiant Inc\./)).toBeVisible()
   await expect(security.getByText(/Copyright 1999-2026 The MITRE Corporation/)).toBeVisible()
 
-  await page.goto('/alerts')
-  await expect(page.getByText('Bekend beveiligingslek: Verploy Lab — vp-lab-footer')).toBeVisible()
-  await expect(page.getByText('Ernst: Ernstig. Bekijk de site in Verploy en voer de oplossing veilig uit.')).toBeVisible()
+  // Inbox: één beslissing per lek, met de knop om het op alle getroffen sites veilig op te lossen.
+  await page.goto('/inbox')
+  await expect(page.getByText('Verploy Lab — vp-lab-footer: oplossing klaar')).toBeVisible()
+  await expect(page.getByText(/Veilige update naar 1\.1\.0 voor 1 site: Lab-WordPress/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Veilig oplossen op 1 site' })).toBeVisible()
+  // Overzicht: tegels en het lek in het beveiligingsblok.
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: /Wacht op jou\s*2\s*1 beslissing/ })).toBeVisible()   // lek + geen HTTPS (lab draait op http)
+  await expect(page.getByRole('link', { name: /Open lekken\s*1\s*op 1 site/ })).toBeVisible()
+  // Beveiliging: per lek, met status per site en hoe lang het al open staat.
+  await page.goto('/security')
+  await expect(page.getByText('Wacht op akkoord · 1')).toBeVisible()
+  await expect(page.getByText(/open sinds \d+ min/)).toBeVisible()
+  await expect(page.getByText('Eerst toestemming')).toBeVisible()
 
   // Een paar evaluatierondes later is er nog steeds geen update gestart.
   await page.waitForTimeout(6_000)
@@ -85,8 +96,11 @@ test('"direct automatisch oplossen" aan → Verploy start zelf een veilige updat
   await page.goto(`/sites/${siteId}`)
   const security = page.getByRole('region', { name: 'Beveiliging' })
   await expect.poll(async () => { await page.reload(); return security.getByText('Geen bekende lekken in WordPress, plugins en thema’s.').isVisible() }, { timeout: 60_000 }).toBe(true)
-  await page.goto('/alerts')
-  await expect(page.getByText('Bekend beveiligingslek: Verploy Lab — vp-lab-footer')).toHaveCount(0)
+  await page.goto('/inbox')
+  await expect(page.getByText('Verploy Lab — vp-lab-footer: oplossing klaar')).toHaveCount(0)
+  // Overzicht: de update staat in "Afgelopen 24 uur", met "automatisch".
+  await page.goto('/')
+  await expect(page.getByText(/Verploy Lab — vp-lab-footer live gezet \(automatisch\)/)).toBeVisible()
   // Er wordt niet nog een keer iets gestart.
   expect(await runsFor(siteId)).toHaveLength(1)
 })

@@ -173,3 +173,8 @@ Gezien op productie: Yoast SEO Premium kreeg op de testkopie "geen update beschi
 - **Waarom geen filter op de updatemelding:** eerst injecteerde ik de update via een filter op de updatemelding. De Plugin Check van WordPress.org weigert dat ("plugin updater detected"). `install(..., overwrite_package)` doet hetzelfde zonder filter.
 - **Oudere connector:** is de connector ouder dan 2.3, dan meldt Verploy dat in gewone taal in plaats van de foutcode.
 - **Getest:** een labplugin die (zoals een betaalde plugin) alleen op het eigen domein een update krijgt. De engine-test draait met 6 extra controles, waaronder dat een onveilige pakketnaam wordt genegeerd, en E2E-scenario 4 zet hem live.
+
+## 24-09 — Operations-cockpit zonder nieuwe tabellen; versienummer zichtbaar
+Overzicht, Inbox en Beveiliging worden per request afgeleid uit runs, meldingen en `site_vulnerabilities`. Er is dus geen extra state die uit de pas kan lopen, en er is geen migratie nodig. Lekken worden per kwetsbaarheid gegroepeerd, over alle sites heen: bij tien sites met hetzelfde lek hoeft een bureau één beslissing te nemen, niet tien. Meldingen van het type `vulnerability` staan niet los in de inbox, want die beslissing staat er al.
+
+Het app-versienummer komt uit `package.json` (semver, handmatig verhoogd per release), met de korte commit-hash van het platform erbij. Zo kan een klant bij support precies zeggen welke versie hij ziet.

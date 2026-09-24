@@ -1,24 +1,26 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bell, FileText, Globe, LogOut, Settings, Users } from 'lucide-react'
+import { FileText, Globe, Inbox, LayoutDashboard, LogOut, Settings, ShieldCheck } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { signOut } from '../(auth)/actions'
 
-export function Sidebar({ agencyName, email, labels, alertCount }: {
+export function Sidebar({ agencyName, email, labels, inboxCount, version }: {
   agencyName: string
   email: string
-  alertCount: number
-  labels: { sites: string; alerts: string; reports: string; settings: string; team: string; signOut: string; agency: string; mainNav: string }
+  inboxCount: number
+  version: string
+  labels: { overview: string; inbox: string; sites: string; security: string; reports: string; settings: string; signOut: string; agency: string; mainNav: string; version: string }
 }) {
   const path = usePathname()
   const nav = [
-    { href: '/', label: labels.sites, icon: Globe, active: path === '/' || path.startsWith('/sites'), count: 0 },
-    { href: '/alerts', label: labels.alerts, icon: Bell, active: path.startsWith('/alerts'), count: alertCount },
+    { href: '/', label: labels.overview, icon: LayoutDashboard, active: path === '/', count: 0 },
+    { href: '/inbox', label: labels.inbox, icon: Inbox, active: path.startsWith('/inbox'), count: inboxCount },
+    { href: '/sites', label: labels.sites, icon: Globe, active: path.startsWith('/sites'), count: 0 },
+    { href: '/security', label: labels.security, icon: ShieldCheck, active: path.startsWith('/security'), count: 0 },
     { href: '/reports', label: labels.reports, icon: FileText, active: path.startsWith('/reports'), count: 0 },
-    { href: '/settings/team', label: labels.team, icon: Users, active: path.startsWith('/settings/team'), count: 0 },
-    { href: '/settings', label: labels.settings, icon: Settings, active: path === '/settings', count: 0 },
+    { href: '/settings', label: labels.settings, icon: Settings, active: path.startsWith('/settings'), count: 0 },
   ]
   return (
     <aside className="flex shrink-0 flex-col border-b border-border bg-surface md:sticky md:top-0 md:h-dvh md:w-60 md:border-r md:border-b-0">
@@ -50,6 +52,7 @@ export function Sidebar({ agencyName, email, labels, alertCount }: {
             <LogOut size={13} aria-hidden /> {labels.signOut}
           </button>
         </form>
+        <p className="mt-3 font-mono text-[11px] text-subtle" title={labels.version}>Verploy {version}</p>
       </div>
     </aside>
   )

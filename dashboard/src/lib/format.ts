@@ -35,3 +35,8 @@ export function effectiveStatus(site: { status: string; connection_status: strin
 export function daysAgoIso(days: number, now = Date.now()): string {
   return new Date(now - days * 86_400_000).toISOString()
 }
+
+/** Het huidige moment voor een render (buiten componenten, zodat de render zelf zuiver blijft). */
+export function requestNow(): number {
+  return Date.now()
+}

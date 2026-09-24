@@ -14,7 +14,7 @@ export default async function NewSitePage() {
   const t = await getT()
   return (
     <div className="mx-auto max-w-xl">
-      <Link href="/" className="text-sm text-muted hover:text-text">← {t('siteDetail.back')}</Link>
+      <Link href="/sites" className="text-sm text-muted hover:text-text">← {t('siteDetail.back')}</Link>
       <h1 className="mt-3 mb-8 text-2xl font-extrabold tracking-tight">{t('sitesNew.title')}</h1>
       <NewSiteForm defaultLocale={session.agency.dashboard_locale} />
     </div>

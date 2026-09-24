@@ -27,7 +27,11 @@
     "agency": "Agencia",
     "mainNav": "Menú principal",
     "alerts": "Alertas",
-    "reports": "Informes"
+    "reports": "Informes",
+    "overview": "Resumen",
+    "inbox": "Bandeja",
+    "security": "Seguridad",
+    "version": "Versión de Verploy"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -187,7 +191,9 @@
     "planComped": "Cuenta gratuita",
     "planActive": "Activa",
     "usage": "{used} de {limit} sitios en uso",
-    "manageBilling": "Gestionar suscripción"
+    "manageBilling": "Gestionar suscripción",
+    "tabGeneral": "General",
+    "version": "Verploy versión {version}"
   },
   "team": {
     "title": "Equipo",
@@ -862,6 +868,100 @@
       "autoTitle": "Corregir automáticamente, de inmediato",
       "autoBody": "Verploy inicia enseguida una actualización segura: primero se prueba en una copia de pruebas y solo se publica si todo funciona. Si la prueba falla, el sitio no cambia y recibes un aviso.",
       "note": "Las vulnerabilidades bajas o medias siempre solo se notifican."
+    }
+  },
+  "ops": {
+    "title": "Resumen",
+    "allGood": "Todo en orden: {healthy} de {total} sitios en buen estado.",
+    "summary": "{inbox, plural, =0 {Nada te espera} one {# asunto te espera} other {# asuntos te esperan}} · {active, plural, =0 {ninguna actualización en curso} one {# actualización en curso} other {# actualizaciones en curso}} · {offline, plural, =0 {todos los sitios en línea} one {# sitio sin conexión} other {# sitios sin conexión}}",
+    "system": "Lista de vulnerabilidades conocidas actualizada {time}.",
+    "systemNever": "La lista de vulnerabilidades conocidas aún no se ha obtenido.",
+    "tiles": {
+      "label": "Resumen",
+      "running": "En curso",
+      "runningSub": "{queued, plural, =0 {nada en cola} one {# en cola} other {# en cola}}",
+      "runningIdle": "ninguna actualización en curso",
+      "inbox": "Te espera",
+      "inboxSub": "{count, plural, =0 {sin decisiones} one {# decisión} other {# decisiones}}",
+      "inboxEmpty": "nada que hacer",
+      "security": "Vulnerabilidades abiertas",
+      "securitySub": "{count, plural, =0 {ningún sitio afectado} one {en # sitio} other {en # sitios}}",
+      "healthy": "Sitios en buen estado",
+      "healthySub": "{offline} sin conexión · {pending} sin conectar"
+    },
+    "running": {
+      "title": "En curso",
+      "empty": "No hay actualizaciones en curso.",
+      "queued": "En cola",
+      "security": "Vulnerabilidad",
+      "progress": "Progreso de la actualización en {site}"
+    },
+    "inbox": {
+      "title": "Te espera",
+      "pageTitle": "Bandeja",
+      "intro": "Todo aquello para lo que Verploy necesita una decisión o que le eches un vistazo. Verploy se encarga del resto.",
+      "empty": "Nada que hacer. Verploy lo vigila todo.",
+      "all": "Los {count}",
+      "waiting": "espera {time}",
+      "details": "Detalles",
+      "viewDiagnosis": "Ver diagnóstico",
+      "openTab": "Abiertos",
+      "resolvedTab": "Resueltos (30 días)",
+      "approveTitle": "{component}: corrección lista",
+      "approveBody": "{title}. Actualización segura a {version} para {count, plural, one {# sitio} other {# sitios}}: {sites}.",
+      "approveButton": "Corregir de forma segura en {count, plural, one {# sitio} other {# sitios}}",
+      "blockedTitle": "{component}: corrección automática retenida",
+      "blockedBody": "{title}. La actualización segura no se completó en {count, plural, one {# sitio} other {# sitios}}: {sites}.",
+      "noFixTitle": "{component}: aún sin corrección",
+      "noFixBody": "{title}. Aún no hay una versión sin esta vulnerabilidad ({count, plural, one {# sitio} other {# sitios}}: {sites}). Considera desactivar o sustituir el plugin.",
+      "started": "{count, plural, one {# actualización segura iniciada} other {# actualizaciones seguras iniciadas}}.",
+      "startFailed": "{count, plural, one {# sitio no pudo empezar} other {# sitios no pudieron empezar}}: ya hay una actualización en curso o el sitio no está conectado.",
+      "kind": {
+        "decision": "Decisión",
+        "problem": "Problema"
+      }
+    },
+    "security": {
+      "title": "Seguridad",
+      "all": "Ver todo",
+      "intro": "Vulnerabilidades conocidas en todos tus sitios, por vulnerabilidad. Abierta desde = cuánto tiempo lleva expuesto un sitio.",
+      "notActive": "La comprobación de vulnerabilidades conocidas aún no está activa.",
+      "empty": "Ninguna vulnerabilidad conocida en tus sitios.",
+      "noSerious": "Ninguna vulnerabilidad alta o crítica.",
+      "affected": "{count, plural, one {# sitio} other {# sitios}}",
+      "exposure": "abierta desde hace {time}",
+      "medianLine": "En los últimos 30 días, las vulnerabilidades altas y críticas estuvieron abiertas una mediana de {time} ({count, plural, one {# resuelta} other {# resueltas}}).",
+      "kpiOpen": "Vulnerabilidades abiertas (altas/críticas)",
+      "kpiSites": "Sitios con una vulnerabilidad conocida",
+      "kpiMedian": "Exposición mediana (30 días)",
+      "kpiMode": "Vulnerabilidades altas/críticas",
+      "modeAuto": "Corregir automáticamente",
+      "modeApprove": "Preguntar primero"
+    },
+    "state": {
+      "fixing": "Corrigiéndose",
+      "awaiting": "Espera aprobación",
+      "scheduled": "Verploy corrige",
+      "blocked": "Retenida",
+      "fixable": "Corrección disponible",
+      "no_fix": "Aún sin corrección"
+    },
+    "activity": {
+      "title": "Últimas 24 horas",
+      "empty": "No ha pasado nada en las últimas 24 horas.",
+      "runDeployed": "{items} publicado",
+      "runBlocked": "{items} retenido",
+      "runRolledBack": "{items} revertido",
+      "runError": "{items}: falló la actualización",
+      "runCancelled": "{items}: cancelado",
+      "alertOpened": "Aviso: {title}",
+      "alertResolved": "Resuelto: {title}",
+      "auto": "automático"
+    },
+    "dur": {
+      "d": "{n} d",
+      "h": "{n} h",
+      "m": "{n} min"
     }
   }
 }

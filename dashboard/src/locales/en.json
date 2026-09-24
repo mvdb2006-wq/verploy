@@ -27,7 +27,11 @@
     "agency": "Agency",
     "mainNav": "Main menu",
     "alerts": "Alerts",
-    "reports": "Reports"
+    "reports": "Reports",
+    "overview": "Overview",
+    "inbox": "Inbox",
+    "security": "Security",
+    "version": "Verploy version"
   },
   "auth": {
     "email": "Email address",
@@ -187,7 +191,9 @@
     "planComped": "Complimentary account",
     "planActive": "Active",
     "usage": "{used} of {limit} sites in use",
-    "manageBilling": "Manage subscription"
+    "manageBilling": "Manage subscription",
+    "tabGeneral": "General",
+    "version": "Verploy version {version}"
   },
   "team": {
     "title": "Team",
@@ -862,6 +868,100 @@
       "autoTitle": "Fix automatically, right away",
       "autoBody": "Verploy starts a safe update immediately: tested on a staging copy first, deployed only if everything works. If the test fails, the site stays unchanged and you get an alert.",
       "note": "Low and medium vulnerabilities are always reported only."
+    }
+  },
+  "ops": {
+    "title": "Overview",
+    "allGood": "All good: {healthy} of {total} sites healthy.",
+    "summary": "{inbox, plural, =0 {Nothing waiting for you} one {# item waiting for you} other {# items waiting for you}} · {active, plural, =0 {no updates running} one {# update running} other {# updates running}} · {offline, plural, =0 {all sites online} one {# site offline} other {# sites offline}}",
+    "system": "Known-vulnerability list updated {time}.",
+    "systemNever": "The known-vulnerability list hasn’t been fetched yet.",
+    "tiles": {
+      "label": "Summary",
+      "running": "Running now",
+      "runningSub": "{queued, plural, =0 {nothing queued} one {# queued} other {# queued}}",
+      "runningIdle": "no updates running",
+      "inbox": "Waiting for you",
+      "inboxSub": "{count, plural, =0 {no decisions} one {# decision} other {# decisions}}",
+      "inboxEmpty": "nothing to do",
+      "security": "Open vulnerabilities",
+      "securitySub": "{count, plural, =0 {no sites affected} one {on # site} other {on # sites}}",
+      "healthy": "Healthy sites",
+      "healthySub": "{offline} offline · {pending} not connected"
+    },
+    "running": {
+      "title": "Running now",
+      "empty": "No updates are running right now.",
+      "queued": "Queued",
+      "security": "Security fix",
+      "progress": "Update progress on {site}"
+    },
+    "inbox": {
+      "title": "Waiting for you",
+      "pageTitle": "Inbox",
+      "intro": "Everything Verploy needs a decision or a look from you on. Verploy handles the rest itself.",
+      "empty": "Nothing to do. Verploy is keeping an eye on everything.",
+      "all": "All {count}",
+      "waiting": "waiting {time}",
+      "details": "Details",
+      "viewDiagnosis": "View diagnosis",
+      "openTab": "Open",
+      "resolvedTab": "Handled (30 days)",
+      "approveTitle": "{component}: fix ready",
+      "approveBody": "{title}. Safe update to {version} for {count, plural, one {# site} other {# sites}}: {sites}.",
+      "approveButton": "Fix safely on {count, plural, one {# site} other {# sites}}",
+      "blockedTitle": "{component}: automatic fix held back",
+      "blockedBody": "{title}. The safe update didn’t go through on {count, plural, one {# site} other {# sites}}: {sites}.",
+      "noFixTitle": "{component}: no fix yet",
+      "noFixBody": "{title}. There is no version without this vulnerability yet ({count, plural, one {# site} other {# sites}}: {sites}). Consider deactivating or replacing the plugin.",
+      "started": "{count, plural, one {# safe update started} other {# safe updates started}}.",
+      "startFailed": "{count, plural, one {# site couldn’t start} other {# sites couldn’t start}}: an update is already running, or the site isn’t connected.",
+      "kind": {
+        "decision": "Decision",
+        "problem": "Problem"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "all": "View all",
+      "intro": "Known vulnerabilities across all your sites, per vulnerability. Open for = how long a site has had it.",
+      "notActive": "Known-vulnerability checks aren’t active yet.",
+      "empty": "No known vulnerabilities on your sites.",
+      "noSerious": "No high or critical vulnerabilities.",
+      "affected": "{count, plural, one {# site} other {# sites}}",
+      "exposure": "open for {time}",
+      "medianLine": "Over the last 30 days, high and critical vulnerabilities were open for a median of {time} ({count, plural, one {# resolved} other {# resolved}}).",
+      "kpiOpen": "Open vulnerabilities (high/critical)",
+      "kpiSites": "Sites with a known vulnerability",
+      "kpiMedian": "Median exposure (30 days)",
+      "kpiMode": "High/critical vulnerabilities",
+      "modeAuto": "Fix automatically",
+      "modeApprove": "Ask first"
+    },
+    "state": {
+      "fixing": "Being fixed",
+      "awaiting": "Awaiting approval",
+      "scheduled": "Verploy is fixing",
+      "blocked": "Held back",
+      "fixable": "Fix available",
+      "no_fix": "No fix yet"
+    },
+    "activity": {
+      "title": "Last 24 hours",
+      "empty": "Nothing happened in the last 24 hours.",
+      "runDeployed": "{items} deployed",
+      "runBlocked": "{items} held back",
+      "runRolledBack": "{items} rolled back",
+      "runError": "{items}: update failed",
+      "runCancelled": "{items}: cancelled",
+      "alertOpened": "Alert: {title}",
+      "alertResolved": "Resolved: {title}",
+      "auto": "automatic"
+    },
+    "dur": {
+      "d": "{n} d",
+      "h": "{n} h",
+      "m": "{n} min"
     }
   }
 }

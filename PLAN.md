@@ -453,3 +453,32 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 **Nog niet gebouwd:** toestemming van de klant van het bureau via een link in een e-mail. Dat kan pas als Resend (#5) werkt.
 
 **Tests:** unit (versievergelijking, bereiken, slugs, feedformaat, stroomlezer) en database (openen/oplossen, melding, rechten, automatisch oplossen: één poging per versie, alleen-lezen-bureau). De E2E-test `phase9-security` draait tegen een lab-WordPress met een mock-feed in hetzelfde formaat. Hij controleert de melding, de bron en dat er zonder toestemming niets gebeurt. Daarna zet hij automatisch oplossen aan: de worker start zelf de veilige update, die gaat live en het lek verdwijnt.
+
+## 19. Operations-cockpit, stap 1 (24-09-2026) — branch `v2`
+
+**Doel:** in één oogopslag zien wat Verploy nu doet, wat op jou wacht en wat er de afgelopen 24 uur is gebeurd. Er is geen databasemigratie nodig: alles is afgeleid uit bestaande tabellen (`src/lib/operations/load.ts` + pure functies in `model.ts`).
+
+**Pagina's:**
+- **Overzicht (`/`):**
+  - Een statusregel ("alles in orde" of wat aandacht vraagt).
+  - Vier tegels: Nu bezig, Wacht op jou, Open lekken, Gezonde sites.
+  - De blokken "Wacht op jou" (max. 5), "Nu bezig" (voortgangsbalk per update; de pagina ververst elke 8 s zolang er iets loopt), "Beveiliging" en "Afgelopen 24 uur".
+  - Een systeemregel met het tijdstip van de laatste feed-update.
+- **Inbox (`/inbox`, vervangt `/alerts`, dat nu doorverwijst):**
+  - Eén beslissing per lek over alle getroffen sites, met de knop "Veilig oplossen op N sites" (per site een gewone veilige update).
+  - Lekken zonder oplossing, en automatische pogingen die zijn tegengehouden.
+  - Open meldingen, met de tabs Open en Afgehandeld (30 dagen).
+- **Beveiliging (`/security`):**
+  - Kengetallen: open ernstige lekken, getroffen sites, mediane oplostijd over 30 dagen, en de modus.
+  - Per lek: de status per site en hoe lang het al open staat.
+  - Bronvermelding.
+- **Sites (`/sites`):** de vroegere startpagina.
+- **Instellingen:** de tabs Algemeen, Team en Abonnement.
+
+**Versienummer:** onderin de zijbalk en bij Instellingen staat "Verploy 2.4.0 · <commit>". Het versienummer komt uit `package.json`; de commit komt uit `VERCEL_GIT_COMMIT_SHA` of `RAILWAY_GIT_COMMIT_SHA`.
+
+**Bewijs:** Playwright 28/28 · DB 164/164 · unit 184/184 · tsc en eslint schoon.
+
+**Stap 2 (volgt, heeft een migratie nodig):**
+- In de inbox: toewijzen, uitstellen, wegzetten met reden, en notities.
+- Herinneringen en een ochtendoverzicht per e-mail.
