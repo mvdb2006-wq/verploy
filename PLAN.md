@@ -487,3 +487,14 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - Oorzaak: `last_heartbeat_at` is het begintijdstip van de heartbeat-transactie. Beoordeelde de worker een site net voordat die transactie committe, dan leek de controle nieuwer dan de heartbeat. Een lek werd dan pas bij de volgende heartbeat gezien, tot ongeveer een uur later.
 - Oplossing: een teller (`sites.heartbeat_seq`, opgehoogd door een trigger) in plaats van tijdstippen. De worker geeft de teller en het feed-tijdstip die hij las mee aan `sync_site_vulnerabilities`, dat een verouderde lezing weigert (er wordt niets vastgelegd, dus ook geen onterecht "opgelost").
 - Een worker van vóór de uitrol (aanroep zonder teller) blijft werken.
+
+## 20. Veilige update per onderdeel (24-09-2026)
+- Een onderdeel dat niet kan worden bijgewerkt (bijv. WPBakery zonder geldige licentie) houdt de rest niet meer tegen. Voorbeelden: "14 van 15 updates veilig uitgevoerd", "WPBakery vraagt aandacht".
+- Elk onderdeel heeft een eigen uitkomst: Live, Al actueel, Vraagt aandacht, Overgeslagen (afhankelijk), Niet live gezet, Teruggezet.
+- Een samenvatting op de run-pagina beantwoordt:
+  - wat is gelukt en wat niet, en waarom;
+  - wat Verploy besloot;
+  - of de live site is geraakt;
+  - de aanbevolen actie, met een knop naar WP Admin.
+- Migratie `20261002000000` past alleen `record_run_outcome` aan: de melding "Update vraagt aandacht" noemt alleen de betrokken onderdelen.
+- Tests: E2E scenario 5 (lab-plugins zonder pakket, een afhankelijke add-on en een onafhankelijke plugin) en een engine-test (een mislukte update laat de oude versie staan).

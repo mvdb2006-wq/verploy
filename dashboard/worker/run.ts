@@ -6,6 +6,7 @@ import { keyMaterial } from '@/lib/security/keys'
 import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PackageResult, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
 import { comparePage, firstFailure, healthy, visualDiff, type CheckOutcome } from './compare'
+import { SKIPPED_DEPENDENCY, dependencyOrder, dependentsOf, isolatedFailure, stagingOk, type RunItem } from '@/lib/run-items'
 
 export type Admin = SupabaseClient<Database>
 export type Run = Tables<'update_runs'>
@@ -27,11 +28,8 @@ export const DEFAULT_STEP_TIMEOUT_MS = 5 * 60_000
 /** Stappen waarin productie al is aangeraakt: bij een fout volgt een rollback. */
 const PRODUCTION_TOUCHED: Status[] = ['deploy_apply', 'postcheck']
 
-interface Item {
-  type: string; slug: string; name: string; from_version: string | null; to_version: string | null; staging?: string; production?: string
-  /** Pakket dat productie ophaalde (betaalde plugins met domeinlicentie); staging én productie installeren precies dit bestand. */
-  package_file?: string
-}
+/** Onderdeel van de run; `package_file` = pakket dat productie ophaalde (betaalde plugins met domeinlicentie). */
+type Item = RunItem
 
 interface StepState {
   pages?: PageTarget[]
@@ -248,10 +246,20 @@ async function fetchPackage(ctx: RunContext, item: Item): Promise<PackageResult 
   }
 }
 
+/**
+ * Past de onderdelen één voor één toe. Op de testkopie geldt "fail isolated where possible": weigert de
+ * connector een onderdeel zonder er iets aan te veranderen, dan gaan de overige door en worden onderdelen
+ * die ervan afhangen overgeslagen. Een crash of een half uitgevoerde update stopt alles (`failed`).
+ * Live worden alleen onderdelen toegepast die op de testkopie gelukt en getest zijn.
+ */
 async function applyAll(ctx: RunContext, base: string, where: 'staging' | 'production'): Promise<{ list: Item[]; failed: Item | null }> {
   const list = items(ctx.run).map(i => ({ ...i }))
-  for (const item of list) {
+  const stepName = where === 'staging' ? 'staging_update' : 'deploy_apply'
+  for (const item of dependencyOrder(list)) {
     if (item[where] === 'updated' || item[where] === 'already_current') continue
+    if (where === 'staging' && item.staging === SKIPPED_DEPENDENCY) continue
+    if (where === 'staging' && item.staging && isolatedFailure(item.staging, item.from_version, null)) continue   // al afgewezen (herhaalde poging)
+    if (where === 'production' && !stagingOk(item)) continue
     const payload = () => ({ type: item.type, slug: item.slug, to_version: item.to_version, ...(item.package_file ? { package_file: item.package_file } : {}) })
     let res
     try {
@@ -276,17 +284,30 @@ async function applyAll(ctx: RunContext, base: string, where: 'staging' | 'produ
       if (!res) {
         // De site reageert niet meer na de update (fatale fout bij het activeren): niet doorgaan.
         item[where] = 'crashed'
-        await event(ctx, where === 'staging' ? 'staging_update' : 'deploy_apply', 'run.item.crashed', { name: item.name }, 'warning')
+        await event(ctx, stepName, 'run.item.crashed', { name: item.name }, 'warning')
         return { list, failed: item }
       }
     }
     item[where] = res.status
-    await event(ctx, where === 'staging' ? 'staging_update' : 'deploy_apply', res.ok ? 'run.item.updated' : 'run.item.failed',
+    await event(ctx, stepName, res.ok ? 'run.item.updated' : 'run.item.failed',
       { name: item.name, from: res.from_version ?? '', to: res.to_version ?? '', status: res.status }, res.ok ? 'info' : 'warning')
-    if (!res.ok) return { list, failed: item }
+    if (res.ok) continue
+    if (where === 'staging' && isolatedFailure(res.status, item.from_version, res.to_version ?? res.from_version)) {
+      // Alleen dit onderdeel: de testkopie is er niet door veranderd, de rest wordt gewoon getest.
+      await event(ctx, stepName, 'run.item.isolated', { name: item.name })
+      for (const dep of dependentsOf(item, list).filter(d => !stagingOk(d) && !d.staging)) {
+        dep.staging = SKIPPED_DEPENDENCY
+        await event(ctx, stepName, 'run.item.skipped_dependent', { name: dep.name, cause: item.name }, 'warning')
+      }
+      continue
+    }
+    return { list, failed: item }
   }
   return { list, failed: null }
 }
+
+/** Namen van onderdelen die aandacht nodig hebben (niet bijgewerkt of overgeslagen). */
+const attentionNames = (list: Item[]) => list.filter(i => i.staging && !stagingOk(i)).map(i => i.name)
 
 export async function step(ctx: RunContext): Promise<Transition> {
   const run = ctx.run
@@ -345,8 +366,19 @@ export async function step(ctx: RunContext): Promise<Transition> {
     case 'staging_update': {
       const { list, failed } = await applyAll(ctx, st.staging_url!, 'staging')
       if (failed) {
-        const t = toCleanup('blocked', { key: 'run.reason.update_failed', params: { name: failed.name, status: failed.staging ?? '' } })
+        // De testkopie is door dit onderdeel niet meer betrouwbaar: de rest kan niet los worden bewezen.
+        const key = failed.staging === 'crashed' ? 'run.reason.update_crashed' : 'run.reason.update_failed'
+        const t = toCleanup('blocked', { key, params: { name: failed.name, status: failed.staging ?? '', total: list.length, attention: [failed.name] } })
         return { ...t, items: list, state: { ...t.state, diagnostics: await collectDiagnostics(ctx, st.staging_url!, 'staging') } }
+      }
+      const tested = list.filter(stagingOk)
+      if (!tested.length) {
+        // Niets bijgewerkt: niets om te testen of live te zetten.
+        const first = list.find(i => i.staging !== SKIPPED_DEPENDENCY) ?? list[0]!
+        const reason: { key: string; params: Record<string, Json> } = list.length === 1 || attentionNames(list).length === 1
+          ? { key: 'run.reason.update_failed', params: { name: first.name, status: first.staging ?? '', total: list.length, attention: attentionNames(list) } }
+          : { key: 'run.reason.none_updated', params: { count: list.length, attention: attentionNames(list) } }
+        return { ...toCleanup('blocked', reason), items: list }
       }
       return cancelIfAsked() ?? { next: 'staging_test', items: list }
     }
@@ -356,7 +388,10 @@ export async function step(ctx: RunContext): Promise<Transition> {
       const cookies = [{ name: 'verploy_staging', value: ctx.client.stagingToken(), url }]
       const { failures } = await testPhase(ctx, 'staging_after', url, st.staging_pages ?? [], cookies, 'staging_before')
       if (failures.length) {
-        const reason = failureReason(failures)
+        const tested = items(run).filter(stagingOk)
+        const base = failureReason(failures)
+        // Meerdere onderdelen samen getest: niet aan te wijzen welke de fout veroorzaakt, dus niets live.
+        const reason = { ...base, params: { ...base.params, total: items(run).length, tested: tested.length, attention: tested.map(i => i.name) } }
         await event(ctx, 'staging_test', 'run.staging.failed', reason.params, 'warning')
         const t = toCleanup('blocked', reason)
         return { ...t, state: { ...t.state, diagnostics: await collectDiagnostics(ctx, url, 'staging') } }
@@ -372,7 +407,7 @@ export async function step(ctx: RunContext): Promise<Transition> {
       // Nieuwe nulmeting vlak vóór de update (onder onderhoud): zo telt tussentijds gewijzigde inhoud niet als fout.
       const bypass = [{ name: 'verploy_bypass', value: ctx.client.bypassToken(), url: prod }]
       await testPhase(ctx, 'production_before', prod, st.pages ?? [], bypass, null)
-      await untilReady(ctx, () => ctx.client.snapshot(prod, items(run).map(i => ({ type: i.type, slug: i.slug }))))
+      await untilReady(ctx, () => ctx.client.snapshot(prod, items(run).filter(stagingOk).map(i => ({ type: i.type, slug: i.slug }))))
       await event(ctx, 'deploy_snapshot', 'run.snapshot.ready')
       return { next: 'deploy_apply' }
     }
@@ -400,6 +435,13 @@ export async function step(ctx: RunContext): Promise<Transition> {
         return { next: 'rollback', state: { pending_verdict: 'rolled_back', pending_reason: reason, diagnostics: await collectDiagnostics(ctx, prod, 'production') } }
       }
       await event(ctx, 'postcheck', 'run.postcheck.passed')
+      // Gedeeltelijk: de geteste onderdelen staan live, de rest vraagt aandacht (met een eigen melding).
+      const attention = attentionNames(items(run))
+      if (attention.length) {
+        return toCleanup('deployed', { key: 'run.reason.partial', params: {
+          deployed: items(run).filter(i => i.production === 'updated' || i.production === 'already_current').length,
+          total: items(run).length, attention, statuses: items(run).filter(i => i.staging && !stagingOk(i)).map(i => i.staging!) } })
+      }
       return toCleanup('deployed')
     }
 

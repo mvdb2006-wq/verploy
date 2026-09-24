@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# Bouwt het Verploy-testlab: drie labplugins (1.0.0 om te installeren, 1.1.0 als update)
+# Bouwt het Verploy-testlab: labplugins (1.0.0 om te installeren, 1.1.0 als update)
 # en de lab-updater die updates aanbiedt vanaf LAB_REPO_URL (zoals premium plugins dat doen).
 #
 #   vp-lab-footer     1.0.0 → 1.1.0  onschuldige tekstwijziging        → verwacht: live
 #   vp-lab-fatal      1.0.0 → 1.1.0  fatale fout op elke pagina        → verwacht: tegengehouden op staging
 #   vp-lab-prod-only  1.0.0 → 1.1.0  breekt alleen buiten staging      → verwacht: teruggedraaid na post-check
 #   vp-lab-licensed   1.0.0 → 1.1.0  update alleen op het eigen domein  → zoals betaalde plugins met domeinlicentie
+#   vp-lab-nopkg      1.0.0 → 1.1.0  updatepakket ontbreekt (404)       → verwacht: apart gezet, rest gaat door
+#   vp-lab-nopkg-addon 1.0.0 → 1.1.0 uitbreiding van vp-lab-nopkg       → verwacht: overgeslagen (afhankelijk)
+#   vp-lab-extra      1.0.0 → 1.1.0  onschuldige tekstwijziging        → verwacht: live, ook als nopkg faalt
 #
 # Gebruik: build-lab.sh <uitvoermap> <publieke-repo-url>
 set -euo pipefail
@@ -39,6 +42,13 @@ plugin vp-lab-prod-only 1.1.0 'if ( ! defined( '"'"'VERPLOY_STAGING'"'"' ) ) { v
 LICENSED='add_action( '"'"'wp_footer'"'"', function () { echo '"'"'<p class="vp-lab-licensed">licensed %s</p>'"'"'; } );'
 plugin vp-lab-licensed 1.0.0 "$(printf "$LICENSED" 'v1.0.0')"
 plugin vp-lab-licensed 1.1.0 "$(printf "$LICENSED" 'v1.1.0')"
+EXTRA='add_action( '"'"'wp_footer'"'"', function () { echo '"'"'<p class="vp-lab-extra">extra %s</p>'"'"'; } );'
+plugin vp-lab-extra 1.0.0 "$(printf "$EXTRA" 'v1.0.0')"
+plugin vp-lab-extra 1.1.0 "$(printf "$EXTRA" 'v1.1.0')"
+plugin vp-lab-nopkg 1.0.0 '// 1.0.0 doet niets.'
+plugin vp-lab-nopkg 1.1.0 '// 1.1.0 wordt nooit gepubliceerd (pakket ontbreekt).'
+plugin vp-lab-nopkg-addon 1.0.0 '// uitbreiding van vp-lab-nopkg.'
+plugin vp-lab-nopkg-addon 1.1.0 '// uitbreiding van vp-lab-nopkg, 1.1.0.'
 
 mkdir -p "$OUT/src/vp-lab-updater/vp-lab-updater"
 cat > "$OUT/src/vp-lab-updater/vp-lab-updater/vp-lab-updater.php" <<'PHP'
@@ -96,9 +106,10 @@ PHP
 sed -i "s#__REPO_URL__#${REPO_URL}#" "$OUT/src/vp-lab-updater/vp-lab-updater/vp-lab-updater.php"
 
 echo '{' > "$OUT/repo/manifest.json"; first=1
-for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed; do
+for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed vp-lab-extra vp-lab-nopkg vp-lab-nopkg-addon; do
   ( cd "$OUT/src/$slug-1.0.0" && zip -qrX "$OUT/install/$slug.zip" "$slug" )
-  ( cd "$OUT/src/$slug-1.1.0" && zip -qrX "$OUT/repo/$slug-1.1.0.zip" "$slug" )
+  # vp-lab-nopkg: update aangeboden, maar het pakket bestaat niet (zoals een premium plugin zonder geldige licentie)
+  [ "$slug" = vp-lab-nopkg ] || ( cd "$OUT/src/$slug-1.1.0" && zip -qrX "$OUT/repo/$slug-1.1.0.zip" "$slug" )
   [ $first = 1 ] || echo ',' >> "$OUT/repo/manifest.json"; first=0
   licensed=false; [ "$slug" = vp-lab-licensed ] && licensed=true
   printf '"%s": {"version": "1.1.0", "package": "%s/%s-1.1.0.zip", "licensed": %s}' "$slug" "$REPO_URL" "$slug" "$licensed" >> "$OUT/repo/manifest.json"

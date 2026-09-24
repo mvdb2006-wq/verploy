@@ -47,7 +47,7 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   const autofixRunIds = [...new Set((vulns ?? []).map(v => v.autofix_run_id).filter((x): x is string => Boolean(x)))]
   const [{ data: vulnDetails }, { data: autofixRuns }] = await Promise.all([
     vulnIds.length ? supabase.from('vulnerabilities').select('id, title, cve, cvss_score, reference_url, mitre').in('id', vulnIds) : Promise.resolve({ data: [] }),
-    autofixRunIds.length ? supabase.from('update_runs').select('id, status, verdict').in('id', autofixRunIds) : Promise.resolve({ data: [] }),
+    autofixRunIds.length ? supabase.from('update_runs').select('id, status, verdict, reason_key').in('id', autofixRunIds) : Promise.resolve({ data: [] }),
   ])
   const detailById = new Map((vulnDetails ?? []).map(d => [d.id, d]))
   const runById = new Map((autofixRuns ?? []).map(r => [r.id, r]))

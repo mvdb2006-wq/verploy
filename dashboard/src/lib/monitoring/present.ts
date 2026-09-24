@@ -23,6 +23,8 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
   if (alert.type.startsWith('update_')) {
     vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
     vars.reason = presentReason(t, typeof p.reason_key === 'string' ? p.reason_key : null, p.reason_params)
+    vars.deployed = Number(p.deployed ?? 0)
+    vars.total = Number(p.total ?? 0)
   }
   if (alert.type === 'vulnerability') {
     vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
@@ -30,6 +32,7 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
   }
   const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon')
     : alert.type === 'vulnerability' && p.autofix === true ? 'vulnerability_auto'
+    : alert.type === 'update_blocked' && p.partial === true ? 'update_partial'
     : alert.type
   const diagnosis = alert.type.startsWith('update_') && typeof p.diagnosis === 'string' && p.diagnosis ? ` ${t('alerts.diagnosis', { text: p.diagnosis })}` : ''
   return {

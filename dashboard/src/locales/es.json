@@ -314,6 +314,10 @@
       "vulnerability_auto": {
         "title": "{count, plural, one {Vulnerabilidad conocida} other {# vulnerabilidades conocidas}}: {items}",
         "body": "Gravedad: {severity}. Verploy lo está corrigiendo de forma automática y segura; te avisaremos si no funciona."
+      },
+      "update_partial": {
+        "title": "Actualización requiere atención: {items}",
+        "body": "{deployed} de {total} actualizaciones se probaron y publicaron; tu sitio funciona con normalidad. Sin actualizar: {items}. Su versión publicada no se ha modificado. Abre la actualización para ver la causa y la acción recomendada."
       }
     },
     "sslError": {
@@ -381,7 +385,8 @@
       "blocked": "Bloqueada",
       "rolled_back": "Revertida",
       "error": "Fallida",
-      "cancelled": "Cancelada"
+      "cancelled": "Cancelada",
+      "partial": "Parcialmente publicada"
     },
     "outcome": {
       "deployed": "Todas las actualizaciones están publicadas y la comprobación posterior ha sido correcta.",
@@ -424,7 +429,8 @@
       "not_a_zip": "El archivo de actualización no es un zip válido",
       "store_failed": "No se pudo guardar el archivo de actualización",
       "unsupported_type": "No compatible",
-      "connector_outdated": "Plugin de Verploy demasiado antiguo para esta actualización (se necesita 2.3 o superior)"
+      "connector_outdated": "Plugin de Verploy demasiado antiguo para esta actualización (se necesita 2.3 o superior)",
+      "skipped_dependency": "Omitida: depende de un componente que falló"
     },
     "phpError": {
       "wp_critical_error": "WordPress muestra un error crítico",
@@ -456,7 +462,10 @@
         "content": "{page} ({viewport}) muestra mucho menos contenido que antes.",
         "visual": "{page} ({viewport}) se ve un {percent} % distinta (permitido: {limit} %).",
         "login": "El formulario de acceso de WordPress ya no funciona."
-      }
+      },
+      "partial": "{deployed} de {total} actualizaciones están publicadas. Sin actualizar: {attention}.",
+      "update_crashed": "{name} bloqueó la copia de prueba, así que Verploy ya no podía probar las demás actualizaciones por separado de forma fiable.",
+      "none_updated": "Ninguna de las {count} actualizaciones pudo aplicarse en la copia de prueba ({attention})."
     },
     "detail": {
       "title": "Actualización segura",
@@ -485,7 +494,8 @@
       "securityTrigger": "Iniciada automáticamente por Verploy por una vulnerabilidad de seguridad conocida.",
       "queueAhead": "Esperando a {count, plural, one {# otra actualización iniciada} other {# otras actualizaciones iniciadas}} antes. Verploy ejecuta varias a la vez; esta empezará en cuanto haya sitio.",
       "queueNext": "Empieza en unos segundos.",
-      "queueRetry": "Verploy lo volverá a intentar a las {time}."
+      "queueRetry": "Verploy lo volverá a intentar a las {time}.",
+      "outcome": "Resultado"
     },
     "events": {
       "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",
@@ -517,7 +527,47 @@
       "verdict_cancelled": "Terminado: cancelada.",
       "done": "Terminado.",
       "queued_security": "{count, plural, one {Actualización de seguridad programada} other {# actualizaciones de seguridad programadas}} automáticamente por Verploy (vulnerabilidad conocida).",
-      "item_package": "{name}: archivo de actualización {version} obtenido a través del sitio en vivo (licencia de su propio dominio)."
+      "item_package": "{name}: archivo de actualización {version} obtenido a través del sitio en vivo (licencia de su propio dominio).",
+      "item_isolated": "{name} apartado; las demás actualizaciones continúan.",
+      "item_skipped_dependent": "{name} omitido: depende de {cause}."
+    },
+    "itemOutcome": {
+      "live": "Publicada",
+      "current": "Ya al día",
+      "attention": "Requiere atención",
+      "skipped_dependent": "Omitida",
+      "held_back": "No publicada",
+      "rolled_back": "Revertida",
+      "pending": "En curso"
+    },
+    "summary": {
+      "headlineAll": "{count, plural, one {Actualización realizada de forma segura} other {Las # actualizaciones realizadas de forma segura}}",
+      "headlinePartial": "{deployed} de {total} actualizaciones realizadas de forma segura",
+      "headlineBlocked": "No se publicó nada",
+      "headlineRolledBack": "Actualización revertida",
+      "headlineError": "Actualización no completada",
+      "headlineCancelled": "Cancelada",
+      "attention": "{name} requiere atención",
+      "live": "Probadas y publicadas: {names}.",
+      "itemFailed": "{name}: {status}. La versión publicada no se ha modificado.",
+      "skipped": "Omitidas porque dependen de un componente que falló ({count}): {names}.",
+      "batchStopped": "Estas {count} actualizaciones se probaron juntas. Como no se puede determinar de forma fiable cuál causó el problema, Verploy no publicó nada.",
+      "crashStopped": "{name} bloqueó la copia de prueba. Después Verploy ya no podía probar las demás actualizaciones por separado de forma fiable, así que no se publicó nada.",
+      "liveOk": "Tu sitio publicado funciona con normalidad: la comprobación tras la publicación fue correcta.",
+      "liveUntouched": "Tu sitio publicado no se ha modificado.",
+      "liveRestored": "Tu sitio publicado se ha restaurado al estado anterior a la actualización.",
+      "recommended": "Recomendado",
+      "noAction": "No tienes que hacer nada.",
+      "openWpAdmin": "Abrir WP Admin",
+      "uncleanStopped": "{name} no se actualizó limpiamente en la copia de prueba. Por eso Verploy ya no podía probar las demás actualizaciones por separado de forma fiable, así que no se publicó nada."
+    },
+    "advice": {
+      "licence": "Comprueba la licencia de {name} en WP Admin. Con una licencia activa, Verploy podrá aplicar la actualización de forma segura la próxima vez.",
+      "retry": "La descarga de {name} falló, normalmente de forma temporal. Vuelve a iniciar la actualización más tarde.",
+      "connector": "Actualiza Verploy Connector en este sitio a la última versión y vuelve a iniciar la actualización.",
+      "filesystem": "WordPress no puede escribir archivos en este servidor. Pide a tu proveedor de hosting permisos de escritura para WordPress.",
+      "dependency": "Resuelve primero el componente del que depende {name}; después esta actualización podrá acompañarlo.",
+      "review": "Consulta los detalles abajo. Actualiza {name} manualmente si hace falta y revisa el sitio después."
     }
   },
   "diagnosis": {
@@ -960,7 +1010,8 @@
       "runCancelled": "{items}: cancelado",
       "alertOpened": "Aviso: {title}",
       "alertResolved": "Resuelto: {title}",
-      "auto": "automático"
+      "auto": "automático",
+      "runAttention": "{items} requiere atención"
     },
     "dur": {
       "d": "{n} d",

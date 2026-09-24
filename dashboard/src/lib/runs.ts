@@ -31,10 +31,12 @@ export function waitingForRetry(run: { status: string; not_before: string }, now
 export type Tone = 'ok' | 'warn' | 'danger' | 'muted' | 'active'
 
 /** Label + kleur voor de status of uitkomst van een run. */
-export function runBadge(t: Translate, run: { status: string; verdict: string | null }): { label: string; tone: Tone } {
+export function runBadge(t: Translate, run: { status: string; verdict: string | null; reason_key?: string | null }): { label: string; tone: Tone } {
   if (run.status !== 'done') {
     return { label: run.status === 'queued' ? t('runs.status.queued') : t('runs.status.running'), tone: 'active' }
   }
+  // Deels live: de geteste onderdelen staan live, één of meer vragen aandacht.
+  if (run.verdict === 'deployed' && run.reason_key === 'run.reason.partial') return { label: t('runs.verdict.partial'), tone: 'warn' }
   const tone: Record<string, Tone> = { deployed: 'ok', blocked: 'warn', rolled_back: 'danger', error: 'danger', cancelled: 'muted' }
   return { label: t(`runs.verdict.${run.verdict ?? 'error'}` as MessageKey), tone: tone[run.verdict ?? 'error'] ?? 'muted' }
 }

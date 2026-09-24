@@ -314,6 +314,10 @@
       "vulnerability_auto": {
         "title": "{count, plural, one {Vulnérabilité connue} other {# vulnérabilités connues}} : {items}",
         "body": "Gravité : {severity}. Verploy corrige cela automatiquement et en sécurité ; vous serez prévenu en cas d’échec."
+      },
+      "update_partial": {
+        "title": "Mise à jour à vérifier : {items}",
+        "body": "{deployed} mises à jour sur {total} ont été testées et mises en ligne ; votre site fonctionne normalement. Non mises à jour : {items}. Leur version en ligne n’a pas été modifiée. Ouvrez la mise à jour pour la cause et l’action recommandée."
       }
     },
     "sslError": {
@@ -381,7 +385,8 @@
       "blocked": "Bloquée",
       "rolled_back": "Annulée (restaurée)",
       "error": "Échec",
-      "cancelled": "Annulée"
+      "cancelled": "Annulée",
+      "partial": "Partiellement en ligne"
     },
     "outcome": {
       "deployed": "Toutes les mises à jour sont en ligne et le contrôle après mise en ligne a réussi.",
@@ -424,7 +429,8 @@
       "not_a_zip": "Le fichier de mise à jour n’est pas un zip valide",
       "store_failed": "Impossible d’enregistrer le fichier de mise à jour",
       "unsupported_type": "Non pris en charge",
-      "connector_outdated": "Extension Verploy trop ancienne pour cette mise à jour (2.3 ou plus récente requise)"
+      "connector_outdated": "Extension Verploy trop ancienne pour cette mise à jour (2.3 ou plus récente requise)",
+      "skipped_dependency": "Ignorée : dépend d’un composant en échec"
     },
     "phpError": {
       "wp_critical_error": "WordPress signale une erreur critique",
@@ -456,7 +462,10 @@
         "content": "{page} ({viewport}) affiche beaucoup moins de contenu qu’avant.",
         "visual": "{page} ({viewport}) est différente à {percent} % (autorisé : {limit} %).",
         "login": "Le formulaire de connexion WordPress ne fonctionne plus."
-      }
+      },
+      "partial": "{deployed} mises à jour sur {total} sont en ligne. Non mises à jour : {attention}.",
+      "update_crashed": "{name} a fait planter la copie de test ; Verploy ne pouvait donc plus tester les autres mises à jour de manière fiable séparément.",
+      "none_updated": "Aucune des {count} mises à jour n’a pu être appliquée sur la copie de test ({attention})."
     },
     "detail": {
       "title": "Mise à jour sécurisée",
@@ -485,7 +494,8 @@
       "securityTrigger": "Lancée automatiquement par Verploy en raison d’une vulnérabilité connue.",
       "queueAhead": "En attente de {count, plural, one {# autre mise à jour lancée} other {# autres mises à jour lancées}} plus tôt. Verploy en exécute plusieurs à la fois ; celle-ci démarre dès qu’une place se libère.",
       "queueNext": "Démarrage dans quelques secondes.",
-      "queueRetry": "Verploy réessaiera à {time}."
+      "queueRetry": "Verploy réessaiera à {time}.",
+      "outcome": "Résultat"
     },
     "events": {
       "queued": "{count, plural, one {Mise à jour planifiée} other {# mises à jour planifiées}}.",
@@ -517,7 +527,47 @@
       "verdict_cancelled": "Terminé : annulée.",
       "done": "Terminé.",
       "queued_security": "{count, plural, one {Mise à jour de sécurité planifiée} other {# mises à jour de sécurité planifiées}} automatiquement par Verploy (vulnérabilité connue).",
-      "item_package": "{name} : fichier de mise à jour {version} récupéré via le site en ligne (licence de son propre domaine)."
+      "item_package": "{name} : fichier de mise à jour {version} récupéré via le site en ligne (licence de son propre domaine).",
+      "item_isolated": "{name} mis de côté ; les autres mises à jour continuent.",
+      "item_skipped_dependent": "{name} ignoré : dépend de {cause}."
+    },
+    "itemOutcome": {
+      "live": "En ligne",
+      "current": "Déjà à jour",
+      "attention": "À vérifier",
+      "skipped_dependent": "Ignorée",
+      "held_back": "Non mise en ligne",
+      "rolled_back": "Restaurée",
+      "pending": "En cours"
+    },
+    "summary": {
+      "headlineAll": "{count, plural, one {Mise à jour effectuée en toute sécurité} other {Les # mises à jour effectuées en toute sécurité}}",
+      "headlinePartial": "{deployed} mises à jour sur {total} effectuées en toute sécurité",
+      "headlineBlocked": "Rien mis en ligne",
+      "headlineRolledBack": "Mise à jour annulée",
+      "headlineError": "Mise à jour non terminée",
+      "headlineCancelled": "Annulée",
+      "attention": "{name} demande votre attention",
+      "live": "Testées et mises en ligne : {names}.",
+      "itemFailed": "{name} : {status}. La version en ligne n’a pas été modifiée.",
+      "skipped": "Ignorées car {count, plural, one {elle dépend} other {elles dépendent}} d’un composant en échec : {names}.",
+      "batchStopped": "Ces {count} mises à jour ont été testées ensemble. Comme il est impossible de déterminer de façon fiable laquelle a causé le problème, Verploy n’a rien mis en ligne.",
+      "crashStopped": "{name} a fait planter la copie de test. Verploy ne pouvait plus tester les autres mises à jour séparément de façon fiable, donc rien n’a été mis en ligne.",
+      "liveOk": "Votre site en ligne fonctionne normalement : le contrôle après mise en ligne a réussi.",
+      "liveUntouched": "Votre site en ligne n’a pas été modifié.",
+      "liveRestored": "Votre site en ligne a été restauré dans son état d’avant la mise à jour.",
+      "recommended": "Recommandé",
+      "noAction": "Aucune action nécessaire.",
+      "openWpAdmin": "Ouvrir WP Admin",
+      "uncleanStopped": "{name} n’a pas été mis à jour proprement sur la copie de test. Verploy ne pouvait donc plus tester les autres mises à jour séparément de façon fiable : rien n’a été mis en ligne."
+    },
+    "advice": {
+      "licence": "Vérifiez la licence de {name} dans WP Admin. Avec une licence active, Verploy pourra effectuer la mise à jour en toute sécurité la prochaine fois.",
+      "retry": "Le téléchargement de {name} a échoué, généralement de façon temporaire. Relancez la mise à jour plus tard.",
+      "connector": "Mettez à jour Verploy Connector sur ce site vers la dernière version, puis relancez la mise à jour.",
+      "filesystem": "WordPress n’a pas le droit d’écrire des fichiers sur ce serveur. Demandez à votre hébergeur les droits d’écriture pour WordPress.",
+      "dependency": "Résolvez d’abord le composant dont dépend {name} ; cette mise à jour pourra ensuite suivre.",
+      "review": "Consultez les détails ci-dessous. Mettez {name} à jour manuellement si nécessaire, puis vérifiez le site."
     }
   },
   "diagnosis": {
@@ -960,7 +1010,8 @@
       "runCancelled": "{items} : annulé",
       "alertOpened": "Alerte : {title}",
       "alertResolved": "Résolu : {title}",
-      "auto": "automatique"
+      "auto": "automatique",
+      "runAttention": "{items} à vérifier"
     },
     "dur": {
       "d": "{n} j",

@@ -181,3 +181,10 @@ Het app-versienummer komt uit `package.json` (semver, handmatig verhoogd per rel
 
 ## 24-09 — Lekcontrole: teller in plaats van tijdstippen
 `now()` in Postgres is het begin van de transactie, niet het moment van committen. Tijdstippen vergelijken tussen twee gelijktijdige processen (heartbeat en worker) is daardoor onbetrouwbaar. Een teller plus een controle onder rijvergrendeling is wél sluitend. De worker leest eerst de teller en daarna de onderdelen: komt er daartussen een heartbeat binnen, dan weigert de database de uitkomst en volgt de volgende ronde. De functie houdt een aanroep zonder teller aan, zodat de migratie vóór de nieuwe worker uitgerold kan worden.
+
+## 24-09 — Veilige update: fail isolated where possible
+Een run is een organisatorische eenheid; de beoordeling gebeurt per onderdeel (`src/lib/run-items.ts`, gedeeld door worker en dashboard).
+- **Eén onderdeel apart:** weigert de connector een onderdeel vóórdat er iets verandert (geen update of pakket, download mislukt, …), of mislukt de update terwijl de oude versie aantoonbaar nog staat, dan is de testkopie voor dat onderdeel gelijk aan live. De overige onderdelen worden dan gewoon getest en live gezet (verdict `deployed`, reason `run.reason.partial`). De melding noemt alleen wat aandacht vraagt.
+- **Afhankelijke onderdelen:** onderdelen die er (vermoedelijk) van afhangen worden overgeslagen. Dat geldt voor uitbreidingen met dezelfde basisnaam (elementor → elementor-pro), voor namen die de basisnaam bevatten ("Redirection for Contact Form 7"), en voor WooCommerce-extensies. Basis-onderdelen worden eerst toegepast. Bij twijfel slaan we liever te veel over.
+- **Alles stoppen:** bij een crash, een half uitgevoerde update, of gezakte tests na meerdere updates samen, want dan is niet aan te tonen welke update de fout veroorzaakt. De uitleg zegt dan precies waarom.
+- **Later (connector 2.4):** de testkopie opnieuw opbouwen zonder de aangewezen schuldige (uit de diagnose) en de rest opnieuw testen. Dat is nu niet mogelijk zonder nieuw connector-endpoint.

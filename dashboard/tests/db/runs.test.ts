@@ -267,6 +267,31 @@ describe('Diagnoses', () => {
       expect(alert.rows).toEqual([{ type: 'update_blocked', diagnosis: 'Akismet 5.3 roept een ontbrekende functie aan.' }])
     }))
 
+  it('gedeeltelijk live: oude updatemeldingen dicht, nieuwe melding noemt alleen wat aandacht vraagt', () =>
+    inTx(async db => {
+      const { a, site } = await readySite(db)
+      const id = await createRun(db, a, site)
+      await asWorker(db, () => db.query(`select app.raise_alert($1, $2, 'update_rolled_back', 'critical', '{}')`, [site, a.id]))
+      await asWorker(db, () => db.query(`select * from public.claim_update_run('w1', 60)`))
+      await asWorker(db, () => db.query(`select public.advance_update_run($1, 'w1', 'done', '{}', 'deployed', 'run.reason.partial', $2)`,
+        [id, JSON.stringify({ deployed: 1, total: 2, attention: ['WPBakery Page Builder'] })]))
+      await asWorker(db, () => db.query(`select public.record_run_outcome($1)`, [id]))
+      const open = await db.query(`select type, severity, params->'items' items, params->>'partial' partial, params->>'deployed' deployed
+                                     from public.alerts where site_id = $1 and status = 'open' and type like 'update_%'`, [site])
+      expect(open.rows).toEqual([{ type: 'update_blocked', severity: 'warning', items: ['WPBakery Page Builder'], partial: 'true', deployed: '1' }])
+    }))
+
+  it('volledig live: geen updatemelding', () =>
+    inTx(async db => {
+      const { a, site } = await readySite(db)
+      const id = await createRun(db, a, site)
+      await asWorker(db, () => db.query(`select * from public.claim_update_run('w1', 60)`))
+      await asWorker(db, () => db.query(`select public.advance_update_run($1, 'w1', 'done', '{}', 'deployed', null, '{}')`, [id]))
+      await asWorker(db, () => db.query(`select public.record_run_outcome($1)`, [id]))
+      const open = await db.query(`select count(*)::int n from public.alerts where site_id = $1 and status = 'open' and type like 'update_%'`, [site])
+      expect(open.rows[0].n).toBe(0)
+    }))
+
   it('een diagnose kan niet aan een run van een ander bureau hangen', () =>
     inTx(async db => {
       const { a, site } = await readySite(db, 'a')

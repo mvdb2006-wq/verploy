@@ -90,6 +90,11 @@ $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' =
 check( 'onveilige pakketnaam wordt genegeerd (geen pad buiten de pakketmap)', 200 === $r[0] && 'already_current' === $r[1]['status'], json_encode( $r ) );
 $r = call( $base, '/verploy/v2/updates/package', array( 'run_id' => $run, 'item' => array( 'type' => 'plugin', 'slug' => 'vp-lab-licensed/vp-lab-licensed.php', 'to_version' => '9.9.9' ) ) );
 check( 'productie: andere versie dan verwacht → geen pakket', 200 === $r[0] && 'version_changed' === $r[1]['status'], json_encode( $r ) );
+// Pakket ontbreekt (404): de update mislukt vóórdat er iets verandert; de oude versie staat er nog en werkt.
+$r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-nopkg' ) ) );
+check( 'staging: update zonder pakket mislukt, oude versie blijft staan (basis voor "fail isolated")',
+	200 === $r[0] && 'update_failed' === $r[1]['status'] && '1.0.0' === $r[1]['from_version'] && '1.0.0' === $r[1]['to_version'], json_encode( $r ) );
+check( 'staging werkt nog na de mislukte update', 200 === page( $surl . '/', array( "X-Verploy-Staging: $token" ) )[0] );
 $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-fatal' ) ) );
 check( 'staging: fatal-update geïnstalleerd', 200 === $r[0] && 'updated' === $r[1]['status'], json_encode( $r ) );
 check( 'staging geeft nu 500', 500 === page( $surl . '/', array( "X-Verploy-Staging: $token" ) )[0] );

@@ -169,7 +169,8 @@ export function Activity({ entries, t, locale }: { entries: ActivityEntry[]; t: 
           const items = e.items.join(', ')
           const key = { deployed: 'runDeployed', blocked: 'runBlocked', rolled_back: 'runRolledBack', cancelled: 'runCancelled' }[e.verdict] ?? 'runError'
           text = t(`ops.activity.${key}` as MessageKey, { items })
-          badge = runBadge(t, { status: 'done', verdict: e.verdict })
+          if (e.verdict === 'deployed' && e.attention.length) text += ` · ${t('ops.activity.runAttention', { items: e.attention.join(', ') })}`
+          badge = runBadge(t, { status: 'done', verdict: e.verdict, reason_key: e.reasonKey })
           href = `/sites/${e.siteId}/runs/${e.runId}`
         } else {
           const { title } = presentAlert(t, locale, e.alert)

@@ -37,6 +37,18 @@ async function startUpdate(page: Page, plugin: string) {
   await expect(page.getByRole('heading', { name: 'Veilige update', level: 1 })).toBeVisible()
 }
 
+/** Start één veilige update met precies deze labplugins aangevinkt. */
+async function startUpdates(page: Page, plugins: string[]) {
+  await page.goto(`/sites/${siteId}`)
+  for (const box of await page.getByRole('checkbox').all()) {
+    const name = (await box.getAttribute('value')) ?? ''
+    if (plugins.some(p => name.startsWith(`plugin:${p}/`))) await box.check()
+    else await box.uncheck()
+  }
+  await page.getByRole('button', { name: `${plugins.length} updates veilig uitvoeren` }).click()
+  await expect(page).toHaveURL(new RegExp(`/sites/${siteId}/runs/[0-9a-f-]{36}`))
+}
+
 async function waitForVerdict(page: Page, label: string) {
   await expect(page.locator('main').getByText(label, { exact: true }).first()).toBeVisible({ timeout: 6 * 60_000 })
 }
@@ -71,7 +83,9 @@ test('scenario 1 — goede update gaat live', async ({ page }) => {
   await expect(running.getByRole('progressbar', { name: 'Voortgang van de update op Lab-WordPress' })).toBeVisible()
   await page.goto(runUrl)
   await waitForVerdict(page, 'Live gezet')
-  await expect(page.getByText('Alle updates staan live en de controle na livegang is geslaagd.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Update veilig uitgevoerd' })).toBeVisible()
+  await expect(page.getByText('Je live site werkt normaal: de controle na livegang is geslaagd.')).toBeVisible()
+  await expect(page.getByText('Je hoeft niets te doen.')).toBeVisible()
   // tests op staging en productie zijn zichtbaar, met screenshots
   await expect(page.getByRole('heading', { name: 'Tests op de testkopie' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Controle op de live site' })).toBeVisible()
@@ -90,7 +104,9 @@ test('scenario 1 — goede update gaat live', async ({ page }) => {
 test('scenario 2 — kapotte update wordt tegengehouden, niets live', async ({ page }) => {
   await startUpdate(page, 'vp-lab-fatal')
   await waitForVerdict(page, 'Tegengehouden')
-  await expect(page.getByText('Niets live gezet: de update gaf problemen op de testkopie.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Niets live gezet' })).toBeVisible()
+  await expect(page.getByText('Je live site is niet gewijzigd.')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Naar WP Admin' })).toHaveAttribute('href', `${LAB_WP}/wp-admin/`)
   await expect(page.getByText(/WordPress meldt een kritieke fout|PHP geeft een fatale fout|gaf HTTP 500/).first()).toBeVisible()
   // fase 5: diagnose met de schuldige plugin en de ontbrekende functie
   await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible()
@@ -111,7 +127,8 @@ test('scenario 3 — update die live breekt wordt automatisch teruggedraaid + e-
   await clearMails()
   await startUpdate(page, 'vp-lab-prod-only')
   await waitForVerdict(page, 'Teruggedraaid')
-  await expect(page.getByText(/De site is automatisch teruggezet naar de versie van vóór de update/).first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Update teruggedraaid' })).toBeVisible()
+  await expect(page.getByText('Je live site is teruggezet naar de toestand van vóór de update.')).toBeVisible()
   await expect(page.getByText('Terugdraaien', { exact: true })).toBeVisible()
   await expect(page.getByText('De site werkt weer zoals vóór de update.')).toBeVisible()
   await expect(page.getByText('Verploy Lab — vp-lab-prod-only 1.1.0 roept een functie aan die niet bestaat (verploy_lab_function_that_does_not_exist).')).toBeVisible()
@@ -130,4 +147,41 @@ test('scenario 4 — betaalde plugin met domeinlicentie: pakket via de live site
   await expect(page.getByText('Verploy Lab — vp-lab-licensed: updatebestand 1.1.0 opgehaald via de live site (licentie van het eigen domein).')).toBeVisible()
   const html = await (await fetch(`${LAB_WP}/`)).text()
   expect(html).toContain('licensed v1.1.0')
+})
+
+test('scenario 5 — één update zonder pakket: apart gezet, afhankelijke overgeslagen, de rest wél live', async ({ page }) => {
+  // Zoals WPBakery zonder geldige licentie: WordPress biedt de update aan, maar het pakket is er niet.
+  await clearMails()
+  await startUpdates(page, ['vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-extra'])
+  await waitForVerdict(page, 'Deels live')
+  await expect(page.getByRole('heading', { name: '1 van 3 updates veilig uitgevoerd' })).toBeVisible()
+  await expect(page.getByText('Getest en live gezet: Verploy Lab — vp-lab-extra.')).toBeVisible()
+  await expect(page.getByText('Verploy Lab — vp-lab-nopkg: Update mislukt. De live versie is niet gewijzigd.')).toBeVisible()
+  await expect(page.getByText(/Overgeslagen omdat het afhangt van een onderdeel dat niet lukte: Verploy Lab — vp-lab-nopkg-addon\./)).toBeVisible()
+  await expect(page.getByText('Je live site werkt normaal: de controle na livegang is geslaagd.')).toBeVisible()
+  await expect(page.getByText('Aanbevolen', { exact: true })).toBeVisible()
+  await expect(page.getByText('vp-lab-nopkg-addon overgeslagen: hangt af van Verploy Lab — vp-lab-nopkg.', { exact: false })).toBeVisible()
+  // per onderdeel een eigen uitkomst
+  const rows = page.getByRole('row')
+  await expect(rows.filter({ hasText: 'vp-lab-extra' }).getByText('Live', { exact: true })).toBeVisible()
+  await expect(page.getByText('Vraagt aandacht', { exact: true })).toBeVisible()
+  await expect(page.getByText('Overgeslagen', { exact: true })).toBeVisible()
+  // live: extra bijgewerkt, nopkg en addon ongewijzigd
+  const html = await (await fetch(`${LAB_WP}/`)).text()
+  expect(html).toContain('extra v1.1.0')
+  const c = db(); await c.connect()
+  try {
+    const { rows: its } = await c.query(`select i->>'slug' slug, i->>'staging' staging, i->>'production' production
+      from public.update_runs r, jsonb_array_elements(r.items) i where r.site_id = $1 and r.created_at = (select max(created_at) from public.update_runs where site_id = $1) order by 1`, [siteId])
+    expect(its).toEqual([
+      { slug: 'vp-lab-extra/vp-lab-extra.php', staging: 'updated', production: 'updated' },
+      { slug: 'vp-lab-nopkg-addon/vp-lab-nopkg-addon.php', staging: 'skipped_dependency', production: null },
+      { slug: 'vp-lab-nopkg/vp-lab-nopkg.php', staging: 'update_failed', production: null },
+    ])
+  } finally { await c.end() }
+  // Inbox: één melding met alleen wat aandacht vraagt, plus een e-mail.
+  await page.goto('/inbox')
+  await expect(page.getByText('Update vraagt aandacht: Verploy Lab — vp-lab-nopkg, Verploy Lab — vp-lab-nopkg-addon')).toBeVisible()
+  await expect(page.getByText(/1 van 3 updates zijn getest en live gezet; je site werkt normaal\./)).toBeVisible()
+  await expect.poll(async () => (await sentMails()).filter(m => m.to.includes(owner.email) && m.subject.includes('Update vraagt aandacht')).length, { timeout: 30_000 }).toBe(1)
 })

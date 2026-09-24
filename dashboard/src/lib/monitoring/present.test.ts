@@ -35,6 +35,14 @@ describe('presentAlert', () => {
     expect(r.body).toContain('Yoast SEO Premium kon niet worden bijgewerkt op de testkopie (Geen downloadbestand; is de licentie nog actief?)')
     expect(r.body).not.toContain('no_package')
   })
+  it('gedeeltelijk live: alleen wat aandacht vraagt, en dat de rest live staat', () => {
+    const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: {
+      partial: true, deployed: 14, total: 15, items: ['WPBakery Page Builder'],
+      reason_key: 'run.reason.partial', reason_params: { deployed: 14, total: 15, attention: ['WPBakery Page Builder'] } } })
+    expect(r.title).toBe('Update vraagt aandacht: WPBakery Page Builder')
+    expect(r.body).toContain('14 van 15 updates zijn getest en live gezet; je site werkt normaal.')
+    expect(r.body).toContain('De live versie daarvan is niet gewijzigd.')
+  })
   it('elk type heeft een titel in elke taal (geen ruwe sleutels)', () => {
     for (const locale of ['nl', 'en', 'de', 'fr', 'es'] as const) {
       const t = createTranslator(locale)

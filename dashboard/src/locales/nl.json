@@ -314,6 +314,10 @@
       "vulnerability_auto": {
         "title": "{count, plural, one {Bekend beveiligingslek} other {# bekende beveiligingslekken}}: {items}",
         "body": "Ernst: {severity}. Verploy lost dit automatisch en veilig op; je krijgt bericht als dat niet lukt."
+      },
+      "update_partial": {
+        "title": "Update vraagt aandacht: {items}",
+        "body": "{deployed} van {total} updates zijn getest en live gezet; je site werkt normaal. Niet bijgewerkt: {items}. De live versie daarvan is niet gewijzigd. Open de update voor de oorzaak en de aanbevolen actie."
       }
     },
     "sslError": {
@@ -381,7 +385,8 @@
       "blocked": "Tegengehouden",
       "rolled_back": "Teruggedraaid",
       "error": "Mislukt",
-      "cancelled": "Geannuleerd"
+      "cancelled": "Geannuleerd",
+      "partial": "Deels live"
     },
     "outcome": {
       "deployed": "Alle updates staan live en de controle na livegang is geslaagd.",
@@ -424,7 +429,8 @@
       "not_a_zip": "Update-bestand is geen geldig zip-bestand",
       "store_failed": "Update-bestand kon niet worden opgeslagen",
       "unsupported_type": "Niet ondersteund",
-      "connector_outdated": "Verploy-plugin te oud voor deze update (2.3 of nieuwer nodig)"
+      "connector_outdated": "Verploy-plugin te oud voor deze update (2.3 of nieuwer nodig)",
+      "skipped_dependency": "Overgeslagen: hangt af van een onderdeel dat niet lukte"
     },
     "phpError": {
       "wp_critical_error": "WordPress meldt een kritieke fout",
@@ -456,7 +462,10 @@
         "content": "{page} ({viewport}) toont veel minder inhoud dan ervoor.",
         "visual": "{page} ({viewport}) ziet er {percent}% anders uit (toegestaan: {limit}%).",
         "login": "Het inlogformulier van WordPress werkt niet meer."
-      }
+      },
+      "partial": "{deployed} van {total} updates staan live. Niet bijgewerkt: {attention}.",
+      "update_crashed": "{name} liet de testkopie crashen. Daardoor kon Verploy de overige updates niet meer betrouwbaar los testen.",
+      "none_updated": "Geen van de {count} updates kon op de testkopie worden bijgewerkt ({attention})."
     },
     "detail": {
       "title": "Veilige update",
@@ -485,7 +494,8 @@
       "securityTrigger": "Automatisch gestart door Verploy vanwege een bekend beveiligingslek.",
       "queueAhead": "Er {count, plural, one {staat nog # update} other {staan nog # updates}} vóór deze in de wachtrij. Verploy voert er een paar tegelijk uit; deze start zodra er plek is.",
       "queueNext": "Start binnen enkele seconden.",
-      "queueRetry": "Verploy probeert het om {time} opnieuw."
+      "queueRetry": "Verploy probeert het om {time} opnieuw.",
+      "outcome": "Uitkomst"
     },
     "events": {
       "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",
@@ -517,7 +527,47 @@
       "verdict_cancelled": "Klaar: geannuleerd.",
       "done": "Klaar.",
       "queued_security": "{count, plural, one {# beveiligingsupdate} other {# beveiligingsupdates}} automatisch ingepland door Verploy (bekend lek).",
-      "item_package": "{name}: updatebestand {version} opgehaald via de live site (licentie van het eigen domein)."
+      "item_package": "{name}: updatebestand {version} opgehaald via de live site (licentie van het eigen domein).",
+      "item_isolated": "{name} apart gezet; de overige updates gaan door.",
+      "item_skipped_dependent": "{name} overgeslagen: hangt af van {cause}."
+    },
+    "itemOutcome": {
+      "live": "Live",
+      "current": "Al actueel",
+      "attention": "Vraagt aandacht",
+      "skipped_dependent": "Overgeslagen",
+      "held_back": "Niet live gezet",
+      "rolled_back": "Teruggezet",
+      "pending": "Bezig"
+    },
+    "summary": {
+      "headlineAll": "{count, plural, one {Update veilig uitgevoerd} other {Alle # updates veilig uitgevoerd}}",
+      "headlinePartial": "{deployed} van {total} updates veilig uitgevoerd",
+      "headlineBlocked": "Niets live gezet",
+      "headlineRolledBack": "Update teruggedraaid",
+      "headlineError": "Update niet afgerond",
+      "headlineCancelled": "Geannuleerd",
+      "attention": "{name} vraagt aandacht",
+      "live": "Getest en live gezet: {names}.",
+      "itemFailed": "{name}: {status}. De live versie is niet gewijzigd.",
+      "skipped": "Overgeslagen omdat {count, plural, one {het afhangt} other {ze afhangen}} van een onderdeel dat niet lukte: {names}.",
+      "batchStopped": "Deze {count} updates zijn samen getest. Omdat niet betrouwbaar vast te stellen is welke de fout veroorzaakte, heeft Verploy niets live gezet.",
+      "crashStopped": "{name} liet de testkopie crashen. Daarna kon Verploy de overige updates niet meer betrouwbaar los testen, dus is niets live gezet.",
+      "liveOk": "Je live site werkt normaal: de controle na livegang is geslaagd.",
+      "liveUntouched": "Je live site is niet gewijzigd.",
+      "liveRestored": "Je live site is teruggezet naar de toestand van vóór de update.",
+      "recommended": "Aanbevolen",
+      "noAction": "Je hoeft niets te doen.",
+      "openWpAdmin": "Naar WP Admin",
+      "uncleanStopped": "{name} is niet schoon bijgewerkt op de testkopie. Daardoor kon Verploy de overige updates niet meer betrouwbaar los testen, dus is niets live gezet."
+    },
+    "advice": {
+      "licence": "Controleer de licentie van {name} in WP Admin. Met een actieve licentie kan Verploy de update de volgende keer veilig uitvoeren.",
+      "retry": "Het downloaden van {name} ging mis, meestal tijdelijk. Start de update later opnieuw.",
+      "connector": "Werk de Verploy Connector op deze site bij naar de nieuwste versie en start de update opnieuw.",
+      "filesystem": "WordPress mag op deze server geen bestanden schrijven. Vraag je hostingpartij om schrijfrechten voor WordPress.",
+      "dependency": "Los eerst het onderdeel op waarvan {name} afhangt; daarna kan deze update mee.",
+      "review": "Bekijk de details hieronder. Werk {name} zo nodig handmatig bij en controleer de site daarna."
     }
   },
   "diagnosis": {
@@ -960,7 +1010,8 @@
       "runCancelled": "{items}: geannuleerd",
       "alertOpened": "Melding: {title}",
       "alertResolved": "Opgelost: {title}",
-      "auto": "automatisch"
+      "auto": "automatisch",
+      "runAttention": "{items} vraagt aandacht"
     },
     "dur": {
       "d": "{n} d",

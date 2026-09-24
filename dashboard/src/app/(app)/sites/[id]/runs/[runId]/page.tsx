@@ -13,12 +13,14 @@ import { Alert } from '@/components/Alert'
 import { cn } from '@/lib/cn'
 import { AutoRefresh } from '@/components/AutoRefresh'
 import { CancelRun } from './cancel'
+import { RunSummary } from '@/components/runs/RunSummary'
+import { itemOutcome, type ItemOutcome, type RunItem } from '@/lib/run-items'
 
 export async function generateMetadata() {
   return { title: (await getT())('runs.detail.title') }
 }
 
-interface Item { type: string; slug: string; name: string; from_version: string | null; to_version: string | null; staging?: string; production?: string }
+type Item = RunItem
 interface Result {
   phase: string; page_key: string; page_label: string; page_url: string; viewport: string; http_status: number | null
   passed: boolean; checks: unknown; screenshot_path: string | null; diff_path: string | null; diff_ratio: number | null
@@ -229,8 +231,9 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const FAILED_KEYS = ['run.step.failed', 'run.staging.failed', 'run.postcheck.failed', 'run.item.failed', 'run.item.crashed', 'run.rollback.still_broken']
   const failedSteps = new Set((events ?? []).filter(e => FAILED_KEYS.includes(e.message_key)).map(e => e.step))
   const byPhase = (phase: string) => ((results ?? []) as Result[]).filter(r => r.phase === phase)
-  const reason = presentReason(t, run.reason_key, run.reason_params)
-  const outcomeTone = { deployed: 'ok', blocked: 'warn', rolled_back: 'danger', error: 'danger', cancelled: 'info' } as const
+  const OUTCOME_CLASS: Record<ItemOutcome, string> = {
+    live: 'badge-ok', current: 'badge-muted', attention: 'badge-warn', skipped_dependent: 'badge-warn', held_back: 'badge-muted', rolled_back: 'badge-danger', pending: 'badge-muted',
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -252,11 +255,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      {done && run.verdict && (
-        <Alert tone={outcomeTone[run.verdict as keyof typeof outcomeTone] ?? 'info'}>
-          <strong>{t(`runs.outcome.${run.verdict}` as MessageKey)}</strong>{reason ? ` ${reason}` : ''}
-        </Alert>
-      )}
+      {done && run.verdict && <RunSummary t={t} run={run} siteUrl={site?.url ?? ''} hasDiagnosis={Boolean(diagnosis)} />}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
       {run.status === 'queued' && (
@@ -275,7 +274,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs text-muted">
-                <tr><th className="px-5 py-2 font-semibold">{t('runs.detail.component')}</th><th className="px-3 py-2 font-semibold">{t('runs.detail.version')}</th><th className="px-3 py-2 font-semibold">{t('runs.detail.staging')}</th><th className="px-5 py-2 font-semibold">{t('runs.detail.production')}</th></tr>
+                <tr><th className="px-5 py-2 font-semibold">{t('runs.detail.component')}</th><th className="px-3 py-2 font-semibold">{t('runs.detail.version')}</th><th className="px-3 py-2 font-semibold">{t('runs.detail.staging')}</th><th className="px-3 py-2 font-semibold">{t('runs.detail.production')}</th><th className="px-5 py-2 font-semibold">{t('runs.detail.outcome')}</th></tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {items.map(i => (
@@ -283,7 +282,8 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                     <td className="px-5 py-2.5 font-medium">{i.name}</td>
                     <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{i.from_version ?? '—'} → {i.to_version ?? '—'}</td>
                     <td className="px-3 py-2.5 text-xs">{i.staging ? t(`runs.itemStatus.${i.staging}` as MessageKey) : '—'}</td>
-                    <td className="px-5 py-2.5 text-xs">{i.production ? t(`runs.itemStatus.${i.production}` as MessageKey) : '—'}</td>
+                    <td className="px-3 py-2.5 text-xs">{i.production ? t(`runs.itemStatus.${i.production}` as MessageKey) : '—'}</td>
+                    <td className="px-5 py-2.5"><span className={cn('badge whitespace-nowrap', OUTCOME_CLASS[itemOutcome(i, run)])}>{t(`runs.itemOutcome.${itemOutcome(i, run)}` as MessageKey)}</span></td>
                   </tr>
                 ))}
               </tbody>

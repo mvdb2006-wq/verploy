@@ -3,6 +3,7 @@ import { cache } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
 import { daysAgoIso, effectiveStatus } from '@/lib/format'
+import { productionOk, stagingOk, type RunItem } from '@/lib/run-items'
 import {
   groupFindings, inboxItems, median, portfolioHealth, isSerious,
   type AlertLite, type FindingRow, type InboxItem, type RunLite, type VulnDetail, type VulnGroup,
@@ -22,7 +23,7 @@ export interface ActiveRun {
 }
 
 export type ActivityEntry =
-  | { kind: 'run'; at: string; siteId: string; siteName: string; runId: string; verdict: string; items: string[]; trigger: string }
+  | { kind: 'run'; at: string; siteId: string; siteName: string; runId: string; verdict: string; reasonKey: string | null; items: string[]; attention: string[]; trigger: string }
   | { kind: 'alert_opened' | 'alert_resolved'; at: string; siteId: string; siteName: string; alert: AlertLite }
 
 export interface Operations {
@@ -49,7 +50,7 @@ async function loadOperationsUncached(supabase: Db, agency: { security_autofix: 
       .select('site_id, vulnerability_id, component_type, component_slug, component_name, installed_version, fixed_version, fixable, severity, first_seen_at, autofix_run_id')
       .eq('status', 'open'),
     supabase.from('alerts').select('id, type, severity, params, opened_at, site_id, acknowledged_at').eq('status', 'open'),
-    supabase.from('update_runs').select('id, site_id, verdict, items, finished_at, trigger').eq('status', 'done').gte('finished_at', since24h)
+    supabase.from('update_runs').select('id, site_id, verdict, reason_key, items, finished_at, trigger').eq('status', 'done').gte('finished_at', since24h)
       .order('finished_at', { ascending: false }).limit(30),
     supabase.from('alerts').select('id, type, severity, params, opened_at, resolved_at, site_id, acknowledged_at, status')
       .neq('severity', 'info').or(`opened_at.gte.${since24h},resolved_at.gte.${since24h}`).limit(60),
@@ -91,8 +92,10 @@ async function loadOperationsUncached(supabase: Db, agency: { security_autofix: 
   const activity: ActivityEntry[] = [
     ...(doneQ.data ?? []).map(r => ({
       kind: 'run' as const, at: r.finished_at!, siteId: r.site_id, siteName: siteNames.get(r.site_id) ?? '—', runId: r.id,
-      verdict: r.verdict ?? 'error', trigger: r.trigger,
-      items: ((r.items as unknown as Array<{ name: string }>) ?? []).map(i => i.name),
+      verdict: r.verdict ?? 'error', reasonKey: r.reason_key, trigger: r.trigger,
+      // Bij (deels) live: alleen wat echt live staat; wat niet lukte apart.
+      items: ((r.items as unknown as RunItem[]) ?? []).filter(i => r.verdict !== 'deployed' || productionOk(i)).map(i => i.name),
+      attention: ((r.items as unknown as RunItem[]) ?? []).filter(i => i.staging && !stagingOk(i)).map(i => i.name),
     })),
     ...(recentAlertsQ.data ?? []).flatMap(a => {
       const lite: AlertLite = { ...a, siteName: siteNames.get(a.site_id) ?? '—' }

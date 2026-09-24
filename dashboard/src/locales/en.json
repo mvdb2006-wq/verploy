@@ -314,6 +314,10 @@
       "vulnerability_auto": {
         "title": "{count, plural, one {Known vulnerability} other {# known vulnerabilities}}: {items}",
         "body": "Severity: {severity}. Verploy is fixing this automatically and safely; you’ll hear from us if that doesn’t work."
+      },
+      "update_partial": {
+        "title": "Update needs attention: {items}",
+        "body": "{deployed} of {total} updates were tested and deployed; your site works normally. Not updated: {items}. Its live version was not changed. Open the update for the cause and the recommended action."
       }
     },
     "sslError": {
@@ -381,7 +385,8 @@
       "blocked": "Blocked",
       "rolled_back": "Rolled back",
       "error": "Failed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "partial": "Partly live"
     },
     "outcome": {
       "deployed": "All updates are live and the post-deploy check passed.",
@@ -424,7 +429,8 @@
       "not_a_zip": "Update file is not a valid zip",
       "store_failed": "Update file could not be stored",
       "unsupported_type": "Not supported",
-      "connector_outdated": "Verploy plugin too old for this update (2.3 or newer needed)"
+      "connector_outdated": "Verploy plugin too old for this update (2.3 or newer needed)",
+      "skipped_dependency": "Skipped: depends on a component that failed"
     },
     "phpError": {
       "wp_critical_error": "WordPress reports a critical error",
@@ -456,7 +462,10 @@
         "content": "{page} ({viewport}) shows much less content than before.",
         "visual": "{page} ({viewport}) looks {percent}% different (allowed: {limit}%).",
         "login": "The WordPress login form no longer works."
-      }
+      },
+      "partial": "{deployed} of {total} updates are live. Not updated: {attention}.",
+      "update_crashed": "{name} crashed the test copy, so Verploy could no longer test the other updates reliably on their own.",
+      "none_updated": "None of the {count} updates could be applied on the test copy ({attention})."
     },
     "detail": {
       "title": "Safe update",
@@ -485,7 +494,8 @@
       "securityTrigger": "Started automatically by Verploy because of a known security vulnerability.",
       "queueAhead": "Waiting for {count, plural, one {# other update} other {# other updates}} that started earlier. Verploy runs a few at a time; this one starts as soon as there’s room.",
       "queueNext": "Starting within a few seconds.",
-      "queueRetry": "Verploy will try again at {time}."
+      "queueRetry": "Verploy will try again at {time}.",
+      "outcome": "Outcome"
     },
     "events": {
       "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",
@@ -517,7 +527,47 @@
       "verdict_cancelled": "Done: cancelled.",
       "done": "Done.",
       "queued_security": "{count, plural, one {# security update} other {# security updates}} scheduled automatically by Verploy (known vulnerability).",
-      "item_package": "{name}: update file {version} fetched through the live site (its own domain licence)."
+      "item_package": "{name}: update file {version} fetched through the live site (its own domain licence).",
+      "item_isolated": "{name} set aside; the other updates continue.",
+      "item_skipped_dependent": "{name} skipped: depends on {cause}."
+    },
+    "itemOutcome": {
+      "live": "Live",
+      "current": "Already current",
+      "attention": "Needs attention",
+      "skipped_dependent": "Skipped",
+      "held_back": "Not deployed",
+      "rolled_back": "Rolled back",
+      "pending": "In progress"
+    },
+    "summary": {
+      "headlineAll": "{count, plural, one {Update completed safely} other {All # updates completed safely}}",
+      "headlinePartial": "{deployed} of {total} updates completed safely",
+      "headlineBlocked": "Nothing deployed",
+      "headlineRolledBack": "Update rolled back",
+      "headlineError": "Update not completed",
+      "headlineCancelled": "Cancelled",
+      "attention": "{name} needs attention",
+      "live": "Tested and deployed: {names}.",
+      "itemFailed": "{name}: {status}. The live version was not changed.",
+      "skipped": "Skipped because {count, plural, one {it depends} other {they depend}} on a component that failed: {names}.",
+      "batchStopped": "These {count} updates were tested together. Because it cannot be reliably determined which one caused the problem, Verploy deployed nothing.",
+      "crashStopped": "{name} crashed the test copy. After that Verploy could no longer test the other updates reliably on their own, so nothing was deployed.",
+      "liveOk": "Your live site works normally: the post-deploy check passed.",
+      "liveUntouched": "Your live site was not changed.",
+      "liveRestored": "Your live site was restored to its state before the update.",
+      "recommended": "Recommended",
+      "noAction": "No action needed.",
+      "openWpAdmin": "Open WP Admin",
+      "uncleanStopped": "{name} was not updated cleanly on the test copy. Verploy could therefore no longer test the other updates reliably on their own, so nothing was deployed."
+    },
+    "advice": {
+      "licence": "Check the {name} licence in WP Admin. With an active licence Verploy can apply the update safely next time.",
+      "retry": "Downloading {name} failed, usually temporarily. Start the update again later.",
+      "connector": "Update the Verploy Connector on this site to the latest version and start the update again.",
+      "filesystem": "WordPress may not write files on this server. Ask your host to give WordPress write access.",
+      "dependency": "First resolve the component {name} depends on; after that this update can go along.",
+      "review": "See the details below. Update {name} manually if needed and check the site afterwards."
     }
   },
   "diagnosis": {
@@ -960,7 +1010,8 @@
       "runCancelled": "{items}: cancelled",
       "alertOpened": "Alert: {title}",
       "alertResolved": "Resolved: {title}",
-      "auto": "automatic"
+      "auto": "automatic",
+      "runAttention": "{items} needs attention"
     },
     "dur": {
       "d": "{n} d",

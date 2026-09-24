@@ -314,6 +314,10 @@
       "vulnerability_auto": {
         "title": "{count, plural, one {Bekannte Sicherheitslücke} other {# bekannte Sicherheitslücken}}: {items}",
         "body": "Schweregrad: {severity}. Verploy behebt das automatisch und sicher; du hörst von uns, wenn es nicht klappt."
+      },
+      "update_partial": {
+        "title": "Update braucht Aufmerksamkeit: {items}",
+        "body": "{deployed} von {total} Updates wurden getestet und live gesetzt; deine Website funktioniert normal. Nicht aktualisiert: {items}. Deren Live-Version wurde nicht verändert. Öffne das Update für Ursache und empfohlene Maßnahme."
       }
     },
     "sslError": {
@@ -381,7 +385,8 @@
       "blocked": "Gestoppt",
       "rolled_back": "Zurückgesetzt",
       "error": "Fehlgeschlagen",
-      "cancelled": "Abgebrochen"
+      "cancelled": "Abgebrochen",
+      "partial": "Teilweise live"
     },
     "outcome": {
       "deployed": "Alle Updates sind live und die Prüfung nach dem Livegang war erfolgreich.",
@@ -424,7 +429,8 @@
       "not_a_zip": "Update-Datei ist kein gültiges ZIP",
       "store_failed": "Update-Datei konnte nicht gespeichert werden",
       "unsupported_type": "Nicht unterstützt",
-      "connector_outdated": "Verploy-Plugin zu alt für dieses Update (2.3 oder neuer nötig)"
+      "connector_outdated": "Verploy-Plugin zu alt für dieses Update (2.3 oder neuer nötig)",
+      "skipped_dependency": "Übersprungen: hängt von einer fehlgeschlagenen Komponente ab"
     },
     "phpError": {
       "wp_critical_error": "WordPress meldet einen kritischen Fehler",
@@ -456,7 +462,10 @@
         "content": "{page} ({viewport}) zeigt deutlich weniger Inhalt als vorher.",
         "visual": "{page} ({viewport}) sieht zu {percent} % anders aus (zulässig: {limit} %).",
         "login": "Das WordPress-Anmeldeformular funktioniert nicht mehr."
-      }
+      },
+      "partial": "{deployed} von {total} Updates sind live. Nicht aktualisiert: {attention}.",
+      "update_crashed": "{name} hat die Testkopie abstürzen lassen. Dadurch konnte Verploy die übrigen Updates nicht mehr zuverlässig einzeln testen.",
+      "none_updated": "Keines der {count} Updates konnte auf der Testkopie angewendet werden ({attention})."
     },
     "detail": {
       "title": "Sicheres Update",
@@ -485,7 +494,8 @@
       "securityTrigger": "Automatisch von Verploy gestartet wegen einer bekannten Sicherheitslücke.",
       "queueAhead": "Vor diesem {count, plural, one {wartet noch # Update} other {warten noch # Updates}} in der Warteschlange. Verploy führt einige gleichzeitig aus; dieses startet, sobald Platz frei ist.",
       "queueNext": "Startet in wenigen Sekunden.",
-      "queueRetry": "Verploy versucht es um {time} erneut."
+      "queueRetry": "Verploy versucht es um {time} erneut.",
+      "outcome": "Ergebnis"
     },
     "events": {
       "queued": "{count, plural, one {Update eingeplant} other {# Updates eingeplant}}.",
@@ -517,7 +527,47 @@
       "verdict_cancelled": "Fertig: abgebrochen.",
       "done": "Fertig.",
       "queued_security": "{count, plural, one {# Sicherheitsupdate} other {# Sicherheitsupdates}} automatisch von Verploy eingeplant (bekannte Lücke).",
-      "item_package": "{name}: Update-Datei {version} über die Live-Site geholt (Lizenz der eigenen Domain)."
+      "item_package": "{name}: Update-Datei {version} über die Live-Site geholt (Lizenz der eigenen Domain).",
+      "item_isolated": "{name} zurückgestellt; die übrigen Updates laufen weiter.",
+      "item_skipped_dependent": "{name} übersprungen: hängt von {cause} ab."
+    },
+    "itemOutcome": {
+      "live": "Live",
+      "current": "Bereits aktuell",
+      "attention": "Braucht Aufmerksamkeit",
+      "skipped_dependent": "Übersprungen",
+      "held_back": "Nicht live gesetzt",
+      "rolled_back": "Zurückgesetzt",
+      "pending": "Läuft"
+    },
+    "summary": {
+      "headlineAll": "{count, plural, one {Update sicher ausgeführt} other {Alle # Updates sicher ausgeführt}}",
+      "headlinePartial": "{deployed} von {total} Updates sicher ausgeführt",
+      "headlineBlocked": "Nichts live gesetzt",
+      "headlineRolledBack": "Update zurückgesetzt",
+      "headlineError": "Update nicht abgeschlossen",
+      "headlineCancelled": "Abgebrochen",
+      "attention": "{name} braucht Aufmerksamkeit",
+      "live": "Getestet und live gesetzt: {names}.",
+      "itemFailed": "{name}: {status}. Die Live-Version wurde nicht verändert.",
+      "skipped": "Übersprungen, weil {count, plural, one {es von einer Komponente abhängt} other {sie von einer Komponente abhängen}}, die fehlschlug: {names}.",
+      "batchStopped": "Diese {count} Updates wurden zusammen getestet. Da sich nicht zuverlässig feststellen lässt, welches den Fehler verursacht hat, hat Verploy nichts live gesetzt.",
+      "crashStopped": "{name} hat die Testkopie abstürzen lassen. Danach konnte Verploy die übrigen Updates nicht mehr zuverlässig einzeln testen, daher wurde nichts live gesetzt.",
+      "liveOk": "Deine Live-Website funktioniert normal: die Prüfung nach dem Livegang war erfolgreich.",
+      "liveUntouched": "Deine Live-Website wurde nicht verändert.",
+      "liveRestored": "Deine Live-Website wurde auf den Stand vor dem Update zurückgesetzt.",
+      "recommended": "Empfohlen",
+      "noAction": "Du musst nichts tun.",
+      "openWpAdmin": "WP Admin öffnen",
+      "uncleanStopped": "{name} wurde auf der Testkopie nicht sauber aktualisiert. Daher konnte Verploy die übrigen Updates nicht mehr zuverlässig einzeln testen, also wurde nichts live gesetzt."
+    },
+    "advice": {
+      "licence": "Prüfe die Lizenz von {name} in WP Admin. Mit einer aktiven Lizenz kann Verploy das Update beim nächsten Mal sicher ausführen.",
+      "retry": "Der Download von {name} ist fehlgeschlagen, meist nur vorübergehend. Starte das Update später erneut.",
+      "connector": "Aktualisiere den Verploy Connector auf dieser Website auf die neueste Version und starte das Update erneut.",
+      "filesystem": "WordPress darf auf diesem Server keine Dateien schreiben. Bitte deinen Hoster um Schreibrechte für WordPress.",
+      "dependency": "Löse zuerst die Komponente, von der {name} abhängt; danach kann dieses Update mit.",
+      "review": "Sieh dir die Details unten an. Aktualisiere {name} bei Bedarf manuell und prüfe danach die Website."
     }
   },
   "diagnosis": {
@@ -960,7 +1010,8 @@
       "runCancelled": "{items}: abgebrochen",
       "alertOpened": "Meldung: {title}",
       "alertResolved": "Behoben: {title}",
-      "auto": "automatisch"
+      "auto": "automatisch",
+      "runAttention": "{items} braucht Aufmerksamkeit"
     },
     "dur": {
       "d": "{n} T",
