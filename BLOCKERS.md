@@ -50,22 +50,17 @@ Door jou gezet: `CRON_SECRET`, `VERPLOY_ENCRYPTION_KEY` en `NEXT_PUBLIC_APP_URL`
 
 ---
 
-## 3. 🟠 Railway voor de worker — nodig om fase 4 live te zetten
+## 3. ✅ Railway voor de worker — opgelost 24-09
 
-**Waarom:** de worker voert de veilige updates uit (staging, tests, rollback) en neemt het monitoringonderhoud over. Hij is klaar en getest, maar moet ergens 24/7 draaien. Er bestaat nog geen Railway-project.
+Project "dependable-comfort", service `verploy` (EU West, Amsterdam). De service bouwt vanuit de repository met root `/dashboard`, via `RAILWAY_DOCKERFILE_PATH=worker/Dockerfile`, en heeft een healthcheck op `/`. De variabelen zijn gezet: de Supabase-sleutels, `VERPLOY_ENCRYPTION_KEY` (gelijk aan die in Vercel) en `WORDFENCE_API_KEY`.
 
-**Wat je moet doen:**
-1. Maak een account op railway.com (inloggen met GitHub kan) en kies het Hobby-plan ($5/maand).
-2. New Project → Deploy from GitHub repo → `mvdb2006-wq/verploy`. Zet bij Settings: **Root Directory** `dashboard`, **Config file** `worker/railway.json` (die gebruikt `worker/Dockerfile`).
-3. Zet onder *Variables* dezelfde waarden als in Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VERPLOY_ENCRYPTION_KEY` (**exact dezelfde waarde als in Vercel**), `NEXT_PUBLIC_APP_URL=https://app.verploy.com`, `WORDFENCE_API_KEY` (#3b), en straks `RESEND_API_KEY` + `RESEND_FROM` (#5).
+**Nog open (klein):** de Railway GitHub-app is niet geïnstalleerd. Daardoor rolt Railway een nieuwe versie niet vanzelf uit. Tot die tijd zet ik na elke release zelf *Deploy latest commit*. Wil je dat het automatisch gaat: Railway → service → Settings → Source → GitHub-app installeren voor `mvdb2006-wq/verploy`.
 
-Of zeg: *"Je mag Railway instellen."* Dan doe ik stap 2 en 3 zelf in de browser, zodra jij in de browser van de Claude-app bent ingelogd op railway.com.
+**Let op:** de trial van Railway loopt 30 dagen of tot $5. Kies daarna het Hobby-plan ($5/maand), anders stopt de worker.
 
-## 3b. 🟠 Wordfence API-sleutel — voor de controle op bekende lekken
+## 3b. ✅ Wordfence API-sleutel — opgelost 24-09
 
-**Waarom:** de feed met kwetsbaarheden is gratis, maar vraagt een eigen sleutel. Zonder sleutel staat de controle uit en toont Verploy geen lekken.
-
-**Wat je moet doen:** maak een gratis account op wordfence.com. Ga naar Account → **Integrations** en maak een API-sleutel aan (je ziet hem maar één keer). Zet hem in Railway onder *Variables* als `WORDFENCE_API_KEY`. Die sleutel mag ik niet zelf invoeren.
+De sleutel staat in Railway. De eerste pogingen kregen HTTP 429 (limiet). De worker wacht daarna 2 uur en probeert het dan opnieuw. Omdat de sleutel in het chatgesprek heeft gestaan: vernieuw hem eventueel in je Wordfence-account (Integrations) en zet de nieuwe in Railway.
 
 ## 4. 🟠 Publiek bereikbare test-WordPress — voor het controlemoment na fase 4
 
