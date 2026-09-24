@@ -8,6 +8,7 @@ type Admin = SupabaseClient<Database>
 export const WORDFENCE_FEED_URL = 'https://www.wordfence.com/api/intelligence/v3/vulnerabilities/production'
 const REFRESH_EVERY_MS = 4 * 3600_000
 const RETRY_AFTER_ERROR_MS = 15 * 60_000
+const RETRY_AFTER_RATE_LIMIT_MS = 2 * 3600_000
 const BATCH = 500
 
 export interface FeedResult { skipped: boolean; stored: number; seen: number; error?: string }
@@ -33,10 +34,12 @@ export async function refreshFeed(
   const now = opts.now ?? Date.now()
   const { data: state, error: stateErr } = await admin.from('vulnerability_feed_state').select('*').eq('id', 1).single()
   if (stateErr) throw stateErr
-  // Na een geslaagde ronde: elke 4 uur. Na een fout: na 15 minuten opnieuw proberen.
+  // Na een geslaagde ronde: elke 4 uur. Na een fout: na 15 minuten opnieuw proberen (bij 429: na 2 uur).
   const lastOk = state.fetched_at ? Date.parse(state.fetched_at) : 0
   const lastErr = state.last_error_at ? Date.parse(state.last_error_at) : 0
-  const due = lastErr > lastOk ? now - lastErr >= RETRY_AFTER_ERROR_MS : now - lastOk >= REFRESH_EVERY_MS
+  // Bij een limiet van Wordfence (HTTP 429) langer wachten, anders blijft de limiet steeds verlengd.
+  const retryAfter = state.last_error === 'feed_http_429' ? RETRY_AFTER_RATE_LIMIT_MS : RETRY_AFTER_ERROR_MS
+  const due = lastErr > lastOk ? now - lastErr >= retryAfter : now - lastOk >= REFRESH_EVERY_MS
   if (!opts.force && !due) return { skipped: true, stored: 0, seen: 0 }
 
   const since = state.source_updated_max ? Date.parse(state.source_updated_max) : null
