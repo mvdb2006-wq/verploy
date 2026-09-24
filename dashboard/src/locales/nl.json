@@ -317,7 +317,7 @@
       },
       "update_partial": {
         "title": "Update vraagt aandacht: {items}",
-        "body": "{deployed} van {total} updates zijn getest en live gezet; je site werkt normaal. Niet bijgewerkt: {items}. De live versie daarvan is niet gewijzigd. Open de update voor de oorzaak en de aanbevolen actie."
+        "body": "{deployed} van {total} updates zijn getest en live gezet; je site werkt normaal. De live versie van de rest is niet gewijzigd."
       }
     },
     "sslError": {
@@ -973,7 +973,8 @@
         "decision": "Beslissing",
         "problem": "Probleem"
       },
-      "moreSites": "+{count} meer"
+      "moreSites": "+{count} meer",
+      "viewRun": "Update bekijken"
     },
     "security": {
       "title": "Beveiliging",
@@ -1019,5 +1020,29 @@
       "h": "{n} u",
       "m": "{n} min"
     }
+  },
+  "sitesList": {
+    "search": "Zoek op naam, domein of klant",
+    "filterLabel": "Filter sites",
+    "filter": {
+      "all": "Alles",
+      "healthy": "Gezond",
+      "attention": "Aandacht nodig",
+      "offline": "Offline",
+      "updating": "Wordt bijgewerkt",
+      "vulnerable": "Kwetsbaar"
+    },
+    "col": {
+      "site": "Website",
+      "status": "Status",
+      "uptime": "Uptime 30 d",
+      "updates": "Updates",
+      "vulns": "Lekken",
+      "activity": "Laatste update",
+      "actions": "Acties"
+    },
+    "updating": "Wordt bijgewerkt",
+    "noResults": "Geen sites gevonden.",
+    "wpAdminFor": "WP Admin van {site} openen (nieuw tabblad)"
   }
 }

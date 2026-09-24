@@ -183,5 +183,7 @@ test('scenario 5 — één update zonder pakket: apart gezet, afhankelijke overg
   await page.goto('/inbox')
   await expect(page.getByText('Update vraagt aandacht: Verploy Lab — vp-lab-nopkg, Verploy Lab — vp-lab-nopkg-addon')).toBeVisible()
   await expect(page.getByText(/1 van 3 updates zijn getest en live gezet; je site werkt normaal\./)).toBeVisible()
+  await page.getByRole('link', { name: 'Update bekijken' }).click()
+  await expect(page.getByRole('heading', { name: '1 van 3 updates veilig uitgevoerd' })).toBeVisible()
   await expect.poll(async () => (await sentMails()).filter(m => m.to.includes(owner.email) && m.subject.includes('Update vraagt aandacht')).length, { timeout: 30_000 }).toBe(1)
 })

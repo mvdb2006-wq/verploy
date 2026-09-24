@@ -188,3 +188,11 @@ Een run is een organisatorische eenheid; de beoordeling gebeurt per onderdeel (`
 - **Afhankelijke onderdelen:** onderdelen die er (vermoedelijk) van afhangen worden overgeslagen. Dat geldt voor uitbreidingen met dezelfde basisnaam (elementor → elementor-pro), voor namen die de basisnaam bevatten ("Redirection for Contact Form 7"), en voor WooCommerce-extensies. Basis-onderdelen worden eerst toegepast. Bij twijfel slaan we liever te veel over.
 - **Alles stoppen:** bij een crash, een half uitgevoerde update, of gezakte tests na meerdere updates samen, want dan is niet aan te tonen welke update de fout veroorzaakt. De uitleg zegt dan precies waarom.
 - **Later (connector 2.4):** de testkopie opnieuw opbouwen zonder de aangewezen schuldige (uit de diagnose) en de rest opnieuw testen. Dat is nu niet mogelijk zonder nieuw connector-endpoint.
+
+## 24-09 — WP Admin: eerst een gewone link, SSO later
+Per site staat er een duidelijke "WP Admin"-link naar `/wp-admin/`. De gebruiker logt in met zijn eigen WordPress-account. Echte one-click login (SSO) vraagt een nieuwe connectorversie. Die volgt pas als het veilig kan:
+- **Token:** kortlevend (≤ 60 s), eenmalig en HMAC-ondertekend met het site-secret. Het token is alleen geldig voor één site en één WordPress-gebruiker, en gebonden aan de Verploy-gebruiker.
+- **Inlogaccount:** de connector logt in als een beheerder die het bureau per site heeft gekozen. Er worden geen wachtwoorden opgeslagen.
+- **Logboek:** elke login komt in Verploy en op de site, met wie en wanneer.
+- **Rechten:** alleen eigenaren en beheerders van het bureau mogen dit, en het kan per site uit.
+- **Blokkade:** een nieuwe ronde met onafhankelijke review van de token-flow, voordat dit live gaat.

@@ -1,43 +1,48 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Alert } from '@/components/Alert'
-import { StatusBadge } from '@/components/StatusBadge'
-import { SeverityBadge } from '@/components/SeverityBadge'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { agencyIsWritable, canManage, requireAgency, trialDaysLeft } from '@/lib/session'
-import { effectiveStatus, formatRelative } from '@/lib/format'
-import type { MessageKey } from '@/lib/i18n/core'
+import { daysAgoIso, effectiveStatus, formatRelative, requestNow } from '@/lib/format'
+import { SITE_FILTERS, buildSiteRows, type SiteFilter } from '@/lib/sites/list'
+import { SitesTable } from './SitesTable'
 
 export async function generateMetadata() {
   return { title: (await getT())('dashboard.title') }
 }
 
-export default async function SitesPage() {
+/** Alle sites, compact: status, uptime (30 dagen), updates, lekken en de laatste update. Zoeken en filteren in de browser. */
+export default async function SitesPage({ searchParams }: { searchParams: Promise<{ f?: string; q?: string }> }) {
   const session = await requireAgency()
-  const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
-  const { data: sites } = await supabase
-    .from('sites')
-    .select('id, name, url, client_name, client_email, status, connection_status, wp_version, php_version, last_heartbeat_at')
-    .order('name')
-  const { data: updates } = await supabase.from('site_components').select('site_id').eq('update_available', true)
-  const { data: openAlerts } = await supabase.from('alerts').select('site_id, severity').eq('status', 'open').in('severity', ['warning', 'critical'])
-  const worst = new Map<string, { severity: string; count: number }>()
-  for (const a of openAlerts ?? []) {
-    const cur = worst.get(a.site_id)
-    worst.set(a.site_id, { severity: cur?.severity === 'critical' || a.severity === 'critical' ? 'critical' : 'warning', count: (cur?.count ?? 0) + 1 })
-  }
-  const updateCount = new Map<string, number>()
-  for (const u of updates ?? []) updateCount.set(u.site_id, (updateCount.get(u.site_id) ?? 0) + 1)
+  const [t, locale, supabase, sp] = await Promise.all([getT(), getLocale(), createClient(), searchParams])
+  const now = requestNow()
+  const since30 = daysAgoIso(30, now)
+  const [{ data: sites }, { data: updates }, { data: alerts }, { data: vulns }, { data: active }, { data: lastRuns }, { data: offline }] = await Promise.all([
+    supabase.from('sites').select('id, name, url, client_name, status, connection_status, last_heartbeat_at, paired_at').order('name'),
+    supabase.from('site_components').select('site_id').eq('update_available', true),
+    supabase.from('alerts').select('site_id, severity').eq('status', 'open').in('severity', ['warning', 'critical']),
+    supabase.from('site_vulnerabilities').select('site_id, severity').eq('status', 'open'),
+    supabase.from('update_runs').select('site_id').neq('status', 'done'),
+    supabase.from('update_runs').select('id, site_id, verdict, reason_key, finished_at').eq('status', 'done').gte('finished_at', daysAgoIso(90, now))
+      .order('finished_at', { ascending: false }).limit(2000),
+    supabase.from('alerts').select('site_id, opened_at, resolved_at, params').eq('type', 'site_offline').or(`resolved_at.is.null,resolved_at.gte.${since30}`),
+  ])
+  const list = (sites ?? []).map(s => ({ ...s, effective: effectiveStatus(s, now) }))
+  const rows = buildSiteRows(list, {
+    updates: updates ?? [], alerts: alerts ?? [], vulns: vulns ?? [],
+    activeRunSites: new Set((active ?? []).map(r => r.site_id)), lastRuns: lastRuns ?? [],
+    offline: (offline ?? []).map(a => ({ site_id: a.site_id, opened_at: a.opened_at, resolved_at: a.resolved_at, since: (a.params as { since?: string } | null)?.since ?? null })),
+  }, now).map(r => ({ ...r, lastRunAgo: r.lastRun ? formatRelative(r.lastRun.at, locale, now) : null }))
 
-  const list = (sites ?? []).map(s => ({ ...s, effective: effectiveStatus(s) }))
   const online = list.filter(s => s.effective === 'online').length
   const writable = agencyIsWritable(session.agency)
   const trialDays = trialDaysLeft(session.agency)
+  const initialFilter = (SITE_FILTERS as string[]).includes(sp.f ?? '') ? (sp.f as SiteFilter) : 'all'
 
   return (
     <div className="mx-auto max-w-6xl">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">{t('dashboard.title')}</h1>
           <p className="mt-1 text-sm text-muted">{t('dashboard.summary', { count: list.length, online })}</p>
@@ -59,46 +64,7 @@ export default async function SitesPage() {
           )}
         </section>
       ) : (
-        <div className="overflow-x-auto rounded-(--radius-card) border border-border bg-surface">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-[11px] font-bold tracking-[0.1em] text-subtle uppercase">
-                <th scope="col" className="px-5 py-3">{t('dashboard.colSite')}</th>
-                <th scope="col" className="px-5 py-3">{t('dashboard.colStatus')}</th>
-                <th scope="col" className="px-5 py-3">{t('dashboard.colWordpress')}</th>
-                <th scope="col" className="px-5 py-3">{t('dashboard.colPhp')}</th>
-                <th scope="col" className="px-5 py-3 text-right">{t('dashboard.colLastSeen')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map(s => {
-                const updatesForSite = updateCount.get(s.id) ?? 0
-                return (
-                  <tr key={s.id} className="border-b border-border/60 last:border-0 hover:bg-surface2/60">
-                    <td className="px-5 py-3.5">
-                      <Link href={`/sites/${s.id}`} className="font-semibold hover:text-accent">{s.name}</Link>
-                      <p className="font-mono text-xs text-subtle">{s.url.replace(/^https?:\/\//, '')}</p>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <StatusBadge status={s.effective} label={t(`site.status.${s.effective}` as MessageKey)} />
-                      {worst.get(s.id) && (
-                        <Link href={`/sites/${s.id}`} className="ml-2 align-middle">
-                          <SeverityBadge severity={worst.get(s.id)!.severity} label={`${worst.get(s.id)!.count} · ${t(`alerts.severity.${worst.get(s.id)!.severity}` as MessageKey)}`} />
-                        </Link>
-                      )}
-                      {updatesForSite > 0 && (
-                        <span className="badge badge-muted ml-2">{t('siteDetail.updatesAvailable', { count: updatesForSite })}</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono tabular-nums">{s.wp_version ?? '—'}</td>
-                    <td className="px-5 py-3.5 font-mono tabular-nums">{s.php_version ?? '—'}</td>
-                    <td className="px-5 py-3.5 text-right text-muted tabular-nums">{formatRelative(s.last_heartbeat_at, locale) ?? t('common.never')}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <SitesTable rows={rows} initialFilter={initialFilter} initialQuery={sp.q ?? ''} />
       )}
     </div>
   )

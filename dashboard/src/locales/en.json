@@ -317,7 +317,7 @@
       },
       "update_partial": {
         "title": "Update needs attention: {items}",
-        "body": "{deployed} of {total} updates were tested and deployed; your site works normally. Not updated: {items}. Its live version was not changed. Open the update for the cause and the recommended action."
+        "body": "{deployed} of {total} updates were tested and deployed; your site works normally. The live version of the rest was not changed."
       }
     },
     "sslError": {
@@ -973,7 +973,8 @@
         "decision": "Decision",
         "problem": "Problem"
       },
-      "moreSites": "+{count} more"
+      "moreSites": "+{count} more",
+      "viewRun": "View update"
     },
     "security": {
       "title": "Security",
@@ -1019,5 +1020,29 @@
       "h": "{n} h",
       "m": "{n} min"
     }
+  },
+  "sitesList": {
+    "search": "Search by name, domain or client",
+    "filterLabel": "Filter sites",
+    "filter": {
+      "all": "All",
+      "healthy": "Healthy",
+      "attention": "Needs attention",
+      "offline": "Offline",
+      "updating": "Updating",
+      "vulnerable": "Vulnerable"
+    },
+    "col": {
+      "site": "Website",
+      "status": "Status",
+      "uptime": "Uptime 30 d",
+      "updates": "Updates",
+      "vulns": "Vulnerabilities",
+      "activity": "Last update",
+      "actions": "Actions"
+    },
+    "updating": "Updating",
+    "noResults": "No sites found.",
+    "wpAdminFor": "Open WP Admin of {site} (new tab)"
   }
 }

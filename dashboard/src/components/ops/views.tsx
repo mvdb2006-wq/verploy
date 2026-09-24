@@ -31,6 +31,7 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
         if (item.kind === 'alert') {
           const a = item.alert
           const { title, body } = presentAlert(t, locale, a)
+          const runId = a.type.startsWith('update_') ? (a.params as { run_id?: string } | null)?.run_id : undefined
           return (
             <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
               <Severity t={t} severity={item.severity} />
@@ -40,10 +41,13 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
                 <p className="mt-0.5 text-sm text-muted">{body}</p>
                 <p className="mt-1 text-xs text-subtle">{t('ops.inbox.kind.problem')} · {waiting}</p>
               </div>
-              <form action={acknowledgeAlert}>
-                <input type="hidden" name="id" value={a.id} />
-                <button type="submit" className="btn btn-ghost px-3 py-1.5 text-xs">{t('alerts.acknowledge')}</button>
-              </form>
+              <div className="flex flex-wrap items-center gap-2">
+                {runId && <Link href={`/sites/${a.site_id}/runs/${runId}`} className="btn btn-primary px-3 py-1.5 text-xs">{t('ops.inbox.viewRun')}</Link>}
+                <form action={acknowledgeAlert}>
+                  <input type="hidden" name="id" value={a.id} />
+                  <button type="submit" className="btn btn-ghost px-3 py-1.5 text-xs">{t('alerts.acknowledge')}</button>
+                </form>
+              </div>
             </li>
           )
         }

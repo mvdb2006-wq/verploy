@@ -97,7 +97,8 @@ async function loadOperationsUncached(supabase: Db, agency: { security_autofix: 
       items: ((r.items as unknown as RunItem[]) ?? []).filter(i => r.verdict !== 'deployed' || productionOk(i)).map(i => i.name),
       attention: ((r.items as unknown as RunItem[]) ?? []).filter(i => i.staging && !stagingOk(i)).map(i => i.name),
     })),
-    ...(recentAlertsQ.data ?? []).flatMap(a => {
+    // Meldingen over updates staan al als de update zelf in de tijdlijn: niet dubbel tonen.
+    ...(recentAlertsQ.data ?? []).filter(a => !a.type.startsWith('update_')).flatMap(a => {
       const lite: AlertLite = { ...a, siteName: siteNames.get(a.site_id) ?? '—' }
       const out: ActivityEntry[] = []
       if (a.opened_at >= since24h) out.push({ kind: 'alert_opened', at: a.opened_at, siteId: a.site_id, siteName: lite.siteName, alert: lite })

@@ -100,8 +100,24 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await expect(wp.locator('.notice-error')).toContainText('ongeldig, verlopen of al gebruikt')
 
     await page.goto('/sites')
-    await expect(page.getByRole('link', { name: 'Test-WordPress' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Test-WordPress', exact: true })).toBeVisible()
     await expect(page.getByText('1 site · 1 online')).toBeVisible()
+    // Direct zoeken (zonder knop), filters met aantallen, en WP Admin per site.
+    const search = page.getByRole('searchbox', { name: 'Zoek op naam, domein of klant' })
+    await search.fill('bestaat-niet')
+    await expect(page.getByText('Geen sites gevonden.')).toBeVisible()
+    await expect(page).toHaveURL(/\?q=bestaat-niet$/)
+    await search.fill('127.0.0.1')                                   // op domein
+    await expect(page.getByRole('link', { name: 'Test-WordPress', exact: true })).toBeVisible()
+    await search.fill('')
+    await page.getByRole('button', { name: 'Offline 0' }).click()
+    await expect(page.getByText('Geen sites gevonden.')).toBeVisible()
+    await page.getByRole('button', { name: /^Alles 1$/ }).click()
+    await expect(page.getByRole('link', { name: 'WP Admin van Test-WordPress openen (nieuw tabblad)' })).toHaveAttribute('href', `${WP}/wp-admin/`)
+    await page.getByRole('button', { name: /^Aandacht nodig 1$/ }).click()   // http-site: melding "geen HTTPS"
+    await page.reload()                                              // filter blijft na herladen/terug
+    await expect(page.getByRole('button', { name: /^Aandacht nodig 1$/ })).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('link', { name: 'Test-WordPress', exact: true })).toBeVisible()
   })
 
   test('teamlid uitnodigen: collega accepteert via link en ziet dezelfde sites', async ({ page }) => {
@@ -123,7 +139,7 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await page.getByRole('button', { name: 'Uitnodiging accepteren' }).click()
     await expect(page.getByRole('heading', { name: 'Overzicht', level: 1 })).toBeVisible()
     await page.goto('/sites')
-    await expect(page.getByRole('link', { name: 'Test-WordPress' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Test-WordPress', exact: true })).toBeVisible()
     // Een lid mag niets beheren
     await expect(page.getByRole('link', { name: 'Site toevoegen' })).toHaveCount(0)
     await signOut(page)

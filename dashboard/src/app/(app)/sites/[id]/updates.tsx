@@ -39,7 +39,7 @@ export function UpdatesPanel({ siteId, components, canRun, activeRunId, blockedR
   const runnable = canRun && !activeRunId && !blockedReason && available.length > 0
 
   return (
-    <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="components-title">
+    <section id="updates" className="scroll-mt-6 rounded-(--radius-card) border border-border bg-surface" aria-labelledby="components-title">
       <form action={action}>
         <input type="hidden" name="site_id" value={siteId} />
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">

@@ -41,7 +41,7 @@ describe('presentAlert', () => {
       reason_key: 'run.reason.partial', reason_params: { deployed: 14, total: 15, attention: ['WPBakery Page Builder'] } } })
     expect(r.title).toBe('Update vraagt aandacht: WPBakery Page Builder')
     expect(r.body).toContain('14 van 15 updates zijn getest en live gezet; je site werkt normaal.')
-    expect(r.body).toContain('De live versie daarvan is niet gewijzigd.')
+    expect(r.body).toContain('De live versie van de rest is niet gewijzigd.')
   })
   it('elk type heeft een titel in elke taal (geen ruwe sleutels)', () => {
     for (const locale of ['nl', 'en', 'de', 'fr', 'es'] as const) {

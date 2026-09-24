@@ -498,3 +498,13 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
   - de aanbevolen actie, met een knop naar WP Admin.
 - Migratie `20261002000000` past alleen `record_run_outcome` aan: de melding "Update vraagt aandacht" noemt alleen de betrokken onderdelen.
 - Tests: E2E scenario 5 (lab-plugins zonder pakket, een afhankelijke add-on en een onafhankelijke plugin) en een engine-test (een mislukte update laat de oude versie staan).
+
+## 21. Sites-pagina en inbox (24-09-2026)
+- **Sites:** een compacte tabel met website, domein, klant, status, uptime over 30 dagen, updates, lekken, laatste update en een link naar WP Admin.
+  - Zoeken werkt direct, op naam, domein en klant.
+  - Er zijn zes filters met aantallen: Alles, Gezond, Aandacht nodig, Offline, Wordt bijgewerkt, Kwetsbaar.
+  - Filter en zoekterm staan in de URL.
+  - Technische details (PHP, connector) staan één niveau dieper, op de sitepagina.
+- **Uptime:** berekend met dezelfde functie als in de rapporten (offline-meldingen). Er is geen migratie nodig.
+- **Inbox:** de website staat altijd bovenaan. Lekken in hetzelfde onderdeel zijn samengevoegd tot één handeling. Bij updatemeldingen staat een knop "Update bekijken".
+- **Tijdlijn "Afgelopen 24 uur":** een update wordt niet meer dubbel getoond (de update én de melding erover).

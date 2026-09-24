@@ -55,7 +55,7 @@ export function SecurityPanel({ siteId, findings, checkedAt, runnable, activeRun
   const serious = findings.some(f => f.severity === 'high' || f.severity === 'critical')
 
   return (
-    <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="security-title">
+    <section id="security" className="scroll-mt-6 rounded-(--radius-card) border border-border bg-surface" aria-labelledby="security-title">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div className="min-w-0">
           <h2 id="security-title" className="flex items-center gap-2 font-bold">

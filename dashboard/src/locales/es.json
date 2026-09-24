@@ -317,7 +317,7 @@
       },
       "update_partial": {
         "title": "Actualización requiere atención: {items}",
-        "body": "{deployed} de {total} actualizaciones se probaron y publicaron; tu sitio funciona con normalidad. Sin actualizar: {items}. Su versión publicada no se ha modificado. Abre la actualización para ver la causa y la acción recomendada."
+        "body": "{deployed} de {total} actualizaciones se probaron y publicaron; tu sitio funciona con normalidad. La versión publicada del resto no se ha modificado."
       }
     },
     "sslError": {
@@ -973,7 +973,8 @@
         "decision": "Decisión",
         "problem": "Problema"
       },
-      "moreSites": "+{count} más"
+      "moreSites": "+{count} más",
+      "viewRun": "Ver actualización"
     },
     "security": {
       "title": "Seguridad",
@@ -1019,5 +1020,29 @@
       "h": "{n} h",
       "m": "{n} min"
     }
+  },
+  "sitesList": {
+    "search": "Buscar por nombre, dominio o cliente",
+    "filterLabel": "Filtrar sitios",
+    "filter": {
+      "all": "Todos",
+      "healthy": "Sanos",
+      "attention": "Requieren atención",
+      "offline": "Sin conexión",
+      "updating": "Actualizándose",
+      "vulnerable": "Vulnerables"
+    },
+    "col": {
+      "site": "Sitio web",
+      "status": "Estado",
+      "uptime": "Disponibilidad 30 d",
+      "updates": "Actualizaciones",
+      "vulns": "Vulnerabilidades",
+      "activity": "Última actualización",
+      "actions": "Acciones"
+    },
+    "updating": "Actualizándose",
+    "noResults": "No se encontraron sitios.",
+    "wpAdminFor": "Abrir WP Admin de {site} (pestaña nueva)"
   }
 }

@@ -317,7 +317,7 @@
       },
       "update_partial": {
         "title": "Mise à jour à vérifier : {items}",
-        "body": "{deployed} mises à jour sur {total} ont été testées et mises en ligne ; votre site fonctionne normalement. Non mises à jour : {items}. Leur version en ligne n’a pas été modifiée. Ouvrez la mise à jour pour la cause et l’action recommandée."
+        "body": "{deployed} mises à jour sur {total} ont été testées et mises en ligne ; votre site fonctionne normalement. La version en ligne des autres n’a pas été modifiée."
       }
     },
     "sslError": {
@@ -973,7 +973,8 @@
         "decision": "Décision",
         "problem": "Problème"
       },
-      "moreSites": "+{count} autres"
+      "moreSites": "+{count} autres",
+      "viewRun": "Voir la mise à jour"
     },
     "security": {
       "title": "Sécurité",
@@ -1019,5 +1020,29 @@
       "h": "{n} h",
       "m": "{n} min"
     }
+  },
+  "sitesList": {
+    "search": "Rechercher par nom, domaine ou client",
+    "filterLabel": "Filtrer les sites",
+    "filter": {
+      "all": "Tous",
+      "healthy": "En bonne santé",
+      "attention": "À vérifier",
+      "offline": "Hors ligne",
+      "updating": "Mise à jour en cours",
+      "vulnerable": "Vulnérables"
+    },
+    "col": {
+      "site": "Site web",
+      "status": "Statut",
+      "uptime": "Disponibilité 30 j",
+      "updates": "Mises à jour",
+      "vulns": "Failles",
+      "activity": "Dernière mise à jour",
+      "actions": "Actions"
+    },
+    "updating": "Mise à jour en cours",
+    "noResults": "Aucun site trouvé.",
+    "wpAdminFor": "Ouvrir WP Admin de {site} (nouvel onglet)"
   }
 }
