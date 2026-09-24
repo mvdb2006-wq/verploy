@@ -59,7 +59,15 @@ async function loadOperationsUncached(supabase: Db, agency: { security_autofix: 
 
   const sites = (sitesQ.data ?? []).map(s => ({ ...s, effective: effectiveStatus(s, now) }))
   const siteNames = new Map(sites.map(s => [s.id, s.name]))
-  const findings = (findingsQ.data ?? []) as FindingRow[]
+  const rawFindings = (findingsQ.data ?? []) as FindingRow[]
+
+  // Versie van de aangeboden update per oplosbaar onderdeel (dat is wat de veilige update installeert).
+  const fixableSites = [...new Set(rawFindings.filter(f => f.fixable).map(f => f.site_id))]
+  const { data: offered } = fixableSites.length
+    ? await supabase.from('site_components').select('site_id, type, slug, latest_version').in('site_id', fixableSites).eq('update_available', true)
+    : { data: [] as Array<{ site_id: string; type: string; slug: string; latest_version: string | null }> }
+  const offeredBy = new Map((offered ?? []).map(c => [`${c.site_id}:${c.type}:${c.slug}`, c.latest_version]))
+  const findings = rawFindings.map(f => ({ ...f, update_to: offeredBy.get(`${f.site_id}:${f.component_type}:${f.component_slug}`) ?? null }))
 
   const vulnIds = [...new Set(findings.map(f => f.vulnerability_id))]
   const autofixRunIds = [...new Set(findings.map(f => f.autofix_run_id).filter((x): x is string => Boolean(x)))]

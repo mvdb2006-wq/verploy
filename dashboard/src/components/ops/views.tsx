@@ -56,7 +56,7 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
         const vars = { component: g.component, title: g.title }
         const sitesFor = (state: SiteState) => uniqueSites(g.sites.filter(s => s.state === state))
         const relevant = item.kind === 'approve' ? sitesFor('awaiting') : item.kind === 'blocked_fix' ? sitesFor('blocked') : item.kind === 'manual' ? sitesFor('manual') : sitesFor('no_fix')
-        const fixed = relevant.map(s => s.fixed).find(Boolean) ?? ''
+        const fixed = relevant.map(s => s.target).find(Boolean) ?? ''
         return (
           <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
             <Severity t={t} severity={item.severity} />
@@ -146,7 +146,7 @@ export function VulnGroupCard({ g, t, now, compact = false }: { g: VulnGroup; t:
             <li key={`${s.siteId}:${s.slug}`} className="flex flex-wrap items-baseline justify-between gap-x-3">
               <span className="min-w-0 [overflow-wrap:anywhere]"><Link href={`/sites/${s.siteId}`} className="font-medium hover:text-accent">{s.siteName}</Link> <span className="text-subtle">· {s.component}</span></span>
               <span className="font-mono text-xs text-subtle">
-                {s.installed}{s.fixed ? ` → ${s.fixed}` : ''} · {t(`ops.state.${s.state}` as MessageKey)}
+                {s.installed}{s.target ? ` → ${s.target}` : ''} · {t(`ops.state.${s.state}` as MessageKey)}
                 {s.runId && (s.state === 'blocked' || s.state === 'fixing') && <> · <Link href={`/sites/${s.siteId}/runs/${s.runId}`} className="hover:text-text">{t('runs.panel.view')}</Link></>}
               </span>
             </li>

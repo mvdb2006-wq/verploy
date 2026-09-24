@@ -847,6 +847,7 @@
     "autofixOff": "Verploy won’t fix anything without your approval. Click “Fix safely”: tested on a staging copy first, then deployed.",
     "changeSetting": "Change setting",
     "fixedIn": "fixed in {version}",
+    "safeUpdateTo": "safe update to {version}",
     "noFix": "no fix yet",
     "noFixAdvice": "There is no version without this vulnerability yet. Consider deactivating or replacing the plugin until a fix is released.",
     "fixNotOffered": "Version {version} fixes this, but WordPress isn’t offering that update yet. Verploy will check again at the next scan.",

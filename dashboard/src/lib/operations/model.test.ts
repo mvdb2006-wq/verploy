@@ -50,6 +50,14 @@ describe('groupFindings', () => {
     expect(groups[0]!.sites).toHaveLength(3)   // detail per onderdeel blijft zichtbaar
     expect(inboxItems(groups, [])[0]).toMatchObject({ kind: 'approve', siteIds: ['s1', 's2'] })
   })
+
+  it('doelversie: de aangeboden update als het lek oplosbaar is, anders de versie waarin het is opgelost', () => {
+    const [g] = groupFindings([
+      f({ fixed_version: null, update_to: '3.7.0' }),
+      f({ site_id: 's2', fixable: false, fixed_version: '3.6.6', update_to: '3.7.0' }),
+    ], new Map(), new Map([['s1', 'Alfa'], ['s2', 'Beta']]), base)
+    expect(g!.sites.map(s => [s.siteName, s.target, s.state])).toEqual([['Alfa', '3.7.0', 'awaiting'], ['Beta', '3.6.6', 'manual']])
+  })
 })
 
 describe('inboxItems', () => {

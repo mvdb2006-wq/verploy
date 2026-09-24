@@ -847,6 +847,7 @@
     "autofixOff": "Verploy ne corrige rien sans votre accord. Cliquez sur « Corriger en sécurité » : testé d’abord sur une copie de test, puis mis en ligne.",
     "changeSetting": "Modifier le réglage",
     "fixedIn": "corrigée en {version}",
+    "safeUpdateTo": "mise à jour sûre vers {version}",
     "noFix": "pas encore de correctif",
     "noFixAdvice": "Aucune version sans cette vulnérabilité n’existe encore. Envisagez de désactiver ou de remplacer l’extension en attendant un correctif.",
     "fixNotOffered": "La version {version} corrige ce problème, mais WordPress ne propose pas encore cette mise à jour. Verploy vérifiera à nouveau au prochain contrôle.",

@@ -41,7 +41,7 @@ test('lek gevonden: melding, uitleg met bron, en de oplossing staat klaar — zo
   const security = page.getByRole('region', { name: 'Beveiliging' })
   await expect.poll(async () => { await page.reload(); return security.getByText('1 bekend lek in 1 onderdeel').isVisible() }, { timeout: 60_000 }).toBe(true)
   await expect(security.getByText('Verploy Lab — vp-lab-footer', { exact: true })).toBeVisible()
-  await expect(security.getByText(/1\.0\.0 · opgelost in 1\.1\.0/)).toBeVisible()
+  await expect(security.getByText(/1\.0\.0 · veilige update naar 1\.1\.0/)).toBeVisible()
   await expect(security.getByText('Ernstig', { exact: true })).toBeVisible()
   await expect(security.getByRole('link', { name: /Unauthenticated Stored Cross-Site Scripting/ })).toHaveAttribute('href', 'https://www.wordfence.com/threat-intel/vulnerabilities/id/e2e-1')
   await expect(security.getByText('CVE-2026-99001 · CVSS 7.2')).toBeVisible()

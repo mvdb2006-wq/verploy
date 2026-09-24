@@ -847,6 +847,7 @@
     "autofixOff": "Verploy lost niets op zonder jouw toestemming. Klik op “Veilig oplossen”: eerst getest op een testkopie, pas daarna live.",
     "changeSetting": "Instelling wijzigen",
     "fixedIn": "opgelost in {version}",
+    "safeUpdateTo": "veilige update naar {version}",
     "noFix": "nog geen oplossing",
     "noFixAdvice": "Er is nog geen versie zonder dit lek. Overweeg de plugin uit te schakelen of te vervangen tot er een oplossing is.",
     "fixNotOffered": "Versie {version} lost dit op, maar WordPress biedt die update nog niet aan. Verploy kijkt bij de volgende controle opnieuw.",

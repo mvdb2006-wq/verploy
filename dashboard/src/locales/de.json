@@ -847,6 +847,7 @@
     "autofixOff": "Verploy behebt nichts ohne deine Zustimmung. Klicke auf „Sicher beheben“: zuerst auf einer Testkopie getestet, erst dann live.",
     "changeSetting": "Einstellung ändern",
     "fixedIn": "behoben in {version}",
+    "safeUpdateTo": "sicheres Update auf {version}",
     "noFix": "noch keine Lösung",
     "noFixAdvice": "Es gibt noch keine Version ohne diese Lücke. Deaktiviere oder ersetze das Plugin am besten, bis eine Lösung erscheint.",
     "fixNotOffered": "Version {version} behebt das, aber WordPress bietet dieses Update noch nicht an. Verploy prüft bei der nächsten Kontrolle erneut.",

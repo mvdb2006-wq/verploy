@@ -17,6 +17,8 @@ export interface FindingRow {
   component_slug: string
   component_name: string
   installed_version: string
+  /** Versie van de aangeboden (veilige) update, alleen bij oplosbaar; wat Verploy daadwerkelijk installeert. */
+  update_to?: string | null
   fixed_version: string | null
   fixable: boolean
   severity: string
@@ -44,6 +46,8 @@ export interface GroupSite {
   component: string
   installed: string
   fixed: string | null
+  /** Doelversie van de veilige update (aangeboden versie), of anders de versie waarin het lek is opgelost. */
+  target: string | null
   state: SiteState
   firstSeen: string
   runId: string | null
@@ -106,7 +110,7 @@ export function groupFindings(
     const state = siteState(f, opts)
     g.sites.push({
       siteId: f.site_id, siteName: siteNames.get(f.site_id) ?? '—', type: f.component_type, slug: f.component_slug,
-      component: f.component_name, installed: f.installed_version, fixed: f.fixed_version, state, firstSeen: f.first_seen_at,
+      component: f.component_name, installed: f.installed_version, fixed: f.fixed_version, target: (f.fixable ? f.update_to : null) ?? f.fixed_version, state, firstSeen: f.first_seen_at,
       runId: f.autofix_run_id,
     })
     if (f.first_seen_at < g.firstSeen) g.firstSeen = f.first_seen_at

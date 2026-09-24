@@ -58,6 +58,7 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
     return {
       vulnerabilityId: v.vulnerability_id, type: v.component_type, slug: v.component_slug, name: v.component_name,
       installed: v.installed_version, fixed: v.fixed_version, fixable: v.fixable,
+      updateTo: v.fixable ? (components ?? []).find(c => c.type === v.component_type && c.slug === v.component_slug && c.update_available)?.latest_version ?? null : null,
       severity: v.severity as SecurityFinding['severity'], title: d?.title ?? v.vulnerability_id,
       cve: d?.cve ?? null, cvss: d?.cvss_score ?? null, url: d?.reference_url ?? null, mitre: d?.mitre ?? false,
       autofixRun: r ? { id: r.id, ...runBadge(t, r) } : null,

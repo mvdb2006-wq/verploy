@@ -19,6 +19,8 @@ export interface SecurityFinding {
   installed: string
   fixed: string | null
   fixable: boolean
+  /** Versie van de aangeboden update (alleen als die het lek oplost). */
+  updateTo: string | null
   severity: 'low' | 'medium' | 'high' | 'critical'
   title: string
   cve: string | null
@@ -103,7 +105,7 @@ export function SecurityPanel({ siteId, findings, checkedAt, runnable, activeRun
                     <p className="text-sm font-semibold">{first.name}</p>
                     <p className="font-mono text-xs text-subtle">
                       {t(`siteDetail.type.${first.type}` as MessageKey)} · {first.installed}
-                      {fixedIn ? ` · ${t('security.fixedIn', { version: fixedIn })}` : ` · ${t('security.noFix')}`}
+                      {fix?.updateTo ? ` · ${t('security.safeUpdateTo', { version: fix.updateTo })}` : fixedIn ? ` · ${t('security.fixedIn', { version: fixedIn })}` : ` · ${t('security.noFix')}`}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
