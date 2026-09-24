@@ -887,7 +887,7 @@
       "security": "Vulnérabilités ouvertes",
       "securitySub": "{count, plural, =0 {aucun site touché} one {sur # site} other {sur # sites}}",
       "healthy": "Sites en bonne santé",
-      "healthySub": "{offline} hors ligne · {pending} non connectés"
+      "healthySub": "{attention} avec points ouverts · {offline} hors ligne · {pending} non connectés"
     },
     "running": {
       "title": "En cours",

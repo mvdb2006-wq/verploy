@@ -38,6 +38,16 @@ describe('groupFindings', () => {
     expect(v1).toMatchObject({ title: 'XSS', cve: 'CVE-1', firstSeen: '2026-09-24T09:00:00Z', counts: { awaiting: 2 } })
     expect(v1.sites.map(s => s.siteName)).toEqual(['Alfa', 'Beta'])
   })
+  it('één lek in thema én plugin op dezelfde site telt als één site (en één knop-site)', () => {
+    const groups = groupFindings([
+      f({ vulnerability_id: 'v9', component_type: 'theme', component_slug: 'Avada', component_name: 'Avada' }),
+      f({ vulnerability_id: 'v9', component_type: 'plugin', component_slug: 'fusion-builder/fusion-builder.php', component_name: 'Avada Builder' }),
+      f({ vulnerability_id: 'v9', site_id: 's2' }),
+    ], new Map(), new Map([['s1', 'Alfa'], ['s2', 'Beta']]), base)
+    expect(groups[0]).toMatchObject({ siteCount: 2, counts: { awaiting: 2 } })
+    expect(groups[0]!.sites).toHaveLength(3)   // detail per onderdeel blijft zichtbaar
+    expect(inboxItems(groups, [])[0]).toMatchObject({ kind: 'approve', siteIds: ['s1', 's2'] })
+  })
 })
 
 describe('inboxItems', () => {
@@ -77,6 +87,6 @@ describe('hulpjes', () => {
   })
   it('portfolioHealth: gezond = online en zonder open melding', () => {
     expect(portfolioHealth([{ id: 'a', effective: 'online' }, { id: 'b', effective: 'online' }, { id: 'c', effective: 'offline' }, { id: 'd', effective: 'pending' }], new Set(['b'])))
-      .toEqual({ total: 4, healthy: 1, offline: 1, pending: 1 })
+      .toEqual({ total: 4, healthy: 1, attention: 1, offline: 1, pending: 1 })
   })
 })

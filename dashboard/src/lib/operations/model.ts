@@ -58,7 +58,10 @@ export interface VulnGroup {
   component: string
   firstSeen: string
   sites: GroupSite[]
+  /** Aantal getroffen sites per status (een site met thema én plugin telt één keer). */
   counts: Record<SiteState, number>
+  /** Aantal verschillende getroffen sites. */
+  siteCount: number
 }
 
 const EMPTY_COUNTS = (): Record<SiteState, number> => ({ fixing: 0, awaiting: 0, scheduled: 0, blocked: 0, fixable: 0, no_fix: 0 })
@@ -75,6 +78,12 @@ export function siteState(f: FindingRow, opts: { autofix: boolean; activeRunSite
 }
 
 /** Open bevindingen gegroepeerd per kwetsbaarheid (ernstigste eerst, dan het langst open). */
+/** Eén regel per site (de eerste), voor tellingen, namen en knoppen. */
+export function uniqueSites<T extends { siteId: string }>(entries: T[]): T[] {
+  const seen = new Set<string>()
+  return entries.filter(e => (seen.has(e.siteId) ? false : (seen.add(e.siteId), true)))
+}
+
 export function groupFindings(
   findings: FindingRow[],
   details: Map<string, VulnDetail>,
@@ -89,7 +98,7 @@ export function groupFindings(
       g = {
         id: f.vulnerability_id, title: d?.title ?? f.vulnerability_id, severity: f.severity as Severity,
         cve: d?.cve ?? null, cvss: d?.cvss_score ?? null, url: d?.reference_url ?? null,
-        component: f.component_name, firstSeen: f.first_seen_at, sites: [], counts: EMPTY_COUNTS(),
+        component: f.component_name, firstSeen: f.first_seen_at, sites: [], counts: EMPTY_COUNTS(), siteCount: 0,
       }
       groups.set(f.vulnerability_id, g)
     }
@@ -99,12 +108,15 @@ export function groupFindings(
       component: f.component_name, installed: f.installed_version, fixed: f.fixed_version, state, firstSeen: f.first_seen_at,
       runId: f.autofix_run_id,
     })
-    g.counts[state]++
     if (f.first_seen_at < g.firstSeen) g.firstSeen = f.first_seen_at
     if (SEVERITY_RANK[f.severity as Severity] > SEVERITY_RANK[g.severity]) g.severity = f.severity as Severity
   }
+  for (const g of groups.values()) {
+    for (const e of uniqueSites(g.sites.map(e => ({ ...e, siteId: `${e.state}:${e.siteId}` })))) g.counts[e.state]++
+    g.siteCount = uniqueSites(g.sites).length
+  }
   return [...groups.values()]
-    .map(g => ({ ...g, sites: g.sites.sort((a, b) => a.siteName.localeCompare(b.siteName)) }))
+    .map(g => ({ ...g, sites: g.sites.sort((a, b) => a.siteName.localeCompare(b.siteName) || a.slug.localeCompare(b.slug)) }))
     .sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || a.firstSeen.localeCompare(b.firstSeen))
 }
 
@@ -125,7 +137,7 @@ export function inboxItems(groups: VulnGroup[], alerts: AlertLite[]): InboxItem[
     if (!isSerious(g.severity)) continue
     const awaiting = g.sites.filter(s => s.state === 'awaiting')
     if (awaiting.length) {
-      items.push({ kind: 'approve', key: `approve:${g.id}`, severity: g.severity, since: minIso(awaiting.map(s => s.firstSeen)), group: g, siteIds: awaiting.map(s => s.siteId) })
+      items.push({ kind: 'approve', key: `approve:${g.id}`, severity: g.severity, since: minIso(awaiting.map(s => s.firstSeen)), group: g, siteIds: uniqueSites(awaiting).map(s => s.siteId) })
     }
     const blocked = g.sites.filter(s => s.state === 'blocked')
     if (blocked.length) items.push({ kind: 'blocked_fix', key: `blocked:${g.id}`, severity: g.severity, since: minIso(blocked.map(s => s.firstSeen)), group: g })
@@ -175,5 +187,6 @@ export function portfolioHealth(sites: { id: string; effective: string }[], atte
   const offline = sites.filter(s => s.effective === 'offline').length
   const pending = sites.filter(s => s.effective === 'pending').length
   const healthy = sites.filter(s => s.effective === 'online' && !attentionSiteIds.has(s.id)).length
-  return { total, healthy, offline, pending }
+  const attention = sites.filter(s => s.effective === 'online' && attentionSiteIds.has(s.id)).length
+  return { total, healthy, attention, offline, pending }
 }

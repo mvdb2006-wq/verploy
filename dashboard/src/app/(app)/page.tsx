@@ -39,7 +39,7 @@ export default async function OverviewPage() {
     { key: 'running', label: t('ops.tiles.running'), value: String(active.length), sub: active.length ? t('ops.tiles.runningSub', { queued: active.filter(r => r.status === 'queued').length }) : t('ops.tiles.runningIdle'), href: '#running', icon: ActivityIcon, tone: active.length ? 'active' : 'muted' },
     { key: 'inbox', label: t('ops.tiles.inbox'), value: String(inbox.length), sub: inbox.length ? t('ops.tiles.inboxSub', { count: inbox.filter(i => i.kind === 'approve').length }) : t('ops.tiles.inboxEmpty'), href: '/inbox', icon: Inbox, tone: inbox.length ? 'warn' : 'ok' },
     { key: 'security', label: t('ops.tiles.security'), value: String(ops.exposure.openSerious), sub: t('ops.tiles.securitySub', { count: ops.exposure.exposedSites }), href: '/security', icon: ops.exposure.openSerious ? ShieldAlert : ShieldCheck, tone: ops.exposure.openSerious ? 'danger' : 'ok' },
-    { key: 'healthy', label: t('ops.tiles.healthy'), value: `${health.healthy} / ${health.total}`, sub: t('ops.tiles.healthySub', { offline: health.offline, pending: health.pending }), href: '/sites', icon: ShieldCheck, tone: health.offline ? 'danger' : 'ok' },
+    { key: 'healthy', label: t('ops.tiles.healthy'), value: `${health.healthy} / ${health.total}`, sub: t('ops.tiles.healthySub', { attention: health.attention, offline: health.offline, pending: health.pending }), href: '/sites', icon: ShieldCheck, tone: health.offline ? 'danger' : 'ok' },
   ] as const
 
   return (

@@ -887,7 +887,7 @@
       "security": "Offene Lücken",
       "securitySub": "{count, plural, =0 {keine Sites betroffen} one {auf # Site} other {auf # Sites}}",
       "healthy": "Gesunde Sites",
-      "healthySub": "{offline} offline · {pending} nicht verbunden"
+      "healthySub": "{attention} mit offenen Punkten · {offline} offline · {pending} nicht verbunden"
     },
     "running": {
       "title": "Läuft gerade",

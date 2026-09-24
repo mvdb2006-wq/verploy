@@ -887,7 +887,7 @@
       "security": "Open lekken",
       "securitySub": "{count, plural, =0 {geen sites geraakt} one {op # site} other {op # sites}}",
       "healthy": "Gezonde sites",
-      "healthySub": "{offline} offline · {pending} niet gekoppeld"
+      "healthySub": "{attention} met open punt · {offline} offline · {pending} niet gekoppeld"
     },
     "running": {
       "title": "Nu bezig",

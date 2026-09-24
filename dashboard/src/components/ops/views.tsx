@@ -5,7 +5,7 @@ import { formatTime } from '@/lib/format'
 import { presentAlert } from '@/lib/monitoring/present'
 import { runBadge } from '@/lib/runs'
 import type { Locale, MessageKey, Translate } from '@/lib/i18n/core'
-import { formatDuration, runProgress, type InboxItem, type SiteState, type VulnGroup } from '@/lib/operations/model'
+import { formatDuration, runProgress, uniqueSites, type InboxItem, type SiteState, type VulnGroup } from '@/lib/operations/model'
 import type { ActiveRun, ActivityEntry } from '@/lib/operations/load'
 import { acknowledgeAlert } from '@/app/(app)/alerts/actions'
 import { FixButton } from './FixButton'
@@ -54,7 +54,7 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
         }
         const g = item.group
         const vars = { component: g.component, title: g.title }
-        const sitesFor = (state: SiteState) => g.sites.filter(s => s.state === state)
+        const sitesFor = (state: SiteState) => uniqueSites(g.sites.filter(s => s.state === state))
         const relevant = item.kind === 'approve' ? sitesFor('awaiting') : item.kind === 'blocked_fix' ? sitesFor('blocked') : sitesFor('no_fix')
         const fixed = relevant.map(s => s.fixed).find(Boolean) ?? ''
         return (
@@ -115,7 +115,7 @@ export function ActiveRuns({ runs, t }: { runs: ActiveRun[]; t: Translate }) {
 
 /** Eén kwetsbaarheid over alle sites, met status per site en blootstelling. */
 export function VulnGroupCard({ g, t, now, compact = false }: { g: VulnGroup; t: Translate; now: number; compact?: boolean }) {
-  const awaiting = g.sites.filter(s => s.state === 'awaiting' || s.state === 'fixable')
+  const awaiting = uniqueSites(g.sites.filter(s => s.state === 'awaiting' || s.state === 'fixable'))
   const states = (Object.entries(g.counts) as Array<[SiteState, number]>).filter(([, n]) => n > 0)
   return (
     <article id={`v-${g.id}`} className="scroll-mt-6 space-y-3 px-5 py-4">
@@ -131,7 +131,7 @@ export function VulnGroupCard({ g, t, now, compact = false }: { g: VulnGroup; t:
             </a>
           ) : <p className="mt-1 text-sm text-muted [overflow-wrap:anywhere]">{g.title}</p>}
           <p className="mt-1 font-mono text-xs text-subtle">
-            {[g.cve, g.cvss !== null ? `CVSS ${g.cvss.toFixed(1)}` : null, t('ops.security.affected', { count: g.sites.length }), t('ops.security.exposure', { time: formatDuration(now - Date.parse(g.firstSeen), t) })].filter(Boolean).join(' · ')}
+            {[g.cve, g.cvss !== null ? `CVSS ${g.cvss.toFixed(1)}` : null, t('ops.security.affected', { count: g.siteCount }), t('ops.security.exposure', { time: formatDuration(now - Date.parse(g.firstSeen), t) })].filter(Boolean).join(' · ')}
           </p>
         </div>
         {!compact && awaiting.length > 0 && <FixButton vulnerabilityId={g.id} siteIds={awaiting.map(s => s.siteId)} variant="ghost" />}
@@ -143,7 +143,7 @@ export function VulnGroupCard({ g, t, now, compact = false }: { g: VulnGroup; t:
         <ul className="space-y-1 text-sm">
           {g.sites.map(s => (
             <li key={`${s.siteId}:${s.slug}`} className="flex flex-wrap items-baseline justify-between gap-x-3">
-              <Link href={`/sites/${s.siteId}`} className="font-medium hover:text-accent">{s.siteName}</Link>
+              <span className="min-w-0 [overflow-wrap:anywhere]"><Link href={`/sites/${s.siteId}`} className="font-medium hover:text-accent">{s.siteName}</Link> <span className="text-subtle">· {s.component}</span></span>
               <span className="font-mono text-xs text-subtle">
                 {s.installed}{s.fixed ? ` → ${s.fixed}` : ''} · {t(`ops.state.${s.state}` as MessageKey)}
                 {s.runId && (s.state === 'blocked' || s.state === 'fixing') && <> · <Link href={`/sites/${s.siteId}/runs/${s.runId}`} className="hover:text-text">{t('runs.panel.view')}</Link></>}

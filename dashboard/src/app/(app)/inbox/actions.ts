@@ -22,10 +22,13 @@ export async function fixVulnerability(_: FixState, form: FormData): Promise<Fix
     .select('site_id, component_type, component_slug')
     .eq('vulnerability_id', vulnerabilityId).eq('status', 'open').eq('fixable', true)
   const targets = (findings ?? []).filter(f => onlySites.length === 0 || onlySites.includes(f.site_id))
+  // Eén veilige update per site, met alle getroffen onderdelen (bijv. thema én plugin met hetzelfde lek).
+  const perSite = new Map<string, Array<{ type: string; slug: string }>>()
+  for (const f of targets) perSite.set(f.site_id, [...(perSite.get(f.site_id) ?? []), { type: f.component_type, slug: f.component_slug }])
   let started = 0
   let failed = 0
-  for (const f of targets) {
-    const { error } = await supabase.rpc('create_update_run', { p_site: f.site_id, p_items: [{ type: f.component_type, slug: f.component_slug }] })
+  for (const [site, items] of perSite) {
+    const { error } = await supabase.rpc('create_update_run', { p_site: site, p_items: items })
     if (error) failed++
     else started++
   }
