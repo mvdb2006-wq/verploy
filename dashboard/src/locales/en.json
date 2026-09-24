@@ -958,21 +958,22 @@
       "viewDiagnosis": "View diagnosis",
       "openTab": "Open",
       "resolvedTab": "Handled (30 days)",
-      "approveTitle": "{component}: fix ready",
-      "approveBody": "{title}. Safe update to {version} for {count, plural, one {# site} other {# sites}}: {sites}.",
+      "approveTitle": "{component}: safe update to {version}",
+      "approveBody": "Fixes {count, plural, one {# known vulnerability} other {# known vulnerabilities}}. Verploy tests the update on a copy of the site first.",
       "approveButton": "Fix safely on {count, plural, one {# site} other {# sites}}",
       "blockedTitle": "{component}: automatic fix held back",
-      "blockedBody": "{title}. The safe update didn’t go through on {count, plural, one {# site} other {# sites}}: {sites}.",
+      "blockedBody": "The safe update did not go through. The live site was not changed.",
       "noFixTitle": "{component}: no fix yet",
-      "noFixBody": "{title}. There is no version without this vulnerability yet ({count, plural, one {# site} other {# sites}}: {sites}). Consider deactivating or replacing the plugin.",
-      "manualTitle": "{component}: update to {version} (not offered by WordPress)",
-      "manualBody": "{title}. Fixed in {version}, but WordPress does not offer this update ({count, plural, one {# site} other {# sites}}: {sites}). Usually a licence is missing or the component updates outside WordPress. Activate the licence so Verploy can update it safely, or update it via the vendor.",
+      "noFixBody": "{count, plural, one {# known vulnerability} other {# known vulnerabilities}} without a version that fixes it. Consider deactivating or replacing the plugin.",
+      "manualTitle": "{component}: update manually to {version}",
+      "manualBody": "Fixes {count, plural, one {# known vulnerability} other {# known vulnerabilities}}. WordPress does not offer this update, usually because a licence is missing. Activate the licence and Verploy will update it safely.",
       "started": "{count, plural, one {# safe update started} other {# safe updates started}}.",
       "startFailed": "{count, plural, one {# site couldn’t start} other {# sites couldn’t start}}: an update is already running, or the site isn’t connected.",
       "kind": {
         "decision": "Decision",
         "problem": "Problem"
-      }
+      },
+      "moreSites": "+{count} more"
     },
     "security": {
       "title": "Security",

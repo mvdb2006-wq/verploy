@@ -1,5 +1,6 @@
 import type { MessageKey, Translate } from '@/lib/i18n/core'
 import { RUN_STEPS } from '@/lib/runs'
+import { compareVersions } from '@/lib/vulnerabilities/version'
 
 /**
  * Het "bedrijfsbeeld" van een bureau voor Overzicht, Inbox en Beveiliging: pure functies,
@@ -125,33 +126,56 @@ export function groupFindings(
     .sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || a.firstSeen.localeCompare(b.firstSeen))
 }
 
+/**
+ * Eén lek-punt in de inbox: één onderdeel met dezelfde vervolgactie, over alle sites heen. Drie lekken in
+ * Avada Builder op dezelfde site zijn één handeling (bijwerken), dus één punt — niet drie.
+ */
+export interface VulnInboxItem {
+  kind: 'approve' | 'manual' | 'no_fix' | 'blocked_fix'
+  key: string
+  severity: Severity
+  since: string
+  component: string
+  componentType: string
+  componentSlug: string
+  sites: Array<{ siteId: string; siteName: string; runId: string | null }>
+  /** Aantal verschillende lekken dat deze actie oplost (of dat open blijft). */
+  vulnCount: number
+  vulnIds: string[]
+  /** Doelversie (hoogste van de betrokken lekken), bij bijwerken. */
+  target: string | null
+}
+
 /** Punten in de inbox: beslissingen (lekken) en problemen (meldingen), ernstigste en oudste eerst. */
-export type InboxItem =
-  | { kind: 'approve'; key: string; severity: Severity; since: string; group: VulnGroup; siteIds: string[] }
-  | { kind: 'no_fix'; key: string; severity: Severity; since: string; group: VulnGroup }
-  | { kind: 'manual'; key: string; severity: Severity; since: string; group: VulnGroup }
-  | { kind: 'blocked_fix'; key: string; severity: Severity; since: string; group: VulnGroup }
-  | { kind: 'alert'; key: string; severity: Severity; since: string; alert: AlertLite }
+export type InboxItem = VulnInboxItem | { kind: 'alert'; key: string; severity: Severity; since: string; alert: AlertLite }
 
 export interface AlertLite { id: string; type: string; severity: string; params: unknown; opened_at: string; site_id: string; siteName: string; acknowledged_at: string | null }
 
 const alertSeverity = (s: string): Severity => (s === 'critical' ? 'critical' : s === 'warning' ? 'high' : 'low')
+const KIND: Partial<Record<SiteState, VulnInboxItem['kind']>> = { awaiting: 'approve', manual: 'manual', no_fix: 'no_fix', blocked: 'blocked_fix' }
 
 export function inboxItems(groups: VulnGroup[], alerts: AlertLite[]): InboxItem[] {
-  const items: InboxItem[] = []
+  const byAction = new Map<string, VulnInboxItem>()
   for (const g of groups) {
     if (!isSerious(g.severity)) continue
-    const awaiting = g.sites.filter(s => s.state === 'awaiting')
-    if (awaiting.length) {
-      items.push({ kind: 'approve', key: `approve:${g.id}`, severity: g.severity, since: minIso(awaiting.map(s => s.firstSeen)), group: g, siteIds: uniqueSites(awaiting).map(s => s.siteId) })
+    for (const e of g.sites) {
+      const kind = KIND[e.state]
+      if (!kind) continue
+      const key = `${kind}:${e.type}:${e.slug}`
+      let item = byAction.get(key)
+      if (!item) {
+        item = { kind, key, severity: g.severity, since: e.firstSeen, component: e.component, componentType: e.type, componentSlug: e.slug,
+          sites: [], vulnCount: 0, vulnIds: [], target: null }
+        byAction.set(key, item)
+      }
+      if (!item.sites.some(s => s.siteId === e.siteId)) item.sites.push({ siteId: e.siteId, siteName: e.siteName, runId: e.runId })
+      if (!item.vulnIds.includes(g.id)) { item.vulnIds.push(g.id); item.vulnCount++ }
+      if (SEVERITY_RANK[g.severity] > SEVERITY_RANK[item.severity]) item.severity = g.severity
+      if (e.firstSeen < item.since) item.since = e.firstSeen
+      if (e.target && (!item.target || compareVersions(e.target, item.target) > 0)) item.target = e.target
     }
-    const blocked = g.sites.filter(s => s.state === 'blocked')
-    if (blocked.length) items.push({ kind: 'blocked_fix', key: `blocked:${g.id}`, severity: g.severity, since: minIso(blocked.map(s => s.firstSeen)), group: g })
-    const noFix = g.sites.filter(s => s.state === 'no_fix')
-    if (noFix.length) items.push({ kind: 'no_fix', key: `nofix:${g.id}`, severity: g.severity, since: minIso(noFix.map(s => s.firstSeen)), group: g })
-    const manual = g.sites.filter(s => s.state === 'manual')
-    if (manual.length) items.push({ kind: 'manual', key: `manual:${g.id}`, severity: g.severity, since: minIso(manual.map(s => s.firstSeen)), group: g })
   }
+  const items: InboxItem[] = [...byAction.values()].map(i => ({ ...i, sites: i.sites.sort((a, b) => a.siteName.localeCompare(b.siteName)) }))
   // Lekken staan al hierboven, per kwetsbaarheid; bevestigde meldingen tellen niet meer mee.
   for (const a of alerts) {
     if (a.type === 'vulnerability' || a.acknowledged_at || a.severity === 'info') continue
@@ -160,7 +184,6 @@ export function inboxItems(groups: VulnGroup[], alerts: AlertLite[]): InboxItem[
   return items.sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || a.since.localeCompare(b.since))
 }
 
-const minIso = (xs: string[]) => xs.reduce((m, x) => (x < m ? x : m))
 
 /** Voortgang van een run: stap n van m (0..1). */
 export function runProgress(status: string): number {

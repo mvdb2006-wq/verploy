@@ -58,8 +58,9 @@ test('lek gevonden: melding, uitleg met bron, en de oplossing staat klaar — zo
 
   // Inbox: één beslissing per lek, met de knop om het op alle getroffen sites veilig op te lossen.
   await page.goto('/inbox')
-  await expect(page.getByText('Verploy Lab — vp-lab-footer: oplossing klaar')).toBeVisible()
-  await expect(page.getByText(/Veilige update naar 1\.1\.0 voor 1 site: Lab-WordPress/)).toBeVisible()
+  const decision = page.getByRole('listitem').filter({ hasText: 'Verploy Lab — vp-lab-footer: veilige update naar 1.1.0' })
+  await expect(decision.getByRole('link', { name: 'Lab-WordPress' })).toBeVisible()   // de website staat er direct bij
+  await expect(decision.getByText('Lost 1 bekend lek op. Verploy test de update eerst op een kopie van de site.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Veilig oplossen op 1 site' })).toBeVisible()
   // Overzicht: tegels en het lek in het beveiligingsblok.
   await page.goto('/')
@@ -74,6 +75,24 @@ test('lek gevonden: melding, uitleg met bron, en de oplossing staat klaar — zo
   // Een paar evaluatierondes later is er nog steeds geen update gestart.
   await page.waitForTimeout(6_000)
   expect(await runsFor(siteId)).toEqual([])
+
+  // Akkoord vanuit de inbox: één veilige update voor precies dit onderdeel op deze site (daarna geannuleerd).
+  await page.goto('/inbox')
+  await page.getByRole('button', { name: 'Veilig oplossen op 1 site' }).click()
+  // Het punt verdwijnt uit de inbox: Verploy is ermee bezig (zichtbaar onder "Nu bezig").
+  await expect(page.getByText('Verploy Lab — vp-lab-footer: veilige update naar 1.1.0')).toHaveCount(0)
+  await expect.poll(async () => (await runsFor(siteId)).length).toBe(1)
+  const [manual] = await runsFor(siteId)
+  expect(manual).toMatchObject({ trigger: 'manual' })
+  expect(manual!.created_by).not.toBeNull()
+  const c = db(); await c.connect()
+  try {
+    const { rows } = await c.query(`select items->0->>'slug' slug, jsonb_array_length(items) n from public.update_runs where id = $1`, [manual!.id])
+    expect(rows[0]).toEqual({ slug: 'vp-lab-footer/vp-lab-footer.php', n: 1 })
+  } finally { await c.end() }
+  await page.goto(`/sites/${siteId}/runs/${manual!.id}`)
+  await page.getByRole('button', { name: 'Annuleren' }).click()
+  await expect(page.locator('main').getByText('Geannuleerd', { exact: true }).first()).toBeVisible({ timeout: 3 * 60_000 })
 })
 
 test('"direct automatisch oplossen" aan → Verploy start zelf een veilige update, zet hem live en het lek verdwijnt', async ({ page }) => {
@@ -84,8 +103,9 @@ test('"direct automatisch oplossen" aan → Verploy start zelf een veilige updat
   await expect(form.getByText('Opgeslagen.')).toBeVisible()
 
   // De worker start de run zelf (trigger security, geen gebruiker).
-  await expect.poll(async () => (await runsFor(siteId)).length, { timeout: 60_000 }).toBe(1)
-  const [r] = await runsFor(siteId)
+  const securityRuns = async () => (await runsFor(siteId)).filter(x => x.trigger === 'security')
+  await expect.poll(async () => (await securityRuns()).length, { timeout: 60_000 }).toBe(1)
+  const [r] = await securityRuns()
   expect(r).toMatchObject({ trigger: 'security', created_by: null })
 
   await page.goto(`/sites/${siteId}/runs/${r!.id}`)
@@ -97,10 +117,10 @@ test('"direct automatisch oplossen" aan → Verploy start zelf een veilige updat
   const security = page.getByRole('region', { name: 'Beveiliging' })
   await expect.poll(async () => { await page.reload(); return security.getByText('Geen bekende lekken in WordPress, plugins en thema’s.').isVisible() }, { timeout: 60_000 }).toBe(true)
   await page.goto('/inbox')
-  await expect(page.getByText('Verploy Lab — vp-lab-footer: oplossing klaar')).toHaveCount(0)
+  await expect(page.getByText('Verploy Lab — vp-lab-footer: veilige update naar 1.1.0')).toHaveCount(0)
   // Overzicht: de update staat in "Afgelopen 24 uur", met "automatisch".
   await page.goto('/')
   await expect(page.getByText(/Verploy Lab — vp-lab-footer live gezet \(automatisch\)/)).toBeVisible()
   // Er wordt niet nog een keer iets gestart.
-  expect(await runsFor(siteId)).toHaveLength(1)
+  expect(await securityRuns()).toHaveLength(1)
 })

@@ -958,21 +958,22 @@
       "viewDiagnosis": "Diagnose bekijken",
       "openTab": "Open",
       "resolvedTab": "Afgehandeld (30 dagen)",
-      "approveTitle": "{component}: oplossing klaar",
-      "approveBody": "{title}. Veilige update naar {version} voor {count, plural, one {# site} other {# sites}}: {sites}.",
+      "approveTitle": "{component}: veilige update naar {version}",
+      "approveBody": "Lost {count, plural, one {# bekend lek} other {# bekende lekken}} op. Verploy test de update eerst op een kopie van de site.",
       "approveButton": "Veilig oplossen op {count, plural, one {# site} other {# sites}}",
       "blockedTitle": "{component}: automatische oplossing tegengehouden",
-      "blockedBody": "{title}. De veilige update ging niet door op {count, plural, one {# site} other {# sites}}: {sites}.",
+      "blockedBody": "De veilige update ging niet door. De live site is niet gewijzigd.",
       "noFixTitle": "{component}: nog geen oplossing",
-      "noFixBody": "{title}. Er is nog geen versie zonder dit lek ({count, plural, one {# site} other {# sites}}: {sites}). Overweeg de plugin uit te schakelen of te vervangen.",
-      "manualTitle": "{component}: bijwerken naar {version} (niet via WordPress)",
-      "manualBody": "{title}. Opgelost in {version}, maar WordPress biedt deze update niet aan ({count, plural, one {# site} other {# sites}}: {sites}). Meestal ontbreekt een licentie of wordt het onderdeel buiten WordPress om bijgewerkt. Activeer de licentie, dan kan Verploy het veilig updaten, of werk het bij via de maker.",
+      "noFixBody": "{count, plural, one {# bekend lek} other {# bekende lekken}} zonder versie die het oplost. Overweeg de plugin uit te schakelen of te vervangen.",
+      "manualTitle": "{component}: handmatig bijwerken naar {version}",
+      "manualBody": "Lost {count, plural, one {# bekend lek} other {# bekende lekken}} op. WordPress biedt deze update niet aan, meestal omdat een licentie ontbreekt. Activeer de licentie, dan werkt Verploy het veilig bij.",
       "started": "{count, plural, one {# veilige update gestart} other {# veilige updates gestart}}.",
       "startFailed": "{count, plural, one {# site kon niet starten} other {# sites konden niet starten}}: er loopt al een update, of de site is niet gekoppeld.",
       "kind": {
         "decision": "Beslissing",
         "problem": "Probleem"
-      }
+      },
+      "moreSites": "+{count} meer"
     },
     "security": {
       "title": "Beveiliging",

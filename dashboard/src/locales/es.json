@@ -958,21 +958,22 @@
       "viewDiagnosis": "Ver diagnóstico",
       "openTab": "Abiertos",
       "resolvedTab": "Resueltos (30 días)",
-      "approveTitle": "{component}: corrección lista",
-      "approveBody": "{title}. Actualización segura a {version} para {count, plural, one {# sitio} other {# sitios}}: {sites}.",
+      "approveTitle": "{component}: actualización segura a {version}",
+      "approveBody": "Corrige {count, plural, one {# vulnerabilidad conocida} other {# vulnerabilidades conocidas}}. Verploy prueba primero la actualización en una copia del sitio.",
       "approveButton": "Corregir de forma segura en {count, plural, one {# sitio} other {# sitios}}",
-      "blockedTitle": "{component}: corrección automática retenida",
-      "blockedBody": "{title}. La actualización segura no se completó en {count, plural, one {# sitio} other {# sitios}}: {sites}.",
+      "blockedTitle": "{component}: corrección automática detenida",
+      "blockedBody": "La actualización segura no se completó. El sitio publicado no se ha modificado.",
       "noFixTitle": "{component}: aún sin corrección",
-      "noFixBody": "{title}. Aún no hay una versión sin esta vulnerabilidad ({count, plural, one {# sitio} other {# sitios}}: {sites}). Considera desactivar o sustituir el plugin.",
-      "manualTitle": "{component}: actualizar a {version} (WordPress no la ofrece)",
-      "manualBody": "{title}. Corregido en {version}, pero WordPress no ofrece esta actualización ({count, plural, one {# sitio} other {# sitios}}: {sites}). Normalmente falta una licencia o el componente se actualiza fuera de WordPress. Activa la licencia para que Verploy pueda actualizarlo de forma segura, o actualízalo a través del fabricante.",
+      "noFixBody": "{count, plural, one {# vulnerabilidad conocida} other {# vulnerabilidades conocidas}} sin versión que la corrija. Considera desactivar o sustituir el plugin.",
+      "manualTitle": "{component}: actualizar manualmente a {version}",
+      "manualBody": "Corrige {count, plural, one {# vulnerabilidad conocida} other {# vulnerabilidades conocidas}}. WordPress no ofrece esta actualización, normalmente porque falta una licencia. Activa la licencia y Verploy lo actualizará de forma segura.",
       "started": "{count, plural, one {# actualización segura iniciada} other {# actualizaciones seguras iniciadas}}.",
       "startFailed": "{count, plural, one {# sitio no pudo empezar} other {# sitios no pudieron empezar}}: ya hay una actualización en curso o el sitio no está conectado.",
       "kind": {
         "decision": "Decisión",
         "problem": "Problema"
-      }
+      },
+      "moreSites": "+{count} más"
     },
     "security": {
       "title": "Seguridad",

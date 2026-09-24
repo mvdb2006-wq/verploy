@@ -48,7 +48,10 @@ describe('groupFindings', () => {
     ], new Map(), new Map([['s1', 'Alfa'], ['s2', 'Beta']]), base)
     expect(groups[0]).toMatchObject({ siteCount: 2, counts: { awaiting: 2 } })
     expect(groups[0]!.sites).toHaveLength(3)   // detail per onderdeel blijft zichtbaar
-    expect(inboxItems(groups, [])[0]).toMatchObject({ kind: 'approve', siteIds: ['s1', 's2'] })
+    // thema en plugin zijn twee handelingen; per handeling de sites
+    const items = inboxItems(groups, [])
+    expect(items.map(i => i.kind === 'alert' ? '' : `${i.component}@${i.sites.map(x => x.siteName).join('+')}`).sort())
+      .toEqual(['Avada Builder@Alfa', 'Avada@Alfa', 'Yoast SEO@Beta'])
   })
 
   it('doelversie: de aangeboden update als het lek oplosbaar is, anders de versie waarin het is opgelost', () => {
@@ -68,8 +71,19 @@ describe('inboxItems', () => {
       f({ vulnerability_id: 'v4', fixable: false, fixed_version: '26.0' }),
     ], new Map(), new Map([['s1', 'Alfa']]), base)
     const items = inboxItems(groups, [alert(), alert({ id: 'a2', acknowledged_at: '2026-09-24T09:00:00Z' }), alert({ id: 'a3', type: 'vulnerability' }), alert({ id: 'a4', severity: 'info' })])
-    expect(items.map(i => i.key)).toEqual(['alert:a1', 'nofix:v2', 'approve:v1', 'manual:v4'])
-    expect(items.find(i => i.kind === 'approve')).toMatchObject({ siteIds: ['s1'] })
+    expect(items.map(i => i.key)).toEqual(['alert:a1', 'no_fix:plugin:yoast/yoast.php', 'approve:plugin:yoast/yoast.php', 'manual:plugin:yoast/yoast.php'])
+    expect(items.find(i => i.kind === 'approve')).toMatchObject({ sites: [{ siteId: 's1', siteName: 'Alfa' }], vulnCount: 1, target: '25.1' })
+  })
+  it('meerdere lekken in hetzelfde onderdeel op dezelfde site(s) = één punt, met de hoogste doelversie en de site(s) erbij', () => {
+    const groups = groupFindings([
+      f({ vulnerability_id: 'a', fixable: false, fixed_version: '3.15.3', severity: 'critical' }),
+      f({ vulnerability_id: 'b', fixable: false, fixed_version: '3.15.5', severity: 'high' }),
+      f({ vulnerability_id: 'c', fixable: false, fixed_version: '3.15.4', severity: 'critical', site_id: 's2' }),
+    ], new Map(), new Map([['s1', 'EM Hosting & Design'], ['s2', 'Beta']]), base)
+    const items = inboxItems(groups, [])
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({ kind: 'manual', severity: 'critical', vulnCount: 3, target: '3.15.5', component: 'Yoast SEO' })
+    expect(items[0]!.kind !== 'alert' && items[0]!.sites.map(x => x.siteName)).toEqual(['Beta', 'EM Hosting & Design'])
   })
   it('met automatisch oplossen aan: geen goedkeuring nodig', () => {
     const groups = groupFindings([f()], new Map(), new Map(), { ...base, autofix: true })

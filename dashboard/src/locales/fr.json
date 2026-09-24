@@ -958,21 +958,22 @@
       "viewDiagnosis": "Voir le diagnostic",
       "openTab": "Ouverts",
       "resolvedTab": "Traités (30 jours)",
-      "approveTitle": "{component} : correctif prêt",
-      "approveBody": "{title}. Mise à jour sécurisée vers {version} pour {count, plural, one {# site} other {# sites}} : {sites}.",
+      "approveTitle": "{component} : mise à jour sûre vers {version}",
+      "approveBody": "Corrige {count, plural, one {# faille connue} other {# failles connues}}. Verploy teste d’abord la mise à jour sur une copie du site.",
       "approveButton": "Corriger en sécurité sur {count, plural, one {# site} other {# sites}}",
-      "blockedTitle": "{component} : correction automatique bloquée",
-      "blockedBody": "{title}. La mise à jour sécurisée n’a pas abouti sur {count, plural, one {# site} other {# sites}} : {sites}.",
+      "blockedTitle": "{component} : correctif automatique bloqué",
+      "blockedBody": "La mise à jour sûre n’a pas abouti. Le site en ligne n’a pas été modifié.",
       "noFixTitle": "{component} : pas encore de correctif",
-      "noFixBody": "{title}. Aucune version sans cette faille n’existe encore ({count, plural, one {# site} other {# sites}} : {sites}). Envisagez de désactiver ou remplacer l’extension.",
-      "manualTitle": "{component} : mettre à jour vers {version} (non proposé par WordPress)",
-      "manualBody": "{title}. Corrigé en {version}, mais WordPress ne propose pas cette mise à jour ({count, plural, one {# site} other {# sites}} : {sites}). Il manque généralement une licence, ou le composant se met à jour en dehors de WordPress. Activez la licence pour que Verploy puisse le mettre à jour en toute sécurité, ou mettez-le à jour via l’éditeur.",
+      "noFixBody": "{count, plural, one {# faille connue} other {# failles connues}} sans version corrective. Envisagez de désactiver ou remplacer l’extension.",
+      "manualTitle": "{component} : mettre à jour manuellement vers {version}",
+      "manualBody": "Corrige {count, plural, one {# faille connue} other {# failles connues}}. WordPress ne propose pas cette mise à jour, généralement faute de licence. Activez la licence et Verploy la mettra à jour en toute sécurité.",
       "started": "{count, plural, one {# mise à jour sécurisée lancée} other {# mises à jour sécurisées lancées}}.",
       "startFailed": "{count, plural, one {# site n’a pas pu démarrer} other {# sites n’ont pas pu démarrer}} : une mise à jour est déjà en cours ou le site n’est pas connecté.",
       "kind": {
         "decision": "Décision",
         "problem": "Problème"
-      }
+      },
+      "moreSites": "+{count} autres"
     },
     "security": {
       "title": "Sécurité",

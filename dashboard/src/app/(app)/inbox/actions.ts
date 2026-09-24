@@ -36,3 +36,30 @@ export async function fixVulnerability(_: FixState, form: FormData): Promise<Fix
   if (started === 0) return { error: t('ops.inbox.startFailed', { count: Math.max(failed, 1) }) }
   return { ok: [t('ops.inbox.started', { count: started }), failed ? t('ops.inbox.startFailed', { count: failed }) : ''].filter(Boolean).join(' ') }
 }
+
+/**
+ * "Veilig oplossen" vanuit de inbox: één onderdeel (type + slug) op de gekozen sites. Alleen sites waar
+ * dat onderdeel nu echt een open, oplosbaar lek heeft (opnieuw bepaald, niet uit het formulier overgenomen).
+ */
+export async function fixComponent(_: FixState, form: FormData): Promise<FixState> {
+  await requireAgency()
+  const t = await getT()
+  const type = String(form.get('component_type') ?? '')
+  const slug = String(form.get('component_slug') ?? '')
+  const onlySites = form.getAll('site_id').map(String).filter(Boolean)
+  if (!type || !slug || !onlySites.length) return { error: t('common.errorGeneric') }
+  const supabase = await createClient()
+  const { data: findings } = await supabase.from('site_vulnerabilities').select('site_id')
+    .eq('component_type', type).eq('component_slug', slug).eq('status', 'open').eq('fixable', true).in('site_id', onlySites)
+  const sites = [...new Set((findings ?? []).map(f => f.site_id))]
+  let started = 0
+  let failed = 0
+  for (const site of sites) {
+    const { error } = await supabase.rpc('create_update_run', { p_site: site, p_items: [{ type, slug }] })
+    if (error) failed++
+    else started++
+  }
+  revalidatePath('/', 'layout')
+  if (started === 0) return { error: t('ops.inbox.startFailed', { count: Math.max(failed, 1) }) }
+  return { ok: [t('ops.inbox.started', { count: started }), failed ? t('ops.inbox.startFailed', { count: failed }) : ''].filter(Boolean).join(' ') }
+}

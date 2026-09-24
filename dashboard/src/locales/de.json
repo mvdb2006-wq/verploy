@@ -958,21 +958,22 @@
       "viewDiagnosis": "Diagnose ansehen",
       "openTab": "Offen",
       "resolvedTab": "Erledigt (30 Tage)",
-      "approveTitle": "{component}: Lösung bereit",
-      "approveBody": "{title}. Sicheres Update auf {version} für {count, plural, one {# Site} other {# Sites}}: {sites}.",
+      "approveTitle": "{component}: sicheres Update auf {version}",
+      "approveBody": "Behebt {count, plural, one {# bekannte Lücke} other {# bekannte Lücken}}. Verploy testet das Update zuerst auf einer Kopie der Website.",
       "approveButton": "Sicher beheben auf {count, plural, one {# Site} other {# Sites}}",
-      "blockedTitle": "{component}: automatische Behebung zurückgehalten",
-      "blockedBody": "{title}. Das sichere Update ging auf {count, plural, one {# Site} other {# Sites}} nicht durch: {sites}.",
+      "blockedTitle": "{component}: automatische Lösung zurückgehalten",
+      "blockedBody": "Das sichere Update wurde nicht ausgeführt. Die Live-Website wurde nicht verändert.",
       "noFixTitle": "{component}: noch keine Lösung",
-      "noFixBody": "{title}. Es gibt noch keine Version ohne diese Lücke ({count, plural, one {# Site} other {# Sites}}: {sites}). Plugin deaktivieren oder ersetzen erwägen.",
-      "manualTitle": "{component}: auf {version} aktualisieren (nicht über WordPress)",
-      "manualBody": "{title}. Behoben in {version}, aber WordPress bietet dieses Update nicht an ({count, plural, one {# Site} other {# Sites}}: {sites}). Meist fehlt eine Lizenz oder die Komponente wird außerhalb von WordPress aktualisiert. Lizenz aktivieren, damit Verploy sicher aktualisieren kann, oder über den Hersteller aktualisieren.",
+      "noFixBody": "{count, plural, one {# bekannte Lücke} other {# bekannte Lücken}} ohne behebende Version. Plugin deaktivieren oder ersetzen erwägen.",
+      "manualTitle": "{component}: manuell auf {version} aktualisieren",
+      "manualBody": "Behebt {count, plural, one {# bekannte Lücke} other {# bekannte Lücken}}. WordPress bietet dieses Update nicht an, meist weil eine Lizenz fehlt. Aktiviere die Lizenz, dann aktualisiert Verploy sicher.",
       "started": "{count, plural, one {# sicheres Update gestartet} other {# sichere Updates gestartet}}.",
       "startFailed": "{count, plural, one {# Site konnte nicht starten} other {# Sites konnten nicht starten}}: Es läuft bereits ein Update oder die Site ist nicht verbunden.",
       "kind": {
         "decision": "Entscheidung",
         "problem": "Problem"
-      }
+      },
+      "moreSites": "+{count} weitere"
     },
     "security": {
       "title": "Sicherheit",

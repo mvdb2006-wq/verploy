@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Globe } from 'lucide-react'
 import { RunBadge } from '@/components/RunBadge'
 import { formatTime } from '@/lib/format'
 import { presentAlert } from '@/lib/monitoring/present'
@@ -21,9 +21,6 @@ export function Severity({ t, severity }: { t: Translate; severity: string }) {
   return <span className={cn('badge shrink-0', SEVERITY_CLASS[severity as keyof typeof SEVERITY_CLASS] ?? 'badge-muted')}>{t(`security.severity.${severity}` as MessageKey)}</span>
 }
 
-const names = (sites: { siteName: string }[], max = 3) =>
-  sites.length <= max ? sites.map(s => s.siteName).join(', ') : `${sites.slice(0, max).map(s => s.siteName).join(', ')} +${sites.length - max}`
-
 /** De inbox: beslissingen en problemen, met hoe lang ze al wachten. */
 export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]; t: Translate; locale: Locale; now: number; limit?: number }) {
   const shown = limit ? items.slice(0, limit) : items
@@ -38,10 +35,8 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
             <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
               <Severity t={t} severity={item.severity} />
               <div className="min-w-0 flex-1 basis-64">
-                <p className="text-sm font-semibold">
-                  <Link href={`/sites/${a.site_id}`} className="hover:text-accent">{a.siteName}</Link>
-                  <span className="text-subtle"> · </span>{title}
-                </p>
+                <SiteNames sites={[{ siteId: a.site_id, siteName: a.siteName }]} t={t} />
+                <p className="mt-0.5 text-sm font-semibold [overflow-wrap:anywhere]">{title}</p>
                 <p className="mt-0.5 text-sm text-muted">{body}</p>
                 <p className="mt-1 text-xs text-subtle">{t('ops.inbox.kind.problem')} · {waiting}</p>
               </div>
@@ -52,37 +47,45 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
             </li>
           )
         }
-        const g = item.group
-        const vars = { component: g.component, title: g.title }
-        const sitesFor = (state: SiteState) => uniqueSites(g.sites.filter(s => s.state === state))
-        const relevant = item.kind === 'approve' ? sitesFor('awaiting') : item.kind === 'blocked_fix' ? sitesFor('blocked') : item.kind === 'manual' ? sitesFor('manual') : sitesFor('no_fix')
-        const fixed = relevant.map(s => s.target).find(Boolean) ?? ''
+        const vars = { component: item.component, version: item.target ?? '', count: item.vulnCount }
+        const title = { approve: 'ops.inbox.approveTitle', manual: 'ops.inbox.manualTitle', no_fix: 'ops.inbox.noFixTitle', blocked_fix: 'ops.inbox.blockedTitle' }[item.kind]
+        const body = { approve: 'ops.inbox.approveBody', manual: 'ops.inbox.manualBody', no_fix: 'ops.inbox.noFixBody', blocked_fix: 'ops.inbox.blockedBody' }[item.kind]
+        const blockedRun = item.kind === 'blocked_fix' ? item.sites.find(s => s.runId) : undefined
         return (
           <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
             <Severity t={t} severity={item.severity} />
             <div className="min-w-0 flex-1 basis-64">
-              <p className="text-sm font-semibold [overflow-wrap:anywhere]">
-                {item.kind === 'approve' ? t('ops.inbox.approveTitle', vars) : item.kind === 'blocked_fix' ? t('ops.inbox.blockedTitle', vars) : item.kind === 'manual' ? t('ops.inbox.manualTitle', { ...vars, version: fixed }) : t('ops.inbox.noFixTitle', vars)}
-              </p>
-              <p className="mt-0.5 text-sm text-muted [overflow-wrap:anywhere]">
-                {item.kind === 'approve' ? t('ops.inbox.approveBody', { ...vars, version: fixed, count: relevant.length, sites: names(relevant) })
-                  : item.kind === 'blocked_fix' ? t('ops.inbox.blockedBody', { ...vars, count: relevant.length, sites: names(relevant) })
-                  : item.kind === 'manual' ? t('ops.inbox.manualBody', { ...vars, version: fixed, count: relevant.length, sites: names(relevant) })
-                  : t('ops.inbox.noFixBody', { ...vars, count: relevant.length, sites: names(relevant) })}
-              </p>
+              <SiteNames sites={item.sites} t={t} />
+              <p className="mt-0.5 text-sm font-semibold [overflow-wrap:anywhere]">{t(title as MessageKey, vars)}</p>
+              <p className="mt-0.5 text-sm text-muted [overflow-wrap:anywhere]">{t(body as MessageKey, vars)}</p>
               <p className="mt-1 text-xs text-subtle">
                 {t(item.kind === 'approve' ? 'ops.inbox.kind.decision' : 'ops.inbox.kind.problem')} · {waiting}
-                {' · '}<Link href={`/security#v-${g.id}`} className="hover:text-text">{t('ops.inbox.details')}</Link>
+                {' · '}<Link href={`/security#v-${item.vulnIds[0]}`} className="hover:text-text">{t('ops.inbox.details')}</Link>
               </p>
             </div>
-            {item.kind === 'approve' && <FixButton vulnerabilityId={g.id} siteIds={item.siteIds} />}
-            {item.kind === 'blocked_fix' && relevant[0]?.runId && (
-              <Link href={`/sites/${relevant[0].siteId}/runs/${relevant[0].runId}`} className="btn btn-ghost px-3 py-1.5 text-xs">{t('ops.inbox.viewDiagnosis')}</Link>
+            {item.kind === 'approve' && <FixButton component={{ type: item.componentType, slug: item.componentSlug }} siteIds={item.sites.map(s => s.siteId)} />}
+            {blockedRun && (
+              <Link href={`/sites/${blockedRun.siteId}/runs/${blockedRun.runId}`} className="btn btn-ghost px-3 py-1.5 text-xs">{t('ops.inbox.viewDiagnosis')}</Link>
             )}
           </li>
         )
       })}
     </ul>
+  )
+}
+
+/** De website(s) waar het om gaat: altijd bovenaan, als link. */
+export function SiteNames({ sites, t, max = 3 }: { sites: Array<{ siteId: string; siteName: string }>; t: Translate; max?: number }) {
+  return (
+    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm font-bold text-text">
+      <Globe size={13} className="shrink-0 text-subtle" aria-hidden />
+      {sites.slice(0, max).map((s, n) => (
+        <span key={s.siteId}>
+          <Link href={`/sites/${s.siteId}`} className="hover:text-accent">{s.siteName}</Link>{n < Math.min(sites.length, max) - 1 ? ',' : ''}
+        </span>
+      ))}
+      {sites.length > max && <span className="font-normal text-muted">{t('ops.inbox.moreSites', { count: sites.length - max })}</span>}
+    </p>
   )
 }
 
@@ -122,6 +125,7 @@ export function VulnGroupCard({ g, t, now, compact = false }: { g: VulnGroup; t:
     <article id={`v-${g.id}`} className="scroll-mt-6 space-y-3 px-5 py-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 basis-64">
+          {compact && <div className="mb-1"><SiteNames sites={uniqueSites(g.sites)} t={t} /></div>}
           <p className="flex flex-wrap items-center gap-2 text-sm font-semibold">
             <Severity t={t} severity={g.severity} />
             <span className="[overflow-wrap:anywhere]">{g.component}</span>
