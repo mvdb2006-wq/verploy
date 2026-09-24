@@ -23,6 +23,11 @@ export function versionAtLeast(version: string | null | undefined, min: readonly
   return true
 }
 
+/** Wacht de run op een nieuwe poging (na een tijdelijke fout)? */
+export function waitingForRetry(run: { status: string; not_before: string }, now = Date.now()): boolean {
+  return run.status !== 'done' && Date.parse(run.not_before) > now
+}
+
 export type Tone = 'ok' | 'warn' | 'danger' | 'muted' | 'active'
 
 /** Label + kleur voor de status of uitkomst van een run. */

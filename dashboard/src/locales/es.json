@@ -469,7 +469,10 @@
       "failed": "Fallida",
       "loginPage": "Página de acceso",
       "timeline": "Cronología",
-      "securityTrigger": "Iniciada automáticamente por Verploy por una vulnerabilidad de seguridad conocida."
+      "securityTrigger": "Iniciada automáticamente por Verploy por una vulnerabilidad de seguridad conocida.",
+      "queueAhead": "Esperando a {count, plural, one {# otra actualización iniciada} other {# otras actualizaciones iniciadas}} antes. Verploy ejecuta varias a la vez; esta empezará en cuanto haya sitio.",
+      "queueNext": "Empieza en unos segundos.",
+      "queueRetry": "Verploy lo volverá a intentar a las {time}."
     },
     "events": {
       "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",

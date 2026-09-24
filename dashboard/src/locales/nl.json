@@ -469,7 +469,10 @@
       "failed": "Gezakt",
       "loginPage": "Inlogpagina",
       "timeline": "Tijdlijn",
-      "securityTrigger": "Automatisch gestart door Verploy vanwege een bekend beveiligingslek."
+      "securityTrigger": "Automatisch gestart door Verploy vanwege een bekend beveiligingslek.",
+      "queueAhead": "Er {count, plural, one {staat nog # update} other {staan nog # updates}} vóór deze in de wachtrij. Verploy voert er een paar tegelijk uit; deze start zodra er plek is.",
+      "queueNext": "Start binnen enkele seconden.",
+      "queueRetry": "Verploy probeert het om {time} opnieuw."
     },
     "events": {
       "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",

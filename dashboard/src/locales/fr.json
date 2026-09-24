@@ -469,7 +469,10 @@
       "failed": "Échoué",
       "loginPage": "Page de connexion",
       "timeline": "Chronologie",
-      "securityTrigger": "Lancée automatiquement par Verploy en raison d’une vulnérabilité connue."
+      "securityTrigger": "Lancée automatiquement par Verploy en raison d’une vulnérabilité connue.",
+      "queueAhead": "En attente de {count, plural, one {# autre mise à jour lancée} other {# autres mises à jour lancées}} plus tôt. Verploy en exécute plusieurs à la fois ; celle-ci démarre dès qu’une place se libère.",
+      "queueNext": "Démarrage dans quelques secondes.",
+      "queueRetry": "Verploy réessaiera à {time}."
     },
     "events": {
       "queued": "{count, plural, one {Mise à jour planifiée} other {# mises à jour planifiées}}.",

@@ -469,7 +469,10 @@
       "failed": "Failed",
       "loginPage": "Login page",
       "timeline": "Timeline",
-      "securityTrigger": "Started automatically by Verploy because of a known security vulnerability."
+      "securityTrigger": "Started automatically by Verploy because of a known security vulnerability.",
+      "queueAhead": "Waiting for {count, plural, one {# other update} other {# other updates}} that started earlier. Verploy runs a few at a time; this one starts as soon as there’s room.",
+      "queueNext": "Starting within a few seconds.",
+      "queueRetry": "Verploy will try again at {time}."
     },
     "events": {
       "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",

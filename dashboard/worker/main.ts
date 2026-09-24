@@ -23,22 +23,26 @@ const POLL_MS = Number(process.env.WORKER_POLL_MS ?? 5000)
 const LEASE_SECONDS = 120
 const MAINTENANCE_EVERY_MS = Number(process.env.WORKER_MAINTENANCE_MS ?? 5 * 60_000)
 const VULN_EVERY_MS = Number(process.env.WORKER_VULN_MS ?? 60_000)
+/** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
+const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
 const log = (msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: WORKER_ID, msg, ...extra }))
 
 let stopping = false
 let browser: Browser | null = null
-let currentRun: string | null = null
+const active = new Map<string, Promise<void>>()   // lopende runs (id → verwerking)
 let lastLoopAt = Date.now()
 
+let launching: Promise<Browser> | null = null
+/** Eén gedeelde Chromium voor alle lopende runs (elke run gebruikt eigen contexten). */
 async function getBrowser(): Promise<Browser> {
   if (browser?.isConnected()) return browser
-  browser = await chromium.launch({
+  launching ??= chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
     args: ['--disable-dev-shm-usage', '--no-sandbox'],
-  })
-  return browser
+  }).then(b => { browser = b; return b }).finally(() => { launching = null })
+  return launching
 }
 
 async function advance(admin: Admin, run: Run, t: Transition) {
@@ -142,14 +146,14 @@ function startHealthServer(port: number) {
   http.createServer((req, res) => {
     const stale = Date.now() - lastLoopAt > 30 * 60_000
     res.writeHead(stale ? 503 : 200, { 'content-type': 'application/json' })
-    res.end(JSON.stringify({ ok: !stale, worker: WORKER_ID, run: currentRun }))
+    res.end(JSON.stringify({ ok: !stale, worker: WORKER_ID, runs: [...active.keys()] }))
   }).listen(port, '0.0.0.0')
 }
 
 async function main() {
   const admin = createAdminClient()
   if (process.env.WORKER_HEALTH_PORT || process.env.PORT) startHealthServer(Number(process.env.WORKER_HEALTH_PORT || process.env.PORT))
-  log('started', { poll_ms: POLL_MS })
+  log('started', { poll_ms: POLL_MS, concurrency: CONCURRENCY })
   const stop = () => { stopping = true; log('stopping') }
   process.on('SIGTERM', stop)
   process.on('SIGINT', stop)
@@ -181,23 +185,29 @@ async function main() {
         else if (data) log('reports_scheduled', { count: data })
       })
     }
-    const { data, error } = await admin.rpc('claim_update_run', { p_worker: WORKER_ID, p_lease_seconds: LEASE_SECONDS })
-    if (error) {
-      log('claim_failed', { error: error.message })
-    } else if (data && data.length) {
-      currentRun = data[0]!.id
-      await processRun(admin, data[0]!).catch(e => log('run_crashed', { error: (e as Error).stack ?? String(e) }))
-      currentRun = null
-      continue
+    // Runs claimen tot het maximum; ze lopen op de achtergrond door terwijl de lus verder gaat.
+    let claimedOne = false
+    while (active.size < CONCURRENCY && !stopping) {
+      const { data, error } = await admin.rpc('claim_update_run', { p_worker: WORKER_ID, p_lease_seconds: LEASE_SECONDS })
+      if (error) { log('claim_failed', { error: error.message }); break }
+      if (!data || !data.length) break
+      const run = data[0]!
+      claimedOne = true
+      active.set(run.id, processRun(admin, run)
+        .catch(e => log('run_crashed', { error: (e as Error).stack ?? String(e) }))
+        .finally(() => { active.delete(run.id) }))
     }
-    // Geen update-run te doen: dan een rapport (updates gaan voor, want die houden een site bezet).
-    const rep = await admin.rpc('claim_report', { p_worker: WORKER_ID, p_lease_seconds: 300 })
-    if (!rep.error && rep.data && rep.data.length) {
-      await processReport(admin, rep.data[0]!, WORKER_ID, log)
-      continue
+    // Geen plek of geen run: dan een rapport, maar alleen als er niets loopt (updates gaan voor).
+    if (!claimedOne && active.size === 0) {
+      const rep = await admin.rpc('claim_report', { p_worker: WORKER_ID, p_lease_seconds: 300 })
+      if (!rep.error && rep.data && rep.data.length) {
+        await processReport(admin, rep.data[0]!, WORKER_ID, log)
+        continue
+      }
     }
     await new Promise(r => setTimeout(r, POLL_MS))
   }
+  await Promise.allSettled(active.values())   // lopende runs geven zichzelf vrij (release) bij stoppen
   await browser?.close().catch(() => undefined)
   await closePdfBrowser()
   log('stopped')

@@ -469,7 +469,10 @@
       "failed": "Nicht bestanden",
       "loginPage": "Anmeldeseite",
       "timeline": "Zeitverlauf",
-      "securityTrigger": "Automatisch von Verploy gestartet wegen einer bekannten Sicherheitslücke."
+      "securityTrigger": "Automatisch von Verploy gestartet wegen einer bekannten Sicherheitslücke.",
+      "queueAhead": "Vor diesem {count, plural, one {wartet noch # Update} other {warten noch # Updates}} in der Warteschlange. Verploy führt einige gleichzeitig aus; dieses startet, sobald Platz frei ist.",
+      "queueNext": "Startet in wenigen Sekunden.",
+      "queueRetry": "Verploy versucht es um {time} erneut."
     },
     "events": {
       "queued": "{count, plural, one {Update eingeplant} other {# Updates eingeplant}}.",

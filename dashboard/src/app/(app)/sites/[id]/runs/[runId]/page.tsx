@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Check, Circle, CircleDashed, LoaderCircle, Stethoscope, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { requireAgency } from '@/lib/session'
 import { formatDate, formatTime } from '@/lib/format'
 import type { Locale, MessageKey, Translate } from '@/lib/i18n/core'
-import { CANCELLABLE, RUN_STEPS, presentReason, runBadge, type RunStep } from '@/lib/runs'
+import { CANCELLABLE, RUN_STEPS, presentReason, runBadge, waitingForRetry, type RunStep } from '@/lib/runs'
 import { RunBadge } from '@/components/RunBadge'
 import { Alert } from '@/components/Alert'
 import { cn } from '@/lib/cn'
@@ -212,6 +213,14 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
     supabase.from('test_results').select('phase, page_key, page_label, page_url, viewport, http_status, passed, checks, screenshot_path, diff_path, diff_ratio').eq('run_id', runId).order('id'),
     supabase.from('diagnoses').select('source, model, summary, cause, fix, culprit_name, confidence, evidence').eq('run_id', runId).maybeSingle(),
   ])
+  // In de wachtrij: hoeveel runs (van alle bureaus) gingen vóór? Alleen het aantal, geen details.
+  let queueAhead = 0
+  if (run.status === 'queued') {
+    const { count } = await createAdminClient().from('update_runs').select('id', { count: 'exact', head: true })
+      .neq('status', 'done').neq('id', run.id).lt('created_at', run.created_at)
+    queueAhead = count ?? 0
+  }
+  const retryWait = waitingForRetry(run)
   const items = run.items as unknown as Item[]
   const badge = runBadge(t, run)
   const done = run.status === 'done'
@@ -250,6 +259,13 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       )}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
+      {run.status === 'queued' && (
+        <p className="rounded-(--radius-card) border border-border bg-surface px-5 py-3 text-sm text-muted" role="status">
+          {retryWait ? t('runs.detail.queueRetry', { time: formatTime(run.not_before, locale) })
+            : queueAhead > 0 ? t('runs.detail.queueAhead', { count: queueAhead })
+            : t('runs.detail.queueNext')}
+        </p>
+      )}
 
       {diagnosis && <DiagnosisCard t={t} d={diagnosis} />}
 
