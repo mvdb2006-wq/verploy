@@ -44,18 +44,9 @@ Met je akkoord in de chat uitgevoerd via de SQL Editor: `ops/prod-upgrade-v2.sql
 
 ---
 
-## 2c. 🟠 Omgevingsvariabelen in Vercel — app draait, maar de onderhouds-cron staat uit
+## 2c. ✅ Omgevingsvariabelen in Vercel — opgelost 24-09
 
-**Waarom:** schrijven naar de geheimenopslag van Vercel is voor mij geblokkeerd door het beleid van deze omgeving. Zonder `CRON_SECRET` geeft `/api/cron/maintenance` 503 (drempels, SSL/domein-controle en e-mails lopen dan niet dagelijks). In Vercel staan ook nog v1-variabelen waarvan ik de (versleutelde) waarde niet kan lezen.
-
-**Wat je moet doen:** Vercel → project verploy → Settings → Environment Variables (Production):
-- **Toevoegen:** `CRON_SECRET` = willekeurige waarde van minstens 32 tekens.
-- **Toevoegen (aanbevolen):** `VERPLOY_ENCRYPTION_KEY` = 32 willekeurige bytes als base64 (bijv. `openssl rand -base64 32`). Doe dit vóór je sites koppelt; daarna niet meer wijzigen.
-- **Controleren:** `NEXT_PUBLIC_APP_URL` = `https://app.verploy.com`.
-- **Verwijderen (v1, niet meer gebruikt):** `STRIPE_PRICE_*` (6×), `RESEND_FROM_EMAIL`, `WORKER_URL`, `WORKER_SECRET`. En `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` als daar oude/testwaarden in staan — v2 gebruikt ze zodra ze gevuld zijn (zie #5 en #7).
-- Daarna: Deployments → laatste → Redeploy.
-
-Of zeg in de chat: *"Je mag de omgevingsvariabelen in Vercel zetten en de v1-variabelen verwijderen."* — dan probeer ik het opnieuw.
+Door jou gezet: `CRON_SECRET`, `VERPLOY_ENCRYPTION_KEY` en `NEXT_PUBLIC_APP_URL` (type Config), en de v1-variabelen verwijderd. Gecontroleerd na de nieuwe deploy: `/api/cron/maintenance` antwoordt 401 zonder geheim (was 503), dus de dagelijkse Vercel Cron draait. Let op: `CRON_SECRET` mag alleen ASCII-tekens bevatten (anders faalt de build). Stripe- en Resend-sleutels komen terug bij #5 en #7.
 
 ---
 
