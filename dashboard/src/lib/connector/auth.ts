@@ -1,7 +1,7 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
-import { decryptSecret } from '@/lib/security/secretbox'
+import { decryptSecret, type KeyMaterial } from '@/lib/security/secretbox'
 import { keyMaterial } from '@/lib/security/keys'
 import { readSignedHeaders, verify } from '@/lib/security/signing'
 
@@ -30,11 +30,9 @@ export async function authenticateSigned(
     .maybeSingle()
   if (!cred?.secret_ciphertext) return { ok: false, reason: 'unknown_site' }
 
-  const km = keyMaterial()
-  const secrets = [decryptSecret(cred.secret_ciphertext, km)]
-  if (cred.previous_secret_ciphertext && cred.previous_valid_until && new Date(cred.previous_valid_until) > new Date()) {
-    secrets.push(decryptSecret(cred.previous_secret_ciphertext, km))
-  }
+  const secrets = usableSecrets({ ...cred, secret_ciphertext: cred.secret_ciphertext }, keyMaterial())
+  // Geen enkel secret te ontsleutelen (bijv. versleuteld met een vervangen sleutel): opnieuw koppelen nodig.
+  if (secrets.length === 0) return { ok: false, reason: 'unknown_site' }
 
   const path = new URL(req.url).pathname
   const result = verify(secrets, h, req.method, path, rawBody)
@@ -46,4 +44,25 @@ export async function authenticateSigned(
     throw error
   }
   return { ok: true, siteId: h.siteId }
+}
+
+/**
+ * De secrets waarmee een handtekening geldig kan zijn: het huidige en, tijdens de overgangsperiode na
+ * opnieuw koppelen, het vorige. Een secret dat niet te ontsleutelen is (versleuteld met een sleutel
+ * die inmiddels is vervangen) telt niet mee; dat mag een geldig nieuw secret niet blokkeren.
+ */
+export function usableSecrets(
+  cred: { secret_ciphertext: string; previous_secret_ciphertext: string | null; previous_valid_until: string | null },
+  km: KeyMaterial,
+  now = Date.now(),
+): string[] {
+  const tryOpen = (box: string) => { try { return decryptSecret(box, km) } catch { return null } }
+  const out: string[] = []
+  const current = tryOpen(cred.secret_ciphertext)
+  if (current !== null) out.push(current)
+  if (cred.previous_secret_ciphertext && cred.previous_valid_until && Date.parse(cred.previous_valid_until) > now) {
+    const previous = tryOpen(cred.previous_secret_ciphertext)
+    if (previous !== null) out.push(previous)
+  }
+  return out
 }
