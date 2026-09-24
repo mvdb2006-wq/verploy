@@ -5,7 +5,8 @@ FROM mcr.microsoft.com/playwright:v1.63.0-noble
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts --no-audit --no-fund
+# NODE_ENV=production zou devDependencies (vite) overslaan; die zijn nodig om te bouwen en worden daarna weggesnoeid.
+RUN npm ci --include=dev --ignore-scripts --no-audit --no-fund
 COPY . .
 RUN npm run worker:build && npm prune --omit=dev --ignore-scripts
 USER pwuser
