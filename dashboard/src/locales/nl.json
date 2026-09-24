@@ -461,7 +461,9 @@
         "landmarks": "{page} ({viewport}): onderdelen van de pagina zijn verdwenen ({missing}).",
         "content": "{page} ({viewport}) toont veel minder inhoud dan ervoor.",
         "visual": "{page} ({viewport}) ziet er {percent}% anders uit (toegestaan: {limit}%).",
-        "login": "Het inlogformulier van WordPress werkt niet meer."
+        "login": "Het inlogformulier van WordPress werkt niet meer.",
+        "form": "Formulier op {page} werkt niet meer na de update: {fnReason}.",
+        "shop": "De webwinkel werkt niet meer na de update: {fnReason}."
       },
       "partial": "{deployed} van {total} updates staan live. Niet bijgewerkt: {attention}.",
       "update_crashed": "{name} liet de testkopie crashen. Daardoor kon Verploy de overige updates niet meer betrouwbaar los testen.",
@@ -529,7 +531,11 @@
       "queued_security": "{count, plural, one {# beveiligingsupdate} other {# beveiligingsupdates}} automatisch ingepland door Verploy (bekend lek).",
       "item_package": "{name}: updatebestand {version} opgehaald via de live site (licentie van het eigen domein).",
       "item_isolated": "{name} apart gezet; de overige updates gaan door.",
-      "item_skipped_dependent": "{name} overgeslagen: hangt af van {cause}."
+      "item_skipped_dependent": "{name} overgeslagen: hangt af van {cause}.",
+      "functional_baseline": "Functionele nulmeting: {ok} van {total} tests werken (formulieren: {forms}, webwinkel: {shop}).",
+      "functional_unsupported": "Formulieren en webwinkel niet getest: werk Verploy Connector bij naar 2.4 of nieuwer.",
+      "functional_passed": "Functionele tests na de update: {ok} van {total} werken, niets is achteruitgegaan.",
+      "functional_failed": "Functionele tests na de update: werkt niet meer: {failed}."
     },
     "itemOutcome": {
       "live": "Live",
@@ -568,6 +574,43 @@
       "filesystem": "WordPress mag op deze server geen bestanden schrijven. Vraag je hostingpartij om schrijfrechten voor WordPress.",
       "dependency": "Los eerst het onderdeel op waarvan {name} afhangt; daarna kan deze update mee.",
       "review": "Bekijk de details hieronder. Werk {name} zo nodig handmatig bij en controleer de site daarna."
+    },
+    "functional": {
+      "title": "Functionele tests op de testkopie",
+      "intro": "Formulieren invullen en versturen, en in de webwinkel een product in de winkelwagen leggen tot en met de afrekenpagina. Vóór en na de update. Er wordt geen e-mail verstuurd, er gaat geen verkeer naar buiten en er wordt niets besteld.",
+      "before": "Vóór",
+      "after": "Na",
+      "kind": {
+        "cf7": "Formulier (Contact Form 7)",
+        "gravity": "Formulier (Gravity Forms)",
+        "wpforms": "Formulier (WPForms)",
+        "shop": "Webwinkel: product → winkelwagen → afrekenen"
+      },
+      "outcome": {
+        "ok": "Werkt",
+        "failed": "Werkt niet",
+        "inconclusive": "Niet vast te stellen",
+        "skipped": "Overgeslagen"
+      },
+      "reason": {
+        "sent": "verstuurd, bevestiging getoond",
+        "redirected": "verstuurd, doorgestuurd naar bedankpagina",
+        "checkout_reached": "afrekenpagina bereikt",
+        "captcha": "beveiligd met een captcha; die omzeilt Verploy niet",
+        "file_required": "vraagt om een bestand",
+        "not_rendered": "het formulier staat niet (meer) op de pagina",
+        "no_submit": "geen verzendknop gevonden",
+        "validation": "de testinzending wordt niet (meer) geaccepteerd",
+        "submit_failed": "versturen mislukt",
+        "no_response": "geen reactie na versturen",
+        "php_error": "PHP-fout na versturen",
+        "page": "de pagina laadt niet",
+        "product_page": "de productpagina laadt niet",
+        "add_to_cart": "het product komt niet in de winkelwagen",
+        "cart": "de winkelwagen laadt niet",
+        "checkout": "de afrekenpagina laadt niet of toont een fout",
+        "js": "nieuwe JavaScript-fouten"
+      }
     }
   },
   "diagnosis": {

@@ -2,7 +2,7 @@ import { PNG } from 'pngjs'
 import pixelmatch from 'pixelmatch'
 import type { Landmark, PageCapture } from './checks'
 
-export type CheckName = 'reachable' | 'http' | 'php_error' | 'js_errors' | 'resources' | 'landmarks' | 'content' | 'visual' | 'login'
+export type CheckName = 'reachable' | 'http' | 'php_error' | 'js_errors' | 'resources' | 'landmarks' | 'content' | 'visual' | 'login' | 'form' | 'shop'
 export interface CheckOutcome { check: CheckName; ok: boolean; detail?: Record<string, string | number | string[]> }
 
 export interface VisualDiff { ratio: number; diffPng: Buffer }
@@ -71,7 +71,7 @@ export function comparePage(before: PageCapture, after: PageCapture, visual: { r
 
 /** Eerste gezakte check, voor de samenvatting ("waarom tegengehouden"). */
 export function firstFailure(outcomes: CheckOutcome[]): CheckOutcome | null {
-  const order: CheckName[] = ['reachable', 'php_error', 'http', 'login', 'landmarks', 'content', 'resources', 'js_errors', 'visual']
+  const order: CheckName[] = ['reachable', 'php_error', 'http', 'login', 'shop', 'form', 'landmarks', 'content', 'resources', 'js_errors', 'visual']
   const failed = outcomes.filter(o => !o.ok)
   failed.sort((a, b) => order.indexOf(a.check) - order.indexOf(b.check))
   return failed[0] ?? null

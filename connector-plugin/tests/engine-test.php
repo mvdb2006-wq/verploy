@@ -36,7 +36,7 @@ function page( $url, array $headers = array() ) {
 	$c = curl_init( $url );
 	curl_setopt_array( $c, array( CURLOPT_HTTPHEADER => $headers, CURLOPT_RETURNTRANSFER => 1, CURLOPT_TIMEOUT => 60 ) );
 	$b = (string) curl_exec( $c );
-	return array( curl_getinfo( $c, CURLINFO_HTTP_CODE ), preg_match( '/footer (v[0-9.]+)/', $b, $m ) ? $m[1] : null );
+	return array( curl_getinfo( $c, CURLINFO_HTTP_CODE ), preg_match( "/footer (v[0-9.]+)/", $b, $m ) ? $m[1] : null, $b );
 }
 function check( $name, $ok, $detail = '' ) {
 	global $fails;
@@ -90,6 +90,16 @@ $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' =
 check( 'onveilige pakketnaam wordt genegeerd (geen pad buiten de pakketmap)', 200 === $r[0] && 'already_current' === $r[1]['status'], json_encode( $r ) );
 $r = call( $base, '/verploy/v2/updates/package', array( 'run_id' => $run, 'item' => array( 'type' => 'plugin', 'slug' => 'vp-lab-licensed/vp-lab-licensed.php', 'to_version' => '9.9.9' ) ) );
 check( 'productie: andere versie dan verwacht → geen pakket', 200 === $r[0] && 'version_changed' === $r[1]['status'], json_encode( $r ) );
+// Functionele tests: doelen opvragen, en tijdens de test geen enkel uitgaand verzoek vanaf de testkopie.
+$r = call( $surl, '/verploy/v2/run/functional', array( 'run_id' => $run ) );
+check( 'staging: functionele doelen (lab heeft geen formulieren of winkel)', 200 === $r[0] && array() === $r[1]['forms'] && null === $r[1]['shop'], json_encode( $r ) );
+$probe = fn( $headers ) => page( $surl . '/?vp_probe=1', array_merge( array( "X-Verploy-Staging: $token" ), $headers ) );
+$p     = $probe( array( 'Cookie: verploy_functional=1' ) );
+check( 'staging + functionele test: uitgaand verkeer geblokkeerd', false !== strpos( $p[2] ?? '', 'probe:verploy_functional_offline' ), json_encode( $p ) );
+$p     = $probe( array() );
+check( 'staging zonder functionele test: niet geblokkeerd door Verploy', 0 === strpos( $p[2] ?? '', 'probe:' ) && false === strpos( $p[2], 'verploy_functional_offline' ), json_encode( $p ) );
+$p     = page( $base . '/?vp_probe=1', array( 'Cookie: verploy_functional=1' ) );
+check( 'productie: de cookie heeft geen effect', false === strpos( $p[2] ?? '', 'verploy_functional_offline' ), json_encode( $p ) );
 // Pakket ontbreekt (404): de update mislukt vóórdat er iets verandert; de oude versie staat er nog en werkt.
 $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-nopkg' ) ) );
 check( 'staging: update zonder pakket mislukt, oude versie blijft staan (basis voor "fail isolated")',

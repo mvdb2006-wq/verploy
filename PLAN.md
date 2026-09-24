@@ -514,3 +514,12 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - Alleen eigenaren en beheerders kunnen verwijderen, en alleen rapporten van het eigen bureau (gecontroleerd via RLS). Een rapport dat nog wordt gemaakt, kan niet worden verwijderd.
 - Eerst wordt de PDF uit de opslag gehaald, dan het record. Mislukt de opslag, dan blijft alles staan en volgt een duidelijke melding. De actie wordt gelogd.
 - Een rapport opnieuw versturen kan nog niet (er is nog geen bestaande verzendroute voor een bestaande PDF). Maak voor nu een nieuw rapport met "Ook per e-mail naar de klant sturen".
+
+## 23. Functionele tests en connector 2.4.0 (24-09-2026)
+- Formulieren (CF7, Gravity Forms, WPForms) en de WooCommerce-winkelwagen tot en met afrekenen worden getest op de testkopie, vóór en na de update. De run-pagina toont ze in het blok "Functionele tests op de testkopie", met de uitkomst en reden per test.
+- Connector 2.4.0:
+  - endpoint `/run/functional`;
+  - blokkade van uitgaand verkeer tijdens functionele tests;
+  - terugval bij het kopiëren van tabellen.
+  - WordPress.org Plugin Check: geen fouten.
+- Bewezen met de echte plugins: een onschuldige update gaat live, met alle functionele tests groen. Een update die alleen het versturen van formulieren breekt (de pagina ziet er hetzelfde uit), wordt tegengehouden met de reden in gewone taal.

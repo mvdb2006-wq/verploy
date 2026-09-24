@@ -61,6 +61,25 @@ class Verploy_Table_Copier {
 	}
 
 	/**
+	 * Terugval als CREATE TABLE … LIKE niet werkt (sommige MySQL-compatibele databases nemen dan de
+	 * prefixlengte van indexen op tekstkolommen niet over, zoals bij WooCommerce' wc_orders_meta):
+	 * dezelfde definitie via SHOW CREATE TABLE, met alleen de tabelnaam vervangen.
+	 */
+	private static function create_from_definition( $src, $dst ) {
+		global $wpdb;
+		$row = $wpdb->get_row( 'SHOW CREATE TABLE ' . self::quote( $src ), ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery
+		if ( ! is_array( $row ) || empty( $row[1] ) ) {
+			return false;
+		}
+		$ddl = preg_replace( '/^CREATE TABLE `[^`]+`/', 'CREATE TABLE ' . self::quote( $dst ), (string) $row[1], 1, $count );
+		if ( 1 !== $count ) {
+			return false;
+		}
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::quote( $dst ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery
+		return false !== $wpdb->query( $ddl ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery
+	}
+
+	/**
 	 * Kopieert tabellen van $from_prefix naar $to_prefix. $state wordt bijgewerkt en
 	 * moet tussen verzoeken bewaard worden; opnieuw aanroepen met dezelfde state hervat.
 	 *
@@ -78,7 +97,7 @@ class Verploy_Table_Copier {
 			$dst = $to_prefix . substr( $src, strlen( $from_prefix ) );
 			if ( ! $state['created'] ) {
 				$wpdb->query( 'DROP TABLE IF EXISTS ' . self::quote( $dst ) ); // phpcs:ignore WordPress.DB.PreparedSQL
-				if ( false === $wpdb->query( 'CREATE TABLE ' . self::quote( $dst ) . ' LIKE ' . self::quote( $src ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL
+				if ( false === $wpdb->query( 'CREATE TABLE ' . self::quote( $dst ) . ' LIKE ' . self::quote( $src ) ) && ! self::create_from_definition( $src, $dst ) ) { // phpcs:ignore WordPress.DB.PreparedSQL
 					throw new RuntimeException( esc_html( 'create_table_failed:' . $dst . ':' . $wpdb->last_error ) );
 				}
 				$state['created'] = true;

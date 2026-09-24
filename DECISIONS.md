@@ -196,3 +196,14 @@ Per site staat er een duidelijke "WP Admin"-link naar `/wp-admin/`. De gebruiker
 - **Logboek:** elke login komt in Verploy en op de site, met wie en wanneer.
 - **Rechten:** alleen eigenaren en beheerders van het bureau mogen dit, en het kan per site uit.
 - **Blokkade:** een nieuwe ronde met onafhankelijke review van de token-flow, voordat dit live gaat.
+
+## 24-09 — Functionele tests: alleen op de testkopie, zonder uitgaand verkeer, alleen nieuwe fouten blokkeren
+- **Wat:** formulieren (Contact Form 7, Gravity Forms, WPForms) worden ingevuld en verstuurd. In WooCommerce gaat een product in de winkelwagen, gevolgd door de afrekenpagina. Dat gebeurt vóór en na de update, op de testkopie. Er wordt nooit betaald of besteld.
+- **Veiligheid:** de testkopie verstuurde al geen e-mail. Met de cookie `verploy_functional` blokkeert connector 2.4 ook al het uitgaande verkeer (`pre_http_request`), zodat een testinzending nooit bij een CRM, Zapier, Mailchimp of betaalprovider van de klant komt. Captcha's omzeilen we niet: zo'n formulier wordt overgeslagen. Testwaarden gebruiken het gereserveerde domein example.com.
+- **Blokkeren:** alleen wat vóór de update werkte en erna niet meer (inclusief nieuwe JavaScript-fouten tijdens de handeling). Een bestaand probleem, een captcha of een onduidelijke uitkomst vóóraf houdt geen update tegen.
+- **Doelen:** de connector (`/run/functional`) vindt pagina's met een formulier-shortcode of -blok, en een koopbaar, eenvoudig product. Een connector ouder dan 2.4 geeft 404: dan slaan we de functionele tests over en zeggen we dat in de tijdlijn.
+- **Resultaten** staan in `test_results` (page_key `fn:…`). Er is geen migratie nodig.
+- **Tests:** E2E `phase91-functional` draait met de echte plugins (officiële zips van wordpress.org; zonder die zips wordt de spec expliciet overgeslagen). De engine-test bewijst de blokkade van uitgaand verkeer op een echte WordPress.
+
+## 24-09 — Tabellen kopiëren: terugval op SHOW CREATE TABLE
+Sommige MySQL-compatibele databases nemen bij `CREATE TABLE … LIKE` de prefixlengte van indexen op tekstkolommen niet over. Gezien bij WooCommerce' `wc_orders_meta` in de testdatabase. De connector valt dan terug op de exacte definitie uit `SHOW CREATE TABLE`, zowel voor de testkopie als voor de snapshot.

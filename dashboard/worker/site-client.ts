@@ -1,3 +1,4 @@
+import type { FunctionalTargets } from './functional'
 import { createHmac } from 'node:crypto'
 import { signedHeaders } from '@/lib/security/signing'
 
@@ -121,5 +122,7 @@ export class SiteClient {
   rollback(base: string) { return this.call<{ state: 'rolled_back' }>(base, '/rollback', {}, 300_000) }
   cleanup(base: string) { return this.call<{ state: 'cleaned' }>(base, '/cleanup', {}, 120_000) }
   diagnostics(base: string) { return this.call<Diagnostics>(base, '/run/diagnostics') }
+  /** Formulieren en webwinkel om functioneel te testen (connector 2.4+; ouder geeft 404). */
+  functional(base: string) { return this.call<FunctionalTargets>(base, '/run/functional') }
   heartbeatNow(base: string) { return this.call<{ sent: true }>(base, '/heartbeat/now') }
 }

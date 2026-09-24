@@ -221,6 +221,21 @@ if ( ! $verploy_api && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 }
 // Staging verstuurt nooit e-mail (bestellingen, formulieren) en wordt niet geïndexeerd.
 add_filter( 'pre_wp_mail', '__return_true' );
+// Functionele tests (formulier versturen, winkelwagen): geen enkel uitgaand verzoek vanaf de testkopie,
+// zodat een testinzending nooit bij een CRM, Zapier, Mailchimp of betaalprovider terechtkomt.
+if ( isset( $_COOKIE['verploy_functional'] ) ) { // phpcs:ignore
+	add_filter(
+		'pre_http_request',
+		function ( $pre, $args, $url ) {
+			if ( 0 === strpos( (string) $url, home_url() ) ) {
+				return $pre;
+			}
+			return new WP_Error( 'verploy_functional_offline', 'Verploy: outgoing requests are disabled during functional tests.' );
+		},
+		1,
+		3
+	);
+}
 add_filter( 'pre_option_blog_public', function () { return '0'; } );
 // Uploads worden niet gekopieerd: toon ze vanaf productie, schrijf nieuwe naar staging.
 add_filter( 'upload_dir', function ( $u ) {
@@ -880,6 +895,81 @@ PHP;
 				Verploy_Table_Copier::drop_prefix( 'vpbk' . $short . '_' );
 			}
 		}
+	}
+
+	// ── Functionele tests ────────────────────────────────────────────────────
+
+	const MAX_FORM_PAGES = 3;
+
+	/**
+	 * Wat de worker functioneel test op de testkopie: pagina's met een formulier (Contact Form 7,
+	 * Gravity Forms, WPForms) en, bij WooCommerce, een koopbaar product plus winkelwagen en afrekenen.
+	 *
+	 * @return array{forms:array<int,array{key:string,kind:string,label:string,url:string}>,shop:array|null}
+	 */
+	public static function functional_targets() {
+		$kinds = array(
+			'cf7'     => array( defined( 'WPCF7_VERSION' ), array( '[contact-form-7', 'wp:contact-form-7/' ) ),
+			'gravity' => array( class_exists( 'GFForms' ), array( '[gravityform', 'wp:gravityforms/' ) ),
+			'wpforms' => array( function_exists( 'wpforms' ), array( '[wpforms', 'wp:wpforms/' ) ),
+		);
+		$forms = array();
+		$seen  = array();
+		foreach ( $kinds as $kind => $def ) {
+			if ( ! $def[0] ) {
+				continue;
+			}
+			foreach ( $def[1] as $needle ) {
+				$posts = get_posts(
+					array(
+						'post_type'   => array( 'page', 'post' ),
+						'post_status' => 'publish',
+						's'           => $needle,
+						'sentence'    => true,
+						'numberposts' => self::MAX_FORM_PAGES,
+						'orderby'     => 'menu_order ID',
+						'order'       => 'ASC',
+					)
+				);
+				foreach ( $posts as $post ) {
+					if ( count( $forms ) >= self::MAX_FORM_PAGES || isset( $seen[ $post->ID ] ) || false === strpos( $post->post_content, $needle ) ) {
+						continue;
+					}
+					$seen[ $post->ID ] = true;
+					$forms[]           = array(
+						'key'   => 'post:' . $post->ID,
+						'kind'  => $kind,
+						'label' => wp_strip_all_tags( get_the_title( $post ) ),
+						'url'   => (string) get_permalink( $post ),
+					);
+				}
+			}
+		}
+		$shop = null;
+		if ( function_exists( 'wc_get_products' ) && function_exists( 'wc_get_cart_url' ) ) {
+			$products = wc_get_products(
+				array(
+					'status'       => 'publish',
+					'type'         => 'simple',
+					'stock_status' => 'instock',
+					'visibility'   => 'catalog',
+					'limit'        => 10,
+					'orderby'      => 'date',
+					'order'        => 'DESC',
+				)
+			);
+			foreach ( $products as $product ) {
+				if ( $product->is_purchasable() && $product->is_in_stock() && ! $product->is_sold_individually() && '' !== (string) $product->get_price() ) {
+					$shop = array(
+						'product'  => array( 'key' => 'post:' . $product->get_id(), 'label' => wp_strip_all_tags( $product->get_name() ), 'url' => (string) get_permalink( $product->get_id() ) ),
+						'cart'     => (string) wc_get_cart_url(),
+						'checkout' => (string) wc_get_checkout_url(),
+					);
+					break;
+				}
+			}
+		}
+		return array( 'forms' => $forms, 'shop' => $shop );
 	}
 
 	// ── Testpagina's ─────────────────────────────────────────────────────────

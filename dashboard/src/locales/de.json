@@ -461,7 +461,9 @@
         "landmarks": "{page} ({viewport}): Teile der Seite sind verschwunden ({missing}).",
         "content": "{page} ({viewport}) zeigt deutlich weniger Inhalt als vorher.",
         "visual": "{page} ({viewport}) sieht zu {percent} % anders aus (zulässig: {limit} %).",
-        "login": "Das WordPress-Anmeldeformular funktioniert nicht mehr."
+        "login": "Das WordPress-Anmeldeformular funktioniert nicht mehr.",
+        "form": "Das Formular auf {page} funktioniert nach dem Update nicht mehr: {fnReason}.",
+        "shop": "Der Shop funktioniert nach dem Update nicht mehr: {fnReason}."
       },
       "partial": "{deployed} von {total} Updates sind live. Nicht aktualisiert: {attention}.",
       "update_crashed": "{name} hat die Testkopie abstürzen lassen. Dadurch konnte Verploy die übrigen Updates nicht mehr zuverlässig einzeln testen.",
@@ -529,7 +531,11 @@
       "queued_security": "{count, plural, one {# Sicherheitsupdate} other {# Sicherheitsupdates}} automatisch von Verploy eingeplant (bekannte Lücke).",
       "item_package": "{name}: Update-Datei {version} über die Live-Site geholt (Lizenz der eigenen Domain).",
       "item_isolated": "{name} zurückgestellt; die übrigen Updates laufen weiter.",
-      "item_skipped_dependent": "{name} übersprungen: hängt von {cause} ab."
+      "item_skipped_dependent": "{name} übersprungen: hängt von {cause} ab.",
+      "functional_baseline": "Funktionale Nullmessung: {ok} von {total} Tests funktionieren (Formulare: {forms}, Shop: {shop}).",
+      "functional_unsupported": "Formulare und Shop nicht getestet: aktualisiere Verploy Connector auf 2.4 oder neuer.",
+      "functional_passed": "Funktionale Tests nach dem Update: {ok} von {total} funktionieren, nichts hat sich verschlechtert.",
+      "functional_failed": "Funktionale Tests nach dem Update: funktioniert nicht mehr: {failed}."
     },
     "itemOutcome": {
       "live": "Live",
@@ -568,6 +574,43 @@
       "filesystem": "WordPress darf auf diesem Server keine Dateien schreiben. Bitte deinen Hoster um Schreibrechte für WordPress.",
       "dependency": "Löse zuerst die Komponente, von der {name} abhängt; danach kann dieses Update mit.",
       "review": "Sieh dir die Details unten an. Aktualisiere {name} bei Bedarf manuell und prüfe danach die Website."
+    },
+    "functional": {
+      "title": "Funktionale Tests auf der Testkopie",
+      "intro": "Formulare ausfüllen und absenden sowie im Shop ein Produkt in den Warenkorb legen bis zur Kasse. Vor und nach dem Update. Es wird keine E-Mail versendet, kein Verkehr nach außen geleitet und nichts bestellt.",
+      "before": "Vorher",
+      "after": "Nachher",
+      "kind": {
+        "cf7": "Formular (Contact Form 7)",
+        "gravity": "Formular (Gravity Forms)",
+        "wpforms": "Formular (WPForms)",
+        "shop": "Shop: Produkt → Warenkorb → Kasse"
+      },
+      "outcome": {
+        "ok": "Funktioniert",
+        "failed": "Defekt",
+        "inconclusive": "Nicht feststellbar",
+        "skipped": "Übersprungen"
+      },
+      "reason": {
+        "sent": "gesendet, Bestätigung angezeigt",
+        "redirected": "gesendet, zur Dankesseite weitergeleitet",
+        "checkout_reached": "Kasse erreicht",
+        "captcha": "durch ein Captcha geschützt; Verploy umgeht es nicht",
+        "file_required": "verlangt eine Datei",
+        "not_rendered": "das Formular ist nicht (mehr) auf der Seite",
+        "no_submit": "keine Senden-Schaltfläche gefunden",
+        "validation": "die Testeingabe wird nicht (mehr) akzeptiert",
+        "submit_failed": "Senden fehlgeschlagen",
+        "no_response": "keine Reaktion nach dem Senden",
+        "php_error": "PHP-Fehler nach dem Senden",
+        "page": "die Seite lädt nicht",
+        "product_page": "die Produktseite lädt nicht",
+        "add_to_cart": "das Produkt landet nicht im Warenkorb",
+        "cart": "der Warenkorb lädt nicht",
+        "checkout": "die Kasse lädt nicht oder zeigt einen Fehler",
+        "js": "neue JavaScript-Fehler"
+      }
     }
   },
   "diagnosis": {

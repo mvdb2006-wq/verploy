@@ -19,7 +19,18 @@ require_once ABSPATH . 'wp-admin/includes/plugin.php';
 require_once ABSPATH . 'wp-admin/includes/file.php';
 WP_Filesystem();
 
-$slugs = array( 'vp-lab-footer', 'vp-lab-fatal', 'vp-lab-prod-only', 'vp-lab-licensed', 'vp-lab-extra', 'vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-updater' );
+// Functionele-testlab (functional-setup.php) weer weghalen: plugins, en de pagina's, formulieren en het product.
+$functional = array( 'contact-form-7/wp-contact-form-7.php', 'wpforms-lite/wpforms.php', 'woocommerce/woocommerce.php' );
+foreach ( get_posts( array( 'post_type' => array( 'page', 'post', 'product', 'wpforms', 'wpcf7_contact_form' ), 'post_status' => 'any', 'numberposts' => -1, 'meta_key' => '_verploy_lab_functional' ) ) as $p ) {
+	wp_delete_post( $p->ID, true );
+}
+update_option( 'active_plugins', array_values( array_diff( (array) get_option( 'active_plugins', array() ), $functional ) ) );
+foreach ( $functional as $f ) {
+	$dir = WP_PLUGIN_DIR . '/' . dirname( $f );
+	if ( is_dir( $dir ) ) { $GLOBALS['wp_filesystem']->delete( $dir, true ); }
+}
+
+$slugs = array( 'vp-lab-footer', 'vp-lab-fatal', 'vp-lab-prod-only', 'vp-lab-licensed', 'vp-lab-extra', 'vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-formbreak', 'vp-lab-probe', 'vp-lab-updater' );
 foreach ( $slugs as $slug ) {
 	$dir = WP_PLUGIN_DIR . '/' . $slug;
 	if ( is_dir( $dir ) ) { $GLOBALS['wp_filesystem']->delete( $dir, true ); }

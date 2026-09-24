@@ -461,7 +461,9 @@
         "landmarks": "{page} ({viewport}): parts of the page disappeared ({missing}).",
         "content": "{page} ({viewport}) shows much less content than before.",
         "visual": "{page} ({viewport}) looks {percent}% different (allowed: {limit}%).",
-        "login": "The WordPress login form no longer works."
+        "login": "The WordPress login form no longer works.",
+        "form": "The form on {page} no longer works after the update: {fnReason}.",
+        "shop": "The shop no longer works after the update: {fnReason}."
       },
       "partial": "{deployed} of {total} updates are live. Not updated: {attention}.",
       "update_crashed": "{name} crashed the test copy, so Verploy could no longer test the other updates reliably on their own.",
@@ -529,7 +531,11 @@
       "queued_security": "{count, plural, one {# security update} other {# security updates}} scheduled automatically by Verploy (known vulnerability).",
       "item_package": "{name}: update file {version} fetched through the live site (its own domain licence).",
       "item_isolated": "{name} set aside; the other updates continue.",
-      "item_skipped_dependent": "{name} skipped: depends on {cause}."
+      "item_skipped_dependent": "{name} skipped: depends on {cause}.",
+      "functional_baseline": "Functional baseline: {ok} of {total} tests work (forms: {forms}, shop: {shop}).",
+      "functional_unsupported": "Forms and shop not tested: update Verploy Connector to 2.4 or newer.",
+      "functional_passed": "Functional tests after the update: {ok} of {total} work, nothing regressed.",
+      "functional_failed": "Functional tests after the update: no longer working: {failed}."
     },
     "itemOutcome": {
       "live": "Live",
@@ -568,6 +574,43 @@
       "filesystem": "WordPress may not write files on this server. Ask your host to give WordPress write access.",
       "dependency": "First resolve the component {name} depends on; after that this update can go along.",
       "review": "See the details below. Update {name} manually if needed and check the site afterwards."
+    },
+    "functional": {
+      "title": "Functional tests on the test copy",
+      "intro": "Filling in and submitting forms, and adding a product to the cart through to the checkout page. Before and after the update. No email is sent, no traffic leaves the copy and nothing is ordered.",
+      "before": "Before",
+      "after": "After",
+      "kind": {
+        "cf7": "Form (Contact Form 7)",
+        "gravity": "Form (Gravity Forms)",
+        "wpforms": "Form (WPForms)",
+        "shop": "Shop: product → cart → checkout"
+      },
+      "outcome": {
+        "ok": "Works",
+        "failed": "Broken",
+        "inconclusive": "Inconclusive",
+        "skipped": "Skipped"
+      },
+      "reason": {
+        "sent": "submitted, confirmation shown",
+        "redirected": "submitted, redirected to thank-you page",
+        "checkout_reached": "checkout page reached",
+        "captcha": "protected by a captcha; Verploy does not bypass it",
+        "file_required": "requires a file",
+        "not_rendered": "the form is not (or no longer) on the page",
+        "no_submit": "no submit button found",
+        "validation": "the test submission is not (or no longer) accepted",
+        "submit_failed": "submitting failed",
+        "no_response": "no response after submitting",
+        "php_error": "PHP error after submitting",
+        "page": "the page does not load",
+        "product_page": "the product page does not load",
+        "add_to_cart": "the product does not get into the cart",
+        "cart": "the cart does not load",
+        "checkout": "the checkout page does not load or shows an error",
+        "js": "new JavaScript errors"
+      }
     }
   },
   "diagnosis": {

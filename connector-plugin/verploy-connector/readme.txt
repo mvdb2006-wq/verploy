@@ -4,7 +4,7 @@ Tags:              maintenance, updates, monitoring, agency, staging
 Requires at least: 5.8
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        2.3.0
+Stable tag:        2.4.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,9 @@ All Verploy settings, staging copies and backups are removed.
 
 == Changelog ==
 
+= 2.4.0 =
+* Functional tests on the staging copy: forms (Contact Form 7, Gravity Forms, WPForms) and the WooCommerce cart and checkout are tested before and after an update. During these tests the staging copy blocks all outgoing requests, so a test submission never reaches a CRM, mailing list or payment provider. Email was already disabled on staging.
+
 = 2.3.0 =
 * Premium plugins and themes licensed per domain: the update package is fetched by the live site (with its licence) and the exact same package is tested on the staging copy and then deployed.
 
@@ -66,6 +69,9 @@ All Verploy settings, staging copies and backups are removed.
 * Pairing with a one-time code; all requests signed with HMAC-SHA256.
 
 == Upgrade Notice ==
+
+= 2.4.0 =
+Adds functional tests of forms and the shop on the staging copy, with all outgoing requests blocked during those tests.
 
 = 2.3.0 =
 Safe updates for premium plugins and themes that only update on their licensed domain.

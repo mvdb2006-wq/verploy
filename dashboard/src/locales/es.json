@@ -461,7 +461,9 @@
         "landmarks": "{page} ({viewport}): han desaparecido partes de la página ({missing}).",
         "content": "{page} ({viewport}) muestra mucho menos contenido que antes.",
         "visual": "{page} ({viewport}) se ve un {percent} % distinta (permitido: {limit} %).",
-        "login": "El formulario de acceso de WordPress ya no funciona."
+        "login": "El formulario de acceso de WordPress ya no funciona.",
+        "form": "El formulario de {page} ya no funciona tras la actualización: {fnReason}.",
+        "shop": "La tienda ya no funciona tras la actualización: {fnReason}."
       },
       "partial": "{deployed} de {total} actualizaciones están publicadas. Sin actualizar: {attention}.",
       "update_crashed": "{name} bloqueó la copia de prueba, así que Verploy ya no podía probar las demás actualizaciones por separado de forma fiable.",
@@ -529,7 +531,11 @@
       "queued_security": "{count, plural, one {Actualización de seguridad programada} other {# actualizaciones de seguridad programadas}} automáticamente por Verploy (vulnerabilidad conocida).",
       "item_package": "{name}: archivo de actualización {version} obtenido a través del sitio en vivo (licencia de su propio dominio).",
       "item_isolated": "{name} apartado; las demás actualizaciones continúan.",
-      "item_skipped_dependent": "{name} omitido: depende de {cause}."
+      "item_skipped_dependent": "{name} omitido: depende de {cause}.",
+      "functional_baseline": "Medición funcional de referencia: funcionan {ok} de {total} pruebas (formularios: {forms}, tienda: {shop}).",
+      "functional_unsupported": "Formularios y tienda no probados: actualiza Verploy Connector a la 2.4 o posterior.",
+      "functional_passed": "Pruebas funcionales tras la actualización: funcionan {ok} de {total}, nada ha empeorado.",
+      "functional_failed": "Pruebas funcionales tras la actualización: ya no funciona: {failed}."
     },
     "itemOutcome": {
       "live": "Publicada",
@@ -568,6 +574,43 @@
       "filesystem": "WordPress no puede escribir archivos en este servidor. Pide a tu proveedor de hosting permisos de escritura para WordPress.",
       "dependency": "Resuelve primero el componente del que depende {name}; después esta actualización podrá acompañarlo.",
       "review": "Consulta los detalles abajo. Actualiza {name} manualmente si hace falta y revisa el sitio después."
+    },
+    "functional": {
+      "title": "Pruebas funcionales en la copia de prueba",
+      "intro": "Rellenar y enviar formularios, y añadir un producto al carrito hasta la página de pago. Antes y después de la actualización. No se envía ningún correo, no sale tráfico y no se pide nada.",
+      "before": "Antes",
+      "after": "Después",
+      "kind": {
+        "cf7": "Formulario (Contact Form 7)",
+        "gravity": "Formulario (Gravity Forms)",
+        "wpforms": "Formulario (WPForms)",
+        "shop": "Tienda: producto → carrito → pago"
+      },
+      "outcome": {
+        "ok": "Funciona",
+        "failed": "No funciona",
+        "inconclusive": "No determinable",
+        "skipped": "Omitida"
+      },
+      "reason": {
+        "sent": "enviado, confirmación mostrada",
+        "redirected": "enviado, redirigido a la página de agradecimiento",
+        "checkout_reached": "página de pago alcanzada",
+        "captcha": "protegido con un captcha; Verploy no lo evita",
+        "file_required": "requiere un archivo",
+        "not_rendered": "el formulario no está (ya) en la página",
+        "no_submit": "no se encontró botón de envío",
+        "validation": "el envío de prueba no se acepta (ya)",
+        "submit_failed": "el envío falló",
+        "no_response": "sin respuesta tras enviar",
+        "php_error": "error de PHP tras enviar",
+        "page": "la página no carga",
+        "product_page": "la página del producto no carga",
+        "add_to_cart": "el producto no llega al carrito",
+        "cart": "el carrito no carga",
+        "checkout": "la página de pago no carga o muestra un error",
+        "js": "nuevos errores de JavaScript"
+      }
     }
   },
   "diagnosis": {

@@ -23,7 +23,7 @@ export async function generateMetadata() {
 type Item = RunItem
 interface Result {
   phase: string; page_key: string; page_label: string; page_url: string; viewport: string; http_status: number | null
-  passed: boolean; checks: unknown; screenshot_path: string | null; diff_path: string | null; diff_ratio: number | null
+  passed: boolean; checks: unknown; screenshot_path: string | null; diff_path: string | null; diff_ratio: number | null; facts?: unknown
 }
 interface CheckRow { check: string; ok: boolean; detail?: Record<string, unknown> }
 
@@ -125,6 +125,59 @@ function ComparisonTable({ t, runId, after, before, beforeLabel, afterLabel }: {
   )
 }
 
+const FN_TONE = { ok: 'badge-ok', failed: 'badge-danger', inconclusive: 'badge-muted', skipped: 'badge-muted' } as const
+
+/** Functionele tests (formulieren, webwinkel) vóór en na de update, met de reden in gewone taal. */
+function FunctionalTable({ t, rows }: { t: Translate; rows: Result[] }) {
+  const keys = [...new Set(rows.map(r => r.page_key))]
+  const facts = (r?: Result) => (r?.facts ?? {}) as { kind?: string; formKind?: string | null; outcome?: keyof typeof FN_TONE; reason?: string }
+  const cell = (r?: Result) => {
+    const f = facts(r)
+    if (!r || !f.outcome) return <span className="text-subtle">—</span>
+    return (
+      <span className="flex flex-wrap items-center gap-1.5">
+        <span className={cn('badge', FN_TONE[f.outcome])}>{t(`runs.functional.outcome.${f.outcome}` as MessageKey)}</span>
+        {f.reason && <span className="text-xs text-muted">{t(`runs.functional.reason.${f.reason}` as MessageKey)}</span>}
+      </span>
+    )
+  }
+  return (
+    <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="functional-title">
+      <header className="border-b border-border px-5 py-4">
+        <h2 id="functional-title" className="font-bold">{t('runs.functional.title')}</h2>
+        <p className="mt-0.5 text-xs text-muted">{t('runs.functional.intro')}</p>
+      </header>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs text-muted">
+            <tr><th className="px-5 py-2 font-semibold">{t('runs.detail.component')}</th><th className="px-3 py-2 font-semibold">{t('runs.functional.before')}</th><th className="px-5 py-2 font-semibold">{t('runs.functional.after')}</th></tr>
+          </thead>
+          <tbody className="divide-y divide-border/60">
+            {keys.map(k => {
+              const before = rows.find(r => r.page_key === k && r.phase === 'staging_before')
+              const after = rows.find(r => r.page_key === k && r.phase === 'staging_after')
+              const any = (after ?? before)!
+              const f = facts(any)
+              const failed = ((after?.checks ?? []) as CheckRow[]).filter(c => !c.ok)
+              return (
+                <tr key={k} className="align-top">
+                  <td className="px-5 py-2.5">
+                    <p className="font-medium">{t(`runs.functional.kind.${f.kind === 'shop' ? 'shop' : f.formKind ?? 'cf7'}` as MessageKey)}</p>
+                    <a href={any.page_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-text [overflow-wrap:anywhere]">{any.page_label}</a>
+                    {failed.map(c => <p key={c.check} className="mt-1 text-xs text-danger">{presentReason(t, `run.reason.check.${c.check}`, c.detail)}</p>)}
+                  </td>
+                  <td className="px-3 py-2.5">{cell(before)}</td>
+                  <td className="px-5 py-2.5">{cell(after)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
 function Steps({ t, status, started, failedSteps }: { t: Translate; status: string; started: Set<string>; failedSteps: Set<string> }) {
   const done = status === 'done'
   const visible = RUN_STEPS.filter(s => s !== 'rollback' || started.has('rollback'))
@@ -212,7 +265,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const [{ data: site }, { data: events }, { data: results }, { data: diagnosis }] = await Promise.all([
     supabase.from('sites').select('id, name, url').eq('id', id).single(),
     supabase.from('update_run_events').select('id, step, level, message_key, params, created_at').eq('run_id', runId).order('id'),
-    supabase.from('test_results').select('phase, page_key, page_label, page_url, viewport, http_status, passed, checks, screenshot_path, diff_path, diff_ratio').eq('run_id', runId).order('id'),
+    supabase.from('test_results').select('phase, page_key, page_label, page_url, viewport, http_status, passed, checks, screenshot_path, diff_path, diff_ratio, facts').eq('run_id', runId).order('id'),
     supabase.from('diagnoses').select('source, model, summary, cause, fix, culprit_name, confidence, evidence').eq('run_id', runId).maybeSingle(),
   ])
   // In de wachtrij: hoeveel runs (van alle bureaus) gingen vóór? Alleen het aantal, geen details.
@@ -230,7 +283,8 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   if (!done) started.add(run.status)
   const FAILED_KEYS = ['run.step.failed', 'run.staging.failed', 'run.postcheck.failed', 'run.item.failed', 'run.item.crashed', 'run.rollback.still_broken']
   const failedSteps = new Set((events ?? []).filter(e => FAILED_KEYS.includes(e.message_key)).map(e => e.step))
-  const byPhase = (phase: string) => ((results ?? []) as Result[]).filter(r => r.phase === phase)
+  const byPhase = (phase: string) => ((results ?? []) as Result[]).filter(r => r.phase === phase && !r.page_key.startsWith('fn:'))
+  const functional = ((results ?? []) as Result[]).filter(r => r.page_key.startsWith('fn:'))
   const OUTCOME_CLASS: Record<ItemOutcome, string> = {
     live: 'badge-ok', current: 'badge-muted', attention: 'badge-warn', skipped_dependent: 'badge-warn', held_back: 'badge-muted', rolled_back: 'badge-danger', pending: 'badge-muted',
   }
@@ -305,6 +359,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
           <ComparisonTable t={t} runId={run.id} after={byPhase('staging_after')} before={byPhase('staging_before')} beforeLabel={t('runs.detail.beforeUpdate')} afterLabel={t('runs.detail.afterUpdate')} />
         </section>
       )}
+      {functional.length > 0 && <FunctionalTable t={t} rows={functional} />}
       {byPhase('production_after').length > 0 && (
         <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="prod-title">
           <header className="border-b border-border px-5 py-4">

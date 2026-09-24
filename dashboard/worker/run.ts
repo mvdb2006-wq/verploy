@@ -6,6 +6,7 @@ import { keyMaterial } from '@/lib/security/keys'
 import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PackageResult, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
 import { comparePage, firstFailure, healthy, visualDiff, type CheckOutcome } from './compare'
+import { compareFunctional, runFunctional, type FnFailure, type FnResult, type FunctionalTargets } from './functional'
 import { SKIPPED_DEPENDENCY, dependencyOrder, dependentsOf, isolatedFailure, stagingOk, type RunItem } from '@/lib/run-items'
 
 export type Admin = SupabaseClient<Database>
@@ -35,6 +36,8 @@ interface StepState {
   pages?: PageTarget[]
   staging_url?: string
   staging_pages?: PageTarget[]
+  /** Wat functioneel getest wordt (vastgelegd bij de nulmeting op de testkopie; null = connector te oud). */
+  functional?: FunctionalTargets | null
   pending_verdict?: Verdict
   pending_reason?: { key: string; params: Record<string, Json> }
   rollback_verified?: boolean
@@ -306,6 +309,59 @@ async function applyAll(ctx: RunContext, base: string, where: 'staging' | 'produ
   return { list, failed: null }
 }
 
+// ── Functionele tests (formulieren, webwinkel) ──────────────────────────────
+
+/** Doelen voor functionele tests, of null als de connector ze nog niet kent (ouder dan 2.4). */
+async function functionalTargets(ctx: RunContext, base: string): Promise<FunctionalTargets | null> {
+  try {
+    const t = await ctx.client.functional(base)
+    return { forms: Array.isArray(t.forms) ? t.forms : [], shop: t.shop ?? null }
+  } catch (err) {
+    if (err instanceof SiteRejectedError && err.status === 404) return null
+    throw err
+  }
+}
+
+async function functionalPhase(ctx: RunContext, base: string, targets: FunctionalTargets): Promise<FnResult[]> {
+  const browser = await ctx.browser()
+  // verploy_functional: de testkopie blokkeert dan al het uitgaande verkeer (geen CRM, Zapier, betaalprovider).
+  const context = await newContext(browser, 'desktop', [
+    { name: 'verploy_staging', value: ctx.client.stagingToken(), url: base },
+    { name: 'verploy_functional', value: '1', url: base },
+  ])
+  let results: FnResult[]
+  try {
+    results = await runFunctional(context, targets)
+  } finally {
+    await context.close().catch(() => undefined)
+  }
+  return results
+}
+
+async function storeFunctional(ctx: RunContext, phase: 'staging_before' | 'staging_after', results: FnResult[], failures: FnFailure[] = []) {
+  for (const r of results) {
+    const failed = failures.filter(f => f.key === r.key)
+    const { error } = await ctx.admin.from('test_results').upsert({
+      agency_id: ctx.run.agency_id, run_id: ctx.run.id, phase, page_key: `fn:${r.key}`, page_label: r.label, page_url: r.url, viewport: 'desktop',
+      http_status: null, load_ms: null, passed: phase === 'staging_before' ? r.outcome !== 'failed' : failed.length === 0,
+      checks: failed.map(f => ({ check: f.kind, ok: false, detail: { page: f.label, fnReason: f.reason, ...(f.errors ? { errors: f.errors } : {}) } })) as unknown as Json,
+      js_errors: r.jsErrors, facts: { functional: true, kind: r.kind, formKind: r.formKind ?? null, outcome: r.outcome, reason: r.reason } as unknown as Json,
+      screenshot_path: null, diff_path: null, diff_ratio: null,
+    }, { onConflict: 'run_id,phase,page_key,viewport' })
+    if (error) throw error
+  }
+}
+
+async function loadFunctional(ctx: RunContext, phase: 'staging_before'): Promise<FnResult[]> {
+  const { data, error } = await ctx.admin.from('test_results').select('page_key, page_label, page_url, js_errors, facts').eq('run_id', ctx.run.id).eq('phase', phase).like('page_key', 'fn:%')
+  if (error) throw error
+  return (data ?? []).map(r => {
+    const f = (r.facts ?? {}) as { kind?: 'form' | 'shop'; formKind?: FnResult['formKind'] | null; outcome?: FnResult['outcome']; reason?: string }
+    return { key: r.page_key.slice(3), kind: f.kind ?? 'form', ...(f.formKind ? { formKind: f.formKind } : {}), label: r.page_label, url: r.page_url,
+      outcome: f.outcome ?? 'inconclusive', reason: f.reason ?? '', jsErrors: (r.js_errors ?? []) as string[] }
+  })
+}
+
 /** Namen van onderdelen die aandacht nodig hebben (niet bijgewerkt of overgeslagen). */
 const attentionNames = (list: Item[]) => list.filter(i => i.staging && !stagingOk(i)).map(i => i.name)
 
@@ -360,7 +416,15 @@ export async function step(ctx: RunContext): Promise<Transition> {
       if (prodHome && healthy(prodHome.capture) && (!stagingHome || !healthy(stagingHome))) {
         throw new RunFailure('run.reason.staging_unusable', { status: stagingHome?.status ?? 0, error: stagingHome?.phpError ?? stagingHome?.error ?? '' })
       }
-      return cancelIfAsked() ?? { next: 'staging_update', state: { staging_pages: pages } }
+      // Functionele nulmeting: werken formulieren en webwinkel vóór de update?
+      const functional = await functionalTargets(ctx, url)
+      if (!functional) await event(ctx, 'staging_baseline', 'run.functional.unsupported')
+      else if (functional.forms.length || functional.shop) {
+        const res = await functionalPhase(ctx, url, functional)
+        await storeFunctional(ctx, 'staging_before', res)
+        await event(ctx, 'staging_baseline', 'run.functional.baseline', { forms: functional.forms.length, shop: functional.shop ? 1 : 0, ok: res.filter(r => r.outcome === 'ok').length, total: res.length })
+      }
+      return cancelIfAsked() ?? { next: 'staging_update', state: { staging_pages: pages, functional } }
     }
 
     case 'staging_update': {
@@ -387,9 +451,21 @@ export async function step(ctx: RunContext): Promise<Transition> {
       const url = st.staging_url!
       const cookies = [{ name: 'verploy_staging', value: ctx.client.stagingToken(), url }]
       const { failures } = await testPhase(ctx, 'staging_after', url, st.staging_pages ?? [], cookies, 'staging_before')
-      if (failures.length) {
+      // Functioneel: alleen wat vóór de update werkte, moet erna nog werken.
+      let fnFailures: FnFailure[] = []
+      if (st.functional && (st.functional.forms.length || st.functional.shop)) {
+        const before = await loadFunctional(ctx, 'staging_before')
+        const after = await functionalPhase(ctx, url, st.functional)
+        fnFailures = compareFunctional(before, after)
+        await storeFunctional(ctx, 'staging_after', after, fnFailures)
+        await event(ctx, 'staging_test', fnFailures.length ? 'run.functional.failed' : 'run.functional.passed',
+          { ok: after.filter(r => r.outcome === 'ok').length, total: after.length, failed: fnFailures.map(f => f.label) }, fnFailures.length ? 'warning' : 'info')
+      }
+      if (failures.length || fnFailures.length) {
         const tested = items(run).filter(stagingOk)
-        const base = failureReason(failures)
+        const fn = fnFailures[0]
+        const base = failures.length ? failureReason(failures)
+          : { key: `run.reason.check.${fn!.kind}`, params: { page: fn!.label, fnReason: fn!.reason, count: fnFailures.length } as Record<string, Json> }
         // Meerdere onderdelen samen getest: niet aan te wijzen welke de fout veroorzaakt, dus niets live.
         const reason = { ...base, params: { ...base.params, total: items(run).length, tested: tested.length, attention: tested.map(i => i.name) } }
         await event(ctx, 'staging_test', 'run.staging.failed', reason.params, 'warning')

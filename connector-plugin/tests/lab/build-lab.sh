@@ -9,6 +9,7 @@
 #   vp-lab-nopkg      1.0.0 → 1.1.0  updatepakket ontbreekt (404)       → verwacht: apart gezet, rest gaat door
 #   vp-lab-nopkg-addon 1.0.0 → 1.1.0 uitbreiding van vp-lab-nopkg       → verwacht: overgeslagen (afhankelijk)
 #   vp-lab-extra      1.0.0 → 1.1.0  onschuldige tekstwijziging        → verwacht: live, ook als nopkg faalt
+#   vp-lab-formbreak  1.0.0 → 1.1.0  CF7-formulieren versturen mislukt  → verwacht: tegengehouden (functionele test)
 #
 # Gebruik: build-lab.sh <uitvoermap> <publieke-repo-url>
 set -euo pipefail
@@ -45,10 +46,19 @@ plugin vp-lab-licensed 1.1.0 "$(printf "$LICENSED" 'v1.1.0')"
 EXTRA='add_action( '"'"'wp_footer'"'"', function () { echo '"'"'<p class="vp-lab-extra">extra %s</p>'"'"'; } );'
 plugin vp-lab-extra 1.0.0 "$(printf "$EXTRA" 'v1.0.0')"
 plugin vp-lab-extra 1.1.0 "$(printf "$EXTRA" 'v1.1.0')"
+# vp-lab-formbreak 1.0.0 → 1.1.0: de update laat het versturen van Contact Form 7-formulieren mislukken, terwijl
+# de pagina er precies hetzelfde uitziet → alleen een functionele test ziet dit (verwacht: tegengehouden).
+plugin vp-lab-formbreak 1.0.0 '// 1.0.0 doet niets.'
+plugin vp-lab-formbreak 1.1.0 'add_action( '"'"'wpcf7_before_send_mail'"'"', function ( $form, &$abort ) { $abort = true; }, 10, 2 );'
 plugin vp-lab-nopkg 1.0.0 '// 1.0.0 doet niets.'
 plugin vp-lab-nopkg 1.1.0 '// 1.1.0 wordt nooit gepubliceerd (pakket ontbreekt).'
 plugin vp-lab-nopkg-addon 1.0.0 '// uitbreiding van vp-lab-nopkg.'
 plugin vp-lab-nopkg-addon 1.1.0 '// uitbreiding van vp-lab-nopkg, 1.1.0.'
+
+# vp-lab-probe: meet of de site uitgaand verkeer mag doen (?vp_probe=1 → "probe:<resultaat>"), voor de
+# controle dat de testkopie tijdens functionele tests niets naar buiten stuurt.
+plugin vp-lab-probe 1.0.0 'add_action( '"'"'template_redirect'"'"', function () { if ( isset( $_GET['"'"'vp_probe'"'"'] ) ) { $r = wp_remote_get( '"'"'https://example.com/'"'"', array( '"'"'timeout'"'"' => 3 ) ); echo '"'"'probe:'"'"' . ( is_wp_error( $r ) ? $r->get_error_code() : '"'"'sent'"'"' ); exit; } } );'
+( cd "$OUT/src/vp-lab-probe-1.0.0" && zip -qrX "$OUT/install/vp-lab-probe.zip" vp-lab-probe )
 
 mkdir -p "$OUT/src/vp-lab-updater/vp-lab-updater"
 cat > "$OUT/src/vp-lab-updater/vp-lab-updater/vp-lab-updater.php" <<'PHP'
@@ -106,7 +116,7 @@ PHP
 sed -i "s#__REPO_URL__#${REPO_URL}#" "$OUT/src/vp-lab-updater/vp-lab-updater/vp-lab-updater.php"
 
 echo '{' > "$OUT/repo/manifest.json"; first=1
-for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed vp-lab-extra vp-lab-nopkg vp-lab-nopkg-addon; do
+for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed vp-lab-extra vp-lab-nopkg vp-lab-nopkg-addon vp-lab-formbreak; do
   ( cd "$OUT/src/$slug-1.0.0" && zip -qrX "$OUT/install/$slug.zip" "$slug" )
   # vp-lab-nopkg: update aangeboden, maar het pakket bestaat niet (zoals een premium plugin zonder geldige licentie)
   [ "$slug" = vp-lab-nopkg ] || ( cd "$OUT/src/$slug-1.1.0" && zip -qrX "$OUT/repo/$slug-1.1.0.zip" "$slug" )

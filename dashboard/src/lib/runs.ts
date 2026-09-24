@@ -61,6 +61,7 @@ export function presentReason(t: Translate, key: string | null | undefined, para
     const label = t(`runs.itemStatus.${p.status}` as MessageKey)
     if (label !== `runs.itemStatus.${p.status}`) vars.status = label
   }
+  if (typeof p.fnReason === 'string' && /^[a-z_]+$/.test(p.fnReason)) vars.fnReason = t(`runs.functional.reason.${p.fnReason}` as MessageKey)
   if (typeof p.error === 'string' && /^(wp_critical_error|php_fatal|db_connection|maintenance)$/.test(p.error)) {
     vars.error = t(`runs.phpError.${p.error}` as MessageKey)
   }

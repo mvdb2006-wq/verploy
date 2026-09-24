@@ -461,7 +461,9 @@
         "landmarks": "{page} ({viewport}) : des parties de la page ont disparu ({missing}).",
         "content": "{page} ({viewport}) affiche beaucoup moins de contenu qu’avant.",
         "visual": "{page} ({viewport}) est différente à {percent} % (autorisé : {limit} %).",
-        "login": "Le formulaire de connexion WordPress ne fonctionne plus."
+        "login": "Le formulaire de connexion WordPress ne fonctionne plus.",
+        "form": "Le formulaire de {page} ne fonctionne plus après la mise à jour : {fnReason}.",
+        "shop": "La boutique ne fonctionne plus après la mise à jour : {fnReason}."
       },
       "partial": "{deployed} mises à jour sur {total} sont en ligne. Non mises à jour : {attention}.",
       "update_crashed": "{name} a fait planter la copie de test ; Verploy ne pouvait donc plus tester les autres mises à jour de manière fiable séparément.",
@@ -529,7 +531,11 @@
       "queued_security": "{count, plural, one {Mise à jour de sécurité planifiée} other {# mises à jour de sécurité planifiées}} automatiquement par Verploy (vulnérabilité connue).",
       "item_package": "{name} : fichier de mise à jour {version} récupéré via le site en ligne (licence de son propre domaine).",
       "item_isolated": "{name} mis de côté ; les autres mises à jour continuent.",
-      "item_skipped_dependent": "{name} ignoré : dépend de {cause}."
+      "item_skipped_dependent": "{name} ignoré : dépend de {cause}.",
+      "functional_baseline": "Mesure fonctionnelle de référence : {ok} tests sur {total} fonctionnent (formulaires : {forms}, boutique : {shop}).",
+      "functional_unsupported": "Formulaires et boutique non testés : mettez Verploy Connector à jour vers 2.4 ou plus récent.",
+      "functional_passed": "Tests fonctionnels après la mise à jour : {ok} sur {total} fonctionnent, aucune régression.",
+      "functional_failed": "Tests fonctionnels après la mise à jour : ne fonctionne plus : {failed}."
     },
     "itemOutcome": {
       "live": "En ligne",
@@ -568,6 +574,43 @@
       "filesystem": "WordPress n’a pas le droit d’écrire des fichiers sur ce serveur. Demandez à votre hébergeur les droits d’écriture pour WordPress.",
       "dependency": "Résolvez d’abord le composant dont dépend {name} ; cette mise à jour pourra ensuite suivre.",
       "review": "Consultez les détails ci-dessous. Mettez {name} à jour manuellement si nécessaire, puis vérifiez le site."
+    },
+    "functional": {
+      "title": "Tests fonctionnels sur la copie de test",
+      "intro": "Remplir et envoyer les formulaires, et ajouter un produit au panier jusqu’à la page de paiement. Avant et après la mise à jour. Aucun e-mail n’est envoyé, aucun trafic ne sort et rien n’est commandé.",
+      "before": "Avant",
+      "after": "Après",
+      "kind": {
+        "cf7": "Formulaire (Contact Form 7)",
+        "gravity": "Formulaire (Gravity Forms)",
+        "wpforms": "Formulaire (WPForms)",
+        "shop": "Boutique : produit → panier → paiement"
+      },
+      "outcome": {
+        "ok": "Fonctionne",
+        "failed": "En panne",
+        "inconclusive": "Indéterminé",
+        "skipped": "Ignoré"
+      },
+      "reason": {
+        "sent": "envoyé, confirmation affichée",
+        "redirected": "envoyé, redirigé vers la page de remerciement",
+        "checkout_reached": "page de paiement atteinte",
+        "captcha": "protégé par un captcha ; Verploy ne le contourne pas",
+        "file_required": "demande un fichier",
+        "not_rendered": "le formulaire n’est pas (plus) sur la page",
+        "no_submit": "aucun bouton d’envoi trouvé",
+        "validation": "l’envoi de test n’est pas (plus) accepté",
+        "submit_failed": "l’envoi a échoué",
+        "no_response": "aucune réponse après l’envoi",
+        "php_error": "erreur PHP après l’envoi",
+        "page": "la page ne se charge pas",
+        "product_page": "la page produit ne se charge pas",
+        "add_to_cart": "le produit n’arrive pas dans le panier",
+        "cart": "le panier ne se charge pas",
+        "checkout": "la page de paiement ne se charge pas ou affiche une erreur",
+        "js": "nouvelles erreurs JavaScript"
+      }
     }
   },
   "diagnosis": {

@@ -46,6 +46,7 @@ class Verploy_Rest_Endpoints {
 			'/run/pages'       => array( 'pages', $run + array( 'keys' => array( 'type' => array( 'array', 'null' ), 'default' => null ), 'extra_paths' => array( 'type' => 'array', 'default' => array() ) ), false ),
 			'/heartbeat/now'   => array( 'heartbeat', $run, false ),
 			'/run/diagnostics' => array( 'diagnostics', $run, false ),
+			'/run/functional'  => array( 'functional', $run, false ),
 		);
 		foreach ( $routes as $route => $def ) {
 			list( $method, $args, $needs_lock ) = $def;
@@ -106,6 +107,8 @@ class Verploy_Rest_Endpoints {
 				case 'pages':
 					$keys = $request->get_param( 'keys' );
 					return new WP_REST_Response( array( 'pages' => Verploy_Run_Engine::pages( is_array( $keys ) ? array_map( 'strval', $keys ) : null, array_map( 'strval', (array) $request->get_param( 'extra_paths' ) ) ) ), 200 );
+				case 'functional':
+					return new WP_REST_Response( Verploy_Run_Engine::functional_targets(), 200 );
 				case 'diagnostics':
 					return new WP_REST_Response( Verploy_Run_Engine::diagnostics( $run_id ), 200 );
 				case 'heartbeat':
