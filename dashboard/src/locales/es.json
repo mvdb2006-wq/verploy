@@ -812,7 +812,9 @@
     "errors": {
       "invalid_period": "Elige un periodo válido: como máximo un año y no en el futuro.",
       "no_client_email": "Primero añade el correo del cliente en el sitio.",
-      "rate_limited": "Has creado muchos informes en la última hora. Inténtalo más tarde."
+      "rate_limited": "Has creado muchos informes en la última hora. Inténtalo más tarde.",
+      "delete_busy": "Este informe se está generando. Elimínalo cuando esté listo.",
+      "delete_storage": "No se pudo eliminar el PDF. No se ha cambiado nada; inténtalo de nuevo."
     },
     "site": {
       "title": "Cliente e informes",
@@ -834,7 +836,13 @@
       "sender": "Remitente de los informes",
       "senderHint": "Aparece bajo cada informe y como remitente del correo. Vacío = nombre de la agencia.",
       "current": "Logotipo actual"
-    }
+    },
+    "view": "Ver",
+    "downloadShort": "Descargar",
+    "deleteConfirm": "¿Eliminar definitivamente este informe y su PDF?",
+    "deleteYes": "Sí, eliminar",
+    "deleted": "Informe eliminado.",
+    "actions": "Acciones para este informe"
   },
   "billing": {
     "title": "Suscripción",

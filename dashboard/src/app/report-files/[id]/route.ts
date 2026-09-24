@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /** PDF van een rapport. RLS (sessie van de gebruiker) bepaalt of hij bij het eigen bureau hoort. */
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new NextResponse(null, { status: 404 })
   const supabase = await createClient()
@@ -16,7 +16,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return new NextResponse(Buffer.from(await data.arrayBuffer()), {
     headers: {
       'content-type': 'application/pdf',
-      'content-disposition': `attachment; filename="${slug}-${report.period_start.slice(0, 7)}.pdf"`,
+      // ?view=1: in de browser openen (Bekijken), anders downloaden.
+      'content-disposition': `${req.nextUrl.searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename="${slug}-${report.period_start.slice(0, 7)}.pdf"`,
       'cache-control': 'private, no-store',
       'x-content-type-options': 'nosniff',
     },

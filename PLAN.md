@@ -508,3 +508,9 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - **Uptime:** berekend met dezelfde functie als in de rapporten (offline-meldingen). Er is geen migratie nodig.
 - **Inbox:** de website staat altijd bovenaan. Lekken in hetzelfde onderdeel zijn samengevoegd tot één handeling. Bij updatemeldingen staat een knop "Update bekijken".
 - **Tijdlijn "Afgelopen 24 uur":** een update wordt niet meer dubbel getoond (de update én de melding erover).
+
+## 22. Rapporten verwijderen (24-09-2026)
+- Per rapport: Bekijken (PDF in een nieuw tabblad), Downloaden en Verwijderen. Verwijderen vraagt eerst een bevestiging in de rij zelf.
+- Alleen eigenaren en beheerders kunnen verwijderen, en alleen rapporten van het eigen bureau (gecontroleerd via RLS). Een rapport dat nog wordt gemaakt, kan niet worden verwijderd.
+- Eerst wordt de PDF uit de opslag gehaald, dan het record. Mislukt de opslag, dan blijft alles staan en volgt een duidelijke melding. De actie wordt gelogd.
+- Een rapport opnieuw versturen kan nog niet (er is nog geen bestaande verzendroute voor een bestaande PDF). Maak voor nu een nieuw rapport met "Ook per e-mail naar de klant sturen".

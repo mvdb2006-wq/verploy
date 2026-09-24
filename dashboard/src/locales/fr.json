@@ -812,7 +812,9 @@
     "errors": {
       "invalid_period": "Choisissez une période valide : un an maximum et pas dans le futur.",
       "no_client_email": "Saisissez d’abord l’adresse e-mail du client pour ce site.",
-      "rate_limited": "Vous avez créé beaucoup de rapports au cours de la dernière heure. Réessayez plus tard."
+      "rate_limited": "Vous avez créé beaucoup de rapports au cours de la dernière heure. Réessayez plus tard.",
+      "delete_busy": "Ce rapport est en cours de création. Supprimez-le une fois prêt.",
+      "delete_storage": "Le PDF n’a pas pu être supprimé. Rien n’a été modifié ; veuillez réessayer."
     },
     "site": {
       "title": "Client et rapports",
@@ -834,7 +836,13 @@
       "sender": "Expéditeur des rapports",
       "senderHint": "Affiché sous chaque rapport et comme expéditeur de l’e-mail. Vide = nom de l’agence.",
       "current": "Logo actuel"
-    }
+    },
+    "view": "Voir",
+    "downloadShort": "Télécharger",
+    "deleteConfirm": "Supprimer définitivement ce rapport et son PDF ?",
+    "deleteYes": "Oui, supprimer",
+    "deleted": "Rapport supprimé.",
+    "actions": "Actions pour ce rapport"
   },
   "billing": {
     "title": "Abonnement",

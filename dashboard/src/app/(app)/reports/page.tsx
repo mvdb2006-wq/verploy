@@ -1,4 +1,3 @@
-import { Download } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { canManage, requireAgency } from '@/lib/session'
@@ -7,6 +6,7 @@ import type { MessageKey } from '@/lib/i18n/core'
 import { RunBadge } from '@/components/RunBadge'
 import { AutoRefresh } from '@/components/AutoRefresh'
 import { ReportForm } from './form'
+import { ReportRowActions } from './row-actions'
 
 export async function generateMetadata() {
   return { title: (await getT())('reports.title') }
@@ -49,23 +49,19 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <th className="px-3 py-3 font-semibold">{t('reports.table.language')}</th>
                   <th className="px-3 py-3 font-semibold">{t('reports.table.trigger')}</th>
                   <th className="px-3 py-3 font-semibold">{t('reports.table.status')}</th>
-                  <th className="px-5 py-3"><span className="sr-only">{t('reports.download')}</span></th>
+                  <th className="px-5 py-3"><span className="sr-only">{t('reports.actions')}</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {(reports ?? []).map(r => (
-                  <tr key={r.id}>
+                  <tr key={r.id} data-report={r.id}>
                     <td className="px-5 py-3 font-medium">{siteName.get(r.site_id) ?? '—'}</td>
                     <td className="px-3 py-3 whitespace-nowrap tabular-nums">{formatDate(`${r.period_start}T12:00:00Z`, locale)} – {formatDate(`${r.period_end}T12:00:00Z`, locale)}</td>
                     <td className="px-3 py-3 uppercase">{r.locale}</td>
                     <td className="px-3 py-3">{t(`reports.trigger.${r.trigger}` as MessageKey)}</td>
                     <td className="px-3 py-3"><RunBadge tone={TONE[r.status as keyof typeof TONE] ?? 'muted'} label={t(`reports.status.${r.status}` as MessageKey, { email: r.send_to ?? '' })} /></td>
                     <td className="px-5 py-3 text-right">
-                      {r.pdf_path && (
-                        <a href={`/report-files/${r.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
-                          <Download size={14} aria-hidden /> {t('reports.download')}
-                        </a>
-                      )}
+                      <ReportRowActions id={r.id} hasPdf={Boolean(r.pdf_path)} canDelete={canManage(session.role)} busy={r.status === 'generating'} />
                     </td>
                   </tr>
                 ))}

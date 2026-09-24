@@ -812,7 +812,9 @@
     "errors": {
       "invalid_period": "Kies een geldige periode: maximaal een jaar en niet in de toekomst.",
       "no_client_email": "Vul eerst het e-mailadres van de klant in bij de site.",
-      "rate_limited": "Je hebt het afgelopen uur veel rapporten gemaakt. Probeer het later opnieuw."
+      "rate_limited": "Je hebt het afgelopen uur veel rapporten gemaakt. Probeer het later opnieuw.",
+      "delete_busy": "Dit rapport wordt nu gemaakt. Verwijder het zodra het klaar is.",
+      "delete_storage": "De PDF kon niet worden verwijderd. Er is niets gewijzigd; probeer het opnieuw."
     },
     "site": {
       "title": "Klant en rapporten",
@@ -834,7 +836,13 @@
       "sender": "Afzender van rapporten",
       "senderHint": "Staat onder elk rapport en als afzender van de e-mail. Leeg laten = naam van het bureau.",
       "current": "Huidig logo"
-    }
+    },
+    "view": "Bekijken",
+    "downloadShort": "Downloaden",
+    "deleteConfirm": "Dit rapport en de PDF definitief verwijderen?",
+    "deleteYes": "Ja, verwijderen",
+    "deleted": "Rapport verwijderd.",
+    "actions": "Acties voor dit rapport"
   },
   "billing": {
     "title": "Abonnement",

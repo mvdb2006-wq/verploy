@@ -812,7 +812,9 @@
     "errors": {
       "invalid_period": "Choose a valid period: at most one year and not in the future.",
       "no_client_email": "First enter the client’s email address for the site.",
-      "rate_limited": "You created many reports in the past hour. Please try again later."
+      "rate_limited": "You created many reports in the past hour. Please try again later.",
+      "delete_busy": "This report is being generated. Delete it once it is ready.",
+      "delete_storage": "The PDF could not be deleted. Nothing was changed; please try again."
     },
     "site": {
       "title": "Client and reports",
@@ -834,7 +836,13 @@
       "sender": "Report sender",
       "senderHint": "Shown under every report and as the email sender. Leave empty to use the agency name.",
       "current": "Current logo"
-    }
+    },
+    "view": "View",
+    "downloadShort": "Download",
+    "deleteConfirm": "Permanently delete this report and its PDF?",
+    "deleteYes": "Yes, delete",
+    "deleted": "Report deleted.",
+    "actions": "Actions for this report"
   },
   "billing": {
     "title": "Subscription",

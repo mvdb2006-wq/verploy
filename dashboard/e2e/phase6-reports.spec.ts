@@ -4,8 +4,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { PNG } from 'pngjs'
 import { expect, test } from '@playwright/test'
-import { clearMails, sentMails } from './support/env'
-import { addAndPairWordPress, signupWithAgency } from './support/flows'
+import { clearMails, db, sentMails } from './support/env'
+import { addAndPairWordPress, login, signupWithAgency } from './support/flows'
 
 /**
  * Fase 6: white-label rapport. Klant instellen (Duits), logo uploaden, rapport maken en
@@ -85,9 +85,15 @@ test('rapport: klant in het Duits, logo, versturen naar de klant, downloaden', a
   expect(text.toLowerCase()).not.toContain('verploy')
 
   // Downloaden uit het dashboard
-  const res = await page.request.get(await page.getByRole('link', { name: 'PDF downloaden' }).first().getAttribute('href') ?? '')
+  const res = await page.request.get(await page.getByRole('link', { name: 'Downloaden' }).first().getAttribute('href') ?? '')
   expect(res.status()).toBe(200)
   expect(res.headers()['content-type']).toBe('application/pdf')
+  expect(res.headers()['content-disposition']).toMatch(/^attachment;/)
+  // Bekijken: dezelfde PDF, maar in de browser (nieuw tabblad)
+  const view = page.getByRole('link', { name: 'Bekijken' }).first()
+  await expect(view).toHaveAttribute('target', '_blank')
+  const viewed = await page.request.get(await view.getAttribute('href') ?? '')
+  expect(viewed.headers()['content-disposition']).toMatch(/^inline;/)
   expect((await res.body()).subarray(0, 5).toString()).toBe('%PDF-')
 })
 
@@ -100,4 +106,28 @@ test('rapport-PDF van een ander bureau is niet te downloaden', async ({ page }) 
   expect(rows).toHaveLength(1)
   const res = await page.request.get(`/report-files/${rows[0].id}`)
   expect(res.status()).toBe(404)
+})
+
+test('rapport verwijderen: eerst bevestigen, daarna zijn record en PDF weg', async ({ page }) => {
+  await login(page, owner)
+  await page.goto('/reports')
+  const c = db(); await c.connect()
+  try {
+    const before = await c.query(`select r.id, r.pdf_path from public.reports r join public.agencies a on a.id = r.agency_id where a.name = $1 order by r.created_at`, [`Agentur Nord ${run}`])
+    expect(before.rows.length).toBeGreaterThan(0)
+    const target = before.rows[0] as { id: string; pdf_path: string }
+    expect(fs.existsSync(path.join(process.env.STORAGE_DIR ?? '/tmp/verploy-local/storage', 'reports', target.pdf_path))).toBe(true)
+    const row = page.locator(`tr[data-report="${target.id}"]`)
+    await row.getByRole('button', { name: 'Verwijderen' }).click()
+    await expect(row.getByText('Dit rapport en de PDF definitief verwijderen?')).toBeVisible()
+    await row.getByRole('button', { name: 'Annuleren' }).click()               // annuleren laat alles staan
+    await row.getByRole('button', { name: 'Verwijderen' }).click()
+    await row.getByRole('button', { name: 'Ja, verwijderen' }).click()
+    await expect(row).toHaveCount(0)                                        // de rij verdwijnt direct
+    const after = await c.query(`select count(*)::int n from public.reports where id = $1`, [target.id])
+    expect(after.rows[0].n).toBe(0)
+    // lokale stand-in van Supabase Storage bewaart objecten als bestanden
+    expect(fs.existsSync(path.join(process.env.STORAGE_DIR ?? '/tmp/verploy-local/storage', 'reports', target.pdf_path))).toBe(false)
+    expect((await page.request.get(`/report-files/${target.id}`)).status()).toBe(404)
+  } finally { await c.end() }
 })

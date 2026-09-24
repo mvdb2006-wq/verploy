@@ -812,7 +812,9 @@
     "errors": {
       "invalid_period": "Wähle einen gültigen Zeitraum: höchstens ein Jahr und nicht in der Zukunft.",
       "no_client_email": "Trage zuerst die E-Mail-Adresse des Kunden bei der Website ein.",
-      "rate_limited": "Du hast in der letzten Stunde viele Berichte erstellt. Versuche es später erneut."
+      "rate_limited": "Du hast in der letzten Stunde viele Berichte erstellt. Versuche es später erneut.",
+      "delete_busy": "Dieser Bericht wird gerade erstellt. Lösche ihn, sobald er fertig ist.",
+      "delete_storage": "Das PDF konnte nicht gelöscht werden. Es wurde nichts geändert; bitte versuche es erneut."
     },
     "site": {
       "title": "Kunde und Berichte",
@@ -834,7 +836,13 @@
       "sender": "Absender der Berichte",
       "senderHint": "Steht unter jedem Bericht und als Absender der E-Mail. Leer = Name der Agentur.",
       "current": "Aktuelles Logo"
-    }
+    },
+    "view": "Ansehen",
+    "downloadShort": "Herunterladen",
+    "deleteConfirm": "Diesen Bericht und das PDF endgültig löschen?",
+    "deleteYes": "Ja, löschen",
+    "deleted": "Bericht gelöscht.",
+    "actions": "Aktionen für diesen Bericht"
   },
   "billing": {
     "title": "Abo",

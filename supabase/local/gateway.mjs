@@ -49,7 +49,7 @@ async function storage(req, res, url) {
   if (req.method === 'DELETE' && !key) {
     const { prefixes = [] } = JSON.parse((await readBody(req)).toString() || '{}')
     const removed = []
-    for (const k of prefixes) { const f = safePath(bucket, k); if (f && fs.existsSync(f)) { fs.rmSync(f); removed.push({ name: k, bucket_id: bucket }) } }
+    for (const k of prefixes) { const f = safePath(bucket, k); if (f && fs.existsSync(f)) { fs.rmSync(f); fs.rmSync(f + '.meta', { force: true }); removed.push({ name: k, bucket_id: bucket }) } }
     return json(res, 200, removed)
   }
   const file = safePath(bucket, key)
