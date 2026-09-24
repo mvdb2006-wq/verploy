@@ -59,7 +59,14 @@
       "checkEmailBody": "Wir haben einen Bestätigungslink an {email} gesendet. Klicke darauf, um fortzufahren.",
       "errorClosed": "Die Registrierung ist vorübergehend geschlossen.",
       "errorExists": "Mit dieser E-Mail-Adresse gibt es bereits ein Konto. Melde dich an oder setze dein Passwort zurück.",
-      "errorWeak": "Wähle ein Passwort mit mindestens 10 Zeichen."
+      "errorWeak": "Wähle ein Passwort mit mindestens 10 Zeichen.",
+      "plan": {
+        "label": "Gewählter Tarif",
+        "chosen": "Gewählter Tarif: {plan}",
+        "detail": "{price} pro Monat · {count, plural, one {# Website} other {# Websites}}",
+        "trial": "Du startest mit 14 Tagen gratis, ohne Kreditkarte. Das Abo schließt du erst danach ab, wenn du willst.",
+        "trialLimit": "Während der Testphase kannst du bis zu {trial} Websites verbinden; alle {count} Websites von {plan} werden mit dem Abo freigeschaltet."
+      }
     },
     "forgot": {
       "title": "Passwort vergessen",
@@ -916,7 +923,13 @@
     "changed": "Änderung übermittelt. Das neue Abo ist in wenigen Sekunden aktiv.",
     "canceled": "Kündigung übermittelt.",
     "resumed": "Das Abo läuft weiter.",
-    "error": "Stripe hat einen Fehler gemeldet. Versuche es erneut oder kontaktiere uns."
+    "error": "Stripe hat einen Fehler gemeldet. Versuche es erneut oder kontaktiere uns.",
+    "intended": {
+      "title": "Du hast {plan} gewählt",
+      "body": "{price} pro Monat · {count, plural, one {# Website} other {# Websites}}. Deine Testphase läuft weiter, bis du abschließt.",
+      "cta": "{plan} abschließen",
+      "badge": "Deine Wahl"
+    }
   },
   "errors": {
     "notFoundTitle": "Seite nicht gefunden",

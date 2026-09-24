@@ -59,7 +59,14 @@
       "checkEmailBody": "We hebben een bevestigingslink gestuurd naar {email}. Klik erop om verder te gaan.",
       "errorClosed": "Registratie is tijdelijk gesloten.",
       "errorExists": "Er bestaat al een account met dit e-mailadres. Log in of stel een nieuw wachtwoord in.",
-      "errorWeak": "Kies een wachtwoord van minimaal 10 tekens."
+      "errorWeak": "Kies een wachtwoord van minimaal 10 tekens.",
+      "plan": {
+        "label": "Gekozen plan",
+        "chosen": "Gekozen plan: {plan}",
+        "detail": "{price} per maand · {count, plural, one {# site} other {# sites}}",
+        "trial": "Je begint met 14 dagen gratis, zonder creditcard. Het abonnement sluit je daarna pas af, als je wilt.",
+        "trialLimit": "Tijdens de proefperiode koppel je tot {trial} sites; alle {count} sites van {plan} komen vrij zodra je het abonnement afsluit."
+      }
     },
     "forgot": {
       "title": "Wachtwoord vergeten",
@@ -916,7 +923,13 @@
     "changed": "Wijziging doorgegeven. Het nieuwe abonnement is binnen enkele seconden actief.",
     "canceled": "Opzegging doorgegeven.",
     "resumed": "Het abonnement loopt weer door.",
-    "error": "Stripe gaf een fout. Probeer het opnieuw of neem contact op."
+    "error": "Stripe gaf een fout. Probeer het opnieuw of neem contact op.",
+    "intended": {
+      "title": "Je koos {plan}",
+      "body": "{price} per maand · {count, plural, one {# site} other {# sites}}. Je proefperiode loopt gewoon door tot je afsluit.",
+      "cta": "{plan} afsluiten",
+      "badge": "Jouw keuze"
+    }
   },
   "errors": {
     "notFoundTitle": "Pagina niet gevonden",

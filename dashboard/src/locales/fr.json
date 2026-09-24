@@ -59,7 +59,14 @@
       "checkEmailBody": "Nous avons envoyé un lien de confirmation à {email}. Cliquez dessus pour continuer.",
       "errorClosed": "Les inscriptions sont temporairement fermées.",
       "errorExists": "Un compte existe déjà avec cette adresse e-mail. Connectez-vous ou réinitialisez votre mot de passe.",
-      "errorWeak": "Choisissez un mot de passe d'au moins 10 caractères."
+      "errorWeak": "Choisissez un mot de passe d'au moins 10 caractères.",
+      "plan": {
+        "label": "Formule choisie",
+        "chosen": "Formule choisie : {plan}",
+        "detail": "{price} par mois · {count, plural, one {# site} other {# sites}}",
+        "trial": "Vous commencez par 14 jours gratuits, sans carte bancaire. Vous ne souscrivez qu’ensuite, si vous le souhaitez.",
+        "trialLimit": "Pendant l’essai, vous pouvez connecter jusqu’à {trial} sites ; les {count} sites de {plan} sont débloqués dès la souscription."
+      }
     },
     "forgot": {
       "title": "Mot de passe oublié",
@@ -916,7 +923,13 @@
     "changed": "Modification envoyée. Le nouvel abonnement sera actif dans quelques secondes.",
     "canceled": "Résiliation envoyée.",
     "resumed": "L’abonnement continue.",
-    "error": "Stripe a renvoyé une erreur. Réessayez ou contactez-nous."
+    "error": "Stripe a renvoyé une erreur. Réessayez ou contactez-nous.",
+    "intended": {
+      "title": "Vous avez choisi {plan}",
+      "body": "{price} par mois · {count, plural, one {# site} other {# sites}}. Votre essai continue jusqu’à la souscription.",
+      "cta": "Souscrire à {plan}",
+      "badge": "Votre choix"
+    }
   },
   "errors": {
     "notFoundTitle": "Page introuvable",

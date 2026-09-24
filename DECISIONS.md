@@ -207,3 +207,14 @@ Per site staat er een duidelijke "WP Admin"-link naar `/wp-admin/`. De gebruiker
 
 ## 24-09 — Tabellen kopiëren: terugval op SHOW CREATE TABLE
 Sommige MySQL-compatibele databases nemen bij `CREATE TABLE … LIKE` de prefixlengte van indexen op tekstkolommen niet over. Gezien bij WooCommerce' `wc_orders_meta` in de testdatabase. De connector valt dan terug op de exacte definitie uit `SHOW CREATE TABLE`, zowel voor de testkopie als voor de snapshot.
+
+## 24-09 — Plankeuze en taal vanaf verploy.com: voorkeur bij het account, geen migratie
+- **Waar het plan staat:** `/signup?plan=<code>` toont het gekozen plan. De server bewaart het bij het account als `intended_plan` (Supabase Auth user metadata, gezet bij het aanmaken van het account). Het is alleen een voorselectie op de abonnementspagina; het wordt steeds opnieuw getoetst aan de openbare plannen in `plans`.
+  - Het staat bewust niet in `agencies.plan_id`: dat is het plan dat nu de limieten bepaalt (de proefperiode draait op Studio).
+  - Prijs en plan van het abonnement komen uit Stripe (webhook, van prijs naar plan). Een gemanipuleerde URL of metadata verandert dus nooit limieten of betaalstatus.
+- **Terugval:** een onbekend of leeg plan betekent geen keuze en geen foutmelding. Is de bezoeker al ingelogd, dan gaat `/signup?plan=x` naar `/settings/billing?plan=x`.
+- **Taal:**
+  - Een geldige `?lang=` wint.
+  - Anders geeft herkomst van verploy.com (Referer-origin; de site stuurt `strict-origin-when-cross-origin`) Engels, maar alleen als de bezoeker nog geen taalkeuze heeft.
+  - De keuze gaat in de cookie `vp_locale` en daarna in de taal van het bureau.
+  - Zonder context blijft de bestaande logica gelden (cookie, dan browsertaal).

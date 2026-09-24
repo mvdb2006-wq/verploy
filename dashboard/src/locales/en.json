@@ -59,7 +59,14 @@
       "checkEmailBody": "We sent a confirmation link to {email}. Click it to continue.",
       "errorClosed": "Sign-ups are temporarily closed.",
       "errorExists": "An account with this email address already exists. Sign in or reset your password.",
-      "errorWeak": "Choose a password of at least 10 characters."
+      "errorWeak": "Choose a password of at least 10 characters.",
+      "plan": {
+        "label": "Selected plan",
+        "chosen": "Selected plan: {plan}",
+        "detail": "{price} per month · {count, plural, one {# site} other {# sites}}",
+        "trial": "You start with 14 days free, no credit card. You only subscribe afterwards, if you want to.",
+        "trialLimit": "During the trial you can connect up to {trial} sites; all {count} sites of {plan} unlock when you subscribe."
+      }
     },
     "forgot": {
       "title": "Forgot password",
@@ -916,7 +923,13 @@
     "changed": "Change submitted. The new plan will be active within seconds.",
     "canceled": "Cancellation submitted.",
     "resumed": "The subscription continues.",
-    "error": "Stripe returned an error. Please try again or contact us."
+    "error": "Stripe returned an error. Please try again or contact us.",
+    "intended": {
+      "title": "You chose {plan}",
+      "body": "{price} per month · {count, plural, one {# site} other {# sites}}. Your trial simply continues until you subscribe.",
+      "cta": "Subscribe to {plan}",
+      "badge": "Your choice"
+    }
   },
   "errors": {
     "notFoundTitle": "Page not found",

@@ -59,7 +59,14 @@
       "checkEmailBody": "Hemos enviado un enlace de confirmación a {email}. Haz clic en él para continuar.",
       "errorClosed": "El registro está cerrado temporalmente.",
       "errorExists": "Ya existe una cuenta con este correo electrónico. Inicia sesión o restablece tu contraseña.",
-      "errorWeak": "Elige una contraseña de al menos 10 caracteres."
+      "errorWeak": "Elige una contraseña de al menos 10 caracteres.",
+      "plan": {
+        "label": "Plan elegido",
+        "chosen": "Plan elegido: {plan}",
+        "detail": "{price} al mes · {count, plural, one {# sitio} other {# sitios}}",
+        "trial": "Empiezas con 14 días gratis, sin tarjeta de crédito. Solo te suscribes después, si quieres.",
+        "trialLimit": "Durante la prueba puedes conectar hasta {trial} sitios; los {count} sitios de {plan} se desbloquean al suscribirte."
+      }
     },
     "forgot": {
       "title": "Contraseña olvidada",
@@ -916,7 +923,13 @@
     "changed": "Cambio enviado. El nuevo plan estará activo en unos segundos.",
     "canceled": "Cancelación enviada.",
     "resumed": "La suscripción continúa.",
-    "error": "Stripe devolvió un error. Inténtalo de nuevo o contáctanos."
+    "error": "Stripe devolvió un error. Inténtalo de nuevo o contáctanos.",
+    "intended": {
+      "title": "Elegiste {plan}",
+      "body": "{price} al mes · {count, plural, one {# sitio} other {# sitios}}. Tu prueba sigue hasta que te suscribas.",
+      "cta": "Suscribirse a {plan}",
+      "badge": "Tu elección"
+    }
   },
   "errors": {
     "notFoundTitle": "Página no encontrada",

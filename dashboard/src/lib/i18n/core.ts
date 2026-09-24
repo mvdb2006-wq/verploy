@@ -5,6 +5,8 @@ import fr from '@/locales/fr.json'
 import es from '@/locales/es.json'
 
 export const LOCALES = ['nl', 'en', 'de', 'fr', 'es'] as const
+/** Taalkeuze van een bezoeker (vóór er een bureau is), bijv. meegegeven door verploy.com. */
+export const LOCALE_COOKIE = 'vp_locale'
 export type Locale = (typeof LOCALES)[number]
 // Terugval voor onbekende browsertalen: Engels (internationale verkoop, zie DECISIONS.md).
 export const DEFAULT_LOCALE: Locale = 'en'

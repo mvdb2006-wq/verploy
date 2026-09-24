@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { env } from '@/lib/env'
 import { getT } from '@/lib/i18n/server'
 import { safeNext } from '@/lib/safe-next'
+import { publicPlans } from '@/lib/billing/public-plans'
+import { pickPlan } from '@/lib/signup-intent'
 
 export interface FormState { error?: string; ok?: string; email?: string }
 
@@ -35,10 +37,16 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
     return { error: parsed.error.issues.some(i => i.path[0] === 'password') ? t('auth.signup.errorWeak') : t('sitesNew.errorEmail') }
   }
   const next = safeNext(String(form.get('next') ?? ''), '/onboarding')
+  // Plan gekozen op verploy.com: opnieuw getoetst aan de openbare plannen; bewaard bij het account als
+  // voorkeur (voorselectie bij het abonnement). Bepaalt nooit prijs, limiet of betaalstatus.
+  const plan = pickPlan(form.get('plan'), await publicPlans())
   const supabase = await createClient()
   const { data, error } = await supabase.auth.signUp({
     ...parsed.data,
-    options: { emailRedirectTo: `${env().NEXT_PUBLIC_APP_URL}/auth/callback?next=${encodeURIComponent(next)}` },
+    options: {
+      emailRedirectTo: `${env().NEXT_PUBLIC_APP_URL}/auth/callback?next=${encodeURIComponent(next)}`,
+      ...(plan ? { data: { intended_plan: plan.id } } : {}),
+    },
   })
   if (error) {
     if (error.code === 'signup_disabled') return { error: t('auth.signup.errorClosed') }

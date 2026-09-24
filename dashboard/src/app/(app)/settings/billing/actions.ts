@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/billing/stripe'
 import { env } from '@/lib/env'
+import { checkoutSessionParams } from '@/lib/billing/checkout'
 
 export interface BillingState { error?: string; ok?: string }
 
@@ -53,21 +54,10 @@ export async function startCheckout(_: BillingState, form: FormData): Promise<Bi
       const { error } = await createAdminClient().rpc('set_stripe_customer', { p_agency: session.agency.id, p_customer: customer })
       if (error) throw error
     }
-    const checkout = await s.checkout.sessions.create({
-      mode: 'subscription',
-      customer,
-      client_reference_id: session.agency.id,
-      line_items: [{ price: plan.stripe_price_id!, quantity: 1 }],
-      subscription_data: { metadata: { agency_id: session.agency.id } },
-      metadata: { agency_id: session.agency.id },
-      allow_promotion_codes: true,
-      billing_address_collection: 'required',
-      tax_id_collection: { enabled: true },
-      customer_update: { address: 'auto', name: 'auto' },
-      locale: STRIPE_LOCALE[await getLocale()],
-      success_url: `${appUrl}/settings/billing?checkout=success`,
-      cancel_url: `${appUrl}/settings/billing`,
-    })
+    const checkout = await s.checkout.sessions.create(checkoutSessionParams({
+      agencyId: session.agency.id, customer, plan: { id: plan.id, stripe_price_id: plan.stripe_price_id! },
+      locale: STRIPE_LOCALE[await getLocale()], appUrl,
+    }))
     url = checkout.url
   } catch (err) {
     console.error('[billing] checkout mislukt', (err as Error).message)

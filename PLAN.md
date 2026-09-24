@@ -523,3 +523,8 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
   - terugval bij het kopiëren van tabellen.
   - WordPress.org Plugin Check: geen fouten.
 - Bewezen met de echte plugins: een onschuldige update gaat live, met alle functionele tests groen. Een update die alleen het versturen van formulieren breekt (de pagina ziet er hetzelfde uit), wordt tegengehouden met de reden in gewone taal.
+
+## 24. Van verploy.com naar de app (24-09-2026)
+- De registratiepagina toont het plan uit `?plan=`, met prijs, aantal sites en de uitleg over de proefperiode. Het plan wordt bewaard bij het account, en de abonnementspagina zet het klaar ("Je koos Agency", "Agency afsluiten").
+- Engels als de bezoeker van verploy.com komt of `?lang=en` meegeeft. Die taal blijft gelden voor inloggen, onboarding en het bureau.
+- Tests: unit (plan geldig, ongeldig of ontbrekend; taal; checkout-prijs uit het plan) en E2E `phase71-signup-plan`, van registratie tot Stripe Checkout, in het Engels en het Nederlands, met een ongeldig plan en voor een gebruiker die al is ingelogd.

@@ -1,10 +1,10 @@
 import 'server-only'
 import { cookies, headers } from 'next/headers'
 import { cache } from 'react'
-import { createTranslator, isLocale, negotiateLocale, type Locale, type Translate } from './core'
+import { LOCALE_COOKIE, createTranslator, isLocale, negotiateLocale, type Locale, type Translate } from './core'
 import { getSession } from '@/lib/session'
 
-export const LOCALE_COOKIE = 'vp_locale'
+export { LOCALE_COOKIE }
 
 /** Taal: die van het bureau (ingelogd), anders cookie, anders Accept-Language. */
 export const getLocale = cache(async (): Promise<Locale> => {

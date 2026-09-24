@@ -31,7 +31,7 @@ export function LoginForm({ next, defaultEmail }: { next: string; defaultEmail?:
   )
 }
 
-export function SignupForm({ next, defaultEmail }: { next: string; defaultEmail?: string }) {
+export function SignupForm({ next, defaultEmail, plan = null }: { next: string; defaultEmail?: string; plan?: string | null }) {
   const { t } = useI18n()
   const [state, action] = useActionState(signup, initial)
   if (state.ok) {
@@ -45,6 +45,7 @@ export function SignupForm({ next, defaultEmail }: { next: string; defaultEmail?
   return (
     <form action={action} className="space-y-4" noValidate>
       <input type="hidden" name="next" value={next} />
+      {plan && <input type="hidden" name="plan" value={plan} />}
       {state.error && <Alert>{state.error}</Alert>}
       <Field id="email" label={t('auth.email')}>
         <input id="email" name="email" type="email" autoComplete="email" required className="input"
