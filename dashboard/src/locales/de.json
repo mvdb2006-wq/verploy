@@ -914,6 +914,8 @@
       "blockedBody": "{title}. Das sichere Update ging auf {count, plural, one {# Site} other {# Sites}} nicht durch: {sites}.",
       "noFixTitle": "{component}: noch keine Lösung",
       "noFixBody": "{title}. Es gibt noch keine Version ohne diese Lücke ({count, plural, one {# Site} other {# Sites}}: {sites}). Plugin deaktivieren oder ersetzen erwägen.",
+      "manualTitle": "{component}: auf {version} aktualisieren (nicht über WordPress)",
+      "manualBody": "{title}. Behoben in {version}, aber WordPress bietet dieses Update nicht an ({count, plural, one {# Site} other {# Sites}}: {sites}). Meist fehlt eine Lizenz oder die Komponente wird außerhalb von WordPress aktualisiert. Lizenz aktivieren, damit Verploy sicher aktualisieren kann, oder über den Hersteller aktualisieren.",
       "started": "{count, plural, one {# sicheres Update gestartet} other {# sichere Updates gestartet}}.",
       "startFailed": "{count, plural, one {# Site konnte nicht starten} other {# Sites konnten nicht starten}}: Es läuft bereits ein Update oder die Site ist nicht verbunden.",
       "kind": {
@@ -944,7 +946,8 @@
       "scheduled": "Verploy behebt",
       "blocked": "Zurückgehalten",
       "fixable": "Lösung verfügbar",
-      "no_fix": "Noch keine Lösung"
+      "no_fix": "Noch keine Lösung",
+      "manual": "Manuell aktualisieren"
     },
     "activity": {
       "title": "Letzte 24 Stunden",

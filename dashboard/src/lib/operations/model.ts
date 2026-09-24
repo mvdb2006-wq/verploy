@@ -33,6 +33,7 @@ export type SiteState =
   | 'scheduled'   // automatisch oplossen staat aan: Verploy start zo zelf
   | 'blocked'     // automatische oplossing is tegengehouden of mislukt → nakijken
   | 'fixable'     // laag/middel met oplossing: kan, hoeft niet
+  | 'manual'      // er is een versie zonder lek, maar WordPress biedt die update niet aan (licentie, eigen updater)
   | 'no_fix'      // nog geen versie zonder lek
 
 export interface GroupSite {
@@ -64,11 +65,11 @@ export interface VulnGroup {
   siteCount: number
 }
 
-const EMPTY_COUNTS = (): Record<SiteState, number> => ({ fixing: 0, awaiting: 0, scheduled: 0, blocked: 0, fixable: 0, no_fix: 0 })
+const EMPTY_COUNTS = (): Record<SiteState, number> => ({ fixing: 0, awaiting: 0, scheduled: 0, blocked: 0, fixable: 0, manual: 0, no_fix: 0 })
 
 export function siteState(f: FindingRow, opts: { autofix: boolean; activeRunSites: Set<string>; runsById: Map<string, RunLite> }): SiteState {
   if (opts.activeRunSites.has(f.site_id)) return 'fixing'
-  if (!f.fixable) return 'no_fix'
+  if (!f.fixable) return f.fixed_version ? 'manual' : 'no_fix'
   if (f.autofix_run_id) {
     const run = opts.runsById.get(f.autofix_run_id)
     if (run && run.status === 'done' && run.verdict !== 'deployed') return 'blocked'
@@ -124,6 +125,7 @@ export function groupFindings(
 export type InboxItem =
   | { kind: 'approve'; key: string; severity: Severity; since: string; group: VulnGroup; siteIds: string[] }
   | { kind: 'no_fix'; key: string; severity: Severity; since: string; group: VulnGroup }
+  | { kind: 'manual'; key: string; severity: Severity; since: string; group: VulnGroup }
   | { kind: 'blocked_fix'; key: string; severity: Severity; since: string; group: VulnGroup }
   | { kind: 'alert'; key: string; severity: Severity; since: string; alert: AlertLite }
 
@@ -143,6 +145,8 @@ export function inboxItems(groups: VulnGroup[], alerts: AlertLite[]): InboxItem[
     if (blocked.length) items.push({ kind: 'blocked_fix', key: `blocked:${g.id}`, severity: g.severity, since: minIso(blocked.map(s => s.firstSeen)), group: g })
     const noFix = g.sites.filter(s => s.state === 'no_fix')
     if (noFix.length) items.push({ kind: 'no_fix', key: `nofix:${g.id}`, severity: g.severity, since: minIso(noFix.map(s => s.firstSeen)), group: g })
+    const manual = g.sites.filter(s => s.state === 'manual')
+    if (manual.length) items.push({ kind: 'manual', key: `manual:${g.id}`, severity: g.severity, since: minIso(manual.map(s => s.firstSeen)), group: g })
   }
   // Lekken staan al hierboven, per kwetsbaarheid; bevestigde meldingen tellen niet meer mee.
   for (const a of alerts) {

@@ -914,6 +914,8 @@
       "blockedBody": "{title}. La mise à jour sécurisée n’a pas abouti sur {count, plural, one {# site} other {# sites}} : {sites}.",
       "noFixTitle": "{component} : pas encore de correctif",
       "noFixBody": "{title}. Aucune version sans cette faille n’existe encore ({count, plural, one {# site} other {# sites}} : {sites}). Envisagez de désactiver ou remplacer l’extension.",
+      "manualTitle": "{component} : mettre à jour vers {version} (non proposé par WordPress)",
+      "manualBody": "{title}. Corrigé en {version}, mais WordPress ne propose pas cette mise à jour ({count, plural, one {# site} other {# sites}} : {sites}). Il manque généralement une licence, ou le composant se met à jour en dehors de WordPress. Activez la licence pour que Verploy puisse le mettre à jour en toute sécurité, ou mettez-le à jour via l’éditeur.",
       "started": "{count, plural, one {# mise à jour sécurisée lancée} other {# mises à jour sécurisées lancées}}.",
       "startFailed": "{count, plural, one {# site n’a pas pu démarrer} other {# sites n’ont pas pu démarrer}} : une mise à jour est déjà en cours ou le site n’est pas connecté.",
       "kind": {
@@ -944,7 +946,8 @@
       "scheduled": "Verploy corrige",
       "blocked": "Bloquée",
       "fixable": "Correctif disponible",
-      "no_fix": "Pas encore de correctif"
+      "no_fix": "Pas encore de correctif",
+      "manual": "Mise à jour manuelle"
     },
     "activity": {
       "title": "Dernières 24 heures",

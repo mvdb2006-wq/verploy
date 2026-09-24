@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn'
 const SEVERITY_CLASS = { critical: 'badge-danger', high: 'badge-danger', medium: 'badge-warn', low: 'badge-muted' } as const
 const STATE_CLASS: Record<SiteState, string> = {
   fixing: 'bg-accent/10 text-accent', awaiting: 'badge-warn', scheduled: 'bg-accent/10 text-accent',
-  blocked: 'badge-danger', fixable: 'badge-muted', no_fix: 'badge-danger',
+  blocked: 'badge-danger', fixable: 'badge-muted', manual: 'badge-warn', no_fix: 'badge-danger',
 }
 
 export function Severity({ t, severity }: { t: Translate; severity: string }) {
@@ -55,18 +55,19 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
         const g = item.group
         const vars = { component: g.component, title: g.title }
         const sitesFor = (state: SiteState) => uniqueSites(g.sites.filter(s => s.state === state))
-        const relevant = item.kind === 'approve' ? sitesFor('awaiting') : item.kind === 'blocked_fix' ? sitesFor('blocked') : sitesFor('no_fix')
+        const relevant = item.kind === 'approve' ? sitesFor('awaiting') : item.kind === 'blocked_fix' ? sitesFor('blocked') : item.kind === 'manual' ? sitesFor('manual') : sitesFor('no_fix')
         const fixed = relevant.map(s => s.fixed).find(Boolean) ?? ''
         return (
           <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
             <Severity t={t} severity={item.severity} />
             <div className="min-w-0 flex-1 basis-64">
               <p className="text-sm font-semibold [overflow-wrap:anywhere]">
-                {item.kind === 'approve' ? t('ops.inbox.approveTitle', vars) : item.kind === 'blocked_fix' ? t('ops.inbox.blockedTitle', vars) : t('ops.inbox.noFixTitle', vars)}
+                {item.kind === 'approve' ? t('ops.inbox.approveTitle', vars) : item.kind === 'blocked_fix' ? t('ops.inbox.blockedTitle', vars) : item.kind === 'manual' ? t('ops.inbox.manualTitle', { ...vars, version: fixed }) : t('ops.inbox.noFixTitle', vars)}
               </p>
               <p className="mt-0.5 text-sm text-muted [overflow-wrap:anywhere]">
                 {item.kind === 'approve' ? t('ops.inbox.approveBody', { ...vars, version: fixed, count: relevant.length, sites: names(relevant) })
                   : item.kind === 'blocked_fix' ? t('ops.inbox.blockedBody', { ...vars, count: relevant.length, sites: names(relevant) })
+                  : item.kind === 'manual' ? t('ops.inbox.manualBody', { ...vars, version: fixed, count: relevant.length, sites: names(relevant) })
                   : t('ops.inbox.noFixBody', { ...vars, count: relevant.length, sites: names(relevant) })}
               </p>
               <p className="mt-1 text-xs text-subtle">

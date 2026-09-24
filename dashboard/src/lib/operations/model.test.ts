@@ -15,7 +15,9 @@ describe('siteState', () => {
   })
   it('lopende run gaat voor; geen oplossing; laag/middel alleen "beschikbaar"', () => {
     expect(siteState(f(), { ...base, activeRunSites: new Set(['s1']) })).toBe('fixing')
-    expect(siteState(f({ fixable: false }), base)).toBe('no_fix')
+    expect(siteState(f({ fixable: false, fixed_version: null }), base)).toBe('no_fix')
+    // wel een versie zonder lek, maar WordPress biedt hem niet aan (premium zonder licentie): handmatig
+    expect(siteState(f({ fixable: false, fixed_version: '7.16.1' }), base)).toBe('manual')
     expect(siteState(f({ severity: 'medium' }), base)).toBe('fixable')
   })
   it('automatische poging tegengehouden → nakijken', () => {
@@ -30,7 +32,7 @@ describe('groupFindings', () => {
   it('groepeert per kwetsbaarheid over sites, ernstigste en oudste eerst, telt statussen', () => {
     const groups = groupFindings([
       f({ site_id: 's2', first_seen_at: '2026-09-24T09:00:00Z' }), f(),
-      f({ vulnerability_id: 'v2', severity: 'critical', component_name: 'Elementor', fixable: false }),
+      f({ vulnerability_id: 'v2', severity: 'critical', component_name: 'Elementor', fixable: false, fixed_version: null }),
       f({ vulnerability_id: 'v3', severity: 'low' }),
     ], new Map([['v1', { id: 'v1', title: 'XSS', cve: 'CVE-1', cvss_score: 7.2, reference_url: null }]]), new Map([['s1', 'Alfa'], ['s2', 'Beta']]), base)
     expect(groups.map(g => g.id)).toEqual(['v2', 'v1', 'v3'])
@@ -54,10 +56,11 @@ describe('inboxItems', () => {
   const alert = (over: Partial<AlertLite> = {}): AlertLite => ({ id: 'a1', type: 'site_offline', severity: 'critical', params: {}, opened_at: '2026-09-24T08:00:00Z', site_id: 's1', siteName: 'Alfa', acknowledged_at: null, ...over })
   it('beslissingen voor ernstige lekken, problemen voor meldingen; lage lekken en bevestigde/lek-meldingen niet', () => {
     const groups = groupFindings([
-      f(), f({ vulnerability_id: 'v2', fixable: false, severity: 'critical' }), f({ vulnerability_id: 'v3', severity: 'medium' }),
+      f(), f({ vulnerability_id: 'v2', fixable: false, fixed_version: null, severity: 'critical' }), f({ vulnerability_id: 'v3', severity: 'medium' }),
+      f({ vulnerability_id: 'v4', fixable: false, fixed_version: '26.0' }),
     ], new Map(), new Map([['s1', 'Alfa']]), base)
     const items = inboxItems(groups, [alert(), alert({ id: 'a2', acknowledged_at: '2026-09-24T09:00:00Z' }), alert({ id: 'a3', type: 'vulnerability' }), alert({ id: 'a4', severity: 'info' })])
-    expect(items.map(i => i.key)).toEqual(['alert:a1', 'nofix:v2', 'approve:v1'])
+    expect(items.map(i => i.key)).toEqual(['alert:a1', 'nofix:v2', 'approve:v1', 'manual:v4'])
     expect(items.find(i => i.kind === 'approve')).toMatchObject({ siteIds: ['s1'] })
   })
   it('met automatisch oplossen aan: geen goedkeuring nodig', () => {

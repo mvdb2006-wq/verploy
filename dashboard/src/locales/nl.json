@@ -914,6 +914,8 @@
       "blockedBody": "{title}. De veilige update ging niet door op {count, plural, one {# site} other {# sites}}: {sites}.",
       "noFixTitle": "{component}: nog geen oplossing",
       "noFixBody": "{title}. Er is nog geen versie zonder dit lek ({count, plural, one {# site} other {# sites}}: {sites}). Overweeg de plugin uit te schakelen of te vervangen.",
+      "manualTitle": "{component}: bijwerken naar {version} (niet via WordPress)",
+      "manualBody": "{title}. Opgelost in {version}, maar WordPress biedt deze update niet aan ({count, plural, one {# site} other {# sites}}: {sites}). Meestal ontbreekt een licentie of wordt het onderdeel buiten WordPress om bijgewerkt. Activeer de licentie, dan kan Verploy het veilig updaten, of werk het bij via de maker.",
       "started": "{count, plural, one {# veilige update gestart} other {# veilige updates gestart}}.",
       "startFailed": "{count, plural, one {# site kon niet starten} other {# sites konden niet starten}}: er loopt al een update, of de site is niet gekoppeld.",
       "kind": {
@@ -944,7 +946,8 @@
       "scheduled": "Verploy lost op",
       "blocked": "Tegengehouden",
       "fixable": "Oplossing beschikbaar",
-      "no_fix": "Nog geen oplossing"
+      "no_fix": "Nog geen oplossing",
+      "manual": "Handmatig bijwerken"
     },
     "activity": {
       "title": "Afgelopen 24 uur",

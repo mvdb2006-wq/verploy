@@ -914,6 +914,8 @@
       "blockedBody": "{title}. The safe update didn’t go through on {count, plural, one {# site} other {# sites}}: {sites}.",
       "noFixTitle": "{component}: no fix yet",
       "noFixBody": "{title}. There is no version without this vulnerability yet ({count, plural, one {# site} other {# sites}}: {sites}). Consider deactivating or replacing the plugin.",
+      "manualTitle": "{component}: update to {version} (not offered by WordPress)",
+      "manualBody": "{title}. Fixed in {version}, but WordPress does not offer this update ({count, plural, one {# site} other {# sites}}: {sites}). Usually a licence is missing or the component updates outside WordPress. Activate the licence so Verploy can update it safely, or update it via the vendor.",
       "started": "{count, plural, one {# safe update started} other {# safe updates started}}.",
       "startFailed": "{count, plural, one {# site couldn’t start} other {# sites couldn’t start}}: an update is already running, or the site isn’t connected.",
       "kind": {
@@ -944,7 +946,8 @@
       "scheduled": "Verploy is fixing",
       "blocked": "Held back",
       "fixable": "Fix available",
-      "no_fix": "No fix yet"
+      "no_fix": "No fix yet",
+      "manual": "Update manually"
     },
     "activity": {
       "title": "Last 24 hours",
