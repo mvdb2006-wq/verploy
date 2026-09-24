@@ -74,7 +74,7 @@ class Verploy_Rest_Endpoints {
 			return new WP_Error( 'verploy_not_locked', 'Run does not hold the site lock.', array( 'status' => 409 ) );
 		}
 		if ( function_exists( 'set_time_limit' ) ) {
-			@set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			@set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, Squiz.PHP.DiscouragedFunctions.Discouraged -- elke stap is begrensd op 20 s; dit voorkomt afbreken bij trage schijven
 		}
 		@ignore_user_abort( true ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 		try {

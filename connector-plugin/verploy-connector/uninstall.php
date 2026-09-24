@@ -18,7 +18,7 @@ wp_clear_scheduled_hook( 'verploy_heartbeat' );
 // Tijdelijke run-bestanden en -tabellen (staging, backups, rollback-noodroute).
 $verploy_mu = ( defined( 'WPMU_PLUGIN_DIR' ) ? WPMU_PLUGIN_DIR : WP_CONTENT_DIR . '/mu-plugins' ) . '/verploy-rescue.php';
 if ( is_file( $verploy_mu ) ) {
-	@unlink( $verploy_mu ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	wp_delete_file( $verploy_mu );
 }
 require_once __DIR__ . '/includes/class-file-copier.php';
 require_once __DIR__ . '/includes/class-table-copier.php';
@@ -26,9 +26,9 @@ foreach ( array( 'verploy-staging', 'verploy-backups' ) as $verploy_dir ) {
 	Verploy_File_Copier::delete_tree( WP_CONTENT_DIR . '/' . $verploy_dir );
 }
 global $wpdb;
-$verploy_tables = $wpdb->get_col( "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND ( LEFT(TABLE_NAME, 4) = 'vpst' OR LEFT(TABLE_NAME, 4) = 'vpbk' )" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+$verploy_tables = $wpdb->get_col( "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND ( LEFT(TABLE_NAME, 4) = 'vpst' OR LEFT(TABLE_NAME, 4) = 'vpbk' )" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- opruimen van eigen staging-/back-uptabellen
 foreach ( (array) $verploy_tables as $verploy_table ) {
 	if ( preg_match( '/^vp(st|bk)[0-9a-f]{8}_[A-Za-z0-9_]+$/', $verploy_table ) ) {
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . Verploy_Table_Copier::quote( $verploy_table ) ); // phpcs:ignore WordPress.DB
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . Verploy_Table_Copier::quote( $verploy_table ) ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- naam gevalideerd met de regex hierboven
 	}
 }

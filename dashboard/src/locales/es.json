@@ -789,5 +789,25 @@
     "canceled": "Cancelación enviada.",
     "resumed": "La suscripción continúa.",
     "error": "Stripe devolvió un error. Inténtalo de nuevo o contáctanos."
+  },
+  "errors": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "Esta página no existe (o ya no existe), o no tienes acceso a ella.",
+    "back": "Ir al resumen",
+    "errorTitle": "Algo salió mal",
+    "errorBody": "Se produjo un error inesperado. Inténtalo de nuevo; si sigue ocurriendo, envíanos la referencia de abajo.",
+    "retry": "Reintentar"
+  },
+  "checklist": {
+    "title": "Primeros pasos con Verploy",
+    "progress": "{done} de {total} completados",
+    "addSite": "Añade tu primer sitio",
+    "addSiteBody": "Solo hace falta un nombre y una dirección.",
+    "connect": "Conecta el sitio",
+    "connectBody": "Instala Verploy Connector e introduce el código de vinculación. Así llegan los primeros datos de estado.",
+    "update": "Ejecuta una actualización segura",
+    "updateBody": "Marca una actualización disponible: Verploy la prueba primero en una copia del sitio.",
+    "report": "Configura informes para tu cliente",
+    "reportBody": "Correo e idioma del cliente y, si quieres, un informe mensual."
   }
 }

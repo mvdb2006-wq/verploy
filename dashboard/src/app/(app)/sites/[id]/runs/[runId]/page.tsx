@@ -61,7 +61,16 @@ function ComparisonTable({ t, runId, after, before, beforeLabel, afterLabel }: {
     <ul className="divide-y divide-border/60">
       {pages.map(p => {
         const rows = ['desktop', 'mobile'].map(vp => ({ vp, a: find(after, p.page_key, vp), b: find(before, p.page_key, vp) })).filter(x => x.a)
-        const failed = rows.flatMap(x => ((x.a!.checks ?? []) as CheckRow[]).filter(c => !c.ok).map(c => ({ ...c, vp: x.vp })))
+        // Dezelfde gezakte check op desktop én mobiel één keer tonen, met beide viewports erbij.
+        const byCheck = new Map<string, CheckRow & { vps: string[] }>()
+        for (const x of rows) {
+          for (const c of ((x.a!.checks ?? []) as CheckRow[]).filter(c => !c.ok)) {
+            const prev = byCheck.get(c.check)
+            if (prev) prev.vps.push(x.vp)
+            else byCheck.set(c.check, { ...c, vps: [x.vp] })
+          }
+        }
+        const failed = [...byCheck.values()]
         const ok = rows.every(x => x.a!.passed)
         return (
           <li key={p.page_key} className="px-5 py-3">
@@ -84,9 +93,9 @@ function ComparisonTable({ t, runId, after, before, beforeLabel, afterLabel }: {
               </summary>
               {failed.length > 0 && (
                 <ul className="mt-2 space-y-1 pl-6 text-sm text-danger">
-                  {failed.map((c, i) => (
-                    <li key={i}>
-                      {t(`runs.viewport.${c.vp}` as MessageKey)}: {presentReason(t, `run.reason.check.${c.check}`, { ...c.detail, page: p.page_label, viewport: c.vp })}
+                  {failed.map(c => (
+                    <li key={c.check} className="[overflow-wrap:anywhere]">
+                      {presentReason(t, `run.reason.check.${c.check}`, { ...c.detail, page: p.page_label || p.page_key, viewportLabel: c.vps.map(v => t(`runs.viewport.${v}` as MessageKey)).join(' + ') })}
                     </li>
                   ))}
                 </ul>
@@ -153,7 +162,7 @@ function DiagnosisCard({ t, d }: { t: Translate; d: DiagnosisRow }) {
           <Stethoscope size={18} className="mt-0.5 shrink-0 text-warn" aria-hidden />
           <div className="min-w-0">
             <h2 id="diagnosis-title" className="font-bold">{t('diagnosis.ui.title')}</h2>
-            <p className="mt-1 text-sm">{d.summary}</p>
+            <p className="mt-1 text-sm [overflow-wrap:anywhere]">{d.summary}</p>
           </div>
         </div>
         <span className="badge badge-muted">{t(`diagnosis.ui.confidence.${d.confidence}` as MessageKey)}</span>
@@ -161,12 +170,12 @@ function DiagnosisCard({ t, d }: { t: Translate; d: DiagnosisRow }) {
       <div className="grid gap-5 px-5 py-4 md:grid-cols-2">
         <div>
           <h3 className="label">{t('diagnosis.ui.cause')}</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90">{d.cause}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90 [overflow-wrap:anywhere]">{d.cause}</p>
           {d.culprit_name && <p className="mt-2 text-xs text-muted">{t('diagnosis.ui.culprit')}: <span className="font-semibold text-text">{d.culprit_name}</span></p>}
         </div>
         <div>
           <h3 className="label">{t('diagnosis.ui.fix')}</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90">{d.fix}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-line text-text/90 [overflow-wrap:anywhere]">{d.fix}</p>
         </div>
       </div>
       {fatal && (

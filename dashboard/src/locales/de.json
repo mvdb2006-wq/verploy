@@ -789,5 +789,25 @@
     "canceled": "Kündigung übermittelt.",
     "resumed": "Das Abo läuft weiter.",
     "error": "Stripe hat einen Fehler gemeldet. Versuche es erneut oder kontaktiere uns."
+  },
+  "errors": {
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Diese Seite existiert nicht (mehr), oder du hast keinen Zugriff darauf.",
+    "back": "Zur Übersicht",
+    "errorTitle": "Etwas ist schiefgelaufen",
+    "errorBody": "Ein unerwarteter Fehler ist aufgetreten. Versuche es erneut; wenn es weiter passiert, sende uns die Referenz unten.",
+    "retry": "Erneut versuchen"
+  },
+  "checklist": {
+    "title": "Erste Schritte mit Verploy",
+    "progress": "{done} von {total} erledigt",
+    "addSite": "Füge deine erste Website hinzu",
+    "addSiteBody": "Nur Name und Adresse sind nötig.",
+    "connect": "Verbinde die Website",
+    "connectBody": "Installiere Verploy Connector und gib den Kopplungscode ein. Dann kommen die ersten Zustandsdaten an.",
+    "update": "Führe ein sicheres Update aus",
+    "updateBody": "Markiere ein verfügbares Update: Verploy testet es zuerst auf einer Kopie der Website.",
+    "report": "Richte Berichte für deinen Kunden ein",
+    "reportBody": "E-Mail-Adresse und Sprache des Kunden und optional ein Monatsbericht."
   }
 }

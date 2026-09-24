@@ -789,5 +789,25 @@
     "canceled": "Opzegging doorgegeven.",
     "resumed": "Het abonnement loopt weer door.",
     "error": "Stripe gaf een fout. Probeer het opnieuw of neem contact op."
+  },
+  "errors": {
+    "notFoundTitle": "Pagina niet gevonden",
+    "notFoundBody": "Deze pagina bestaat niet (meer), of je hebt er geen toegang toe.",
+    "back": "Naar het overzicht",
+    "errorTitle": "Er ging iets mis",
+    "errorBody": "Er is een onverwachte fout opgetreden. Probeer het opnieuw; blijft het misgaan, stuur ons dan de referentie hieronder.",
+    "retry": "Opnieuw proberen"
+  },
+  "checklist": {
+    "title": "Aan de slag met Verploy",
+    "progress": "{done} van {total} klaar",
+    "addSite": "Voeg je eerste site toe",
+    "addSiteBody": "Alleen de naam en het adres zijn nodig.",
+    "connect": "Koppel de site",
+    "connectBody": "Installeer Verploy Connector en vul de koppelcode in. Dan komt de eerste health-data binnen.",
+    "update": "Voer een veilige update uit",
+    "updateBody": "Vink een beschikbare update aan: Verploy test hem eerst op een kopie van de site.",
+    "report": "Stel rapporten in voor je klant",
+    "reportBody": "E-mailadres en taal van de klant, en eventueel een maandrapport."
   }
 }

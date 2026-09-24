@@ -144,3 +144,9 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 - **`past_due` blijft schrijfbaar:** Stripe probeert de betaling nog een paar keer, en een mislukte incasso mag een bureau niet direct blokkeren. Na de laatste poging zegt Stripe het abonnement op (`canceled`), en dan wordt het bureau alleen-lezen. Monitoring loopt altijd door.
 - **Prijzen exclusief btw, geen Stripe Tax.** Btw-afhandeling (verlegging bij EU-bedrijven, OSS) is een keuze voor Martijn en zijn boekhouder: zie BLOCKERS #7. Checkout verzamelt al het factuuradres en btw-nummer, zodat Stripe Tax later zonder codewijziging aan kan.
 - **Tests tegen stripe-mock**, de officiële mock van Stripe met hun OpenAPI-specificatie (versie 0.203.0). Zo test de echte SDK de echte request-vormen. Webhooks worden in de test ondertekend met `generateTestHeaderString`; dat is hetzelfde verificatiepad als in productie.
+
+## Fase 8 — afwerking (24-09-2026)
+
+- **Plugin Check is een harde releaseregel**, naast PHP 7.4-compatibiliteit, de integratietests en de engine-test. De plugin doet dingen die WordPress.org normaal afraadt: hele tabellen kopiëren en hernoemen, en een must-use-plugin schrijven tijdens een deploy. Die zijn in de code gedocumenteerd met de reden. Bij de review zal ik dat in de begeleidende tekst toelichten.
+- **Checklist in plaats van een aparte onboarding-wizard.** Het is dezelfde flow als het echte werk, dus niets extra's om te onderhouden. De checklist verdwijnt vanzelf.
+- **Bekend, niet opgelost:** Next.js logt bij snelle navigatie tijdens tests "destination stream closed early". Dat gebeurt wanneer een lopende server-render wordt afgebroken omdat de browser al verder navigeert. Er gaat voor de gebruiker niets mis (alle tests slagen), maar het vervuilt de logs. Dit bekijk ik opnieuw na de productie-uitrol met echte logs.

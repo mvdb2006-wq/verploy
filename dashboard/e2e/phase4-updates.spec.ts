@@ -42,7 +42,7 @@ async function waitForVerdict(page: Page, label: string) {
 }
 
 test.beforeAll(() => {
-  execFileSync('php', [path.resolve(import.meta.dirname, 'support/lab-reset.php'), LAB_WP_DIR, LAB_DIR, LAB_WP,
+  execFileSync('php', [path.resolve(import.meta.dirname, '../../connector-plugin/tests/lab/lab-reset.php'), LAB_WP_DIR, LAB_DIR, LAB_WP,
     path.resolve(import.meta.dirname, '../../connector-plugin/verploy-connector')], { stdio: 'inherit' })
 })
 

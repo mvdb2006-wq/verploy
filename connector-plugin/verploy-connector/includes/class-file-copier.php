@@ -78,10 +78,10 @@ class Verploy_File_Copier {
 				list( $src, $dst ) = explode( "\t", $line, 2 );
 				$dir = dirname( $dst );
 				if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
-					throw new RuntimeException( 'mkdir_failed:' . $dir );
+					throw new RuntimeException( esc_html( 'mkdir_failed:' . $dir ) );
 				}
 				if ( ! @copy( $src, $dst ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
-					throw new RuntimeException( 'copy_failed:' . $src );
+					throw new RuntimeException( esc_html( 'copy_failed:' . $src ) );
 				}
 			}
 			$cursor++;
@@ -97,17 +97,26 @@ class Verploy_File_Copier {
 		return rtrim( str_replace( '\\', '/', (string) $path ), '/' );
 	}
 
-	/** Verwijdert een map recursief (alleen binnen WP_CONTENT_DIR, als vangnet). */
+	/** WordPress-bestandssysteem (direct); updates vereisen dat al, dus de engine ook. */
+	public static function fs() {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+		if ( ! $wp_filesystem ) {
+			throw new RuntimeException( 'filesystem_unavailable' );
+		}
+		return $wp_filesystem;
+	}
+
+	/** Verwijdert een map of bestand recursief (alleen binnen de WordPress-installatie, als vangnet). */
 	public static function delete_tree( $dir ) {
 		$dir = self::norm( $dir );
-		if ( '' === $dir || ! is_dir( $dir ) || 0 !== strpos( $dir, self::norm( WP_CONTENT_DIR ) . '/' ) ) {
+		if ( '' === $dir || ! file_exists( $dir ) || 0 !== strpos( $dir, self::norm( ABSPATH ) . '/' ) ) {
 			return;
 		}
-		$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
-		foreach ( $it as $f ) {
-			$f->isDir() && ! $f->isLink() ? @rmdir( $f->getPathname() ) : @unlink( $f->getPathname() ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-		}
-		@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		self::fs()->delete( $dir, true );
 	}
 
 	/** Kopieert een map of bestand in één keer (voor kleine plugin-/themamappen). */

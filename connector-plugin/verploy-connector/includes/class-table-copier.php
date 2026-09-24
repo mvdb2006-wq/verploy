@@ -10,6 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Deze klasse kopieert en hernoemt complete databasetabellen (staging en back-up). Dat kan niet via de
+// WordPress-API's; tabelnamen komen uitsluitend uit information_schema of uit onze eigen prefix en worden
+// met quote() tussen backticks gezet (backticks in namen verdubbeld). Caching is hier niet van toepassing.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 class Verploy_Table_Copier {
 
 	const ROWS_PER_CHUNK = 2000;
@@ -75,7 +79,7 @@ class Verploy_Table_Copier {
 			if ( ! $state['created'] ) {
 				$wpdb->query( 'DROP TABLE IF EXISTS ' . self::quote( $dst ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 				if ( false === $wpdb->query( 'CREATE TABLE ' . self::quote( $dst ) . ' LIKE ' . self::quote( $src ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL
-					throw new RuntimeException( 'create_table_failed:' . $dst . ':' . $wpdb->last_error );
+					throw new RuntimeException( esc_html( 'create_table_failed:' . $dst . ':' . $wpdb->last_error ) );
 				}
 				$state['created'] = true;
 				$state['last']    = null;
@@ -103,7 +107,7 @@ class Verploy_Table_Copier {
 					$state['offset'] += self::ROWS_PER_CHUNK;
 				}
 				if ( false === $ok ) {
-					throw new RuntimeException( 'copy_rows_failed:' . $dst . ':' . $wpdb->last_error );
+					throw new RuntimeException( esc_html( 'copy_rows_failed:' . $dst . ':' . $wpdb->last_error ) );
 				}
 			}
 			$state['index']++;
@@ -135,7 +139,7 @@ class Verploy_Table_Copier {
 				$ok = $wpdb->query( 'RENAME TABLE ' . self::quote( $bk ) . ' TO ' . self::quote( $live ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 			}
 			if ( false === $ok ) {
-				throw new RuntimeException( 'restore_failed:' . $live . ':' . $wpdb->last_error );
+				throw new RuntimeException( esc_html( 'restore_failed:' . $live . ':' . $wpdb->last_error ) );
 			}
 			$wpdb->query( 'DROP TABLE IF EXISTS ' . self::quote( $trash . $suffix ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 		}

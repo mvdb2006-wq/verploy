@@ -4,9 +4,10 @@
  * labplugins 1.0.0 + lab-updater geïnstalleerd en actief, geen Verploy-koppeling, geen
  * run-restanten (lock, onderhoudsmodus, staging, back-ups).
  *
- *   php e2e/support/lab-reset.php <wordpress-map> <lab-map> <site-url> [connector-bronmap]
+ *   php connector-plugin/tests/lab/lab-reset.php <wordpress-map> <lab-map> <site-url> [connector-bronmap]
  *
  * Met een connector-bronmap wordt ook Verploy Connector vervangen door die versie.
+ * Met VERPLOY_PAIR="<site-id> <secret>" wordt de connector direct gekoppeld (voor de engine-test).
  */
 if ( PHP_SAPI !== 'cli' || $argc < 4 ) { fwrite( STDERR, "gebruik: lab-reset.php <wp> <lab> <url>\n" ); exit( 2 ); }
 [ , $lab_wp_dir, $lab_dir, $lab_url ] = $argv; // let op: $wp is een WordPress-global
@@ -51,5 +52,11 @@ foreach ( array( 'verploy-staging', 'verploy-backups' ) as $d ) {
 global $wpdb;
 foreach ( (array) $wpdb->get_col( "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND ( LEFT(TABLE_NAME, 4) = 'vpst' OR LEFT(TABLE_NAME, 4) = 'vpbk' )" ) as $t ) {
 	$wpdb->query( "DROP TABLE `$t`" );
+}
+$pair = getenv( 'VERPLOY_PAIR' );
+if ( $pair ) {
+	list( $pair_id, $pair_secret ) = explode( ' ', $pair, 2 );
+	update_option( 'verploy_site_id', $pair_id, false );
+	update_option( 'verploy_secret', $pair_secret, false );
 }
 echo "lab klaar\n";

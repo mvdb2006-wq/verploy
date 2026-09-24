@@ -63,7 +63,7 @@ class Verploy_Admin {
 
 	public static function handle_pair() {
 		self::guard( 'verploy_pair' );
-		$code   = isset( $_POST['verploy_code'] ) ? sanitize_text_field( wp_unslash( $_POST['verploy_code'] ) ) : '';
+		$code   = isset( $_POST['verploy_code'] ) ? sanitize_text_field( wp_unslash( $_POST['verploy_code'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce gecontroleerd in guard()
 		$result = Verploy_Connection::pair( $code );
 		if ( is_wp_error( $result ) ) {
 			self::done( 'error', $result->get_error_message() );

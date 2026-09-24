@@ -50,4 +50,42 @@ E2E_LAB_WP_DIR=/pad/naar/mysql-wp E2E_LAB_DIR=/pad/naar/lab npx playwright test
 `npm run worker:build` bundelt `dashboard/worker/` naar `worker/dist/main.mjs`, en `npm run worker` start hem. Hij gebruikt dezelfde omgevingsvariabelen als het dashboard (zie `.env.example`). Voor productie is er `worker/Dockerfile` (Playwright-image) met `worker/railway.json`, zie BLOCKERS #3.
 ```
 
-Deploy-instructies volgen in fase 8.
+## Deployen (productie)
+
+Verploy bestaat uit vier onderdelen die samen draaien. Zet ze in deze volgorde live; per stap staat hoe je controleert dat het werkt.
+
+### 1. Database (Supabase)
+
+1. Migraties toepassen: `supabase db push` (of de workflow `ops/github-workflows/supabase-migrations.yml` met de secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` en `SUPABASE_PROJECT_REF`). De migraties in `supabase/migrations/` zijn de enige bron van waarheid: ook de storage-buckets `run-artifacts`, `reports` en `branding` (alle drie privé) en de pg_cron-taak voor meldingen komen daaruit.
+2. Auth → URL Configuration: Site URL `https://app.verploy.com`, en de redirect-URL `https://app.verploy.com/auth/callback`.
+3. Controle: `select count(*) from public.plans` geeft 4, en `select app.agency_is_writable(id) from public.agencies` werkt.
+
+### 2. Dashboard (Vercel)
+
+- Root directory `dashboard`, framework Next.js. De productie-branch is `main`.
+- Omgevingsvariabelen: zie `dashboard/.env.example`. Minimaal zijn nodig: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`, `VERPLOY_ENCRYPTION_KEY`, `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` en `STRIPE_PORTAL_CONFIGURATION`.
+- `vercel.json` plant dagelijks `/api/cron/maintenance` als vangnet. Het echte onderhoud doet de worker elke 5 minuten.
+- Controle: `https://app.verploy.com/api/health` geeft `{"ok":true}` (app en database bereikbaar).
+
+### 3. Worker (Railway)
+
+- Nieuw project vanuit de GitHub-repo, met root directory `dashboard` en config-bestand `worker/railway.json`. Die bouwt `worker/Dockerfile`, op basis van het officiële Playwright-image met Chromium voor tests en PDF's.
+- Omgevingsvariabelen: dezelfde Supabase-, encryptie-, Resend- en `NEXT_PUBLIC_APP_URL`-waarden als in Vercel, plus optioneel `ANTHROPIC_API_KEY` (AI-diagnose) en `WORKER_ID`.
+- Eén replica is genoeg. Wil je meer capaciteit, voeg dan replica's toe: runs en rapporten worden met `SKIP LOCKED` en leases verdeeld, zodat nooit twee workers dezelfde run doen.
+- Controle: de healthcheck op `/` geeft `{"ok":true}`, en de logregel `"msg":"maintenance"` verschijnt elke 5 minuten.
+
+### 4. Stripe
+
+1. Zet `STRIPE_SECRET_KEY` in Vercel.
+2. Draai `node --env-file=.env.local scripts/stripe-setup.mjs --webhook-url https://app.verploy.com/api/stripe/webhook` vanuit `dashboard/`, met de productiesleutels in `.env.local`. Dit maakt het product, de prijzen (uit de tabel `plans`), het klantportaal en de webhook aan en print `STRIPE_WEBHOOK_SECRET` en `STRIPE_PORTAL_CONFIGURATION`. Zet die in Vercel.
+3. Prijzen wijzigen: pas de tabel `plans` aan (migratie) en draai het script opnieuw. De oude prijs wordt gearchiveerd; bestaande abonnementen blijven op hun prijs tot je ze omzet.
+
+### 5. Verploy Connector (WordPress-plugin)
+
+- Release: verhoog `VERPLOY_VERSION` en de header in `connector-plugin/verploy-connector/verploy-connector.php`, werk `readme.txt` bij en draai `connector-plugin/build.sh`. Dat draait de PHP 7.4-controle, de integratietests, de engine-test (staging/deploy/rollback op MySQL) en de WordPress.org Plugin Check. Alleen als alles slaagt, publiceert het script de zip naar `dashboard/public/downloads/`. Pas daarna `CONNECTOR_RELEASE` in `dashboard/src/lib/connector/release.ts` aan: sites met de direct-build zien de update dan in wp-admin.
+- WordPress.org: dien `dist/verploy-connector-<versie>-wporg.zip` in; die versie bevat geen eigen updater.
+
+### Na elke deploy
+
+Doorloop één keer: registreren → site toevoegen → koppelen → veilige update (testplugin) → rapport maken. Zie de stappenlijst in `PLAN.md` §13.
+

@@ -789,5 +789,25 @@
     "canceled": "Résiliation envoyée.",
     "resumed": "L’abonnement continue.",
     "error": "Stripe a renvoyé une erreur. Réessayez ou contactez-nous."
+  },
+  "errors": {
+    "notFoundTitle": "Page introuvable",
+    "notFoundBody": "Cette page n’existe pas (ou plus), ou vous n’y avez pas accès.",
+    "back": "Retour à l’aperçu",
+    "errorTitle": "Une erreur s’est produite",
+    "errorBody": "Une erreur inattendue est survenue. Réessayez ; si le problème persiste, envoyez-nous la référence ci-dessous.",
+    "retry": "Réessayer"
+  },
+  "checklist": {
+    "title": "Bien démarrer avec Verploy",
+    "progress": "{done} sur {total} terminé(s)",
+    "addSite": "Ajoutez votre premier site",
+    "addSiteBody": "Seuls un nom et une adresse sont nécessaires.",
+    "connect": "Connectez le site",
+    "connectBody": "Installez Verploy Connector et saisissez le code d’association. Les premières données de santé arrivent alors.",
+    "update": "Lancez une mise à jour sécurisée",
+    "updateBody": "Cochez une mise à jour disponible : Verploy la teste d’abord sur une copie du site.",
+    "report": "Configurez les rapports pour votre client",
+    "reportBody": "E-mail et langue du client, et éventuellement un rapport mensuel."
   }
 }

@@ -172,13 +172,13 @@ class Verploy_Run_Engine {
 		$q   = array( 'Verploy_Table_Copier', 'quote' );
 
 		// Prefix-afhankelijke sleutels (rollen, gebruikersrechten) meenemen naar de nieuwe prefix.
-		$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'options' ) . ' SET option_name = %s WHERE option_name = %s', $new . 'user_roles', $old . 'user_roles' ) ); // phpcs:ignore WordPress.DB.PreparedSQL
-		$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'usermeta' ) . ' SET meta_key = CONCAT(%s, SUBSTRING(meta_key, %d)) WHERE meta_key LIKE %s', $new, strlen( $old ) + 1, $wpdb->esc_like( $old ) . '%' ) ); // phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'options' ) . ' SET option_name = %s WHERE option_name = %s', $new . 'user_roles', $old . 'user_roles' ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- staging-tabellen (eigen prefix) bestaan niet in de WordPress-API
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'usermeta' ) . ' SET meta_key = CONCAT(%s, SUBSTRING(meta_key, %d)) WHERE meta_key LIKE %s', $new, strlen( $old ) + 1, $wpdb->esc_like( $old ) . '%' ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- staging-tabellen (eigen prefix) bestaan niet in de WordPress-API
 		// Staging: geen zoekmachines, gewone permalinks (werken zonder serverconfiguratie), geen cron.
 		foreach ( array( 'blog_public' => '0', 'permalink_structure' => '' ) as $name => $value ) {
-			$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'options' ) . ' SET option_value = %s WHERE option_name = %s', $value, $name ) ); // phpcs:ignore WordPress.DB.PreparedSQL
+			$wpdb->query( $wpdb->prepare( 'UPDATE ' . call_user_func( $q, $new . 'options' ) . ' SET option_value = %s WHERE option_name = %s', $value, $name ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- staging-tabellen (eigen prefix) bestaan niet in de WordPress-API
 		}
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . call_user_func( $q, $new . 'options' ) . ' WHERE option_name IN (%s, %s, %s)', 'cron', 'rewrite_rules', Verploy_Heartbeat::OPT_LAST ) ); // phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . call_user_func( $q, $new . 'options' ) . ' WHERE option_name IN (%s, %s, %s)', 'cron', 'rewrite_rules', Verploy_Heartbeat::OPT_LAST ) ); // phpcs:ignore WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- staging-tabellen (eigen prefix) bestaan niet in de WordPress-API
 
 		$uploads  = wp_upload_dir( null, false );
 		$consts   = array();
@@ -195,7 +195,7 @@ class Verploy_Run_Engine {
 			. 'define( \'WP_SITEURL\', ' . var_export( $p['url'], true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "define( 'WP_CONTENT_DIR', __DIR__ . '/wp-content' );\n"
 			. 'define( \'WP_CONTENT_URL\', ' . var_export( $p['url'] . '/wp-content', true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-			. "define( 'DISABLE_WP_CRON', true );\ndefine( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\ndefine( 'WP_DEBUG_LOG', __DIR__ . '/' . " . var_export( self::log_name( 'debug', $run_id ), true ) . " );\n"
+			. "define( 'DISABLE_WP_CRON', true );\ndefine( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\ndefine( 'WP_DEBUG_LOG', __DIR__ . '/' . " . var_export( self::log_name( 'debug', $run_id ), true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. 'define( \'VERPLOY_PROD_UPLOADS_URL\', ' . var_export( $uploads['baseurl'], true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. '$table_prefix = ' . var_export( $p['prefix'], true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "if ( ! defined( 'ABSPATH' ) ) { define( 'ABSPATH', __DIR__ . '/' ); }\nrequire_once ABSPATH . 'wp-settings.php';\n";
@@ -230,7 +230,7 @@ add_filter( 'upload_dir', function ( $u ) {
 PHP;
 		wp_mkdir_p( $p['dir'] . '/wp-content/mu-plugins' );
 		file_put_contents( $p['dir'] . '/wp-content/mu-plugins/verploy-staging-guard.php', $guard ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		@unlink( $p['dir'] . '/.verploy-manifest' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		wp_delete_file( $p['dir'] . '/.verploy-manifest' );
 	}
 
 	// ── Updates uitvoeren (op staging én productie dezelfde code) ─────────────
@@ -368,7 +368,7 @@ PHP;
 		if ( 'init' === $snap['phase'] ) {
 			$base = Verploy_File_Copier::norm( WP_CONTENT_DIR ) . '/verploy-backups';
 			self::protect_dir( $base );
-			file_put_contents( $base . '/.htaccess', "Require all denied\nDeny from all\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			Verploy_File_Copier::fs()->put_contents( $base . '/.htaccess', "Require all denied\nDeny from all\n" );
 			$dir = $base . '/' . $short . '-' . wp_generate_password( 16, false, false );
 			wp_mkdir_p( $dir );
 			$files = array();
@@ -409,7 +409,7 @@ PHP;
 			while ( $snap['fi'] < count( $snap['files'] ) && ! $budget->expired() ) {
 				$f = $snap['files'][ $snap['fi'] ];
 				if ( ! Verploy_File_Copier::copy_tree( $f['live'], $f['backup'] ) ) {
-					throw new RuntimeException( 'backup_copy_failed:' . $f['live'] );
+					throw new RuntimeException( esc_html( 'backup_copy_failed:' . $f['live'] ) );
 				}
 				$snap['fi']++;
 			}
@@ -451,10 +451,10 @@ PHP;
 				if ( is_dir( $f['live'] ) ) {
 					Verploy_File_Copier::delete_tree( $f['live'] );
 				} elseif ( is_file( $f['live'] ) ) {
-					@unlink( $f['live'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+					wp_delete_file( $f['live'] );
 				}
 				if ( ! Verploy_File_Copier::copy_tree( $f['backup'], $f['live'] ) ) {
-					throw new RuntimeException( 'restore_copy_failed:' . $f['live'] );
+					throw new RuntimeException( esc_html( 'restore_copy_failed:' . $f['live'] ) );
 				}
 			}
 			$snap['files_restored'] = true;
@@ -662,7 +662,7 @@ PHP;
 
 	public static function remove_rescue() {
 		if ( is_file( self::rescue_path() ) ) {
-			@unlink( self::rescue_path() ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			wp_delete_file( self::rescue_path() );
 		}
 	}
 
@@ -733,7 +733,7 @@ PHP;
 		$base = Verploy_File_Copier::norm( WP_CONTENT_DIR ) . '/verploy-backups';
 		foreach ( (array) glob( $base . '/verploy-*.log' ) as $log ) {
 			if ( filemtime( $log ) < time() - $max_age ) {
-				@unlink( $log ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				wp_delete_file( $log );
 			}
 		}
 		foreach ( (array) glob( $base . '/*', GLOB_ONLYDIR ) as $dir ) {

@@ -789,5 +789,25 @@
     "canceled": "Cancellation submitted.",
     "resumed": "The subscription continues.",
     "error": "Stripe returned an error. Please try again or contact us."
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page does not exist (anymore), or you do not have access to it.",
+    "back": "Go to overview",
+    "errorTitle": "Something went wrong",
+    "errorBody": "An unexpected error occurred. Please try again; if it keeps happening, send us the reference below.",
+    "retry": "Try again"
+  },
+  "checklist": {
+    "title": "Get started with Verploy",
+    "progress": "{done} of {total} done",
+    "addSite": "Add your first site",
+    "addSiteBody": "Only a name and address are needed.",
+    "connect": "Connect the site",
+    "connectBody": "Install Verploy Connector and enter the pairing code. The first health data then comes in.",
+    "update": "Run a safe update",
+    "updateBody": "Tick an available update: Verploy tests it on a copy of the site first.",
+    "report": "Set up reports for your client",
+    "reportBody": "Client email and language, and optionally a monthly report."
   }
 }

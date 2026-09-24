@@ -8,6 +8,7 @@ import { getLocale, getT } from '@/lib/i18n/server'
 import { agencyIsWritable, canManage, requireAgency, trialDaysLeft } from '@/lib/session'
 import { effectiveStatus, formatRelative } from '@/lib/format'
 import type { MessageKey } from '@/lib/i18n/core'
+import { Checklist } from '@/components/Checklist'
 
 export async function generateMetadata() {
   return { title: (await getT())('dashboard.title') }
@@ -18,8 +19,12 @@ export default async function SitesPage() {
   const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
   const { data: sites } = await supabase
     .from('sites')
-    .select('id, name, url, client_name, status, connection_status, wp_version, php_version, last_heartbeat_at')
+    .select('id, name, url, client_name, client_email, status, connection_status, wp_version, php_version, last_heartbeat_at')
     .order('name')
+  const [{ count: runCount }, { count: reportCount }] = await Promise.all([
+    supabase.from('update_runs').select('id', { count: 'exact', head: true }),
+    supabase.from('reports').select('id', { count: 'exact', head: true }),
+  ])
   const { data: updates } = await supabase.from('site_components').select('site_id').eq('update_available', true)
   const { data: openAlerts } = await supabase.from('alerts').select('site_id, severity').eq('status', 'open').in('severity', ['warning', 'critical'])
   const worst = new Map<string, { severity: string; count: number }>()
@@ -47,6 +52,18 @@ export default async function SitesPage() {
         )}
       </header>
 
+      {canManage(session.role) && (() => {
+        const first = list[0]
+        const connected = list.find(s => s.connection_status === 'connected')
+        return (
+          <Checklist t={t} steps={[
+            { key: 'addSite', done: list.length > 0, href: '/sites/new' },
+            { key: 'connect', done: Boolean(connected), href: first ? `/sites/${first.id}` : '/sites/new' },
+            { key: 'update', done: (runCount ?? 0) > 0, href: connected ? `/sites/${connected.id}` : first ? `/sites/${first.id}` : '/sites/new' },
+            { key: 'report', done: (reportCount ?? 0) > 0 || list.some(s => s.client_email), href: first ? `/sites/${first.id}` : '/sites/new' },
+          ]} />
+        )
+      })()}
       {!writable && <Alert tone="warn" className="mb-6">{t('dashboard.readOnlyBanner')}</Alert>}
       {writable && trialDays !== null && <Alert tone="info" className="mb-6">{t('dashboard.trialBanner', { days: trialDays })}</Alert>}
 

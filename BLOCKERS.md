@@ -120,11 +120,12 @@ Of zeg: *"Je mag Railway instellen."* Dan doe ik stap 2 en 3 zelf in de browser,
 
 **Live gaan (later):** dezelfde stappen met de live-sleutel, na je akkoord.
 
-## 8. ⚪ WordPress.org-publicatie — fase 8
+## 8. ⚪ WordPress.org-publicatie — plugin is klaar (Plugin Check: geen fouten)
 
-**Wat je moet doen:** een account op wordpress.org, daarna de plugin indienen via wordpress.org/plugins/developers/add. Ik lever de ZIP en de readme aan. De review duurt meestal 1–4 weken.
-
----
+**Wat je moet doen:**
+1. Maak een account op wordpress.org, of gebruik je bestaande.
+2. Zorg voor een openbare **privacyverklaring** en **gebruiksvoorwaarden** (bijvoorbeeld verploy.com/privacy en verploy.com/terms). WordPress.org eist links naar de voorwaarden van een externe dienst in de readme. De marketingsite staat bewust nog niet online; twee losse pagina's zijn genoeg.
+3. Daarna dien ik de plugin in via wordpress.org/plugins/developers/add (met jouw account in de browser), met de wporg-zip en een toelichting op de staging/rollback-onderdelen. De review duurt meestal 1–4 weken.
 
 ## 9. ⚪ Ter info (geen actie nodig voor de bouw)
 

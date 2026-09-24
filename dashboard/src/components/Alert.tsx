@@ -8,7 +8,7 @@ export function Alert({ tone = 'danger', children, className }: {
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('rounded-lg border px-3.5 py-2.5 text-sm', {
+      className={cn('rounded-lg border px-3.5 py-2.5 text-sm [overflow-wrap:anywhere]', {
         'border-danger/30 bg-danger/10 text-danger': tone === 'danger',
         'border-accent/30 bg-accent/10 text-accent': tone === 'ok',
         'border-warn/30 bg-warn/10 text-warn': tone === 'warn',

@@ -19,7 +19,7 @@ Keuzes met onderbouwing staan in `DECISIONS.md`, en wat op Martijn wacht staat i
 | 5 | AI-diagnose | ✅ klaar lokaal (24-09) · AI-verfijning wacht op BLOCKERS #6 (werkt nu regelgebaseerd) | Begrijpelijke uitleg met oorzaak + oplossing bij gezakte test |
 | 6 | Rapporten | ✅ klaar lokaal (24-09) · versturen vanaf verploy.com wacht op BLOCKERS #5 | PDF in NL/DE/FR/ES/EN, bureau-branding, handmatig + maandelijks automatisch |
 | 7 | Stripe | ✅ klaar lokaal (24-09) · live wacht op BLOCKERS #7 (Stripe-sleutel) | Abonneren/upgraden/downgraden/opzeggen in testmodus; tier-limiet server-side afgedwongen |
-| 8 | Afwerking | — | Onboarding, lege staten, foutmeldingen, responsive, plugin volgens WP.org-richtlijnen, README met deploy |
+| 8 | Afwerking | ✅ klaar lokaal (24-09) · productie wacht op BLOCKERS #2–#5 | Onboarding, lege staten, foutmeldingen, responsive, plugin volgens WP.org-richtlijnen, README met deploy |
 
 ---
 
@@ -417,3 +417,22 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - opzeggen en weer doorgaan werken
 - beëindigd → nieuwe site geweigerd → nieuw abonnement → weer schrijfbaar
 - een beheerder ziet geen knoppen om het abonnement te wijzigen
+
+---
+
+## 17. Resultaat fase 8 (24-09-2026) — branch `v2`
+
+**Gebouwd:**
+- **Onboarding:** checklist "Aan de slag" op het overzicht (site toevoegen → koppelen → eerste veilige update → rapporten). De eerstvolgende stap is uitgelicht, en de checklist verdwijnt pas als alles gedaan is.
+- **Foutpagina's:** 404 in de taal van de gebruiker, een foutgrens binnen de app met "opnieuw proberen" en een referentie (digest), en een laatste vangnet als zelfs de layout faalt.
+- **Mobiel:** alle hoofdpagina's zijn op 390 px gecontroleerd zonder horizontaal scrollen. Lange paden en foutmeldingen breken nu af, en gezakte checks worden per soort gebundeld (desktop + mobiel) in plaats van dubbel getoond.
+- **Healthcheck** `/api/health` voor uptime-monitoring (app en database).
+- **Plugin volgens de WordPress.org-richtlijnen:** de officiële Plugin Check (2.1.0) meldt geen fouten en geen waarschuwingen voor de wporg-build.
+  - Bestanden verwijderen gaat via `wp_delete_file` en `WP_Filesystem`.
+  - Foutmeldingen in exceptions worden ge-escaped.
+  - Directe databasequery's zijn gedocumenteerd, want tabellen kopiëren kan niet via de WordPress-API.
+  - De readme is bijgewerkt voor 2.x.
+  - Plugin Check zit nu in `build.sh`: geen release zonder groene check.
+- **README:** een deploy-handleiding per onderdeel (Supabase, Vercel, Railway, Stripe, plugin-release), met een controle per stap. CI bouwt ook de worker.
+
+**Bewijs:** Playwright 26/26 (alle fasen, inclusief fase 8: checklist, 404, healthcheck, mobiel) · DB 145/145 · unit 121/121 · engine-test 30/30 · Plugin Check "No errors found".

@@ -52,7 +52,7 @@ class Verploy_Health_Collector {
 
 	private static function db_size() {
 		global $wpdb;
-		$size = $wpdb->get_var( $wpdb->prepare( 'SELECT SUM(data_length + index_length) FROM information_schema.TABLES WHERE table_schema = %s', DB_NAME ) );
+		$size = $wpdb->get_var( $wpdb->prepare( 'SELECT SUM(data_length + index_length) FROM information_schema.TABLES WHERE table_schema = %s', DB_NAME ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- databasegrootte, eens per heartbeat
 		return null === $size ? null : (float) $size;
 	}
 

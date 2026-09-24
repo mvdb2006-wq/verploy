@@ -46,6 +46,7 @@ export function presentReason(t: Translate, key: string | null | undefined, para
     else if (Array.isArray(v)) vars[k] = v.map(String).join(', ')
   }
   if (typeof p.viewport === 'string') vars.viewport = t(`runs.viewport.${p.viewport}` as MessageKey)
+  if (typeof p.viewportLabel === 'string') vars.viewport = p.viewportLabel
   if (typeof p.ratio === 'number') vars.percent = (p.ratio * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
   if (typeof p.threshold === 'number') vars.limit = (p.threshold * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
   if (typeof p.step === 'string') vars.step = t(`runs.steps.${p.step}` as MessageKey)
