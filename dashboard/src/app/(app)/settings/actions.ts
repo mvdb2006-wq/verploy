@@ -33,6 +33,19 @@ export async function saveAgency(_: SettingsState, form: FormData): Promise<Sett
   return { ok: createTranslator(parsed.data.dashboard_locale)('common.saved') }
 }
 
+/** Wat Verploy doet bij ernstige en kritieke beveiligingslekken (eigenaar/beheerder; RLS dwingt dat af). */
+export async function saveSecurity(_: SettingsState, form: FormData): Promise<SettingsState> {
+  const session = await requireAgency()
+  const t = await getT()
+  const mode = String(form.get('security_mode') ?? '')
+  if (mode !== 'approve' && mode !== 'auto') return { error: t('common.errorGeneric') }
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('agencies').update({ security_autofix: mode === 'auto' }, { count: 'exact' }).eq('id', session.agency.id)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath('/', 'layout')
+  return { ok: t('common.saved') }
+}
+
 export interface InviteState { error?: string; link?: string; email?: string; emailed?: boolean }
 
 export async function inviteMember(_: InviteState, form: FormData): Promise<InviteState> {

@@ -436,3 +436,20 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - **README:** een deploy-handleiding per onderdeel (Supabase, Vercel, Railway, Stripe, plugin-release), met een controle per stap. CI bouwt ook de worker.
 
 **Bewijs:** Playwright 26/26 (alle fasen, inclusief fase 8: checklist, 404, healthcheck, mobiel) · DB 145/145 · unit 121/121 · engine-test 30/30 · Plugin Check "No errors found".
+
+## 18. Bekende kwetsbaarheden (24-09-2026) — branch `v2`
+
+**Bron:** Wordfence Intelligence, Vulnerability Data Feed v3 (production). Gratis, ook voor commercieel gebruik. Er is een API-sleutel nodig (Wordfence-account → Integrations). Verploy toont bij elk lek een link naar het record, plus de copyright-/licentietekst van Defiant en, bij CVE-materiaal, van MITRE, zoals de voorwaarden vragen.
+
+**Werking (worker):**
+- Elke 4 uur wordt de feed (>100 MB) als stroom ingelezen (`src/lib/vulnerabilities/stream.ts`). Er staat steeds maar één record in het geheugen. Nieuwe en gewijzigde records komen compact in `vulnerabilities` terecht. Dat gebeurt op de achtergrond, zodat lopende updates niet hoeven te wachten.
+- Elke minuut worden de sites beoordeeld waarvoor iets veranderd is: een nieuwe heartbeat of een nieuwe feed (`sites_due_for_vulnerability_check`). Versies worden vergeleken zoals PHP's `version_compare`. De uitkomst gaat naar `site_vulnerabilities`, met één melding (`vulnerability`) per site: ernstig of kritiek → kritieke melding met e-mail, middel → waarschuwing, laag → alleen in de app.
+- "Oplosbaar" betekent: WordPress biedt een update aan die zelf niet meer kwetsbaar is.
+
+**Instelling per bureau (`agencies.security_autofix`, standaard uit):**
+- **Eerst toestemming vragen** (standaard): melding en e-mail. Op de sitepagina staat per onderdeel een knop "Veilig oplossen". Die gebruikt de gewone veilige update: testkopie → tests → live → controle → zo nodig terugdraaien.
+- **Direct automatisch oplossen:** bij een ernstig of kritiek lek met een klaarstaande veilige update start Verploy direct zelf die veilige update (`update_runs.trigger = 'security'`, zonder gebruiker). Per onderdeel gebeurt dat hooguit één keer per doelversie: een tegengehouden update wordt niet steeds opnieuw geprobeerd. Lekken met ernst laag of middel worden altijd alleen gemeld.
+
+**Nog niet gebouwd:** toestemming van de klant van het bureau via een link in een e-mail. Dat kan pas als Resend (#5) werkt.
+
+**Tests:** unit (versievergelijking, bereiken, slugs, feedformaat, stroomlezer) en database (openen/oplossen, melding, rechten, automatisch oplossen: één poging per versie, alleen-lezen-bureau). De E2E-test `phase9-security` draait tegen een lab-WordPress met een mock-feed in hetzelfde formaat. Hij controleert de melding, de bron en dat er zonder toestemming niets gebeurt. Daarna zet hij automatisch oplossen aan: de worker start zelf de veilige update, die gaat live en het lek verdwijnt.

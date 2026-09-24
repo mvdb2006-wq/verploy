@@ -300,6 +300,14 @@
       "update_failed": {
         "title": "Échec de la mise à jour : {items}",
         "body": "{reason}"
+      },
+      "vulnerability": {
+        "title": "{count, plural, one {Vulnérabilité connue} other {# vulnérabilités connues}} : {items}",
+        "body": "Gravité : {severity}. Ouvrez le site dans Verploy et appliquez le correctif en sécurité."
+      },
+      "vulnerability_auto": {
+        "title": "{count, plural, one {Vulnérabilité connue} other {# vulnérabilités connues}} : {items}",
+        "body": "Gravité : {severity}. Verploy corrige cela automatiquement et en sécurité ; vous serez prévenu en cas d’échec."
       }
     },
     "sslError": {
@@ -460,7 +468,8 @@
       "passed": "Réussi",
       "failed": "Échoué",
       "loginPage": "Page de connexion",
-      "timeline": "Chronologie"
+      "timeline": "Chronologie",
+      "securityTrigger": "Lancée automatiquement par Verploy en raison d’une vulnérabilité connue."
     },
     "events": {
       "queued": "{count, plural, one {Mise à jour planifiée} other {# mises à jour planifiées}}.",
@@ -490,7 +499,8 @@
       "verdict_rolled_back": "Terminé : restaurée.",
       "verdict_error": "Terminé : échec.",
       "verdict_cancelled": "Terminé : annulée.",
-      "done": "Terminé."
+      "done": "Terminé.",
+      "queued_security": "{count, plural, one {Mise à jour de sécurité planifiée} other {# mises à jour de sécurité planifiées}} automatiquement par Verploy (vulnérabilité connue)."
     }
   },
   "diagnosis": {
@@ -809,5 +819,38 @@
     "updateBody": "Cochez une mise à jour disponible : Verploy la teste d’abord sur une copie du site.",
     "report": "Configurez les rapports pour votre client",
     "reportBody": "E-mail et langue du client, et éventuellement un rapport mensuel."
+  },
+  "security": {
+    "title": "Sécurité",
+    "summary": "{count, plural, one {# vulnérabilité connue} other {# vulnérabilités connues}} dans {components, plural, one {# composant} other {# composants}}",
+    "none": "Aucune vulnérabilité connue dans WordPress, les extensions et les thèmes.",
+    "fix": "Corriger en sécurité",
+    "fixAll": "Corriger {count, plural, one {# composant} other {les # composants}} en sécurité",
+    "autofixOn": "Verploy corrige automatiquement les vulnérabilités élevées et critiques : testées d’abord sur une copie de test, puis mises en ligne.",
+    "autofixOff": "Verploy ne corrige rien sans votre accord. Cliquez sur « Corriger en sécurité » : testé d’abord sur une copie de test, puis mis en ligne.",
+    "changeSetting": "Modifier le réglage",
+    "fixedIn": "corrigée en {version}",
+    "noFix": "pas encore de correctif",
+    "noFixAdvice": "Aucune version sans cette vulnérabilité n’existe encore. Envisagez de désactiver ou de remplacer l’extension en attendant un correctif.",
+    "fixNotOffered": "La version {version} corrige ce problème, mais WordPress ne propose pas encore cette mise à jour. Verploy vérifiera à nouveau au prochain contrôle.",
+    "autofixRun": "Correction automatique :",
+    "checkedAt": "Dernier contrôle {date}",
+    "source": "Source : Wordfence Intelligence (Defiant Inc.).",
+    "licence": "Copyright et licence",
+    "severity": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée",
+      "critical": "Critique"
+    },
+    "settings": {
+      "title": "Vulnérabilités de sécurité",
+      "intro": "Verploy compare en continu vos sites à la base Wordfence des vulnérabilités connues. Que faire en cas de vulnérabilité élevée ou critique ?",
+      "approveTitle": "Demander d’abord l’accord",
+      "approveBody": "Vous recevez immédiatement une alerte et un e-mail. Le correctif est prêt : en un clic, Verploy l’applique en sécurité.",
+      "autoTitle": "Corriger automatiquement, tout de suite",
+      "autoBody": "Verploy lance immédiatement une mise à jour sécurisée : testée d’abord sur une copie de test, mise en ligne seulement si tout fonctionne. Si le test échoue, le site reste inchangé et vous recevez une alerte.",
+      "note": "Les vulnérabilités faibles ou moyennes sont toujours uniquement signalées."
+    }
   }
 }

@@ -300,6 +300,14 @@
       "update_failed": {
         "title": "Update mislukt: {items}",
         "body": "{reason}"
+      },
+      "vulnerability": {
+        "title": "{count, plural, one {Bekend beveiligingslek} other {# bekende beveiligingslekken}}: {items}",
+        "body": "Ernst: {severity}. Bekijk de site in Verploy en voer de oplossing veilig uit."
+      },
+      "vulnerability_auto": {
+        "title": "{count, plural, one {Bekend beveiligingslek} other {# bekende beveiligingslekken}}: {items}",
+        "body": "Ernst: {severity}. Verploy lost dit automatisch en veilig op; je krijgt bericht als dat niet lukt."
       }
     },
     "sslError": {
@@ -460,7 +468,8 @@
       "passed": "Geslaagd",
       "failed": "Gezakt",
       "loginPage": "Inlogpagina",
-      "timeline": "Tijdlijn"
+      "timeline": "Tijdlijn",
+      "securityTrigger": "Automatisch gestart door Verploy vanwege een bekend beveiligingslek."
     },
     "events": {
       "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",
@@ -490,7 +499,8 @@
       "verdict_rolled_back": "Klaar: teruggedraaid.",
       "verdict_error": "Klaar: mislukt.",
       "verdict_cancelled": "Klaar: geannuleerd.",
-      "done": "Klaar."
+      "done": "Klaar.",
+      "queued_security": "{count, plural, one {# beveiligingsupdate} other {# beveiligingsupdates}} automatisch ingepland door Verploy (bekend lek)."
     }
   },
   "diagnosis": {
@@ -809,5 +819,38 @@
     "updateBody": "Vink een beschikbare update aan: Verploy test hem eerst op een kopie van de site.",
     "report": "Stel rapporten in voor je klant",
     "reportBody": "E-mailadres en taal van de klant, en eventueel een maandrapport."
+  },
+  "security": {
+    "title": "Beveiliging",
+    "summary": "{count, plural, one {# bekend lek} other {# bekende lekken}} in {components, plural, one {# onderdeel} other {# onderdelen}}",
+    "none": "Geen bekende lekken in WordPress, plugins en thema’s.",
+    "fix": "Veilig oplossen",
+    "fixAll": "{count, plural, one {# onderdeel} other {Alle # onderdelen}} veilig oplossen",
+    "autofixOn": "Ernstige en kritieke lekken lost Verploy automatisch op: eerst getest op een testkopie, pas daarna live.",
+    "autofixOff": "Verploy lost niets op zonder jouw toestemming. Klik op “Veilig oplossen”: eerst getest op een testkopie, pas daarna live.",
+    "changeSetting": "Instelling wijzigen",
+    "fixedIn": "opgelost in {version}",
+    "noFix": "nog geen oplossing",
+    "noFixAdvice": "Er is nog geen versie zonder dit lek. Overweeg de plugin uit te schakelen of te vervangen tot er een oplossing is.",
+    "fixNotOffered": "Versie {version} lost dit op, maar WordPress biedt die update nog niet aan. Verploy kijkt bij de volgende controle opnieuw.",
+    "autofixRun": "Automatische oplossing:",
+    "checkedAt": "Laatst gecontroleerd {date}",
+    "source": "Bron: Wordfence Intelligence (Defiant Inc.).",
+    "licence": "Copyright en licentie",
+    "severity": {
+      "low": "Laag",
+      "medium": "Middel",
+      "high": "Ernstig",
+      "critical": "Kritiek"
+    },
+    "settings": {
+      "title": "Beveiligingslekken",
+      "intro": "Verploy vergelijkt je sites continu met de Wordfence-database van bekende lekken. Wat moet er gebeuren bij een ernstig of kritiek lek?",
+      "approveTitle": "Eerst toestemming vragen",
+      "approveBody": "Je krijgt direct een melding en e-mail. De oplossing staat klaar: met één klik voert Verploy hem veilig uit.",
+      "autoTitle": "Direct automatisch oplossen",
+      "autoBody": "Verploy start meteen een veilige update: eerst getest op een testkopie, pas live als alles werkt. Mislukt de test, dan blijft de site ongewijzigd en krijg je een melding.",
+      "note": "Lekken met ernst laag of middel worden altijd alleen gemeld."
+    }
   }
 }

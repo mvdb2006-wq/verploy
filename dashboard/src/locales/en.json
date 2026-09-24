@@ -300,6 +300,14 @@
       "update_failed": {
         "title": "Update failed: {items}",
         "body": "{reason}"
+      },
+      "vulnerability": {
+        "title": "{count, plural, one {Known vulnerability} other {# known vulnerabilities}}: {items}",
+        "body": "Severity: {severity}. Open the site in Verploy and apply the fix safely."
+      },
+      "vulnerability_auto": {
+        "title": "{count, plural, one {Known vulnerability} other {# known vulnerabilities}}: {items}",
+        "body": "Severity: {severity}. Verploy is fixing this automatically and safely; you’ll hear from us if that doesn’t work."
       }
     },
     "sslError": {
@@ -460,7 +468,8 @@
       "passed": "Passed",
       "failed": "Failed",
       "loginPage": "Login page",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "securityTrigger": "Started automatically by Verploy because of a known security vulnerability."
     },
     "events": {
       "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",
@@ -490,7 +499,8 @@
       "verdict_rolled_back": "Done: rolled back.",
       "verdict_error": "Done: failed.",
       "verdict_cancelled": "Done: cancelled.",
-      "done": "Done."
+      "done": "Done.",
+      "queued_security": "{count, plural, one {# security update} other {# security updates}} scheduled automatically by Verploy (known vulnerability)."
     }
   },
   "diagnosis": {
@@ -809,5 +819,38 @@
     "updateBody": "Tick an available update: Verploy tests it on a copy of the site first.",
     "report": "Set up reports for your client",
     "reportBody": "Client email and language, and optionally a monthly report."
+  },
+  "security": {
+    "title": "Security",
+    "summary": "{count, plural, one {# known vulnerability} other {# known vulnerabilities}} in {components, plural, one {# component} other {# components}}",
+    "none": "No known vulnerabilities in WordPress, plugins and themes.",
+    "fix": "Fix safely",
+    "fixAll": "Fix {count, plural, one {# component} other {all # components}} safely",
+    "autofixOn": "Verploy fixes high and critical vulnerabilities automatically: tested on a staging copy first, then deployed.",
+    "autofixOff": "Verploy won’t fix anything without your approval. Click “Fix safely”: tested on a staging copy first, then deployed.",
+    "changeSetting": "Change setting",
+    "fixedIn": "fixed in {version}",
+    "noFix": "no fix yet",
+    "noFixAdvice": "There is no version without this vulnerability yet. Consider deactivating or replacing the plugin until a fix is released.",
+    "fixNotOffered": "Version {version} fixes this, but WordPress isn’t offering that update yet. Verploy will check again at the next scan.",
+    "autofixRun": "Automatic fix:",
+    "checkedAt": "Last checked {date}",
+    "source": "Source: Wordfence Intelligence (Defiant Inc.).",
+    "licence": "Copyright and licence",
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "settings": {
+      "title": "Security vulnerabilities",
+      "intro": "Verploy continuously checks your sites against the Wordfence database of known vulnerabilities. What should happen when a high or critical vulnerability is found?",
+      "approveTitle": "Ask for approval first",
+      "approveBody": "You get an alert and email right away. The fix is ready: one click and Verploy applies it safely.",
+      "autoTitle": "Fix automatically, right away",
+      "autoBody": "Verploy starts a safe update immediately: tested on a staging copy first, deployed only if everything works. If the test fails, the site stays unchanged and you get an alert.",
+      "note": "Low and medium vulnerabilities are always reported only."
+    }
   }
 }

@@ -4,10 +4,10 @@ import { actAs, asSuper, expectError, inTx, pool, seedAgency, type Agency, type 
 afterAll(() => pool.end())
 
 /** Tabellen met bureau-data die leden mogen lezen. */
-const READABLE = ['agencies', 'agency_members', 'sites', 'health_snapshots', 'site_components', 'update_runs', 'update_run_events', 'test_results', 'diagnoses', 'reports'] as const
+const READABLE = ['agencies', 'agency_members', 'sites', 'health_snapshots', 'site_components', 'update_runs', 'update_run_events', 'test_results', 'diagnoses', 'reports', 'site_vulnerabilities'] as const
 /** Tabellen die voor gebruikers volledig onzichtbaar moeten zijn. */
 const SECRET = ['site_credentials', 'signed_request_nonces'] as const
-const ALL_TABLES = [...READABLE, 'agency_invitations', 'plans', ...SECRET] as const
+const ALL_TABLES = [...READABLE, 'agency_invitations', 'plans', 'vulnerabilities', 'vulnerability_feed_state', ...SECRET] as const
 
 const agencyCol = (t: string) => (t === 'agencies' ? 'id' : 'agency_id')
 

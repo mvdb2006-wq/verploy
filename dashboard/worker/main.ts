@@ -8,6 +8,8 @@ import { chromium, type Browser } from 'playwright-core'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runMaintenance } from '@/lib/monitoring/maintenance'
 import { dispatchNotifications } from '@/lib/monitoring/notify'
+import { evaluateSites, refreshFeed } from '@/lib/vulnerabilities/feed'
+import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
 import { closePdfBrowser, processReport } from './reports'
@@ -20,6 +22,7 @@ const WORKER_ID = process.env.WORKER_ID || `${os.hostname()}-${process.pid}`
 const POLL_MS = Number(process.env.WORKER_POLL_MS ?? 5000)
 const LEASE_SECONDS = 120
 const MAINTENANCE_EVERY_MS = Number(process.env.WORKER_MAINTENANCE_MS ?? 5 * 60_000)
+const VULN_EVERY_MS = Number(process.env.WORKER_VULN_MS ?? 60_000)
 
 const log = (msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: WORKER_ID, msg, ...extra }))
@@ -152,8 +155,24 @@ async function main() {
   process.on('SIGINT', stop)
 
   let lastMaintenance = 0
+  let lastVuln = 0
+  let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
+    if (Date.now() - lastVuln > VULN_EVERY_MS) {
+      lastVuln = Date.now()
+      // De feed is groot (minuten): op de achtergrond, zodat updates niet hoeven te wachten.
+      if (!feedBusy) {
+        feedBusy = true
+        refreshFeed(admin, { apiKey: env().WORDFENCE_API_KEY, url: env().WORDFENCE_FEED_URL })
+          .then(r => { if (!r.skipped) log(r.error ? 'vuln_feed_failed' : 'vuln_feed', { ...r }) })
+          .catch(e => log('vuln_feed_failed', { error: (e as Error).message }))
+          .finally(() => { feedBusy = false })
+      }
+      await evaluateSites(admin)
+        .then(r => { if (r.evaluated || r.autofixStarted) log('vuln_evaluated', { ...r }) })
+        .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
+    }
     if (Date.now() - lastMaintenance > MAINTENANCE_EVERY_MS) {
       lastMaintenance = Date.now()
       await runMaintenance(admin).then(r => log('maintenance', { ...r })).catch(e => log('maintenance_failed', { error: (e as Error).message }))

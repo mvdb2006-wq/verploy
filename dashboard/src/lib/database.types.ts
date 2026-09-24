@@ -23,6 +23,7 @@ export type Database = {
           subscription_period_end: string | null
           subscription_cancel_at_end: boolean
           stripe_synced_at: string | null
+          security_autofix: boolean
         }
         Insert: {
           id?: string
@@ -42,6 +43,7 @@ export type Database = {
           subscription_period_end?: string | null
           subscription_cancel_at_end?: boolean
           stripe_synced_at?: string | null
+          security_autofix?: boolean
         }
         Update: {
           id?: string
@@ -61,6 +63,7 @@ export type Database = {
           subscription_period_end?: string | null
           subscription_cancel_at_end?: boolean
           stripe_synced_at?: string | null
+          security_autofix?: boolean
         }
         Relationships: []
       }
@@ -473,6 +476,66 @@ export type Database = {
         }
         Relationships: []
       }
+      site_vulnerabilities: {
+        Row: {
+          site_id: string
+          agency_id: string
+          vulnerability_id: string
+          component_type: string
+          component_slug: string
+          component_name: string
+          installed_version: string
+          fixed_version: string | null
+          severity: string
+          fixable: boolean
+          status: string
+          first_seen_at: string
+          updated_at: string
+          resolved_at: string | null
+          autofix_run_id: string | null
+          autofix_target: string | null
+          autofix_at: string | null
+        }
+        Insert: {
+          site_id: string
+          agency_id: string
+          vulnerability_id: string
+          component_type: string
+          component_slug: string
+          component_name: string
+          installed_version: string
+          fixed_version?: string | null
+          severity: string
+          fixable?: boolean
+          status?: string
+          first_seen_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          autofix_run_id?: string | null
+          autofix_target?: string | null
+          autofix_at?: string | null
+        }
+        Update: {
+          site_id?: string
+          agency_id?: string
+          vulnerability_id?: string
+          component_type?: string
+          component_slug?: string
+          component_name?: string
+          installed_version?: string
+          fixed_version?: string | null
+          severity?: string
+          fixable?: boolean
+          status?: string
+          first_seen_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+          autofix_run_id?: string | null
+          autofix_target?: string | null
+          autofix_at?: string | null
+        }
+        Relationships: []
+      }
       sites: {
         Row: {
           id: string
@@ -503,6 +566,7 @@ export type Database = {
           test_masks: string[]
           diff_threshold: number
           report_monthly: boolean
+          vulns_checked_at: string | null
         }
         Insert: {
           id?: string
@@ -533,6 +597,7 @@ export type Database = {
           test_masks?: string[]
           diff_threshold?: number
           report_monthly?: boolean
+          vulns_checked_at?: string | null
         }
         Update: {
           id?: string
@@ -563,6 +628,7 @@ export type Database = {
           test_masks?: string[]
           diff_threshold?: number
           report_monthly?: boolean
+          vulns_checked_at?: string | null
         }
         Relationships: []
       }
@@ -702,6 +768,7 @@ export type Database = {
           started_at: string | null
           finished_at: string | null
           updated_at: string
+          trigger: string
         }
         Insert: {
           id?: string
@@ -725,6 +792,7 @@ export type Database = {
           started_at?: string | null
           finished_at?: string | null
           updated_at?: string
+          trigger?: string
         }
         Update: {
           id?: string
@@ -748,6 +816,91 @@ export type Database = {
           started_at?: string | null
           finished_at?: string | null
           updated_at?: string
+          trigger?: string
+        }
+        Relationships: []
+      }
+      vulnerabilities: {
+        Row: {
+          id: string
+          software_type: string
+          slug: string
+          name: string
+          title: string
+          affected: Json
+          patched_versions: string[]
+          severity: string
+          cvss_score: number | null
+          cve: string | null
+          reference_url: string | null
+          mitre: boolean
+          published_at: string | null
+          source_updated_at: string | null
+          fetched_at: string
+        }
+        Insert: {
+          id: string
+          software_type: string
+          slug: string
+          name: string
+          title: string
+          affected: Json
+          patched_versions?: string[]
+          severity: string
+          cvss_score?: number | null
+          cve?: string | null
+          reference_url?: string | null
+          mitre?: boolean
+          published_at?: string | null
+          source_updated_at?: string | null
+          fetched_at?: string
+        }
+        Update: {
+          id?: string
+          software_type?: string
+          slug?: string
+          name?: string
+          title?: string
+          affected?: Json
+          patched_versions?: string[]
+          severity?: string
+          cvss_score?: number | null
+          cve?: string | null
+          reference_url?: string | null
+          mitre?: boolean
+          published_at?: string | null
+          source_updated_at?: string | null
+          fetched_at?: string
+        }
+        Relationships: []
+      }
+      vulnerability_feed_state: {
+        Row: {
+          id: number
+          fetched_at: string | null
+          source_updated_max: string | null
+          record_count: number
+          last_error: string | null
+          last_error_at: string | null
+          attribution: Json
+        }
+        Insert: {
+          id?: number
+          fetched_at?: string | null
+          source_updated_max?: string | null
+          record_count?: number
+          last_error?: string | null
+          last_error_at?: string | null
+          attribution?: Json
+        }
+        Update: {
+          id?: number
+          fetched_at?: string | null
+          source_updated_max?: string | null
+          record_count?: number
+          last_error?: string | null
+          last_error_at?: string | null
+          attribution?: Json
         }
         Relationships: []
       }
@@ -773,6 +926,7 @@ export type Database = {
       invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
       peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
+      pending_security_fixes: { Args: { p_limit?: number | null }; Returns: { site_id: string; items: Json }[] }
       record_run_outcome: { Args: { p_run: string | null }; Returns: undefined }
       record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
       release_update_run: { Args: { p_run: string | null; p_worker: string | null; p_delay_seconds?: number | null }; Returns: undefined }
@@ -782,7 +936,10 @@ export type Database = {
       schedule_monthly_reports: { Args: Record<PropertyKey, never>; Returns: number }
       set_plan_price: { Args: { p_plan: string | null; p_price: string | null }; Returns: undefined }
       set_stripe_customer: { Args: { p_agency: string | null; p_customer: string | null }; Returns: undefined }
+      sites_due_for_vulnerability_check: { Args: { p_limit?: number | null }; Returns: { site_id: string }[] }
+      start_security_fix: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
+      sync_site_vulnerabilities: { Args: { p_site: string | null; p_findings: Json | null }; Returns: number }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }
     Enums: { [_ in never]: never }

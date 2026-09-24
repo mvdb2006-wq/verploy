@@ -153,3 +153,11 @@ Eén regel onderbouwing per keuze. Nieuwste onderaan per sectie.
 
 ## 24-09 — Geen downgrade als "update" aanbieden
 WordPress kan een verouderde updatemelding in `update_plugins` bewaren (gezien op productie: Verploy Connector 2.2.0 met "update naar 1.3.1" na handmatig uploaden). De server neemt een updatemelding daarom alleen over als de aangeboden versie numeriek nieuwer is dan de geïnstalleerde (`isNewerVersion` in `src/lib/connector/payload.ts`); anders geen update en geen `latest_version`. Server-side, zodat het voor alle geïnstalleerde pluginversies direct werkt; bij de volgende heartbeat (≤ 15 min) is de melding weg.
+
+## 24-09 — Bekende kwetsbaarheden: Wordfence-feed, standaard eerst toestemming
+- **Wordfence Intelligence in plaats van Patchstack of WPScan.** De feed is gratis, ook voor commercieel gebruik (API-sleutel verplicht) en bevat CVSS en gepatchte versies. Patchstack en WPScan zijn betaald per gebruik.
+- **De hele feed opslaan, niet alleen de plugins die nu voorkomen.** Een nieuw gekoppelde site wordt dan direct beoordeeld, zonder te wachten op de volgende feed. Compact opgeslagen: geen beschrijvingen of licentieteksten per record. De licentieteksten staan één keer in `vulnerability_feed_state`.
+- **Zelf een stroomlezer voor JSON.** De feed is een object van meer dan 100 MB. Een eenvoudige stroomlezer die alleen de bovenste laag splitst (`streamObjectValues`, getest op elke mogelijke knip in een blok) voorkomt een extra afhankelijkheid en een geheugenpiek in de worker.
+- **Standaard "eerst toestemming".** Martijn vond volledig automatisch oplossen te riskant als standaard. Het is per bureau in te stellen. Automatisch oplossen gebruikt exact dezelfde veilige update als handmatig: eerst de testkopie en alleen live als de tests slagen.
+- **Eén poging per doelversie.** Wordt een automatische oplossing tegengehouden, dan probeert Verploy het pas opnieuw als er een nieuwere versie is. Zo ontstaat er geen lus en blijft de melding met de diagnose staan.
+- **Ernst volgt CVSS-rating.** Staat er geen rating in het record, dan geldt de score. Zonder score telt het lek als "middel", zodat een onbekend lek nooit genegeerd wordt en nooit automatisch wordt opgelost.

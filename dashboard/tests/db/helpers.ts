@@ -98,6 +98,11 @@ export async function seedAgency(db: Db, label: string, opts: { plan?: string; p
       `insert into public.site_components (agency_id, site_id, type, slug, name, version) values ($1, $2, 'plugin', 'akismet/akismet.php', 'Akismet', '5.0')`,
       [ag.id, s.id],
     )
+    if (i === 1) await db.query(
+      `insert into public.site_vulnerabilities (site_id, agency_id, vulnerability_id, component_type, component_slug, component_name, installed_version, severity)
+       values ($2, $1, 'seed-vuln', 'plugin', 'akismet/akismet.php', 'Akismet', '5.0', 'medium')`,
+      [ag.id, s.id],
+    )
     await db.query(`update public.site_credentials set secret_ciphertext = 'ciphertext-${label}${i}' where site_id = $1`, [s.id])
     await db.query(`insert into public.signed_request_nonces (site_id, nonce) values ($1, $2)`, [s.id, randomUUID().replaceAll('-', '')])
   }

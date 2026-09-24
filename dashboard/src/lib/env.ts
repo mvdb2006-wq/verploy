@@ -17,6 +17,10 @@ const schema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   /** Klantportaal-configuratie (uitvoer van scripts/stripe-setup.mjs). */
   STRIPE_PORTAL_CONFIGURATION: z.string().optional(),
+  /** Wordfence Intelligence (kwetsbaarheden). Zonder sleutel staat de controle uit. Alleen nodig in de worker. */
+  WORDFENCE_API_KEY: z.string().optional(),
+  /** Alleen voor tests: eigen feed-adres. */
+  WORDFENCE_FEED_URL: z.url().optional(),
   /** Alleen voor tests: stripe-mock, bijv. http://127.0.0.1:12111 */
   STRIPE_API_BASE: z.url().optional(),
 })

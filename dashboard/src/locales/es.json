@@ -300,6 +300,14 @@
       "update_failed": {
         "title": "Actualización fallida: {items}",
         "body": "{reason}"
+      },
+      "vulnerability": {
+        "title": "{count, plural, one {Vulnerabilidad conocida} other {# vulnerabilidades conocidas}}: {items}",
+        "body": "Gravedad: {severity}. Abre el sitio en Verploy y aplica la corrección de forma segura."
+      },
+      "vulnerability_auto": {
+        "title": "{count, plural, one {Vulnerabilidad conocida} other {# vulnerabilidades conocidas}}: {items}",
+        "body": "Gravedad: {severity}. Verploy lo está corrigiendo de forma automática y segura; te avisaremos si no funciona."
       }
     },
     "sslError": {
@@ -460,7 +468,8 @@
       "passed": "Superada",
       "failed": "Fallida",
       "loginPage": "Página de acceso",
-      "timeline": "Cronología"
+      "timeline": "Cronología",
+      "securityTrigger": "Iniciada automáticamente por Verploy por una vulnerabilidad de seguridad conocida."
     },
     "events": {
       "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",
@@ -490,7 +499,8 @@
       "verdict_rolled_back": "Terminado: revertida.",
       "verdict_error": "Terminado: fallida.",
       "verdict_cancelled": "Terminado: cancelada.",
-      "done": "Terminado."
+      "done": "Terminado.",
+      "queued_security": "{count, plural, one {Actualización de seguridad programada} other {# actualizaciones de seguridad programadas}} automáticamente por Verploy (vulnerabilidad conocida)."
     }
   },
   "diagnosis": {
@@ -809,5 +819,38 @@
     "updateBody": "Marca una actualización disponible: Verploy la prueba primero en una copia del sitio.",
     "report": "Configura informes para tu cliente",
     "reportBody": "Correo e idioma del cliente y, si quieres, un informe mensual."
+  },
+  "security": {
+    "title": "Seguridad",
+    "summary": "{count, plural, one {# vulnerabilidad conocida} other {# vulnerabilidades conocidas}} en {components, plural, one {# componente} other {# componentes}}",
+    "none": "Sin vulnerabilidades conocidas en WordPress, plugins y temas.",
+    "fix": "Corregir de forma segura",
+    "fixAll": "Corregir {count, plural, one {# componente} other {los # componentes}} de forma segura",
+    "autofixOn": "Verploy corrige automáticamente las vulnerabilidades altas y críticas: primero se prueban en una copia de pruebas y después se publican.",
+    "autofixOff": "Verploy no corrige nada sin tu aprobación. Haz clic en «Corregir de forma segura»: primero se prueba en una copia de pruebas y después se publica.",
+    "changeSetting": "Cambiar ajuste",
+    "fixedIn": "corregida en {version}",
+    "noFix": "aún sin corrección",
+    "noFixAdvice": "Todavía no hay una versión sin esta vulnerabilidad. Considera desactivar o sustituir el plugin hasta que haya una corrección.",
+    "fixNotOffered": "La versión {version} lo corrige, pero WordPress aún no ofrece esa actualización. Verploy volverá a comprobarlo en la próxima revisión.",
+    "autofixRun": "Corrección automática:",
+    "checkedAt": "Última comprobación {date}",
+    "source": "Fuente: Wordfence Intelligence (Defiant Inc.).",
+    "licence": "Copyright y licencia",
+    "severity": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "settings": {
+      "title": "Vulnerabilidades de seguridad",
+      "intro": "Verploy compara continuamente tus sitios con la base de datos de Wordfence de vulnerabilidades conocidas. ¿Qué debe pasar ante una vulnerabilidad alta o crítica?",
+      "approveTitle": "Pedir aprobación primero",
+      "approveBody": "Recibes un aviso y un correo al instante. La corrección está lista: con un clic, Verploy la aplica de forma segura.",
+      "autoTitle": "Corregir automáticamente, de inmediato",
+      "autoBody": "Verploy inicia enseguida una actualización segura: primero se prueba en una copia de pruebas y solo se publica si todo funciona. Si la prueba falla, el sitio no cambia y recibes un aviso.",
+      "note": "Las vulnerabilidades bajas o medias siempre solo se notifican."
+    }
   }
 }

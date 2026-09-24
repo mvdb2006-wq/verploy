@@ -15,7 +15,8 @@ import { UpdatesPanel } from './updates'
 import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
 import { ClientReports } from './client-reports'
-import { MIN_CONNECTOR_FOR_RUNS, versionAtLeast } from '@/lib/runs'
+import { MIN_CONNECTOR_FOR_RUNS, runBadge, versionAtLeast } from '@/lib/runs'
+import { SecurityPanel, type Attribution, type SecurityFinding } from './security'
 
 function memoryRaw(raw: unknown): string | null {
   const server = (raw as { server?: { memory_limit?: unknown } } | null)?.server
@@ -29,7 +30,7 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
   const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
   const { data: site } = await supabase.from('sites').select('*').eq('id', id).maybeSingle()
   if (!site) notFound()
-  const [{ data: snap }, { data: components }, { data: alerts }, { data: runs }] = await Promise.all([
+  const [{ data: snap }, { data: components }, { data: alerts }, { data: runs }, { data: vulns }, { data: feed }] = await Promise.all([
     supabase.from('health_snapshots').select('memory_limit_mb, disk_free_mb, captured_at, raw').eq('site_id', id).order('id', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('site_components').select('type, slug, name, version, latest_version, update_available, active').eq('site_id', id)
       .order('update_available', { ascending: false }).order('active', { ascending: false }).order('type').order('name'),
@@ -37,7 +38,30 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
       .eq('site_id', id).eq('status', 'open').neq('severity', 'info').order('opened_at', { ascending: false }),
     supabase.from('update_runs').select('id, status, verdict, items, created_at, finished_at, reason_key, reason_params')
       .eq('site_id', id).order('created_at', { ascending: false }).limit(10),
+    supabase.from('site_vulnerabilities').select('vulnerability_id, component_type, component_slug, component_name, installed_version, fixed_version, fixable, severity, autofix_run_id')
+      .eq('site_id', id).eq('status', 'open'),
+    supabase.from('vulnerability_feed_state').select('fetched_at, attribution').eq('id', 1).maybeSingle(),
   ])
+  const vulnIds = [...new Set((vulns ?? []).map(v => v.vulnerability_id))]
+  const autofixRunIds = [...new Set((vulns ?? []).map(v => v.autofix_run_id).filter((x): x is string => Boolean(x)))]
+  const [{ data: vulnDetails }, { data: autofixRuns }] = await Promise.all([
+    vulnIds.length ? supabase.from('vulnerabilities').select('id, title, cve, cvss_score, reference_url, mitre').in('id', vulnIds) : Promise.resolve({ data: [] }),
+    autofixRunIds.length ? supabase.from('update_runs').select('id, status, verdict').in('id', autofixRunIds) : Promise.resolve({ data: [] }),
+  ])
+  const detailById = new Map((vulnDetails ?? []).map(d => [d.id, d]))
+  const runById = new Map((autofixRuns ?? []).map(r => [r.id, r]))
+  const rank = { critical: 0, high: 1, medium: 2, low: 3 } as const
+  const findings: SecurityFinding[] = (vulns ?? []).map(v => {
+    const d = detailById.get(v.vulnerability_id)
+    const r = v.autofix_run_id ? runById.get(v.autofix_run_id) : undefined
+    return {
+      vulnerabilityId: v.vulnerability_id, type: v.component_type, slug: v.component_slug, name: v.component_name,
+      installed: v.installed_version, fixed: v.fixed_version, fixable: v.fixable,
+      severity: v.severity as SecurityFinding['severity'], title: d?.title ?? v.vulnerability_id,
+      cve: d?.cve ?? null, cvss: d?.cvss_score ?? null, url: d?.reference_url ?? null, mitre: d?.mitre ?? false,
+      autofixRun: r ? { id: r.id, ...runBadge(t, r) } : null,
+    }
+  }).sort((a, b) => rank[a.severity] - rank[b.severity] || a.name.localeCompare(b.name))
   const openAlerts = (alerts ?? []).sort((a, b) => (SEVERITY_ORDER[a.severity as keyof typeof SEVERITY_ORDER] ?? 9) - (SEVERITY_ORDER[b.severity as keyof typeof SEVERITY_ORDER] ?? 9))
   const phpAlert = openAlerts.find(a => a.type === 'php_eol')
   const phpEol = (phpAlert?.params as { eol?: string } | undefined)?.eol
@@ -142,6 +166,18 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
             </div>
           ))}
         </dl>
+      )}
+
+      {connected && (feed?.fetched_at || findings.length > 0) && (
+        <SecurityPanel
+          siteId={site.id}
+          findings={findings}
+          checkedAt={site.vulns_checked_at ? formatDate(site.vulns_checked_at, locale, true) : null}
+          runnable={!blockedReason}
+          activeRunId={activeRun?.id ?? null}
+          autofix={Boolean(session.agency.security_autofix)}
+          attribution={(feed?.attribution ?? {}) as { defiant?: Attribution; mitre?: Attribution }}
+        />
       )}
 
       <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} />

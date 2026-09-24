@@ -5,7 +5,7 @@ import { Field } from '@/components/Field'
 import { SubmitButton } from '@/components/SubmitButton'
 import { LOCALES, type MessageKey } from '@/lib/i18n/core'
 import { useI18n } from '@/lib/i18n/client'
-import { saveAgency, saveLogo } from './actions'
+import { saveAgency, saveLogo, saveSecurity } from './actions'
 
 export function AgencyForm({ defaults, disabled }: { defaults: { name: string; dashboard_locale: string; brand_color: string; report_sender_name: string }; disabled: boolean }) {
   const { t } = useI18n()
@@ -75,5 +75,40 @@ export function LogoForm({ hasLogo, disabled }: { hasLogo: boolean; disabled: bo
       {state.error && <Alert>{state.error}</Alert>}
       {state.ok && <Alert tone="ok">{t('common.saved')}</Alert>}
     </section>
+  )
+}
+
+/** Keuze per bureau: ernstige/kritieke lekken eerst laten goedkeuren of direct automatisch veilig oplossen. */
+export function SecurityForm({ autofix, disabled }: { autofix: boolean; disabled: boolean }) {
+  const { t } = useI18n()
+  const [state, action] = useActionState(saveSecurity, {})
+  const options = [
+    { value: 'approve', title: t('security.settings.approveTitle'), body: t('security.settings.approveBody') },
+    { value: 'auto', title: t('security.settings.autoTitle'), body: t('security.settings.autoBody') },
+  ]
+  return (
+    <form action={action} className="card space-y-4" id="security" aria-labelledby="security-settings-title">
+      <div>
+        <h2 id="security-settings-title" className="font-bold">{t('security.settings.title')}</h2>
+        <p className="mt-1 text-sm text-muted">{t('security.settings.intro')}</p>
+      </div>
+      {state.error && <Alert>{state.error}</Alert>}
+      {state.ok && <Alert tone="ok">{state.ok}</Alert>}
+      <fieldset disabled={disabled} className="space-y-3">
+        <legend className="sr-only">{t('security.settings.title')}</legend>
+        {options.map(o => (
+          <label key={o.value} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+            <input type="radio" name="security_mode" value={o.value} defaultChecked={(o.value === 'auto') === autofix}
+              className="mt-1 size-4 shrink-0 accent-(--color-accent)" />
+            <span>
+              <span className="block text-sm font-semibold">{o.title}</span>
+              <span className="block text-sm text-muted">{o.body}</span>
+            </span>
+          </label>
+        ))}
+        <p className="text-xs text-subtle">{t('security.settings.note')}</p>
+        {!disabled && <SubmitButton pendingLabel={t('common.saving')}>{t('common.save')}</SubmitButton>}
+      </fieldset>
+    </form>
   )
 }

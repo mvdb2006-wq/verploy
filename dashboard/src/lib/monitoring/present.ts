@@ -24,7 +24,13 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
     vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
     vars.reason = presentReason(t, typeof p.reason_key === 'string' ? p.reason_key : null, p.reason_params)
   }
-  const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon') : alert.type
+  if (alert.type === 'vulnerability') {
+    vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
+    vars.severity = typeof p.max_severity === 'string' ? t(`security.severity.${p.max_severity}` as MessageKey) : ''
+  }
+  const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon')
+    : alert.type === 'vulnerability' && p.autofix === true ? 'vulnerability_auto'
+    : alert.type
   const diagnosis = alert.type.startsWith('update_') && typeof p.diagnosis === 'string' && p.diagnosis ? ` ${t('alerts.diagnosis', { text: p.diagnosis })}` : ''
   return {
     title: t(`alerts.types.${key}.title` as MessageKey, vars),

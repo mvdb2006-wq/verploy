@@ -21,10 +21,19 @@ describe('presentAlert', () => {
     expect(presentAlert(de, 'de', { type: 'ssl_invalid', severity: 'critical', params: { error: 'self_signed' } }).body)
       .toContain('das Zertifikat ist selbstsigniert')
   })
+  it('beveiligingslek: onderdelen, ernst en "automatisch" in de tekst', () => {
+    const base = { type: 'vulnerability', severity: 'critical', params: { count: 2, items: ['Akismet', 'Yoast SEO'], max_severity: 'critical', autofix: false } }
+    const r = presentAlert(nl, 'nl', base)
+    expect(r.title).toBe('2 bekende beveiligingslekken: Akismet, Yoast SEO')
+    expect(r.body).toBe('Ernst: Kritiek. Bekijk de site in Verploy en voer de oplossing veilig uit.')
+    const auto = presentAlert(nl, 'nl', { ...base, params: { ...base.params, count: 1, items: ['Akismet'], autofix: true } })
+    expect(auto.title).toBe('Bekend beveiligingslek: Akismet')
+    expect(auto.body).toContain('Verploy lost dit automatisch en veilig op')
+  })
   it('elk type heeft een titel in elke taal (geen ruwe sleutels)', () => {
     for (const locale of ['nl', 'en', 'de', 'fr', 'es'] as const) {
       const t = createTranslator(locale)
-      for (const type of ['site_offline', 'ssl_expiring', 'ssl_invalid', 'ssl_missing', 'domain_expiring', 'php_eol', 'memory_low', 'disk_low', 'core_update', 'plugin_updates']) {
+      for (const type of ['site_offline', 'ssl_expiring', 'ssl_invalid', 'ssl_missing', 'domain_expiring', 'php_eol', 'memory_low', 'disk_low', 'core_update', 'plugin_updates', 'vulnerability']) {
         for (const severity of ['warning', 'critical']) {
           const r = presentAlert(t, locale, { type, severity, params: { days: 3, count: 2, mb: 64, version: '8.1', error: 'expired' } })
           expect(r.title, `${locale}/${type}`).not.toMatch(/^alerts\./)
