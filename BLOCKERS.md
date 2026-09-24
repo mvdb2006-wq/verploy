@@ -28,22 +28,9 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 
 ---
 
-## 2. 🔴 Migraties naar productie — fase 2 staat klaar en wacht hierop
+## 2. ✅ Migraties naar productie — opgelost 24-09
 
-**Waarom:** fase 2 is gebouwd en getest (branch `v2`), maar kan pas live als het v2-schema op de productiedatabase staat. Tot die tijd draait app.verploy.com de oude versie en blijft registratie dicht. Schrijven naar productie is voor mij geblokkeerd door het beleid van deze omgeving; de hotfix van 23-09 lukte alleen met jouw expliciete akkoord in de chat.
-
-**Wat je moet doen (één van de twee):**
-- **A. (aanbevolen, eenmalig):** voeg drie GitHub-secrets toe aan de repo `mvdb2006-wq/verploy` (Settings → Secrets and variables → Actions → New repository secret):
-  - `SUPABASE_ACCESS_TOKEN`: maken op supabase.com → Account → Access Tokens → "Generate new token"
-  - `SUPABASE_DB_PASSWORD`: het databasewachtwoord van het project (Project Settings → Database; gebruik "Reset database password" als je het niet meer weet)
-  - `SUPABASE_PROJECT_REF`: `awsdapsdlazppvaemrki`
-
-  Ik schrijf de GitHub Action die bij elke push naar `main` de migraties toepast (`supabase db push`).
-- **B.** Per migratie in de chat akkoord geven, zodat ik hem via de SQL Editor uitvoer.
-
-**Daarna doe ik zelf:** `v2` mergen naar `main` (Vercel deployt), in Supabase Auth de redirect-URL `https://app.verploy.com/auth/callback` toevoegen en registratie weer aanzetten, controleren dat alles werkt, en je laten weten dat de sites opnieuw gekoppeld kunnen worden (#1).
-
-**Ondertussen:** ik bouw fase 3 verder op `v2`; alle migraties worden lokaal op Postgres 16 getest met de RLS-testsuite.
+Met je akkoord in de chat uitgevoerd via de SQL Editor: `ops/prod-upgrade-v2.sql` (één transactie; eerst proefrun met rollback, daarna echt). De v1-gegevens staan als reservekopie in schema `backup_v1` (niet via de API bereikbaar). De migraties staan geregistreerd in `supabase_migrations.schema_migrations`. `v2` is naar `main` gemerged; app.verploy.com draait v2 (`/api/health` → ok). Registratie staat weer aan (met e-mailbevestiging).
 
 ---
 
@@ -57,13 +44,18 @@ Wil je dat ik stappen 1, 2 en 4 zelf in de browser doe? Log dan in op wp-admin v
 
 ---
 
-## 2c. 🟠 Twee omgevingsvariabelen in Vercel — samen met #2
+## 2c. 🟠 Omgevingsvariabelen in Vercel — app draait, maar de onderhouds-cron staat uit
 
-**Waarom:** de onderhouds-cron (drempels, SSL/domein, e-mails) werkt alleen met een geheim. E-mail vanaf verploy.com kan pas na #5.
+**Waarom:** schrijven naar de geheimenopslag van Vercel is voor mij geblokkeerd door het beleid van deze omgeving. Zonder `CRON_SECRET` geeft `/api/cron/maintenance` 503 (drempels, SSL/domein-controle en e-mails lopen dan niet dagelijks). In Vercel staan ook nog v1-variabelen waarvan ik de (versleutelde) waarde niet kan lezen.
 
-**Wat je moet doen (één van de twee):**
-- **A.** Zeg: *"Je mag de omgevingsvariabelen in Vercel zetten."* Dan zet ik `CRON_SECRET` (een willekeurige waarde die ik genereer) en `NEXT_PUBLIC_APP_URL=https://app.verploy.com` zelf via de browser.
-- **B.** Vercel → project → Settings → Environment Variables → voeg `CRON_SECRET` toe met een willekeurige lange waarde (minstens 32 tekens), en controleer `NEXT_PUBLIC_APP_URL = https://app.verploy.com`.
+**Wat je moet doen:** Vercel → project verploy → Settings → Environment Variables (Production):
+- **Toevoegen:** `CRON_SECRET` = willekeurige waarde van minstens 32 tekens.
+- **Toevoegen (aanbevolen):** `VERPLOY_ENCRYPTION_KEY` = 32 willekeurige bytes als base64 (bijv. `openssl rand -base64 32`). Doe dit vóór je sites koppelt; daarna niet meer wijzigen.
+- **Controleren:** `NEXT_PUBLIC_APP_URL` = `https://app.verploy.com`.
+- **Verwijderen (v1, niet meer gebruikt):** `STRIPE_PRICE_*` (6×), `RESEND_FROM_EMAIL`, `WORKER_URL`, `WORKER_SECRET`. En `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` als daar oude/testwaarden in staan — v2 gebruikt ze zodra ze gevuld zijn (zie #5 en #7).
+- Daarna: Deployments → laatste → Redeploy.
+
+Of zeg in de chat: *"Je mag de omgevingsvariabelen in Vercel zetten en de v1-variabelen verwijderen."* — dan probeer ik het opnieuw.
 
 ---
 
