@@ -567,6 +567,9 @@ export type Database = {
           diff_threshold: number
           report_monthly: boolean
           vulns_checked_at: string | null
+          heartbeat_seq: number
+          vulns_checked_seq: number | null
+          vulns_checked_feed_at: string | null
         }
         Insert: {
           id?: string
@@ -598,6 +601,9 @@ export type Database = {
           diff_threshold?: number
           report_monthly?: boolean
           vulns_checked_at?: string | null
+          heartbeat_seq?: number
+          vulns_checked_seq?: number | null
+          vulns_checked_feed_at?: string | null
         }
         Update: {
           id?: string
@@ -629,6 +635,9 @@ export type Database = {
           diff_threshold?: number
           report_monthly?: boolean
           vulns_checked_at?: string | null
+          heartbeat_seq?: number
+          vulns_checked_seq?: number | null
+          vulns_checked_feed_at?: string | null
         }
         Relationships: []
       }
@@ -939,7 +948,7 @@ export type Database = {
       sites_due_for_vulnerability_check: { Args: { p_limit?: number | null }; Returns: { site_id: string }[] }
       start_security_fix: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
-      sync_site_vulnerabilities: { Args: { p_site: string | null; p_findings: Json | null }; Returns: number }
+      sync_site_vulnerabilities: { Args: { p_site: string | null; p_findings: Json | null; p_heartbeat_seq?: number | null; p_feed_at?: string | null }; Returns: number }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }
     Enums: { [_ in never]: never }

@@ -100,7 +100,7 @@ export async function refreshFeed(
   return { skipped: false, stored, seen }
 }
 
-export interface EvaluateResult { evaluated: number; open: number; autofixStarted: number }
+export interface EvaluateResult { evaluated: number; open: number; autofixStarted: number; stale: number }
 
 /**
  * Beoordeelt sites waarvoor iets veranderd is (nieuwe heartbeat of nieuwe feed): bevindingen vastleggen,
@@ -113,8 +113,16 @@ export async function evaluateSites(admin: Admin, opts: { limit?: number; deadli
   let evaluated = 0
   let open = 0
   let autofixStarted = 0
+  let stale = 0
+  // Feed-stand vóór het lezen van de lekken: is de feed intussen vernieuwd, dan weigert de database de uitkomst.
+  const { data: feed, error: fErr0 } = await admin.from('vulnerability_feed_state').select('fetched_at').eq('id', 1).single()
+  if (fErr0) throw fErr0
   for (const { site_id } of due ?? []) {
     if (Date.now() > deadline) break
+    // Eerst de heartbeat-teller, dan de onderdelen: de onderdelen zijn dus minstens zo nieuw als de teller.
+    // Komt er daarna nog een heartbeat binnen, dan klopt de teller niet meer en weigert de database de uitkomst.
+    const { data: site, error: hErr } = await admin.from('sites').select('heartbeat_seq').eq('id', site_id).single()
+    if (hErr) throw hErr
     const { data: comps, error: cErr } = await admin
       .from('site_components')
       .select('type, slug, name, version, latest_version, update_available')
@@ -133,10 +141,13 @@ export async function evaluateSites(admin: Admin, opts: { limit?: number; deadli
       }
     }
     const findings = matchComponents(components, bySlug)
-    const { data: n, error: sErr } = await admin.rpc('sync_site_vulnerabilities', { p_site: site_id, p_findings: findings as unknown as Json })
+    const { data: n, error: sErr } = await admin.rpc('sync_site_vulnerabilities', {
+      p_site: site_id, p_findings: findings as unknown as Json, p_heartbeat_seq: site.heartbeat_seq, p_feed_at: feed.fetched_at ?? undefined,
+    })
     if (sErr) throw sErr
+    if (n === null) { stale++; continue }   // intussen nieuwe heartbeat of feed: volgende ronde opnieuw
     evaluated++
-    open += n ?? 0
+    open += n
   }
 
   // Automatisch oplossen (alleen bureaus die dat hebben aangezet; de database bepaalt wat er in aanmerking komt).
@@ -147,5 +158,5 @@ export async function evaluateSites(admin: Admin, opts: { limit?: number; deadli
     if (fErr) throw fErr
     if (runId) autofixStarted++
   }
-  return { evaluated, open, autofixStarted }
+  return { evaluated, open, autofixStarted, stale }
 }

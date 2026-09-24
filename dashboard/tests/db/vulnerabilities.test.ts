@@ -79,6 +79,51 @@ describe('sync_site_vulnerabilities', () => {
       await db.query(`update public.vulnerability_feed_state set fetched_at = null`)
       expect(await due()).toEqual([])
     }))
+
+  it('verouderde lezing (heartbeat of feed kwam tussendoor) → niets vastgelegd, site blijft aan de beurt', () =>
+    inTx(async db => {
+      const { site } = await setup(db)
+      const due = () => asWorker(db, async () => (await db.query(`select site_id from public.sites_due_for_vulnerability_check(500)`)).rows.map(r => r.site_id))
+      const state = async () => (await db.query(`select s.heartbeat_seq::int seq, f.fetched_at::text fetched_at from public.sites s, public.vulnerability_feed_state f where s.id = $1 and f.id = 1`, [site])).rows[0]
+      const syncAt = (findings: unknown[], seq: number, feedAt: string) => asWorker(db, async () =>
+        (await db.query(`select public.sync_site_vulnerabilities($1, $2, $3, $4) n`, [site, JSON.stringify(findings), seq, feedAt])).rows[0].n as number | null)
+
+      // Een heartbeat verhoogt de teller (ook als iets anders dan de heartbeat-functie hem zet).
+      const before = await state()
+      await db.query(`update public.sites set last_heartbeat_at = now() - interval '30 seconds' where id = $1`, [site])
+      const s1 = await state()
+      expect(s1.seq).toBe(before.seq + 1)
+      await db.query(`update public.sites set name = name where id = $1`, [site])
+      expect((await state()).seq).toBe(s1.seq)
+
+      // Actuele lezing: vastgelegd, niet meer aan de beurt.
+      expect(await syncAt([finding()], s1.seq, s1.fetched_at)).toBe(1)
+      expect(await due()).not.toContain(site)
+
+      // Worker las de onderdelen vóór de volgende heartbeat (lege lijst): geweigerd, lek blijft open, site aan de beurt.
+      await db.query(`update public.sites set last_heartbeat_at = now() where id = $1`, [site])
+      expect(await due()).toContain(site)
+      expect(await syncAt([], s1.seq, s1.fetched_at)).toBeNull()
+      const open = await db.query(`select status from public.site_vulnerabilities where site_id = $1`, [site])
+      expect(open.rows).toEqual([{ status: 'open' }])
+      expect(await due()).toContain(site)
+
+      // Idem als de feed intussen vernieuwd is.
+      const s2 = await state()
+      await db.query(`update public.vulnerability_feed_state set fetched_at = now() where id = 1`)
+      expect(await syncAt([], s2.seq, s2.fetched_at)).toBeNull()
+      const s3 = await state()
+      expect(await syncAt([], s3.seq, s3.fetched_at)).toBe(0)
+      expect(await due()).not.toContain(site)
+    }))
+
+  it('oude aanroep zonder teller (worker van vóór de uitrol) werkt nog', () =>
+    inTx(async db => {
+      const { site } = await setup(db)
+      expect(await sync(db, site, [finding()])).toBe(1)
+      const s = await db.query(`select vulns_checked_seq = heartbeat_seq ok from public.sites where id = $1`, [site])
+      expect(s.rows[0].ok).toBe(true)
+    }))
 })
 
 describe('start_security_fix', () => {

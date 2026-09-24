@@ -174,7 +174,7 @@ async function main() {
           .finally(() => { feedBusy = false })
       }
       await evaluateSites(admin)
-        .then(r => { if (r.evaluated || r.autofixStarted) log('vuln_evaluated', { ...r }) })
+        .then(r => { if (r.evaluated || r.autofixStarted || r.stale) log('vuln_evaluated', { ...r }) })
         .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
     }
     if (Date.now() - lastMaintenance > MAINTENANCE_EVERY_MS) {

@@ -477,8 +477,13 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 
 **Versienummer:** onderin de zijbalk en bij Instellingen staat "Verploy 2.4.0 · <commit>". Het versienummer komt uit `package.json`; de commit komt uit `VERCEL_GIT_COMMIT_SHA` of `RAILWAY_GIT_COMMIT_SHA`.
 
-**Bewijs:** Playwright 28/28 · DB 164/164 · unit 184/184 · tsc en eslint schoon.
+**Bewijs:** Playwright 29/29 · DB 166/166 · unit 184/184 · tsc en eslint schoon.
 
 **Stap 2 (volgt, heeft een migratie nodig):**
 - In de inbox: toewijzen, uitstellen, wegzetten met reden, en notities.
 - Herinneringen en een ochtendoverzicht per e-mail.
+
+**Lekcontrole zonder tijdsrace (migratie `20261001000000`):**
+- Oorzaak: `last_heartbeat_at` is het begintijdstip van de heartbeat-transactie. Beoordeelde de worker een site net voordat die transactie committe, dan leek de controle nieuwer dan de heartbeat. Een lek werd dan pas bij de volgende heartbeat gezien, tot ongeveer een uur later.
+- Oplossing: een teller (`sites.heartbeat_seq`, opgehoogd door een trigger) in plaats van tijdstippen. De worker geeft de teller en het feed-tijdstip die hij las mee aan `sync_site_vulnerabilities`, dat een verouderde lezing weigert (er wordt niets vastgelegd, dus ook geen onterecht "opgelost").
+- Een worker van vóór de uitrol (aanroep zonder teller) blijft werken.

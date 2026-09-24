@@ -178,3 +178,6 @@ Gezien op productie: Yoast SEO Premium kreeg op de testkopie "geen update beschi
 Overzicht, Inbox en Beveiliging worden per request afgeleid uit runs, meldingen en `site_vulnerabilities`. Er is dus geen extra state die uit de pas kan lopen, en er is geen migratie nodig. Lekken worden per kwetsbaarheid gegroepeerd, over alle sites heen: bij tien sites met hetzelfde lek hoeft een bureau één beslissing te nemen, niet tien. Meldingen van het type `vulnerability` staan niet los in de inbox, want die beslissing staat er al.
 
 Het app-versienummer komt uit `package.json` (semver, handmatig verhoogd per release), met de korte commit-hash van het platform erbij. Zo kan een klant bij support precies zeggen welke versie hij ziet.
+
+## 24-09 — Lekcontrole: teller in plaats van tijdstippen
+`now()` in Postgres is het begin van de transactie, niet het moment van committen. Tijdstippen vergelijken tussen twee gelijktijdige processen (heartbeat en worker) is daardoor onbetrouwbaar. Een teller plus een controle onder rijvergrendeling is wél sluitend. De worker leest eerst de teller en daarna de onderdelen: komt er daartussen een heartbeat binnen, dan weigert de database de uitkomst en volgt de volgende ronde. De functie houdt een aanroep zonder teller aan, zodat de migratie vóór de nieuwe worker uitgerold kan worden.
