@@ -91,6 +91,7 @@ add_filter( 'site_transient_update_plugins', function ( $t ) {
 	if ( ! isset( $t->response ) ) { $t->response = array(); }
 	foreach ( get_plugins() as $file => $data ) {
 		$slug = dirname( $file );
+		if ( 0 !== strpos( $slug, 'vp-lab-' ) ) { continue; }   // alleen labplugins; andere updates (bijv. Verploy Connector) blijven staan
 		$m    = vp_lab_manifest();
 		// Zoals een betaalde plugin met domeinlicentie: op een ander adres (de testkopie) geen update.
 		$licensed_elsewhere = ! empty( $m[ $slug ]['licensed'] ) && defined( 'VERPLOY_STAGING' );

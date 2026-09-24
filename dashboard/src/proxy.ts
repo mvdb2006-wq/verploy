@@ -2,6 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { LOCALE_COOKIE } from '@/lib/i18n/core'
 import { entryLocale, normalizePlanParam } from '@/lib/signup-intent'
+import { resilientFetch } from '@/lib/supabase/fetch'
+
+const proxyFetch = resilientFetch()
 
 const PUBLIC_PREFIXES = ['/login', '/signup', '/forgot-password', '/auth/', '/invite/', '/api/']
 
@@ -24,6 +27,7 @@ export async function proxy(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: proxyFetch },
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: toSet => {

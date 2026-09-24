@@ -3,12 +3,16 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { env } from '@/lib/env'
 import type { Database } from '@/lib/database.types'
+import { resilientFetch } from './fetch'
+
+const serverFetch = resilientFetch()
 
 /** Supabase-client namens de ingelogde gebruiker (RLS geldt). */
 export async function createClient() {
   const cookieStore = await cookies()
   const e = env()
   return createServerClient<Database>(e.NEXT_PUBLIC_SUPABASE_URL, e.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    global: { fetch: serverFetch },
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: toSet => {

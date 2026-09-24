@@ -29,6 +29,12 @@ foreach ( $functional as $f ) {
 	$dir = WP_PLUGIN_DIR . '/' . dirname( $f );
 	if ( is_dir( $dir ) ) { $GLOBALS['wp_filesystem']->delete( $dir, true ); }
 }
+// … en hun tabellen (WooCommerce, WPForms, Action Scheduler), zodat de lab weer een kale WordPress is.
+global $wpdb;
+foreach ( (array) $wpdb->get_col( $wpdb->prepare( 'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND ( TABLE_NAME LIKE %s OR TABLE_NAME LIKE %s OR TABLE_NAME LIKE %s OR TABLE_NAME LIKE %s )',
+	$wpdb->esc_like( $wpdb->prefix . 'wc_' ) . '%', $wpdb->esc_like( $wpdb->prefix . 'woocommerce_' ) . '%', $wpdb->esc_like( $wpdb->prefix . 'wpforms_' ) . '%', $wpdb->esc_like( $wpdb->prefix . 'actionscheduler_' ) . '%' ) ) as $t ) {
+	$wpdb->query( "DROP TABLE `$t`" );
+}
 
 $slugs = array( 'vp-lab-footer', 'vp-lab-fatal', 'vp-lab-prod-only', 'vp-lab-licensed', 'vp-lab-extra', 'vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-formbreak', 'vp-lab-probe', 'vp-lab-updater' );
 foreach ( $slugs as $slug ) {
@@ -54,6 +60,7 @@ update_option( 'active_plugins', array_values( array_unique( $active ) ) );
 
 foreach ( array( 'verploy_site_id', 'verploy_secret', 'verploy_paired_at', 'verploy_last_heartbeat', 'verploy_run_lock', 'verploy_run_state', 'verploy_maintenance' ) as $o ) { delete_option( $o ); }
 delete_site_transient( 'update_plugins' );
+delete_transient( 'verploy_update_info' );   // eventueel gezet door de zelf-update-test
 delete_transient( 'vp_lab_manifest' );
 $mu = WPMU_PLUGIN_DIR . '/verploy-rescue.php';
 if ( is_file( $mu ) ) { unlink( $mu ); }
