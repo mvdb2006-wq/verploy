@@ -129,7 +129,8 @@ export function normalizeFeedRecord(r: FeedRecord): VulnerabilityRecord[] {
   const severity = severityOf(typeof r.cvss?.rating === 'string' ? r.cvss.rating : null, score)
   const refs = Array.isArray(r.references) ? r.references.filter((x): x is string => typeof x === 'string' && /^https?:\/\//.test(x)) : []
   const reference = refs.find(u => u.includes('wordfence.com')) ?? refs[0] ?? null
-  const out: VulnerabilityRecord[] = []
+  // Dezelfde software kan meerdere keren in één record staan (bijv. per versiereeks): samenvoegen.
+  const byKey = new Map<string, VulnerabilityRecord>()
   for (const sw of r.software as FeedSoftware[]) {
     const type = sw.type
     if (type !== 'core' && type !== 'plugin' && type !== 'theme') continue
@@ -146,7 +147,14 @@ export function normalizeFeedRecord(r: FeedRecord): VulnerabilityRecord[] {
     }
     if (affected.length === 0) continue
     const patched = Array.isArray(sw.patched_versions) ? sw.patched_versions.map(cleanVersion).filter((v): v is string => v !== null && v !== '*') : []
-    out.push({
+    const key = `${type}:${slug}`
+    const existing = byKey.get(key)
+    if (existing) {
+      existing.affected.push(...affected)
+      existing.patched_versions = [...new Set([...existing.patched_versions, ...patched])]
+      continue
+    }
+    byKey.set(key, {
       id: r.id, software_type: type, slug, name: s(sw.name, 200) || slug, title: s(r.title, 500) || slug,
       affected, patched_versions: patched, severity, cvss_score: score,
       cve: typeof r.cve === 'string' && /^CVE-\d{4}-\d+$/.test(r.cve) ? r.cve : null,
@@ -154,5 +162,5 @@ export function normalizeFeedRecord(r: FeedRecord): VulnerabilityRecord[] {
       mitre: Boolean(r.copyrights && typeof r.copyrights === 'object' && 'mitre' in r.copyrights),
     })
   }
-  return out
+  return [...byKey.values()]
 }

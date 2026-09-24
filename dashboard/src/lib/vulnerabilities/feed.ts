@@ -7,6 +7,7 @@ type Admin = SupabaseClient<Database>
 
 export const WORDFENCE_FEED_URL = 'https://www.wordfence.com/api/intelligence/v3/vulnerabilities/production'
 const REFRESH_EVERY_MS = 4 * 3600_000
+const RETRY_AFTER_ERROR_MS = 15 * 60_000
 const BATCH = 500
 
 export interface FeedResult { skipped: boolean; stored: number; seen: number; error?: string }
@@ -32,8 +33,11 @@ export async function refreshFeed(
   const now = opts.now ?? Date.now()
   const { data: state, error: stateErr } = await admin.from('vulnerability_feed_state').select('*').eq('id', 1).single()
   if (stateErr) throw stateErr
-  const lastTry = Math.max(state.fetched_at ? Date.parse(state.fetched_at) : 0, state.last_error_at ? Date.parse(state.last_error_at) : 0)
-  if (!opts.force && now - lastTry < REFRESH_EVERY_MS) return { skipped: true, stored: 0, seen: 0 }
+  // Na een geslaagde ronde: elke 4 uur. Na een fout: na 15 minuten opnieuw proberen.
+  const lastOk = state.fetched_at ? Date.parse(state.fetched_at) : 0
+  const lastErr = state.last_error_at ? Date.parse(state.last_error_at) : 0
+  const due = lastErr > lastOk ? now - lastErr >= RETRY_AFTER_ERROR_MS : now - lastOk >= REFRESH_EVERY_MS
+  if (!opts.force && !due) return { skipped: true, stored: 0, seen: 0 }
 
   const since = state.source_updated_max ? Date.parse(state.source_updated_max) : null
   let maxUpdated = since
@@ -43,7 +47,9 @@ export async function refreshFeed(
   let batch: VulnerabilityRecord[] = []
   const flush = async () => {
     if (batch.length === 0) return
-    const rows = batch.map(r => ({ ...r, affected: r.affected as unknown as Json, fetched_at: new Date(now).toISOString() }))
+    // Eén rij per sleutel per upsert (Postgres weigert dezelfde rij twee keer in één opdracht).
+    const unique = new Map(batch.map(r => [`${r.id}|${r.software_type}|${r.slug}`, r]))
+    const rows = [...unique.values()].map(r => ({ ...r, affected: r.affected as unknown as Json, fetched_at: new Date(now).toISOString() }))
     batch = []
     const { error } = await admin.from('vulnerabilities').upsert(rows, { onConflict: 'id,software_type,slug' })
     if (error) throw error

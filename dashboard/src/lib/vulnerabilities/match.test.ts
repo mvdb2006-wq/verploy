@@ -113,6 +113,13 @@ describe('normalizeFeedRecord (Wordfence v3)', () => {
       published_at: '1998-01-09T00:00:00Z', source_updated_at: '2022-08-05T20:14:05Z', mitre: true,
     }])
   })
+  it('dezelfde software twee keer in één record → één rij met alle versiereeksen', () => {
+    const sw = record.software[0]!
+    const rows = normalizeFeedRecord({ ...record, software: [sw, { ...sw, affected_versions: { '2.0 - 2.1': { from_version: '2.0', from_inclusive: true, to_version: '2.1', to_inclusive: true } }, patched_versions: ['2.2'] }] })
+    expect(rows).toHaveLength(1)
+    expect(rows[0]!.affected).toHaveLength(2)
+    expect(rows[0]!.patched_versions).toEqual(['1.2.4', '2.2'])
+  })
   it('informatief of onleesbaar → overgeslagen', () => {
     expect(normalizeFeedRecord({ ...record, informational: true })).toEqual([])
     expect(normalizeFeedRecord({ ...record, software: [{ type: 'plugin', slug: 'x', affected_versions: {} }] })).toEqual([])
