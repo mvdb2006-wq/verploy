@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { heartbeatSchema, normalizePairingCode, parseMemoryLimitMb, toRows, type HeartbeatPayload } from './payload'
+import { heartbeatSchema, isNewerVersion, normalizePairingCode, parseMemoryLimitMb, toRows, type HeartbeatPayload } from './payload'
 
 export const samplePayload: HeartbeatPayload = {
   schema: 2,
@@ -33,6 +33,18 @@ describe('heartbeat-payload', () => {
     expect(r.components.map(c => `${c.type}:${c.slug}`)).toEqual(['core:wordpress', 'plugin:akismet/akismet.php', 'theme:twentytwentyfive'])
     expect(r.components[1]).toMatchObject({ update_available: true, latest_version: '5.4' })
   })
+
+  it('verouderde updatemelding (lagere of gelijke versie) wordt genegeerd — geen downgrade aanbieden', () => {
+    const r = toRows({ ...samplePayload, plugins: [
+      { file: 'verploy-connector/verploy-connector.php', name: 'Verploy Connector', version: '2.2.0', active: true, update_available: true, update_version: '1.3.1' },
+      { file: 'x/x.php', name: 'X', version: '1.0', active: true, update_available: true, update_version: '1.0' },
+      { file: 'y/y.php', name: 'Y', version: '1.0-beta', active: true, update_available: true, update_version: '1.0' },
+    ] })
+    expect(r.components.slice(1, 4).map(c => [c.update_available, c.latest_version])).toEqual([[false, null], [false, null], [true, '1.0']])
+  })
+
+  it.each([['1.3.1', '2.2.0', false], ['2.2.1', '2.2.0', true], ['2.10', '2.9', true], ['6.8', '6.8.1', false], ['6.8.1', '6.8', true], ['5.4', null, true]] as const)(
+    'isNewerVersion(%s, %s) → %s', (a, b, o) => { expect(isNewerVersion(a, b)).toBe(o) })
 
   it.each([['256M', 256], ['1G', 1024], ['512k', 1], ['-1', null], ['134217728', 128], ['onzin', null]])('memory_limit %s → %s', (i, o) => {
     expect(parseMemoryLimitMb(i)).toBe(o)

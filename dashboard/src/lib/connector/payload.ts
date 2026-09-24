@@ -67,6 +67,31 @@ export interface HeartbeatRows {
   components: Array<{ type: 'plugin' | 'theme' | 'core'; slug: string; name: string; version: string | null; latest_version: string | null; update_available: boolean; active: boolean }>
 }
 
+/**
+ * Is `latest` echt nieuwer dan `installed`? WordPress kan een verouderde update-melding bewaren
+ * (bijv. na handmatig een nieuwere versie uploaden), en dan zou een "update" een downgrade zijn.
+ * Numerieke delen worden vergeleken; zijn die gelijk (bijv. 1.0-beta ↔ 1.0), dan volgen we WordPress.
+ */
+export function isNewerVersion(latest: string, installed: string | null): boolean {
+  if (!installed) return true
+  const nums = (v: string) => (/^[0-9]+(?:\.[0-9]+)*/.exec(v)?.[0] ?? '').split('.').filter(Boolean).map(Number)
+  const a = nums(latest)
+  const b = nums(installed)
+  if (a.length === 0 || b.length === 0) return latest !== installed
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const x = a[i] ?? 0
+    const y = b[i] ?? 0
+    if (x !== y) return x > y
+  }
+  return latest !== installed
+}
+
+/** Updatemelding alleen overnemen als de aangeboden versie nieuwer is dan de geïnstalleerde. */
+function offer(reported: boolean, latest: string | null, installed: string | null): { latest_version: string | null; update_available: boolean } {
+  if (!reported || !latest || !isNewerVersion(latest, installed)) return { latest_version: null, update_available: false }
+  return { latest_version: latest, update_available: true }
+}
+
 export function toRows(p: HeartbeatPayload): HeartbeatRows {
   return {
     snapshot: {
@@ -82,11 +107,11 @@ export function toRows(p: HeartbeatPayload): HeartbeatRows {
     },
     components: [
       { type: 'core', slug: 'wordpress', name: 'WordPress', version: p.wordpress.version,
-        latest_version: p.wordpress.update_version, update_available: p.wordpress.update_available, active: true },
+        ...offer(p.wordpress.update_available, p.wordpress.update_version, p.wordpress.version), active: true },
       ...p.plugins.map(pl => ({ type: 'plugin' as const, slug: pl.file, name: pl.name, version: pl.version,
-        latest_version: pl.update_version, update_available: pl.update_available, active: pl.active })),
+        ...offer(pl.update_available, pl.update_version, pl.version), active: pl.active })),
       ...p.themes.map(th => ({ type: 'theme' as const, slug: th.slug, name: th.name, version: th.version,
-        latest_version: th.update_version, update_available: th.update_available, active: th.active })),
+        ...offer(th.update_available, th.update_version, th.version), active: th.active })),
     ],
   }
 }
