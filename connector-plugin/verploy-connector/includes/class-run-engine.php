@@ -197,6 +197,7 @@ class Verploy_Run_Engine {
 			. 'define( \'WP_CONTENT_URL\', ' . var_export( $p['url'] . '/wp-content', true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "define( 'DISABLE_WP_CRON', true );\ndefine( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\ndefine( 'WP_DEBUG_LOG', __DIR__ . '/' . " . var_export( self::log_name( 'debug', $run_id ), true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. 'define( \'VERPLOY_PROD_UPLOADS_URL\', ' . var_export( $uploads['baseurl'], true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			. 'define( \'VERPLOY_PROD_CONTENT_DIR\', ' . var_export( Verploy_File_Copier::norm( WP_CONTENT_DIR ), true ) . " );\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. '$table_prefix = ' . var_export( $p['prefix'], true ) . ";\n" // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			. "if ( ! defined( 'ABSPATH' ) ) { define( 'ABSPATH', __DIR__ . '/' ); }\nrequire_once ABSPATH . 'wp-settings.php';\n";
 		file_put_contents( $p['dir'] . '/wp-config.php', $config ); // phpcs:ignore WordPress.WP.AlternativeFunctions
@@ -253,10 +254,14 @@ PHP;
 			// Zonder directe schrijfrechten kan WordPress niet zelf updaten (FTP-gegevens nodig).
 			return self::item_result( $item, false, null, null, 'filesystem_not_writable', '' );
 		}
-		$type = isset( $item['type'] ) ? $item['type'] : '';
-		$slug = isset( $item['slug'] ) ? (string) $item['slug'] : '';
-		$to   = isset( $item['to_version'] ) ? (string) $item['to_version'] : null;
-		$skin = new Verploy_Quiet_Skin();
+		$type    = isset( $item['type'] ) ? $item['type'] : '';
+		$slug    = isset( $item['slug'] ) ? (string) $item['slug'] : '';
+		$to      = isset( $item['to_version'] ) ? (string) $item['to_version'] : null;
+		$skin    = new Verploy_Quiet_Skin();
+		$package = self::package_path( $item );
+		if ( null !== $package && null !== $to && in_array( $type, array( 'plugin', 'theme' ), true ) ) {
+			return self::apply_package( $item, $type, $slug, $to, $package, $skin );
+		}
 
 		if ( 'plugin' === $type ) {
 			wp_clean_plugins_cache( true );
@@ -327,6 +332,137 @@ PHP;
 		}
 
 		return self::item_result( $item, false, null, null, 'unknown_type', '' );
+	}
+
+	// ── Updatepakketten van productie (betaalde plugins/thema's met domeinlicentie) ──
+
+	/**
+	 * Map met de updatepakketten van een run op productie (ook vanaf staging bereikbaar).
+	 */
+	private static function package_dir( $run_id ) {
+		$content = defined( 'VERPLOY_PROD_CONTENT_DIR' ) ? VERPLOY_PROD_CONTENT_DIR : Verploy_File_Copier::norm( WP_CONTENT_DIR );
+		return $content . '/verploy-backups/' . self::short_id( $run_id ) . '-packages';
+	}
+
+	/**
+	 * Pad van een eerder opgehaald pakket voor dit item, of null. Alleen bestandsnamen die
+	 * Verploy zelf heeft gemaakt (willekeurig, .zip) in de pakketmap van deze run.
+	 */
+	private static function package_path( array $item ) {
+		$file   = isset( $item['package_file'] ) ? (string) $item['package_file'] : '';
+		$run_id = isset( $item['run_id'] ) ? (string) $item['run_id'] : '';
+		if ( '' === $file || ! preg_match( '/^[a-zA-Z0-9]{24}\.zip$/', $file ) || ! self::valid_run_id( $run_id ) ) {
+			return null;
+		}
+		$path = self::package_dir( $run_id ) . '/' . $file;
+		return is_file( $path ) ? $path : null;
+	}
+
+	/**
+	 * Productie: haalt het updatepakket op zoals WordPress het hier aanbiedt (met de licentie van
+	 * deze site) en bewaart het voor de testkopie en de livegang. Zo wordt precies dezelfde code
+	 * getest als die daarna live gaat, ook bij plugins die alleen op het eigen domein updaten.
+	 *
+	 * @return array{ok:bool,status:string,file?:string,version?:string,bytes?:int}
+	 */
+	public static function fetch_package( $run_id, array $item ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+		$type = isset( $item['type'] ) ? $item['type'] : '';
+		$slug = isset( $item['slug'] ) ? (string) $item['slug'] : '';
+		$to   = isset( $item['to_version'] ) ? (string) $item['to_version'] : '';
+		$offer = null;
+		if ( 'plugin' === $type ) {
+			wp_update_plugins();
+			$updates = get_site_transient( 'update_plugins' );
+			if ( isset( $updates->response[ $slug ] ) ) {
+				$r     = $updates->response[ $slug ];
+				$offer = array( 'version' => isset( $r->new_version ) ? (string) $r->new_version : '', 'package' => isset( $r->package ) ? (string) $r->package : '' );
+			}
+		} elseif ( 'theme' === $type ) {
+			wp_update_themes();
+			$updates = get_site_transient( 'update_themes' );
+			if ( isset( $updates->response[ $slug ] ) ) {
+				$r     = (array) $updates->response[ $slug ];
+				$offer = array( 'version' => isset( $r['new_version'] ) ? (string) $r['new_version'] : '', 'package' => isset( $r['package'] ) ? (string) $r['package'] : '' );
+			}
+		} else {
+			return array( 'ok' => false, 'status' => 'unsupported_type' );
+		}
+		if ( null === $offer ) {
+			return array( 'ok' => false, 'status' => 'no_update_available' );
+		}
+		if ( '' === $offer['package'] ) {
+			// Bijv. een verlopen licentie: WordPress toont de update, maar zonder downloadbestand.
+			return array( 'ok' => false, 'status' => 'no_package', 'version' => $offer['version'] );
+		}
+		if ( '' !== $to && version_compare( $offer['version'], $to, '!=' ) ) {
+			return array( 'ok' => false, 'status' => 'version_changed', 'version' => $offer['version'] );
+		}
+		$tmp = download_url( $offer['package'], 300 );
+		if ( is_wp_error( $tmp ) ) {
+			return array( 'ok' => false, 'status' => 'download_failed', 'version' => $offer['version'] );
+		}
+		$fh    = fopen( $tmp, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$magic = $fh ? fread( $fh, 2 ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
+		if ( $fh ) {
+			fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
+		if ( 'PK' !== $magic ) {
+			wp_delete_file( $tmp );
+			return array( 'ok' => false, 'status' => 'not_a_zip', 'version' => $offer['version'] );
+		}
+		$dir = self::package_dir( $run_id );
+		self::protect_dir( dirname( $dir ) );
+		self::protect_dir( $dir );
+		$file = wp_generate_password( 24, false, false ) . '.zip';
+		if ( ! Verploy_File_Copier::fs()->move( $tmp, $dir . '/' . $file, true ) ) {
+			wp_delete_file( $tmp );
+			return array( 'ok' => false, 'status' => 'store_failed', 'version' => $offer['version'] );
+		}
+		return array( 'ok' => true, 'status' => 'ready', 'file' => $file, 'version' => $offer['version'], 'bytes' => (int) filesize( $dir . '/' . $file ) );
+	}
+
+	/**
+	 * Installeert een update vanuit een eerder opgehaald pakket, met WordPress' eigen "vervang de
+	 * huidige versie door de geüploade" (install met overwrite_package), zoals bij handmatig uploaden.
+	 */
+	private static function apply_package( array $item, $type, $slug, $to, $package, $skin ) {
+		if ( 'plugin' === $type ) {
+			wp_clean_plugins_cache( true );
+			$plugins = get_plugins();
+			if ( ! isset( $plugins[ $slug ] ) ) {
+				return self::item_result( $item, false, null, null, 'not_installed', '' );
+			}
+			$from = $plugins[ $slug ]['Version'];
+			if ( version_compare( $from, $to, '>=' ) ) {
+				return self::item_result( $item, true, $from, $from, 'already_current', '' );
+			}
+			$was_active = is_plugin_active( $slug );
+			$result     = ( new Plugin_Upgrader( $skin ) )->install( $package, array( 'overwrite_package' => true ) );
+			wp_clean_plugins_cache( true );
+			$after = get_plugins();
+			$now   = isset( $after[ $slug ] ) ? $after[ $slug ]['Version'] : null;
+			if ( $was_active && ! is_plugin_active( $slug ) && null !== $now ) {
+				activate_plugin( $slug, '', false, true );
+			}
+			$ok = ! is_wp_error( $result ) && $result && null !== $now && version_compare( $now, $from, '>' );
+			return self::item_result( $item, $ok, $from, $now, $ok ? 'updated' : 'update_failed', $skin->log() . ( is_wp_error( $result ) ? "\n" . $result->get_error_message() : '' ) );
+		}
+		$theme = wp_get_theme( $slug );
+		if ( ! $theme->exists() ) {
+			return self::item_result( $item, false, null, null, 'not_installed', '' );
+		}
+		$from = $theme->get( 'Version' );
+		if ( version_compare( $from, $to, '>=' ) ) {
+			return self::item_result( $item, true, $from, $from, 'already_current', '' );
+		}
+		$result = ( new Theme_Upgrader( $skin ) )->install( $package, array( 'overwrite_package' => true ) );
+		wp_clean_themes_cache();
+		$now = wp_get_theme( $slug )->get( 'Version' );
+		$ok  = ! is_wp_error( $result ) && $result && version_compare( $now, $from, '>' );
+		return self::item_result( $item, $ok, $from, $now, $ok ? 'updated' : 'update_failed', $skin->log() );
 	}
 
 	private static function item_result( array $item, $ok, $from, $to, $status, $log ) {
@@ -712,6 +848,7 @@ PHP;
 		global $wpdb;
 		$p = self::staging_paths( $run_id );
 		Verploy_File_Copier::delete_tree( $p['dir'] );
+		Verploy_File_Copier::delete_tree( self::package_dir( $run_id ) );
 		Verploy_Table_Copier::drop_prefix( $p['prefix'] );
 		self::set_maintenance( $run_id, false, 0 );
 		self::remove_rescue();

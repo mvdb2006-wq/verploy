@@ -78,6 +78,18 @@ check( 'staging toont footer v1.1.0', 'v1.1.0' === page( $surl . '/', array( "X-
 check( 'productie ongewijzigd (v1.0.0)', 'v1.0.0' === page( $base . '/' )[1] );
 $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-footer' ) ) );
 check( 'zelfde update nogmaals is idempotent', 200 === $r[0] && 'already_current' === $r[1]['status'], json_encode( $r ) );
+// Betaalde plugin met domeinlicentie: op de testkopie geen update, via het pakket van productie wel.
+$r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-licensed' ) ) );
+check( 'staging: licentieplugin zonder pakket → geen update aangeboden', 200 === $r[0] && 'no_update_available' === $r[1]['status'], json_encode( $r ) );
+$r = call( $base, '/verploy/v2/updates/package', array( 'run_id' => $run, 'item' => $item( 'vp-lab-licensed' ) ) );
+check( 'productie: pakket opgehaald met de eigen licentie', 200 === $r[0] && true === $r[1]['ok'] && '1.1.0' === $r[1]['version'] && preg_match( '/^[a-zA-Z0-9]{24}\.zip$/', $r[1]['file'] ?? '' ), json_encode( $r ) );
+$pkg = $r[1]['file'] ?? '';
+$r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-licensed' ) + array( 'package_file' => $pkg ) ) );
+check( 'staging: licentieplugin bijgewerkt vanuit het pakket', 200 === $r[0] && 'updated' === $r[1]['status'] && '1.1.0' === $r[1]['to_version'], json_encode( $r ) );
+$r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-licensed' ) + array( 'package_file' => '../../../wp-config.php' ) ) );
+check( 'onveilige pakketnaam wordt genegeerd (geen pad buiten de pakketmap)', 200 === $r[0] && 'already_current' === $r[1]['status'], json_encode( $r ) );
+$r = call( $base, '/verploy/v2/updates/package', array( 'run_id' => $run, 'item' => array( 'type' => 'plugin', 'slug' => 'vp-lab-licensed/vp-lab-licensed.php', 'to_version' => '9.9.9' ) ) );
+check( 'productie: andere versie dan verwacht → geen pakket', 200 === $r[0] && 'version_changed' === $r[1]['status'], json_encode( $r ) );
 $r = call( $surl, '/verploy/v2/updates/apply', array( 'run_id' => $run, 'item' => $item( 'vp-lab-fatal' ) ) );
 check( 'staging: fatal-update geïnstalleerd', 200 === $r[0] && 'updated' === $r[1]['status'], json_encode( $r ) );
 check( 'staging geeft nu 500', 500 === page( $surl . '/', array( "X-Verploy-Staging: $token" ) )[0] );
@@ -113,6 +125,7 @@ check( 'productie weer gezond (v1.0.0)', 200 === $p[0] && 'v1.0.0' === $p[1], js
 
 $r = call( $base, '/verploy/v2/cleanup', array( 'run_id' => $run ) );
 check( 'opgeruimd', 200 === $r[0] && 'cleaned' === $r[1]['state'], json_encode( $r ) );
+check( 'pakketten van de run opgeruimd', ! is_dir( getenv( 'ENGINE_WP_DIR' ) . '/wp-content/verploy-backups/' . substr( str_replace( '-', '', $run ), 0, 8 ) . '-packages' ) );
 check( 'staging bestaat niet meer', 'v1.0.0' !== page( $surl . '/', array( "X-Verploy-Staging: $token" ) )[1] );
 $p = page( $base . '/' );
 check( 'productie open voor bezoekers', 200 === $p[0] && 'v1.0.0' === $p[1], json_encode( $p ) );

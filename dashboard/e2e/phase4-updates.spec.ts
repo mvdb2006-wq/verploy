@@ -115,3 +115,12 @@ test('scenario 3 — update die live breekt wordt automatisch teruggedraaid + e-
   expect(mail.text).toContain(`/sites/${siteId}/runs/`)
   expect(mail.text).toContain('Diagnose: Verploy Lab — vp-lab-prod-only 1.1.0 roept een functie aan die niet bestaat')
 })
+
+test('scenario 4 — betaalde plugin met domeinlicentie: pakket via de live site, getest en live gezet', async ({ page }) => {
+  // vp-lab-licensed biedt (zoals Yoast Premium, Avada, ACF Pro) alleen een update aan op het eigen domein, niet op de testkopie.
+  await startUpdate(page, 'vp-lab-licensed')
+  await waitForVerdict(page, 'Live gezet')
+  await expect(page.getByText('Verploy Lab — vp-lab-licensed: updatebestand 1.1.0 opgehaald via de live site (licentie van het eigen domein).')).toBeVisible()
+  const html = await (await fetch(`${LAB_WP}/`)).text()
+  expect(html).toContain('licensed v1.1.0')
+})

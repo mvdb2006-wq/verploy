@@ -411,7 +411,14 @@
       "no_update_available": "Aucune mise à jour disponible",
       "filesystem_not_writable": "Pas de droits d’écriture sur le serveur",
       "unknown_type": "Type inconnu",
-      "crashed": "Le site a planté après la mise à jour"
+      "crashed": "Le site a planté après la mise à jour",
+      "no_package": "Pas de fichier à télécharger ; la licence est-elle encore active ?",
+      "version_changed": "Une autre version que prévu est proposée",
+      "download_failed": "Échec du téléchargement de la mise à jour",
+      "not_a_zip": "Le fichier de mise à jour n’est pas un zip valide",
+      "store_failed": "Impossible d’enregistrer le fichier de mise à jour",
+      "unsupported_type": "Non pris en charge",
+      "connector_outdated": "Extension Verploy trop ancienne pour cette mise à jour (2.3 ou plus récente requise)"
     },
     "phpError": {
       "wp_critical_error": "WordPress signale une erreur critique",
@@ -503,7 +510,8 @@
       "verdict_error": "Terminé : échec.",
       "verdict_cancelled": "Terminé : annulée.",
       "done": "Terminé.",
-      "queued_security": "{count, plural, one {Mise à jour de sécurité planifiée} other {# mises à jour de sécurité planifiées}} automatiquement par Verploy (vulnérabilité connue)."
+      "queued_security": "{count, plural, one {Mise à jour de sécurité planifiée} other {# mises à jour de sécurité planifiées}} automatiquement par Verploy (vulnérabilité connue).",
+      "item_package": "{name} : fichier de mise à jour {version} récupéré via le site en ligne (licence de son propre domaine)."
     }
   },
   "diagnosis": {

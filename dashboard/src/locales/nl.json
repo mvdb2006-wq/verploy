@@ -411,7 +411,14 @@
       "no_update_available": "Geen update beschikbaar",
       "filesystem_not_writable": "Geen schrijfrechten op de server",
       "unknown_type": "Onbekend type",
-      "crashed": "Site crashte na de update"
+      "crashed": "Site crashte na de update",
+      "no_package": "Geen downloadbestand; is de licentie nog actief?",
+      "version_changed": "Andere versie aangeboden dan verwacht",
+      "download_failed": "Downloaden van de update mislukt",
+      "not_a_zip": "Update-bestand is geen geldig zip-bestand",
+      "store_failed": "Update-bestand kon niet worden opgeslagen",
+      "unsupported_type": "Niet ondersteund",
+      "connector_outdated": "Verploy-plugin te oud voor deze update (2.3 of nieuwer nodig)"
     },
     "phpError": {
       "wp_critical_error": "WordPress meldt een kritieke fout",
@@ -503,7 +510,8 @@
       "verdict_error": "Klaar: mislukt.",
       "verdict_cancelled": "Klaar: geannuleerd.",
       "done": "Klaar.",
-      "queued_security": "{count, plural, one {# beveiligingsupdate} other {# beveiligingsupdates}} automatisch ingepland door Verploy (bekend lek)."
+      "queued_security": "{count, plural, one {# beveiligingsupdate} other {# beveiligingsupdates}} automatisch ingepland door Verploy (bekend lek).",
+      "item_package": "{name}: updatebestand {version} opgehaald via de live site (licentie van het eigen domein)."
     }
   },
   "diagnosis": {

@@ -3,7 +3,7 @@ import type { Browser } from 'playwright-core'
 import type { Database, Json, Tables } from '@/lib/database.types'
 import { decryptSecret } from '@/lib/security/secretbox'
 import { keyMaterial } from '@/lib/security/keys'
-import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PageTarget } from './site-client'
+import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PackageResult, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
 import { comparePage, firstFailure, healthy, visualDiff, type CheckOutcome } from './compare'
 
@@ -27,7 +27,11 @@ export const DEFAULT_STEP_TIMEOUT_MS = 5 * 60_000
 /** Stappen waarin productie al is aangeraakt: bij een fout volgt een rollback. */
 const PRODUCTION_TOUCHED: Status[] = ['deploy_apply', 'postcheck']
 
-interface Item { type: string; slug: string; name: string; from_version: string | null; to_version: string | null; staging?: string; production?: string }
+interface Item {
+  type: string; slug: string; name: string; from_version: string | null; to_version: string | null; staging?: string; production?: string
+  /** Pakket dat productie ophaalde (betaalde plugins met domeinlicentie); staging én productie installeren precies dit bestand. */
+  package_file?: string
+}
 
 interface StepState {
   pages?: PageTarget[]
@@ -234,18 +238,41 @@ const state = (run: Run) => (run.step_state ?? {}) as StepState
 const toCleanup = (verdict: Verdict, reason?: { key: string; params: Record<string, Json> }): Transition =>
   ({ next: 'cleanup', state: { pending_verdict: verdict, ...(reason ? { pending_reason: reason } : {}) } })
 
+/** Pakket via de live site; een connector ouder dan 2.3 kent dit nog niet (404). */
+async function fetchPackage(ctx: RunContext, item: Item): Promise<PackageResult | { ok: false; status: 'connector_outdated' }> {
+  try {
+    return await ctx.client.fetchPackage(ctx.site.url, { type: item.type, slug: item.slug, to_version: item.to_version })
+  } catch (err) {
+    if (err instanceof SiteRejectedError && err.status === 404) return { ok: false, status: 'connector_outdated' }
+    throw err
+  }
+}
+
 async function applyAll(ctx: RunContext, base: string, where: 'staging' | 'production'): Promise<{ list: Item[]; failed: Item | null }> {
   const list = items(ctx.run).map(i => ({ ...i }))
   for (const item of list) {
     if (item[where] === 'updated' || item[where] === 'already_current') continue
+    const payload = () => ({ type: item.type, slug: item.slug, to_version: item.to_version, ...(item.package_file ? { package_file: item.package_file } : {}) })
     let res
     try {
-      res = await ctx.client.apply(base, { type: item.type, slug: item.slug, to_version: item.to_version })
+      res = await ctx.client.apply(base, payload())
+      // Betaalde plugins/thema's updaten vaak alleen op het eigen (gelicenseerde) domein. Dan haalt de
+      // live site het pakket op en installeert de testkopie precies dat bestand (later ook live).
+      if (where === 'staging' && res.status === 'no_update_available' && (item.type === 'plugin' || item.type === 'theme') && !item.package_file) {
+        const pkg = await fetchPackage(ctx, item)
+        if (pkg.ok && pkg.file) {
+          item.package_file = pkg.file
+          await event(ctx, 'staging_update', 'run.item.package', { name: item.name, version: pkg.version ?? '' })
+          res = await ctx.client.apply(base, payload())
+        } else {
+          res = { ...res, status: pkg.status }
+        }
+      }
     } catch (err) {
       // Een 500 kan betekenen dat de update wél is geïnstalleerd maar de site daarna crashte.
       // Nogmaals aanroepen is veilig (idempotent) en vertelt ons welke versie er nu staat.
       if (!(err instanceof TransientSiteError)) throw err
-      res = await ctx.client.apply(base, { type: item.type, slug: item.slug, to_version: item.to_version }).catch(() => null)
+      res = await ctx.client.apply(base, payload()).catch(() => null)
       if (!res) {
         // De site reageert niet meer na de update (fatale fout bij het activeren): niet doorgaan.
         item[where] = 'crashed'

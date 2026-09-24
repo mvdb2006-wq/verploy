@@ -22,7 +22,16 @@ export interface ApplyResult {
   from_version: string | null
   to_version: string | null
   status: 'updated' | 'already_current' | 'update_failed' | 'not_installed' | 'no_update_available' | 'filesystem_not_writable' | 'unknown_type'
+    | PackageResult['status'] | 'connector_outdated'
   log: string
+}
+
+/** Updatepakket dat de live site (met haar licentie) heeft opgehaald (plugin 2.3+). */
+export interface PackageResult {
+  ok: boolean
+  status: 'ready' | 'no_update_available' | 'no_package' | 'version_changed' | 'download_failed' | 'not_a_zip' | 'store_failed' | 'unsupported_type'
+  file?: string
+  version?: string
 }
 
 export interface PageTarget { key: string; label: string; url: string }
@@ -97,8 +106,11 @@ export class SiteClient {
   pages(base: string, keys: string[] | null, extraPaths: string[] = []) {
     return this.call<{ pages: PageTarget[] }>(base, '/run/pages', { keys, extra_paths: extraPaths })
   }
-  apply(base: string, item: { type: string; slug: string; to_version: string | null }) {
+  apply(base: string, item: { type: string; slug: string; to_version: string | null; package_file?: string }) {
     return this.call<ApplyResult>(base, '/updates/apply', { item }, 300_000)
+  }
+  fetchPackage(base: string, item: { type: string; slug: string; to_version: string | null }) {
+    return this.call<PackageResult>(base, '/updates/package', { item }, 360_000)
   }
   snapshot(base: string, items: { type: string; slug: string }[]) {
     return this.call<{ state: 'building' | 'ready'; phase: string }>(base, '/snapshot/create', { items }, 120_000)

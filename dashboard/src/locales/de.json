@@ -411,7 +411,14 @@
       "no_update_available": "Kein Update verfügbar",
       "filesystem_not_writable": "Keine Schreibrechte auf dem Server",
       "unknown_type": "Unbekannter Typ",
-      "crashed": "Website nach dem Update abgestürzt"
+      "crashed": "Website nach dem Update abgestürzt",
+      "no_package": "Keine Download-Datei; ist die Lizenz noch aktiv?",
+      "version_changed": "Andere Version angeboten als erwartet",
+      "download_failed": "Herunterladen des Updates fehlgeschlagen",
+      "not_a_zip": "Update-Datei ist kein gültiges ZIP",
+      "store_failed": "Update-Datei konnte nicht gespeichert werden",
+      "unsupported_type": "Nicht unterstützt",
+      "connector_outdated": "Verploy-Plugin zu alt für dieses Update (2.3 oder neuer nötig)"
     },
     "phpError": {
       "wp_critical_error": "WordPress meldet einen kritischen Fehler",
@@ -503,7 +510,8 @@
       "verdict_error": "Fertig: fehlgeschlagen.",
       "verdict_cancelled": "Fertig: abgebrochen.",
       "done": "Fertig.",
-      "queued_security": "{count, plural, one {# Sicherheitsupdate} other {# Sicherheitsupdates}} automatisch von Verploy eingeplant (bekannte Lücke)."
+      "queued_security": "{count, plural, one {# Sicherheitsupdate} other {# Sicherheitsupdates}} automatisch von Verploy eingeplant (bekannte Lücke).",
+      "item_package": "{name}: Update-Datei {version} über die Live-Site geholt (Lizenz der eigenen Domain)."
     }
   },
   "diagnosis": {

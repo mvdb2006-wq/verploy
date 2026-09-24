@@ -164,3 +164,12 @@ WordPress kan een verouderde updatemelding in `update_plugins` bewaren (gezien o
 
 ## 24-09 — Worker voert twee runs tegelijk uit; wachtrij zichtbaar
 Martijn zag een update lang op "In de wachtrij" staan zonder uitleg: de worker deed één run tegelijk en er liep er al een. Nu claimt de worker tot `WORKER_CONCURRENCY` runs (standaard 2). Dat is altijd op verschillende sites, want de database staat één actieve run per site toe. Alle runs delen één Chromium, elk met eigen contexten. Bij 1 GB geheugen op Railway is 2 een veilige grens; verhogen kan als het plan groter wordt. Rapporten draaien alleen als er geen run loopt. De run-pagina toont bij "In de wachtrij" hoeveel runs er vóór staan (alleen het aantal, over alle bureaus), of wanneer een nieuwe poging volgt.
+
+## 24-09 — Betaalde plugins met domeinlicentie: pakket via de live site (connector 2.3.0)
+Gezien op productie: Yoast SEO Premium kreeg op de testkopie "geen update beschikbaar". Betaalde plugins en thema's (Yoast Premium, Avada, ACF Pro, Gravity Forms, …) bieden hun update vaak alleen aan op het gelicenseerde domein, en de testkopie draait onder een ander adres. Nu gaat het zo:
+- **Pakket ophalen:** geeft de testkopie "geen update beschikbaar", dan haalt de live site het updatepakket op met haar eigen licentie (`/updates/package`). Ze controleert dat het een zip is en dat de versie klopt, en bewaart het onder een willekeurige naam in de back-upmap van die run.
+- **Installeren:** de testkopie installeert precies dat pakket, via WordPress' eigen "vervang door geüploade versie". Bij de livegang installeert productie hetzelfde bestand. Zo gaat er gegarandeerd precies de geteste code live.
+- **Opruimen:** het pakket wordt met de run opgeruimd.
+- **Waarom geen filter op de updatemelding:** eerst injecteerde ik de update via een filter op de updatemelding. De Plugin Check van WordPress.org weigert dat ("plugin updater detected"). `install(..., overwrite_package)` doet hetzelfde zonder filter.
+- **Oudere connector:** is de connector ouder dan 2.3, dan meldt Verploy dat in gewone taal in plaats van de foutcode.
+- **Getest:** een labplugin die (zoals een betaalde plugin) alleen op het eigen domein een update krijgt. De engine-test draait met 6 extra controles, waaronder dat een onveilige pakketnaam wordt genegeerd, en E2E-scenario 4 zet hem live.

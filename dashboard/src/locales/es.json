@@ -411,7 +411,14 @@
       "no_update_available": "No hay actualización disponible",
       "filesystem_not_writable": "Sin permisos de escritura en el servidor",
       "unknown_type": "Tipo desconocido",
-      "crashed": "El sitio falló tras la actualización"
+      "crashed": "El sitio falló tras la actualización",
+      "no_package": "Sin archivo de descarga; ¿sigue activa la licencia?",
+      "version_changed": "Se ofrece otra versión de la esperada",
+      "download_failed": "Falló la descarga de la actualización",
+      "not_a_zip": "El archivo de actualización no es un zip válido",
+      "store_failed": "No se pudo guardar el archivo de actualización",
+      "unsupported_type": "No compatible",
+      "connector_outdated": "Plugin de Verploy demasiado antiguo para esta actualización (se necesita 2.3 o superior)"
     },
     "phpError": {
       "wp_critical_error": "WordPress muestra un error crítico",
@@ -503,7 +510,8 @@
       "verdict_error": "Terminado: fallida.",
       "verdict_cancelled": "Terminado: cancelada.",
       "done": "Terminado.",
-      "queued_security": "{count, plural, one {Actualización de seguridad programada} other {# actualizaciones de seguridad programadas}} automáticamente por Verploy (vulnerabilidad conocida)."
+      "queued_security": "{count, plural, one {Actualización de seguridad programada} other {# actualizaciones de seguridad programadas}} automáticamente por Verploy (vulnerabilidad conocida).",
+      "item_package": "{name}: archivo de actualización {version} obtenido a través del sitio en vivo (licencia de su propio dominio)."
     }
   },
   "diagnosis": {

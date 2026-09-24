@@ -38,6 +38,7 @@ class Verploy_Rest_Endpoints {
 			'/run/state'       => array( 'describe', $run, false ),
 			'/staging/build'   => array( 'staging_build', $run, true ),
 			'/updates/apply'   => array( 'apply', $run + array( 'item' => array( 'required' => true, 'type' => 'object' ) ), true ),
+			'/updates/package' => array( 'package', $run + array( 'item' => array( 'required' => true, 'type' => 'object' ) ), false ),
 			'/snapshot/create' => array( 'snapshot', $run + array( 'items' => array( 'required' => true, 'type' => 'array' ) ), true ),
 			'/maintenance'     => array( 'maintenance', $run + array( 'enabled' => array( 'required' => true, 'type' => 'boolean' ), 'ttl' => array( 'type' => 'integer', 'default' => 900 ) ), true ),
 			'/rollback'        => array( 'rollback', $run, true ),
@@ -90,8 +91,12 @@ class Verploy_Rest_Endpoints {
 				case 'staging_build':
 					return new WP_REST_Response( Verploy_Run_Engine::staging_build( $run_id, new Verploy_Budget( 20 ) ), 200 );
 				case 'apply':
-					$item = (array) $request->get_param( 'item' );
+					// Het pakket hoort bij déze run: run_id komt uit het ondertekende verzoek, niet uit het item.
+					$item           = (array) $request->get_param( 'item' );
+					$item['run_id'] = $run_id;
 					return new WP_REST_Response( Verploy_Run_Engine::apply_update( $item ), 200 );
+				case 'package':
+					return new WP_REST_Response( Verploy_Run_Engine::fetch_package( $run_id, (array) $request->get_param( 'item' ) ), 200 );
 				case 'snapshot':
 					return new WP_REST_Response( Verploy_Run_Engine::snapshot_create( $run_id, (array) $request->get_param( 'items' ), new Verploy_Budget( 20 ) ), 200 );
 				case 'maintenance':

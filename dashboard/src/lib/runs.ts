@@ -55,6 +55,10 @@ export function presentReason(t: Translate, key: string | null | undefined, para
   if (typeof p.ratio === 'number') vars.percent = (p.ratio * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
   if (typeof p.threshold === 'number') vars.limit = (p.threshold * 100).toLocaleString(locale, { maximumFractionDigits: 1 })
   if (typeof p.step === 'string') vars.step = t(`runs.steps.${p.step}` as MessageKey)
+  if (typeof p.status === 'string' && /^[a-z_]+$/.test(p.status)) {
+    const label = t(`runs.itemStatus.${p.status}` as MessageKey)
+    if (label !== `runs.itemStatus.${p.status}`) vars.status = label
+  }
   if (typeof p.error === 'string' && /^(wp_critical_error|php_fatal|db_connection|maintenance)$/.test(p.error)) {
     vars.error = t(`runs.phpError.${p.error}` as MessageKey)
   }

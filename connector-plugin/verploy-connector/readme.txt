@@ -4,7 +4,7 @@ Tags:              maintenance, updates, monitoring, agency, staging
 Requires at least: 5.8
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        2.2.0
+Stable tag:        2.3.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,9 @@ All Verploy settings, staging copies and backups are removed.
 
 == Changelog ==
 
+= 2.3.0 =
+* Premium plugins and themes licensed per domain: the update package is fetched by the live site (with its licence) and the exact same package is tested on the staging copy and then deployed.
+
 = 2.2.0 =
 * Diagnosis data after a failed test: fatal errors are recorded during the update and made available to Verploy.
 
@@ -63,6 +66,9 @@ All Verploy settings, staging copies and backups are removed.
 * Pairing with a one-time code; all requests signed with HMAC-SHA256.
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Safe updates for premium plugins and themes that only update on their licensed domain.
 
 = 2.2.0 =
 Adds diagnosis data for failed updates.

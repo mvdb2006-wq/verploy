@@ -411,7 +411,14 @@
       "no_update_available": "No update available",
       "filesystem_not_writable": "No write access on the server",
       "unknown_type": "Unknown type",
-      "crashed": "Site crashed after the update"
+      "crashed": "Site crashed after the update",
+      "no_package": "No download file; is the licence still active?",
+      "version_changed": "A different version was offered than expected",
+      "download_failed": "Downloading the update failed",
+      "not_a_zip": "Update file is not a valid zip",
+      "store_failed": "Update file could not be stored",
+      "unsupported_type": "Not supported",
+      "connector_outdated": "Verploy plugin too old for this update (2.3 or newer needed)"
     },
     "phpError": {
       "wp_critical_error": "WordPress reports a critical error",
@@ -503,7 +510,8 @@
       "verdict_error": "Done: failed.",
       "verdict_cancelled": "Done: cancelled.",
       "done": "Done.",
-      "queued_security": "{count, plural, one {# security update} other {# security updates}} scheduled automatically by Verploy (known vulnerability)."
+      "queued_security": "{count, plural, one {# security update} other {# security updates}} scheduled automatically by Verploy (known vulnerability).",
+      "item_package": "{name}: update file {version} fetched through the live site (its own domain licence)."
     }
   },
   "diagnosis": {

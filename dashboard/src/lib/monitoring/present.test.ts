@@ -30,6 +30,11 @@ describe('presentAlert', () => {
     expect(auto.title).toBe('Bekend beveiligingslek: Akismet')
     expect(auto.body).toContain('Verploy lost dit automatisch en veilig op')
   })
+  it('update tegengehouden: de status staat in gewone taal, niet als code', () => {
+    const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: { items: ['Yoast SEO Premium'], reason_key: 'run.reason.update_failed', reason_params: { name: 'Yoast SEO Premium', status: 'no_package' } } })
+    expect(r.body).toContain('Yoast SEO Premium kon niet worden bijgewerkt op de testkopie (Geen downloadbestand; is de licentie nog actief?)')
+    expect(r.body).not.toContain('no_package')
+  })
   it('elk type heeft een titel in elke taal (geen ruwe sleutels)', () => {
     for (const locale of ['nl', 'en', 'de', 'fr', 'es'] as const) {
       const t = createTranslator(locale)
