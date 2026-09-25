@@ -28,6 +28,8 @@ export type Database = {
           auto_update_window: string
           auto_update_frequency: string
           timezone: string
+          daily_digest: boolean
+          digest_sent_at: string | null
         }
         Insert: {
           id?: string
@@ -52,6 +54,8 @@ export type Database = {
           auto_update_window?: string
           auto_update_frequency?: string
           timezone?: string
+          daily_digest?: boolean
+          digest_sent_at?: string | null
         }
         Update: {
           id?: string
@@ -76,6 +80,8 @@ export type Database = {
           auto_update_window?: string
           auto_update_frequency?: string
           timezone?: string
+          daily_digest?: boolean
+          digest_sent_at?: string | null
         }
         Relationships: []
       }
@@ -938,6 +944,7 @@ export type Database = {
       apply_stripe_subscription: { Args: { p_event_id: string | null; p_event_type: string | null; p_event_created: string | null; p_agency: string | null; p_customer: string | null; p_subscription: string | null; p_price: string | null; p_status: string | null; p_period_end: string | null; p_cancel_at_end: boolean | null }; Returns: boolean }
       cancel_update_run: { Args: { p_run: string | null }; Returns: undefined }
       claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
+      claim_daily_digests: { Args: { p_hour?: number | null; p_limit?: number | null }; Returns: { agency_id: string; agency_name: string; locale: string; since: string; recipients: string[] }[] }
       claim_report: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['reports']['Row'][] }
       claim_update_run: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['update_runs']['Row'][] }
       clear_update_approvals_outside_schedule: { Args: Record<PropertyKey, never>; Returns: number }

@@ -5,7 +5,7 @@ import { Field } from '@/components/Field'
 import { SubmitButton } from '@/components/SubmitButton'
 import { LOCALES, type MessageKey } from '@/lib/i18n/core'
 import { useI18n } from '@/lib/i18n/client'
-import { saveAgency, saveAutoUpdates, saveLogo, saveSecurity } from './actions'
+import { saveAgency, saveAutoUpdates, saveDigest, saveLogo, saveSecurity } from './actions'
 import { FREQUENCIES, UPDATE_WINDOWS } from '@/lib/auto-updates/policy'
 
 export function AgencyForm({ defaults, disabled }: { defaults: { name: string; dashboard_locale: string; brand_color: string; report_sender_name: string }; disabled: boolean }) {
@@ -173,6 +173,30 @@ export function AutoUpdatesForm({ defaults, disabled }: {
         )}
         {on && <p className="text-xs text-subtle">{t('autoUpdates.timezone', { timezone: tz })}</p>}
         <p className="text-sm text-muted">{t('autoUpdates.how')}</p>
+        {!disabled && <SubmitButton pendingLabel={t('common.saving')}>{t('common.save')}</SubmitButton>}
+      </fieldset>
+    </form>
+  )
+}
+
+/** Ochtendmail "Afgelopen nacht": één vinkje. */
+export function DigestForm({ on, disabled }: { on: boolean; disabled: boolean }) {
+  const { t } = useI18n()
+  const [state, action] = useActionState(saveDigest, {})
+  return (
+    <form action={action} className="card space-y-3" id="digest" aria-labelledby="digest-title">
+      <h2 id="digest-title" className="font-bold">{t('digest.settings.title')}</h2>
+      {state.error && <Alert>{state.error}</Alert>}
+      {state.ok && <Alert tone="ok">{state.ok}</Alert>}
+      <fieldset disabled={disabled} className="space-y-3">
+        <legend className="sr-only">{t('digest.settings.title')}</legend>
+        <label className="flex cursor-pointer items-start gap-3">
+          <input type="checkbox" name="daily_digest" defaultChecked={on} className="mt-1 size-4 shrink-0 accent-(--color-accent)" />
+          <span>
+            <span className="block text-sm font-semibold">{t('digest.settings.label')}</span>
+            <span className="block text-sm text-muted">{t('digest.settings.body')}</span>
+          </span>
+        </label>
         {!disabled && <SubmitButton pendingLabel={t('common.saving')}>{t('common.save')}</SubmitButton>}
       </fieldset>
     </form>

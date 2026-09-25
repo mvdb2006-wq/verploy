@@ -245,3 +245,10 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
 - **Waarom in de worker en niet in SQL:** versievergelijking en herkansingslogica zijn in TypeScript testbaar en worden gedeeld met de uitleg in het dashboard. De database bewaakt de randvoorwaarden (`start_scheduled_update` controleert opnieuw of het aan staat, en `app.insert_update_run` controleert abonnement, koppeling en connector) en legt de run vast met trigger `scheduled`.
 - **Geen extra toestand:** "vannacht al gedaan" volgt uit de laatste run met trigger `scheduled`. Een vraag om akkoord vervalt vanzelf als de update weg is, of als het bureau of de site niet meer meedoet.
 - **Migratie** `20261003000000_scheduled_updates` bevat alleen toevoegingen, met standaard uit. Betaalstatus en planlimieten blijven ongemoeid.
+
+## 25-09 — Ochtendmail "Afgelopen nacht": één mail per bureau, alleen als er iets te melden is
+- **Wanneer en aan wie:** om 07:00 in de tijdzone van het bureau (dezelfde als bij de automatische updates) naar eigenaren en beheerders. Standaard aan; uitzetten kan bij Instellingen.
+- **Inhoud:** wat live is gezet en wat niet (per site, met de reden in gewone taal), en hoeveel beslissingen en problemen in de inbox wachten. De knop gaat naar de inbox als daar iets wacht, anders naar het overzicht. Zonder iets te melden gaat er geen mail uit.
+- **Precies één keer per dag:** `claim_daily_digests` claimt atomair (`digest_sent_at`, SKIP LOCKED), en elke mail heeft een idempotency key per bureau, dag en ontvanger. De periode loopt vanaf de vorige mail, maximaal 48 uur terug.
+- **Zonder e-mailprovider** (geen `RESEND_API_KEY`) wordt niets geclaimd. De mail begint vanzelf zodra Resend is ingesteld.
+- **Opbouw:** de mail wordt puur samengesteld in `src/lib/digest/build.ts` en is getest. De worker haalt de gegevens op. Migratie `20261004000000_daily_digest` bevat alleen toevoegingen.

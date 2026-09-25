@@ -1153,5 +1153,27 @@
       "exclude": "Never automatically",
       "include": "Automatic again"
     }
+  },
+  "digest": {
+    "subject": "Last night at {agency}: {live} live, {held} held back",
+    "subjectWaiting": "{agency}: {count, plural, one {# item awaits} other {# items await}} you in Verploy",
+    "heading": "Last night at {agency}",
+    "intro": "Everything was tested on a copy of the site first; only then did it go live.",
+    "introQuiet": "Nothing was updated, but this is still waiting for you.",
+    "live": "Put live ({count})",
+    "held": "Not put live ({count})",
+    "waiting": "Waiting for you ({count})",
+    "line": "{site}: {items}",
+    "lineReason": "{site}: {items}. {reason}",
+    "decisions": "{count, plural, one {# decision} other {# decisions}} (approve an update or fix a vulnerability)",
+    "problems": "{count, plural, one {# issue} other {# issues}} to look at",
+    "ctaInbox": "Go to the inbox",
+    "ctaOverview": "Go to the overview",
+    "footer": "You receive this morning email because you are an owner or admin of {agency} in Verploy. You can turn it off in Settings.",
+    "settings": {
+      "title": "Morning email",
+      "label": "A short overview of last night, every morning at 07:00",
+      "body": "What Verploy put live, what was held back and what is waiting for you. Only when there is something to report."
+    }
   }
 }

@@ -1153,5 +1153,27 @@
       "exclude": "Nunca automático",
       "include": "De nuevo automático"
     }
+  },
+  "digest": {
+    "subject": "Anoche en {agency}: {live} publicadas, {held} retenidas",
+    "subjectWaiting": "{agency}: {count, plural, one {# punto te espera} other {# puntos te esperan}} en Verploy",
+    "heading": "Anoche en {agency}",
+    "intro": "Todo se probó primero en una copia del sitio; solo después se publicó.",
+    "introQuiet": "No se actualizó nada, pero esto sigue esperándote.",
+    "live": "Publicado ({count})",
+    "held": "No publicado ({count})",
+    "waiting": "Te espera ({count})",
+    "line": "{site}: {items}",
+    "lineReason": "{site}: {items}. {reason}",
+    "decisions": "{count, plural, one {# decisión} other {# decisiones}} (aprobar una actualización o corregir una vulnerabilidad)",
+    "problems": "{count, plural, one {# problema} other {# problemas}} por revisar",
+    "ctaInbox": "Ir a la bandeja de entrada",
+    "ctaOverview": "Ir al resumen",
+    "footer": "Recibes este correo matinal porque eres propietario o administrador de {agency} en Verploy. Puedes desactivarlo en Ajustes.",
+    "settings": {
+      "title": "Correo matinal",
+      "label": "Cada mañana a las 07:00, un breve resumen de la noche",
+      "body": "Lo que Verploy publicó, lo que se retuvo y lo que te espera. Solo si hay algo que contar."
+    }
   }
 }

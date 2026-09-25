@@ -1153,5 +1153,27 @@
       "exclude": "Nie automatisch",
       "include": "Wieder automatisch"
     }
+  },
+  "digest": {
+    "subject": "Letzte Nacht bei {agency}: {live} live, {held} zurückgehalten",
+    "subjectWaiting": "{agency}: {count, plural, one {# Punkt wartet} other {# Punkte warten}} in Verploy auf dich",
+    "heading": "Letzte Nacht bei {agency}",
+    "intro": "Alles wurde zuerst auf einer Kopie der Website getestet; erst danach ging es live.",
+    "introQuiet": "Es wurde nichts aktualisiert, aber das hier wartet noch auf dich.",
+    "live": "Live gestellt ({count})",
+    "held": "Nicht live gestellt ({count})",
+    "waiting": "Wartet auf dich ({count})",
+    "line": "{site}: {items}",
+    "lineReason": "{site}: {items}. {reason}",
+    "decisions": "{count, plural, one {# Entscheidung} other {# Entscheidungen}} (Update freigeben oder Sicherheitslücke beheben)",
+    "problems": "{count, plural, one {# Problem} other {# Probleme}} zum Ansehen",
+    "ctaInbox": "Zum Posteingang",
+    "ctaOverview": "Zur Übersicht",
+    "footer": "Du erhältst diese Morgenmail, weil du Inhaber oder Admin von {agency} in Verploy bist. Abschalten kannst du sie in den Einstellungen.",
+    "settings": {
+      "title": "Morgenmail",
+      "label": "Jeden Morgen um 07:00 ein kurzer Überblick über die letzte Nacht",
+      "body": "Was Verploy live gestellt hat, was zurückgehalten wurde und was auf dich wartet. Nur wenn es etwas zu melden gibt."
+    }
   }
 }

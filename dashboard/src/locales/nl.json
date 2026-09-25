@@ -1153,5 +1153,27 @@
       "exclude": "Nooit automatisch",
       "include": "Weer automatisch"
     }
+  },
+  "digest": {
+    "subject": "Afgelopen nacht bij {agency}: {live} live, {held} tegengehouden",
+    "subjectWaiting": "{agency}: {count, plural, one {# punt wacht} other {# punten wachten}} op je in Verploy",
+    "heading": "Afgelopen nacht bij {agency}",
+    "intro": "Alles is eerst getest op een kopie van de site; pas daarna ging het live.",
+    "introQuiet": "Er is niets bijgewerkt, maar dit wacht nog op je.",
+    "live": "Live gezet ({count})",
+    "held": "Niet live gezet ({count})",
+    "waiting": "Wacht op jou ({count})",
+    "line": "{site}: {items}",
+    "lineReason": "{site}: {items}. {reason}",
+    "decisions": "{count, plural, one {# beslissing} other {# beslissingen}} (akkoord op een update of een lek oplossen)",
+    "problems": "{count, plural, one {# probleem} other {# problemen}} om naar te kijken",
+    "ctaInbox": "Naar de inbox",
+    "ctaOverview": "Naar het overzicht",
+    "footer": "Je ontvangt deze ochtendmail omdat je eigenaar of beheerder bent van {agency} in Verploy. Uitzetten kan bij Instellingen.",
+    "settings": {
+      "title": "Ochtendmail",
+      "label": "Elke ochtend om 07:00 een kort overzicht van de afgelopen nacht",
+      "body": "Wat Verploy live zette, wat is tegengehouden en wat op je wacht. Alleen als er iets te melden is."
+    }
   }
 }

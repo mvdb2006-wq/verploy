@@ -1153,5 +1153,27 @@
       "exclude": "Jamais automatiquement",
       "include": "De nouveau automatique"
     }
+  },
+  "digest": {
+    "subject": "La nuit dernière chez {agency} : {live} en ligne, {held} bloquées",
+    "subjectWaiting": "{agency} : {count, plural, one {# point vous attend} other {# points vous attendent}} dans Verploy",
+    "heading": "La nuit dernière chez {agency}",
+    "intro": "Tout a d’abord été testé sur une copie du site ; ce n’est qu’ensuite que c’est passé en ligne.",
+    "introQuiet": "Rien n’a été mis à jour, mais ceci vous attend encore.",
+    "live": "Mis en ligne ({count})",
+    "held": "Non mis en ligne ({count})",
+    "waiting": "En attente de vous ({count})",
+    "line": "{site} : {items}",
+    "lineReason": "{site} : {items}. {reason}",
+    "decisions": "{count, plural, one {# décision} other {# décisions}} (approuver une mise à jour ou corriger une faille)",
+    "problems": "{count, plural, one {# problème} other {# problèmes}} à examiner",
+    "ctaInbox": "Ouvrir la boîte de réception",
+    "ctaOverview": "Ouvrir la vue d’ensemble",
+    "footer": "Vous recevez cet e-mail du matin car vous êtes propriétaire ou administrateur de {agency} dans Verploy. Vous pouvez le désactiver dans les réglages.",
+    "settings": {
+      "title": "E-mail du matin",
+      "label": "Chaque matin à 07:00, un bref récapitulatif de la nuit",
+      "body": "Ce que Verploy a mis en ligne, ce qui a été bloqué et ce qui vous attend. Uniquement s’il y a quelque chose à signaler."
+    }
   }
 }

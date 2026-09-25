@@ -10,6 +10,7 @@ import { runMaintenance } from '@/lib/monitoring/maintenance'
 import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { evaluateSites, refreshFeed } from '@/lib/vulnerabilities/feed'
 import { runScheduledUpdates } from '@/lib/auto-updates/schedule'
+import { sendDailyDigests } from '@/lib/digest/send'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -185,6 +186,9 @@ async function main() {
       await runScheduledUpdates(admin)
         .then(r => { if (r.started || r.cleared) log('scheduled_updates', { ...r }) })
         .catch(e => log('scheduled_updates_failed', { error: (e as Error).message }))
+      await sendDailyDigests(admin)
+        .then(r => { if (r.claimed) log('daily_digest', { ...r }) })
+        .catch(e => log('daily_digest_failed', { error: (e as Error).message }))
     }
     if (Date.now() - lastMaintenance > MAINTENANCE_EVERY_MS) {
       lastMaintenance = Date.now()

@@ -79,6 +79,17 @@ export async function saveAutoUpdates(_: SettingsState, form: FormData): Promise
   return { ok: t('common.saved') }
 }
 
+/** Ochtendmail "Afgelopen nacht" aan of uit (eigenaar/beheerder; RLS dwingt dat af). */
+export async function saveDigest(_: SettingsState, form: FormData): Promise<SettingsState> {
+  const session = await requireAgency()
+  const t = await getT()
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('agencies').update({ daily_digest: form.get('daily_digest') === 'on' }, { count: 'exact' }).eq('id', session.agency.id)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath('/', 'layout')
+  return { ok: t('common.saved') }
+}
+
 export interface InviteState { error?: string; link?: string; email?: string; emailed?: boolean }
 
 export async function inviteMember(_: InviteState, form: FormData): Promise<InviteState> {

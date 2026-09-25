@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
-import { LAB_DIR, LAB_WP, LAB_WP_DIR, db } from './support/env'
+import { LAB_DIR, LAB_WP, LAB_WP_DIR, clearMails, db, sentMails } from './support/env'
 import { addAndPairWordPress, signupWithAgency } from './support/flows'
 
 /**
@@ -121,4 +121,31 @@ test('per site "Nooit automatisch": de site doet niet meer mee', async ({ page }
   await expect(page.getByRole('region', { name: 'Deze site wordt nooit automatisch bijgewerkt' })).toBeVisible()
   await page.getByRole('region', { name: 'Deze site wordt nooit automatisch bijgewerkt' }).getByRole('button', { name: 'Weer automatisch' }).click()
   await expect(page.getByRole('region', { name: /Automatisch bijgewerkt/ })).toBeVisible()
+})
+
+test('ochtendmail om 07:00: wat live ging, per site, met een knop naar de inbox', async () => {
+  // Het bureau "staat" nu in een tijdzone waar het 07:xx is.
+  const offset = ((7 - new Date().getUTCHours() + 36) % 24) - 12
+  const morning = offset === 0 ? 'Etc/GMT' : offset > 0 ? `Etc/GMT-${offset}` : `Etc/GMT+${-offset}`
+  await clearMails()
+  const c = db(); await c.connect()
+  try {
+    await c.query(`update public.agencies a set timezone = $2, digest_sent_at = null
+                     from public.agency_members m join auth.users u on u.id = m.user_id
+                    where m.agency_id = a.id and u.email = $1`, [owner.email, morning])
+  } finally { await c.end() }
+  await expect.poll(async () => (await sentMails()).filter(m => m.to.includes(owner.email) && m.subject.startsWith('Afgelopen nacht')).length, { timeout: 60_000 }).toBe(1)
+  const mail = (await sentMails()).find(m => m.to.includes(owner.email) && m.subject.startsWith('Afgelopen nacht'))!
+  expect(mail.subject).toBe(`Afgelopen nacht bij Gepland ${run}: 2 live, 0 tegengehouden`)
+  expect(mail.text).toContain('Live gezet (2)')
+  expect(mail.text).toContain('Lab-WordPress: Verploy Lab — vp-lab-footer 1.1.0')
+  expect(mail.text).toContain('Lab-WordPress: Verploy Lab — vp-lab-extra 1.1.0')
+  expect(mail.text).toContain('Alles is eerst getest op een kopie van de site')
+  // De lab-site draait op http: dat is een open probleem, dus de knop gaat naar de inbox.
+  expect(mail.text).toContain('Wacht op jou (1)')
+  expect(mail.html).toContain('href="http://127.0.0.1:3000/inbox"')
+  expect(mail.html).toContain('Naar de inbox')
+  // Eén keer per dag: niet nog een keer.
+  await new Promise(r => setTimeout(r, 8_000))
+  expect((await sentMails()).filter(m => m.to.includes(owner.email) && m.subject.startsWith('Afgelopen nacht'))).toHaveLength(1)
 })
