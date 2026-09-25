@@ -297,3 +297,4 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - Is de periode precies een kalendermaand, dan staat de naam van de maand erin.
 - **Nieuw:** een tegel "Lekken opgelost" in plaats van "Aandachtspunten"; die aandachtspunten staan nog steeds als eigen blok in het rapport. Daarnaast een blok "Beveiliging" met de opgeloste lekken per onderdeel: aantal, hoogste ernst, versie en datum.
 - Oudere rapportgegevens zonder `security` blijven werken.
+- **Les bij de uitrol (25-09):** in productie krijgt de service role geen standaardrechten op nieuwe tabellen; lokaal wel. Elke nieuwe tabel die de worker leest of schrijft, krijgt daarom een expliciete `grant … to service_role` (hersteld met `20261007000100`).
