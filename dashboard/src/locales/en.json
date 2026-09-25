@@ -31,7 +31,8 @@
     "overview": "Overview",
     "inbox": "Inbox",
     "security": "Security",
-    "version": "Verploy version"
+    "version": "Verploy version",
+    "updates": "Updates"
   },
   "auth": {
     "email": "Email address",
@@ -1229,5 +1230,19 @@
     "loginSubtitle": "Enter the 6-digit code from your authenticator app.",
     "loginSubmit": "Log in",
     "lost": "Lost your phone? Contact support@verploy.com; after a check we will help you get back in."
+  },
+  "bulk": {
+    "title": "Updates across your sites",
+    "intro": "All available updates, per component across all your sites. One click updates the component everywhere safely: per site tested on a copy first, only then live.",
+    "none": "All sites are up to date. No updates available.",
+    "autoOn": "Automatic safe updates are on: Verploy also runs regular updates itself at the chosen time.",
+    "button": "{count, plural, one {Update safely on # site} other {Update safely on all # sites}}",
+    "sites": "{count, plural, one {# site} other {# sites}}",
+    "security": "Fixes a vulnerability",
+    "major": "Major version jump",
+    "showSites": "Which sites",
+    "busy": "An update is already running",
+    "allBusy": "An update is already running on {count, plural, one {this site} other {these sites}}. Try again shortly.",
+    "someBusy": "An update was already running on {count, plural, one {# site} other {# sites}}; it will follow later."
   }
 }

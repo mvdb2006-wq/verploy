@@ -31,7 +31,8 @@
     "overview": "Vue d’ensemble",
     "inbox": "Boîte de réception",
     "security": "Sécurité",
-    "version": "Version de Verploy"
+    "version": "Version de Verploy",
+    "updates": "Mises à jour"
   },
   "auth": {
     "email": "Adresse e-mail",
@@ -1229,5 +1230,19 @@
     "loginSubtitle": "Saisissez le code à 6 chiffres de votre application d’authentification.",
     "loginSubmit": "Se connecter",
     "lost": "Téléphone perdu ? Contactez support@verploy.com ; après vérification, nous vous aiderons à récupérer l’accès."
+  },
+  "bulk": {
+    "title": "Mises à jour sur tous vos sites",
+    "intro": "Toutes les mises à jour disponibles, par composant sur tous vos sites. Un clic met le composant à jour partout en toute sécurité : pour chaque site, d’abord testé sur une copie, puis en ligne.",
+    "none": "Tous les sites sont à jour. Aucune mise à jour disponible.",
+    "autoOn": "Les mises à jour sûres automatiques sont activées : Verploy effectue aussi les mises à jour courantes au moment choisi.",
+    "button": "{count, plural, one {Mettre à jour en sécurité sur # site} other {Mettre à jour en sécurité sur les # sites}}",
+    "sites": "{count, plural, one {# site} other {# sites}}",
+    "security": "Corrige une faille",
+    "major": "Saut de version majeure",
+    "showSites": "Quels sites",
+    "busy": "Une mise à jour est déjà en cours",
+    "allBusy": "Une mise à jour est déjà en cours sur {count, plural, one {ce site} other {ces sites}}. Réessayez dans un instant.",
+    "someBusy": "Une mise à jour était déjà en cours sur {count, plural, one {# site} other {# sites}} ; elle suivra plus tard."
   }
 }

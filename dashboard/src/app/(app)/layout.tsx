@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         inboxCount={ops.inbox.length}
         version={build ? `${version} · ${build}` : version}
         labels={{
-          overview: t('nav.overview'), inbox: t('nav.inbox'), sites: t('nav.sites'), security: t('nav.security'),
+          overview: t('nav.overview'), inbox: t('nav.inbox'), sites: t('nav.sites'), updates: t('nav.updates'), security: t('nav.security'),
           reports: t('nav.reports'), settings: t('nav.settings'), signOut: t('nav.signOut'), agency: t('nav.agency'),
           mainNav: t('nav.mainNav'), version: t('nav.version'),
         }}

@@ -31,7 +31,8 @@
     "overview": "Übersicht",
     "inbox": "Inbox",
     "security": "Sicherheit",
-    "version": "Verploy-Version"
+    "version": "Verploy-Version",
+    "updates": "Updates"
   },
   "auth": {
     "email": "E-Mail-Adresse",
@@ -1229,5 +1230,19 @@
     "loginSubtitle": "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
     "loginSubmit": "Anmelden",
     "lost": "Telefon verloren? Wende dich an support@verploy.com; nach einer Prüfung helfen wir dir weiter."
+  },
+  "bulk": {
+    "title": "Updates auf all deinen Websites",
+    "intro": "Alle verfügbaren Updates, pro Komponente über alle Websites. Ein Klick aktualisiert die Komponente überall sicher: pro Website zuerst auf einer Kopie getestet, erst dann live.",
+    "none": "Alle Websites sind aktuell. Es gibt keine Updates.",
+    "autoOn": "Automatische sichere Updates sind an: Normale Updates führt Verploy auch selbst zum gewählten Zeitpunkt aus.",
+    "button": "{count, plural, one {Sicher aktualisieren auf # Website} other {Sicher aktualisieren auf allen # Websites}}",
+    "sites": "{count, plural, one {# Website} other {# Websites}}",
+    "security": "Behebt eine Sicherheitslücke",
+    "major": "Großer Versionssprung",
+    "showSites": "Welche Websites",
+    "busy": "Es läuft bereits ein Update",
+    "allBusy": "Auf {count, plural, one {dieser Website} other {diesen Websites}} läuft bereits ein Update. Versuche es gleich noch einmal.",
+    "someBusy": "Auf {count, plural, one {# Website} other {# Websites}} lief bereits ein Update; es folgt später."
   }
 }

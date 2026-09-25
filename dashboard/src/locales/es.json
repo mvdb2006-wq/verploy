@@ -31,7 +31,8 @@
     "overview": "Resumen",
     "inbox": "Bandeja",
     "security": "Seguridad",
-    "version": "Versión de Verploy"
+    "version": "Versión de Verploy",
+    "updates": "Actualizaciones"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -1229,5 +1230,19 @@
     "loginSubtitle": "Introduce el código de 6 dígitos de tu app de autenticación.",
     "loginSubmit": "Iniciar sesión",
     "lost": "¿Has perdido el teléfono? Escribe a support@verploy.com; tras una comprobación te ayudamos a recuperar el acceso."
+  },
+  "bulk": {
+    "title": "Actualizaciones en todos tus sitios",
+    "intro": "Todas las actualizaciones disponibles, por componente en todos tus sitios. Un clic actualiza el componente en todas partes con seguridad: en cada sitio se prueba antes en una copia y solo después se publica.",
+    "none": "Todos los sitios están al día. No hay actualizaciones.",
+    "autoOn": "Las actualizaciones seguras automáticas están activadas: Verploy también hace las normales en el momento elegido.",
+    "button": "{count, plural, one {Actualizar con seguridad en # sitio} other {Actualizar con seguridad en los # sitios}}",
+    "sites": "{count, plural, one {# sitio} other {# sitios}}",
+    "security": "Corrige una vulnerabilidad",
+    "major": "Salto de versión mayor",
+    "showSites": "Qué sitios",
+    "busy": "Ya hay una actualización en curso",
+    "allBusy": "Ya hay una actualización en curso en {count, plural, one {este sitio} other {estos sitios}}. Inténtalo en un momento.",
+    "someBusy": "Ya había una actualización en curso en {count, plural, one {# sitio} other {# sitios}}; seguirá más tarde."
   }
 }

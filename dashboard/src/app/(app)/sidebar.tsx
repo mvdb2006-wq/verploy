@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, Globe, Inbox, LayoutDashboard, LogOut, Settings, ShieldCheck } from 'lucide-react'
+import { FileText, Globe, Inbox, LayoutDashboard, LogOut, Settings, ShieldCheck, RefreshCw } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { signOut } from '../(auth)/actions'
@@ -11,13 +11,14 @@ export function Sidebar({ agencyName, email, labels, inboxCount, version }: {
   email: string
   inboxCount: number
   version: string
-  labels: { overview: string; inbox: string; sites: string; security: string; reports: string; settings: string; signOut: string; agency: string; mainNav: string; version: string }
+  labels: { overview: string; inbox: string; sites: string; updates: string; security: string; reports: string; settings: string; signOut: string; agency: string; mainNav: string; version: string }
 }) {
   const path = usePathname()
   const nav = [
     { href: '/', label: labels.overview, icon: LayoutDashboard, active: path === '/', count: 0 },
     { href: '/inbox', label: labels.inbox, icon: Inbox, active: path.startsWith('/inbox'), count: inboxCount },
     { href: '/sites', label: labels.sites, icon: Globe, active: path.startsWith('/sites'), count: 0 },
+    { href: '/updates', label: labels.updates, icon: RefreshCw, active: path.startsWith('/updates'), count: 0 },
     { href: '/security', label: labels.security, icon: ShieldCheck, active: path.startsWith('/security'), count: 0 },
     { href: '/reports', label: labels.reports, icon: FileText, active: path.startsWith('/reports'), count: 0 },
     { href: '/settings', label: labels.settings, icon: Settings, active: path.startsWith('/settings'), count: 0 },

@@ -31,7 +31,8 @@
     "overview": "Overzicht",
     "inbox": "Inbox",
     "security": "Beveiliging",
-    "version": "Versie van Verploy"
+    "version": "Versie van Verploy",
+    "updates": "Updates"
   },
   "auth": {
     "email": "E-mailadres",
@@ -1229,5 +1230,19 @@
     "loginSubtitle": "Vul de code van 6 cijfers uit je authenticator-app in.",
     "loginSubmit": "Inloggen",
     "lost": "Telefoon kwijt? Neem contact op met support@verploy.com; we helpen je na controle weer op weg."
+  },
+  "bulk": {
+    "title": "Updates op al je sites",
+    "intro": "Alle beschikbare updates, per onderdeel over al je sites. Eén klik werkt het onderdeel overal veilig bij: per site eerst getest op een kopie, pas daarna live.",
+    "none": "Alle sites zijn bij. Er zijn geen updates beschikbaar.",
+    "autoOn": "Automatische veilige updates staan aan: gewone updates doet Verploy ook zelf, op het ingestelde moment.",
+    "button": "{count, plural, one {Veilig bijwerken op # site} other {Veilig bijwerken op alle # sites}}",
+    "sites": "{count, plural, one {# site} other {# sites}}",
+    "security": "Lost een lek op",
+    "major": "Grote versiesprong",
+    "showSites": "Welke sites",
+    "busy": "Er loopt al een update",
+    "allBusy": "Op {count, plural, one {deze site} other {deze sites}} loopt al een update. Probeer het straks opnieuw.",
+    "someBusy": "Op {count, plural, one {# site} other {# sites}} liep al een update; die volgt later."
   }
 }
