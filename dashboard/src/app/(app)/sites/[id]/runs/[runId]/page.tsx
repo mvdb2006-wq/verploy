@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Check, Circle, CircleDashed, LoaderCircle, Stethoscope, X } from 'lucide-react'
@@ -344,13 +345,25 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
               </thead>
               <tbody className="divide-y divide-border/60">
                 {items.map(i => (
-                  <tr key={`${i.type}:${i.slug}`}>
+                  <Fragment key={`${i.type}:${i.slug}`}>
+                  <tr className={i.failure ? 'border-b-0 [&>td]:pb-1' : undefined}>
                     <td className="px-5 py-2.5 font-medium">{i.name}</td>
                     <td className="px-3 py-2.5 font-mono text-xs whitespace-nowrap">{i.from_version ?? '—'} → {i.to_version ?? '—'}</td>
                     <td className="px-3 py-2.5 text-xs">{i.staging ? t(`runs.itemStatus.${i.staging}` as MessageKey) : '—'}</td>
                     <td className="px-3 py-2.5 text-xs">{i.production ? t(`runs.itemStatus.${i.production}` as MessageKey) : '—'}</td>
                     <td className="px-5 py-2.5"><span className={cn('badge whitespace-nowrap', OUTCOME_CLASS[itemOutcome(i, run)])}>{t(`runs.itemOutcome.${itemOutcome(i, run)}` as MessageKey)}</span></td>
                   </tr>
+                  {i.failure && (
+                    <tr>
+                      <td colSpan={5} className="px-5 pb-3 pt-0">
+                        <p className="rounded-md bg-warn/5 px-3 py-2 text-xs text-text">
+                          <span className="font-semibold">{t('runs.failure.why')}</span> {t(`runs.failure.${i.failure.kind}` as MessageKey)}
+                          {i.failure.message && <span className="mt-1 block font-mono text-[11px] text-muted">{t('runs.failure.said', { message: i.failure.message })}</span>}
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>

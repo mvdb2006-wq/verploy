@@ -20,6 +20,8 @@ export interface RunItem {
   /** Uitkomst op de live site. */
   production?: string
   package_file?: string
+  /** Waarom de update niet lukte, volgens het logboek van WordPress (zie lib/updates/failure.ts). */
+  failure?: { kind: string; message: string | null }
 }
 
 export const SKIPPED_DEPENDENCY = 'skipped_dependency'

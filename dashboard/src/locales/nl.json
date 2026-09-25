@@ -633,6 +633,19 @@
         "checkout": "de afrekenpagina laadt niet of toont een fout",
         "js": "nieuwe JavaScript-fouten"
       }
+    },
+    "failure": {
+      "license": "De plugin mag alleen met een geactiveerde licentie worden bijgewerkt. Activeer de licentie in WP Admin (bij WPBakery: WPBakery → Product License; zit hij bij je thema, dan werk je hem bij via een thema-update).",
+      "no_package": "De maker van de plugin gaf geen downloadbestand. Meestal is de licentie niet (meer) actief op deze site; controleer die in WP Admin.",
+      "download": "Het downloaden van de update lukte niet. Bij een betaalde plugin betekent dit meestal dat de licentie niet actief is op deze site; anders reageerde de server van de maker niet goed en probeert Verploy het bij de volgende ronde opnieuw.",
+      "permissions": "WordPress mocht de bestanden niet vervangen (schrijfrechten op de server). Laat je hostingpartij de rechten van wp-content controleren.",
+      "folder_exists": "Er stond nog een map van een eerdere, afgebroken update. Die ruimt WordPress normaal zelf op; lukt het de volgende keer weer niet, verwijder dan de map in wp-content/upgrade.",
+      "bad_package": "Het updatebestand was beschadigd of geen geldige plugin. Probeer het later opnieuw of download de plugin handmatig bij de maker.",
+      "requirements": "Deze versie vraagt een nieuwere PHP- of WordPress-versie dan de site nu heeft. Werk die eerst bij.",
+      "disk_space": "Er is te weinig schijfruimte op de server om de update uit te pakken. Maak ruimte vrij of vraag je hostingpartij om meer ruimte.",
+      "unknown": "WordPress kon de update niet installeren.",
+      "said": "WordPress meldde: {message}",
+      "why": "Waarom?"
     }
   },
   "diagnosis": {

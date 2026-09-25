@@ -7,6 +7,7 @@ import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, ty
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
 import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, visualDiff, type CheckOutcome, type VisualDiff } from './compare'
 import { compareFunctional, runFunctional, type FnFailure, type FnResult, type FunctionalTargets } from './functional'
+import { explainFailure } from '@/lib/updates/failure'
 import { SKIPPED_DEPENDENCY, dependencyOrder, dependentsOf, isolatedFailure, stagingOk, type RunItem } from '@/lib/run-items'
 
 export type Admin = SupabaseClient<Database>
@@ -209,6 +210,10 @@ export async function testPhase(
   return { failures, captures }
 }
 
+/** Per onderdeel waarom de update niet lukte (voor de melding in de inbox en de ochtendmail). */
+const failuresOf = (list: RunItem[]): Json =>
+  list.filter(i => i.failure).map(i => ({ name: i.name, kind: i.failure!.kind })) as unknown as Json
+
 /** Pauze voor de tweede meting van een afgekeurde pagina. */
 const RECHECK_DELAY_MS = Number(process.env.WORKER_RECHECK_MS ?? 10_000)
 
@@ -355,8 +360,10 @@ async function applyAll(ctx: RunContext, base: string, where: 'staging' | 'produ
       }
     }
     item[where] = res.status
+    if (!res.ok && res.log) item.failure = explainFailure(res.log)
     await event(ctx, stepName, res.ok ? 'run.item.updated' : 'run.item.failed',
-      { name: item.name, from: res.from_version ?? '', to: res.to_version ?? '', status: res.status }, res.ok ? 'info' : 'warning')
+      { name: item.name, from: res.from_version ?? '', to: res.to_version ?? '', status: res.status,
+        ...(item.failure && !res.ok ? { kind: item.failure.kind, detail: item.failure.message ?? '' } : {}) }, res.ok ? 'info' : 'warning')
     if (res.ok) continue
     if (where === 'staging' && isolatedFailure(res.status, item.from_version, res.to_version ?? res.from_version)) {
       // Alleen dit onderdeel: de testkopie is er niet door veranderd, de rest wordt gewoon getest.
@@ -495,7 +502,7 @@ export async function step(ctx: RunContext): Promise<Transition> {
       if (failed) {
         // De testkopie is door dit onderdeel niet meer betrouwbaar: de rest kan niet los worden bewezen.
         const key = failed.staging === 'crashed' ? 'run.reason.update_crashed' : 'run.reason.update_failed'
-        const t = toCleanup('blocked', { key, params: { name: failed.name, status: failed.staging ?? '', total: list.length, attention: [failed.name] } })
+        const t = toCleanup('blocked', { key, params: { name: failed.name, status: failed.staging ?? '', total: list.length, attention: [failed.name], failures: failuresOf([failed]) } })
         return { ...t, items: list, state: { ...t.state, diagnostics: await collectDiagnostics(ctx, st.staging_url!, 'staging') } }
       }
       const tested = list.filter(stagingOk)
@@ -503,8 +510,8 @@ export async function step(ctx: RunContext): Promise<Transition> {
         // Niets bijgewerkt: niets om te testen of live te zetten.
         const first = list.find(i => i.staging !== SKIPPED_DEPENDENCY) ?? list[0]!
         const reason: { key: string; params: Record<string, Json> } = list.length === 1 || attentionNames(list).length === 1
-          ? { key: 'run.reason.update_failed', params: { name: first.name, status: first.staging ?? '', total: list.length, attention: attentionNames(list) } }
-          : { key: 'run.reason.none_updated', params: { count: list.length, attention: attentionNames(list) } }
+          ? { key: 'run.reason.update_failed', params: { name: first.name, status: first.staging ?? '', total: list.length, attention: attentionNames(list), failures: failuresOf(list) } }
+          : { key: 'run.reason.none_updated', params: { count: list.length, attention: attentionNames(list), failures: failuresOf(list) } }
         return { ...toCleanup('blocked', reason), items: list }
       }
       return cancelIfAsked() ?? { next: 'staging_test', items: list }
@@ -579,7 +586,8 @@ export async function step(ctx: RunContext): Promise<Transition> {
       if (attention.length) {
         return toCleanup('deployed', { key: 'run.reason.partial', params: {
           deployed: items(run).filter(i => i.production === 'updated' || i.production === 'already_current').length,
-          total: items(run).length, attention, statuses: items(run).filter(i => i.staging && !stagingOk(i)).map(i => i.staging!) } })
+          total: items(run).length, attention, statuses: items(run).filter(i => i.staging && !stagingOk(i)).map(i => i.staging!),
+          failures: failuresOf(items(run)) } })
       }
       return toCleanup('deployed')
     }

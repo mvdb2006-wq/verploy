@@ -32,8 +32,13 @@ if ( ! class_exists( 'Verploy_Quiet_Skin' ) ) {
 
 		public function error( $errors ) {
 			if ( is_wp_error( $errors ) ) {
-				foreach ( $errors->get_error_messages() as $m ) {
-					$this->lines[] = 'Error: ' . wp_strip_all_tags( $m );
+				// Met de extra gegevens van WordPress (bij een mislukte download de HTTP-reden, zoals
+				// "Unauthorized" of "Not Found"): daaruit leidt Verploy af waarom een update niet lukte.
+				foreach ( $errors->get_error_codes() as $code ) {
+					$data = $errors->get_error_data( $code );
+					foreach ( $errors->get_error_messages( $code ) as $m ) {
+						$this->lines[] = 'Error: ' . wp_strip_all_tags( $m ) . ( is_string( $data ) && '' !== $data ? ' ' . wp_strip_all_tags( $data ) : '' );
+					}
 				}
 			} elseif ( is_string( $errors ) ) {
 				$this->lines[] = 'Error: ' . wp_strip_all_tags( $errors );

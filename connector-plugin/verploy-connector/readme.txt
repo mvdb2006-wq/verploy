@@ -4,7 +4,7 @@ Tags:              maintenance, updates, monitoring, agency, staging
 Requires at least: 5.8
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        2.5.0
+Stable tag:        2.5.1
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,9 @@ Verploy sends your browser to this site with a signed login token (HMAC-SHA256 w
 All Verploy settings, staging copies and backups are removed.
 
 == Changelog ==
+
+= 2.5.1 =
+* When an update cannot be installed, the full reason from WordPress is passed on (for example "Download failed. Unauthorized"), so Verploy can explain why and what to do.
 
 = 2.5.0 =
 * One-click login to WP Admin from Verploy: a signed, single-use token valid for 60 seconds, only for an existing administrator. Can be turned off under Settings → Verploy; every login is logged there.

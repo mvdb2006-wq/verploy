@@ -312,3 +312,11 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   4. **Tweede meting vóór het oordeel:** een pagina die na de update afkeurt, wordt na 10 s opnieuw gemeten. Pas als ook die meting afkeurt, houdt Verploy de update tegen of draait hij terug. Dit vangt lege caches direct na een update op.
 - De bestaande herkenning van "vanzelf bewegend" (drie keer laden) blijft als vangnet voor onbekende sliders.
 - E2E `phase98` (Swiper wisselt van dia → live; update laat de slider verdwijnen → tegengehouden), `phase93` blijft groen.
+
+## 25-09 — "Vraagt aandacht": altijd met de reden erbij
+- De connector stuurde het logboek van WordPress al mee, maar de worker gooide het weg. Nu leidt `lib/updates/failure.ts` er een oorzaak uit af, in Engels en Nederlands (WordPress schrijft in de taal van de site). Mogelijke oorzaken: licentie, geen downloadbestand, downloaden mislukt, schrijfrechten, oude map, kapot pakket, PHP/WP-eisen of schijfruimte. De letterlijke melding wordt bewaard, zonder licentiesleutels en tokens.
+- **Te zien:**
+  - onder het onderdeel op de run-pagina: "Waarom? …" met wat je eraan doet, en "WordPress meldde: …";
+  - in de inbox en de ochtendmail (`reason_params.failures`).
+- **Connector 2.5.1:** geeft bij een fout ook de extra gegevens van WordPress door, bijvoorbeeld "Download failed. **Unauthorized**". Zonder die HTTP-reden is een licentieprobleem niet te onderscheiden van een haperende server.
+- Oude runs hebben geen logboek; daar staat alleen de status.

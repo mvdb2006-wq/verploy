@@ -41,10 +41,18 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
     : alert.type === 'update_approval' && Array.isArray(p.items) && p.items.some(i => (i as { why?: unknown } | null)?.why === 'risky') ? 'update_approval_risky'
     : alert.type
   const diagnosis = alert.type.startsWith('update_') && typeof p.diagnosis === 'string' && p.diagnosis ? ` ${t('alerts.diagnosis', { text: p.diagnosis })}` : ''
+  // Waarom een onderdeel niet kon worden bijgewerkt (licentie, schrijfrechten, …), met wat je eraan doet.
+  const rp = (p.reason_params ?? {}) as { failures?: unknown }
+  const failures = alert.type.startsWith('update_') && Array.isArray(rp.failures)
+    ? (rp.failures as Array<{ name?: unknown; kind?: unknown }>).filter(f => typeof f.kind === 'string' && FAILURE_KINDS.has(f.kind as string)).slice(0, 3)
+      .map(f => ` ${str(f.name)}: ${t(`runs.failure.${f.kind as string}` as MessageKey)}`).join('')
+    : ''
   return {
     title: t(`alerts.types.${key}.title` as MessageKey, vars),
-    body: t(`alerts.types.${key}.body` as MessageKey, vars) + diagnosis,
+    body: t(`alerts.types.${key}.body` as MessageKey, vars) + failures + diagnosis,
   }
 }
+
+const FAILURE_KINDS = new Set(['license', 'no_package', 'download', 'permissions', 'folder_exists', 'bad_package', 'requirements', 'disk_space', 'unknown'])
 
 export const SEVERITY_ORDER = { critical: 0, warning: 1, info: 2 } as const

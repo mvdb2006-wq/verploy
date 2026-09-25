@@ -633,6 +633,19 @@
         "checkout": "la página de pago no carga o muestra un error",
         "js": "nuevos errores de JavaScript"
       }
+    },
+    "failure": {
+      "license": "Este plugin solo se puede actualizar con una licencia activada. Actívala en WP Admin (en WPBakery: WPBakery → Product License; si viene con tu tema, actualízalo mediante una actualización del tema).",
+      "no_package": "El autor del plugin no proporcionó ningún archivo. Normalmente la licencia no está (o ya no está) activa en este sitio; compruébala en WP Admin.",
+      "download": "La descarga de la actualización falló. En un plugin de pago suele significar que la licencia no está activa en este sitio; si no, el servidor del autor no respondió bien y Verploy lo volverá a intentar en la próxima ronda.",
+      "permissions": "WordPress no pudo reemplazar los archivos (permisos de escritura en el servidor). Pide a tu proveedor de hosting que revise los permisos de wp-content.",
+      "folder_exists": "Seguía existiendo una carpeta de una actualización interrumpida. WordPress suele limpiarla; si vuelve a fallar, elimina la carpeta en wp-content/upgrade.",
+      "bad_package": "El archivo de actualización estaba dañado o no era un plugin válido. Inténtalo más tarde o descarga el plugin manualmente desde su autor.",
+      "requirements": "Esta versión necesita una versión de PHP o WordPress más reciente que la del sitio. Actualízala primero.",
+      "disk_space": "No hay suficiente espacio en disco en el servidor para descomprimir la actualización. Libera espacio o pide más a tu proveedor de hosting.",
+      "unknown": "WordPress no pudo instalar la actualización.",
+      "said": "WordPress indicó: {message}",
+      "why": "¿Por qué?"
     }
   },
   "diagnosis": {

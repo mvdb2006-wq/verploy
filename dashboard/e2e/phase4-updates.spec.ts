@@ -167,6 +167,9 @@ test('scenario 5 — één update zonder pakket: apart gezet, afhankelijke overg
   await expect(rows.filter({ hasText: 'vp-lab-extra' }).getByText('Live', { exact: true })).toBeVisible()
   await expect(page.getByText('Vraagt aandacht', { exact: true })).toBeVisible()
   await expect(page.getByText('Overgeslagen', { exact: true })).toBeVisible()
+  // Waarom: in gewone taal met wat je eraan doet, plus de letterlijke melding van WordPress.
+  await expect(page.getByText('De maker van de plugin gaf geen downloadbestand.', { exact: false })).toBeVisible()
+  await expect(page.getByText(/WordPress meldde: .*Not Found/)).toBeVisible()
   // live: extra bijgewerkt, nopkg en addon ongewijzigd
   const html = await (await fetch(`${LAB_WP}/`)).text()
   expect(html).toContain('extra v1.1.0')
@@ -183,6 +186,7 @@ test('scenario 5 — één update zonder pakket: apart gezet, afhankelijke overg
   // Inbox: één melding met alleen wat aandacht vraagt, plus een e-mail.
   await page.goto('/inbox')
   await expect(page.getByText('Update vraagt aandacht: Verploy Lab — vp-lab-nopkg, Verploy Lab — vp-lab-nopkg-addon')).toBeVisible()
+  await expect(page.getByText(/Verploy Lab — vp-lab-nopkg: De maker van de plugin gaf geen downloadbestand/).first()).toBeVisible()
   await expect(page.getByText(/1 van 3 updates zijn getest en live gezet; je site werkt normaal\./)).toBeVisible()
   await page.getByRole('link', { name: 'Update bekijken' }).click()
   await expect(page.getByRole('heading', { name: '1 van 3 updates veilig uitgevoerd' })).toBeVisible()

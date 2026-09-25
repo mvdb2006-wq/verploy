@@ -39,6 +39,12 @@ describe('presentAlert', () => {
     expect(risky.title).toBe(major.title)
     expect(risky.body).toContain('op andere sites vaker problemen')
   })
+  it('update vraagt aandacht: waarom (licentie) en wat je eraan doet', () => {
+    const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: { partial: true, deployed: 11, total: 12, items: ['WPBakery Page Builder'],
+      reason_key: 'run.reason.partial', reason_params: { failures: [{ name: 'WPBakery Page Builder', kind: 'license' }, { name: 'X', kind: 'bogus' }] } } })
+    expect(r.body).toContain('WPBakery Page Builder: De plugin mag alleen met een geactiveerde licentie worden bijgewerkt.')
+    expect(r.body).not.toContain('bogus')
+  })
   it('update tegengehouden: de status staat in gewone taal, niet als code', () => {
     const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: { items: ['Yoast SEO Premium'], reason_key: 'run.reason.update_failed', reason_params: { name: 'Yoast SEO Premium', status: 'no_package' } } })
     expect(r.body).toContain('Yoast SEO Premium kon niet worden bijgewerkt op de testkopie (Geen downloadbestand; is de licentie nog actief?)')
