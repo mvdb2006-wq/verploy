@@ -4,7 +4,8 @@
  * Het bureau kiest alleen Aan/Uit, een moment en eventueel "eens per week". Al het andere beslist
  * Verploy hier, per update:
  *   • auto        gewone update (patch/minor, WordPress-onderhoudsrelease): testen op een kopie, dan live;
- *   • approval    grote versiesprong (2.x → 3.x) of WordPress-hoofdversie: één vraag in de inbox;
+ *   • approval    grote versiesprong (2.x → 3.x), WordPress-hoofdversie, of een versie die elders op
+ *                 meerdere sites misging (update_intel): één vraag in de inbox;
  *   • held        al eens tegengehouden door deze update zelf (of licentie/pakket ontbreekt): niet opnieuw;
  *                 de melding van die run staat al in de inbox;
  *   • retry_alone tegengehouden in een run met meerdere updates, zonder dat vaststaat welke het was:
@@ -12,6 +13,7 @@
  * Lekken gaan voor. Puur (geen I/O), gedeeld door worker en tests.
  */
 import { itemOutcome, type ItemOutcome, type RunItem } from '@/lib/run-items'
+import { intelKey, intelVerdict, type Intel } from '@/lib/updates/intel'
 
 export type UpdateWindow = 'night' | 'morning' | 'evening'
 export type Frequency = 'daily' | 'weekly'
@@ -63,7 +65,7 @@ const parts = (v: string | null | undefined): number[] | null => {
   return m ? m[0].split('.').map(Number) : null
 }
 
-export type ApprovalReason = 'major' | 'core_major' | 'unknown_version'
+export type ApprovalReason = 'major' | 'core_major' | 'unknown_version' | 'risky'
 
 /** Moet een mens eerst akkoord geven voor deze versiesprong? null = nee. */
 export function approvalReason(c: { type: string; slug: string; version: string | null; latest_version: string | null }): ApprovalReason | null {
@@ -91,7 +93,7 @@ export type Decision =
 
 const FAILED: ItemOutcome[] = ['held_back', 'rolled_back', 'skipped_dependent']
 
-export function decide(c: Component, past: PastRun[]): Decision {
+export function decide(c: Component, past: PastRun[], intel?: Map<string, Intel>): Decision {
   const tries = past.flatMap(r => r.items
     .filter(i => i.type === c.type && i.slug === c.slug && i.to_version === c.latest_version)
     .map(i => ({ outcome: itemOutcome(i, r), alone: r.items.length === 1 })))
@@ -100,6 +102,8 @@ export function decide(c: Component, past: PastRun[]): Decision {
   // Een grote versiesprong doet Verploy nooit zelf, ook niet als herkansing.
   const why = approvalReason(c)
   if (why) return { kind: 'approval', why }
+  // Elders ging deze versie op meerdere sites mis: niet zelf doen, eerst even kijken.
+  if (c.latest_version && intel && intelVerdict(intel.get(intelKey(c.type, c.slug, c.latest_version))) === 'risky') return { kind: 'approval', why: 'risky' }
   if (tries.some(t => FAILED.includes(t.outcome))) return { kind: 'retry_alone' }
   return { kind: 'auto' }
 }
@@ -118,7 +122,7 @@ export interface Plan {
  * Wat gaat er nu mee? Eerst alle gewone updates samen (lekken voorop). Zijn er die niet, dan één
  * eerder in een groep tegengehouden update apart, om te zien of die het probleem was.
  */
-export function plan(components: Component[], past: PastRun[], vulnerable: Set<string>): Plan {
+export function plan(components: Component[], past: PastRun[], vulnerable: Set<string>, intel?: Map<string, Intel>): Plan {
   const key = (c: { type: string; slug: string }) => `${c.type}:${c.slug}`
   const rank = (c: Component) => (vulnerable.has(key(c)) ? 0 : c.slug === CONNECTOR_SLUG ? 1 : 2)
   const sorted = [...components].filter(c => c.latest_version).sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name))
@@ -126,7 +130,7 @@ export function plan(components: Component[], past: PastRun[], vulnerable: Set<s
   const alone: Component[] = []
   const out: Plan = { run: [], approvals: [], held: [], retry: false }
   for (const c of sorted) {
-    const d = decide(c, past)
+    const d = decide(c, past, intel)
     if (d.kind === 'auto') auto.push(c)
     else if (d.kind === 'retry_alone') alone.push(c)
     else if (d.kind === 'approval') out.approvals.push({ type: c.type, slug: c.slug, name: c.name, from_version: c.version, to_version: c.latest_version, why: d.why })

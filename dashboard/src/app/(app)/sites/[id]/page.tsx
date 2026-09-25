@@ -13,6 +13,7 @@ import { PairingPanel } from './pairing'
 import { DeleteSite } from './delete'
 import { SiteAutoUpdates } from './auto-updates'
 import { UpdatesPanel } from './updates'
+import { intelMap } from '@/lib/updates/intel'
 import { WpLoginSettings, type WpAdmin } from './wp-login'
 import { WpAdminLink, wpLoginSupported } from '@/components/WpAdminLink'
 import { Alert } from '@/components/Alert'
@@ -108,6 +109,12 @@ export default async function SitePage({ params, searchParams }: { params: Promi
   // Eén klik vraagt tweestapsverificatie in Verploy; zonder die blijft het de gewone link, met een hint.
   const mfa = wpLogin && canManage(session.role) ? await mfaState(supabase) : null
   const oneClick = wpLogin && wpLoginOnSite && canManage(session.role) && Boolean(mfa?.verified)
+  // Hoe de aangeboden versies elders gingen (Verploy leert van alle sites).
+  const updSlugs = [...new Set((components ?? []).filter(c => c.update_available).map(c => c.slug))]
+  const { data: intelRows } = updSlugs.length
+    ? await supabase.from('update_intel').select('type, slug, version, ok_sites, failed_sites').in('slug', updSlugs)
+    : { data: [] }
+  const intel = Object.fromEntries(intelMap(intelRows ?? []))
   const connected = site.connection_status === 'connected'
   const manage = canManage(session.role)
   const activeRun = (runs ?? []).find(r => r.status !== 'done') ?? null
@@ -227,7 +234,7 @@ export default async function SitePage({ params, searchParams }: { params: Promi
           frequency={session.agency.auto_update_frequency} canEdit={manage} />
       )}
 
-      <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} />
+      <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} intel={intel} />
 
       {(runs ?? []).length > 0 && <RunHistory siteId={site.id} runs={runs ?? []} t={t} locale={locale} />}
 

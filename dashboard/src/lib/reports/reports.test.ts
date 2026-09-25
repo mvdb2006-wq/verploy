@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createTranslator, LOCALES } from '@/lib/i18n/core'
-import { computeUptime, type ReportData } from './model'
-import { duration, footerTemplate, renderReportHtml } from './render'
+import { computeUptime, groupFixedVulns, type ReportData } from './model'
+import { duration, footerTemplate, renderReportHtml, reportSummary } from './render'
 
 const NOW = Date.parse('2026-09-15T12:00:00Z')
 
@@ -86,5 +86,38 @@ describe('renderReportHtml', () => {
   it('duur leesbaar', () => {
     expect(duration(45, createTranslator('nl'))).toBe('45 min')
     expect(duration(135, createTranslator('de'))).toBe('2 Std. 15 Min.')
+  })
+})
+
+describe('waarde van het onderhoud in één zin', () => {
+  const vulns = groupFixedVulns([
+    { component_type: 'plugin', component_slug: 'woo', component_name: 'WooCommerce', severity: 'medium', fixed_version: '10.1.0', resolved_at: '2026-08-12T09:00:00Z' },
+    { component_type: 'plugin', component_slug: 'woo', component_name: 'WooCommerce', severity: 'high', fixed_version: '10.1.0', resolved_at: '2026-08-12T09:05:00Z' },
+    { component_type: 'plugin', component_slug: 'cf7', component_name: 'Contact Form 7', severity: 'low', fixed_version: '6.0', resolved_at: '2026-08-03T09:00:00Z' },
+  ])
+  it('opgeloste lekken per onderdeel: aantal, hoogste ernst, ernstigste eerst', () => {
+    expect(vulns).toEqual([
+      { name: 'WooCommerce', count: 2, severity: 'high', version: '10.1.0', date: '2026-08-12T09:05:00Z' },
+      { name: 'Contact Form 7', count: 1, severity: 'low', version: '6.0', date: '2026-08-03T09:00:00Z' },
+    ])
+  })
+  it('kalendermaand bij naam; updates, lekken, opgevangen problemen en beschikbaarheid', () => {
+    const d = data({ security: { fixed: vulns }, uptime: { percent: 99.98, downtimeMinutes: 9, incidents: [] } })
+    expect(reportSummary(d, createTranslator('nl'), 'nl'))
+      .toBe('In augustus hielden we 2 updates veilig bij, losten we 3 beveiligingslekken op, vingen we 1 update met problemen op vóór die live ging en was de website 99,98% online.')
+    expect(reportSummary(d, createTranslator('en'), 'en'))
+      .toBe('In August, we safely applied 2 updates, we fixed 3 security vulnerabilities, we caught 1 problematic update before it went live and the website was 99.98% online.')
+    const html = renderReportHtml(d, createTranslator('nl'), 'nl')
+    expect(html).toContain('Lekken opgelost')
+    expect(html).toContain('Contact Form 7')
+  })
+  it('andere periode, rustige maand, en alle talen zonder ontbrekende teksten', () => {
+    const quiet = data({ runs: [], period: { start: '2026-08-05', end: '2026-08-31' }, uptime: { percent: 100, downtimeMinutes: 0, incidents: [] } })
+    expect(reportSummary(quiet, createTranslator('nl'), 'nl')).toBe('In deze periode was de website 100% online.')
+    expect(reportSummary({ ...quiet, uptime: { percent: null, downtimeMinutes: 0, incidents: [] } }, createTranslator('nl'), 'nl'))
+      .toBe('In deze periode hielden we de website in de gaten; er hoefde niets te worden bijgewerkt.')
+    for (const locale of LOCALES) {
+      expect(reportSummary(data({ security: { fixed: vulns } }), createTranslator(locale), locale), locale).not.toMatch(/report\.|\{/)
+    }
   })
 })

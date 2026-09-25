@@ -30,6 +30,15 @@ describe('presentAlert', () => {
     expect(auto.title).toBe('Bekend beveiligingslek: Akismet')
     expect(auto.body).toContain('Verploy lost dit automatisch en veilig op')
   })
+  it('akkoord gevraagd: grote versiesprong of een versie die elders vaak misging', () => {
+    const item = { name: 'Elementor', to_version: '4.0.0', why: 'major' }
+    const major = presentAlert(nl, 'nl', { type: 'update_approval', severity: 'warning', params: { count: 1, items: [item] } })
+    expect(major.title).toBe('Update wacht op je akkoord: Elementor 4.0.0')
+    expect(major.body).toContain('grote versiesprong')
+    const risky = presentAlert(nl, 'nl', { type: 'update_approval', severity: 'warning', params: { count: 1, items: [{ ...item, why: 'risky' }] } })
+    expect(risky.title).toBe(major.title)
+    expect(risky.body).toContain('op andere sites vaker problemen')
+  })
   it('update tegengehouden: de status staat in gewone taal, niet als code', () => {
     const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: { items: ['Yoast SEO Premium'], reason_key: 'run.reason.update_failed', reason_params: { name: 'Yoast SEO Premium', status: 'no_package' } } })
     expect(r.body).toContain('Yoast SEO Premium kon niet worden bijgewerkt op de testkopie (Geen downloadbestand; is de licentie nog actief?)')

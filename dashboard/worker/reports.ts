@@ -5,8 +5,8 @@ import type { Tables } from '@/lib/database.types'
 import { createTranslator, isLocale, type Locale } from '@/lib/i18n/core'
 import { presentAlert } from '@/lib/monitoring/present'
 import { ruleDiagnosis, type Evidence } from '@/lib/diagnosis/rules'
-import { computeUptime, type ReportData } from '@/lib/reports/model'
-import { footerTemplate, renderReportHtml } from '@/lib/reports/render'
+import { computeUptime, groupFixedVulns, type ReportData } from '@/lib/reports/model'
+import { footerTemplate, renderReportHtml, reportSummary } from '@/lib/reports/render'
 import { renderAgencyEmail, sendEmail } from '@/lib/email'
 import type { Admin } from './run'
 
@@ -28,7 +28,7 @@ export async function gatherReportData(admin: Admin, report: Report, now = Date.
   const from = `${report.period_start}T00:00:00Z`
   const until = new Date(Date.parse(`${report.period_end}T00:00:00Z`) + 86_400_000).toISOString()
 
-  const [{ data: snap }, { data: comps }, { data: runs }, { data: offline }, { data: open }, { data: owners }] = await Promise.all([
+  const [{ data: snap }, { data: comps }, { data: runs }, { data: offline }, { data: open }, { data: owners }, { data: fixedVulns }] = await Promise.all([
     admin.from('health_snapshots').select('memory_limit_mb, disk_free_mb').eq('site_id', site.id).order('id', { ascending: false }).limit(1).maybeSingle(),
     admin.from('site_components').select('slug').eq('site_id', site.id).eq('update_available', true),
     admin.from('update_runs').select('id, verdict, items, finished_at').eq('site_id', site.id).eq('status', 'done')
@@ -37,6 +37,8 @@ export async function gatherReportData(admin: Admin, report: Report, now = Date.
       .lt('opened_at', until).or(`resolved_at.is.null,resolved_at.gt.${from}`),
     admin.from('alerts').select('type, severity, params').eq('site_id', site.id).eq('status', 'open').in('severity', ['warning', 'critical']),
     admin.rpc('agency_owner_email', { p_agency: agency.id }),
+    admin.from('site_vulnerabilities').select('component_type, component_slug, component_name, severity, fixed_version, resolved_at')
+      .eq('site_id', site.id).eq('status', 'resolved').gte('resolved_at', from).lt('resolved_at', until),
   ])
   const runIds = (runs ?? []).map(r => r.id)
   const { data: diags } = runIds.length
@@ -77,6 +79,7 @@ export async function gatherReportData(admin: Admin, report: Report, now = Date.
       sslError: site.ssl_valid === false ? site.ssl_error : null, domainUntil: site.domain_expires_at,
       memoryMb: snap?.memory_limit_mb ?? null, diskFreeMb: snap?.disk_free_mb ?? null, pendingUpdates: (comps ?? []).length,
     },
+    security: { fixed: groupFixedVulns(fixedVulns ?? []) },
     attention: (open ?? []).filter(a => !a.type.startsWith('update_') && a.type !== 'plugin_updates')
       .map(a => ({ ...presentAlert(t, locale, a), severity: a.severity as 'warning' | 'critical' })),
   }
@@ -150,7 +153,8 @@ export async function processReport(admin: Admin, report: Report, workerId: stri
     if (report.send_to) {
       const t = createTranslator(locale)
       const vars = { site: data.site.name, period: fmtPeriod(data, locale), agency: data.agency.sender }
-      const mail = renderAgencyEmail({ agency: data.agency.sender, color: data.agency.color, heading: t('report.email.heading', vars), body: t('report.email.body', vars), footer: t('report.email.footer', vars) })
+      const body = `${reportSummary(data, t, locale)} ${t('report.email.body', vars)}`
+      const mail = renderAgencyEmail({ agency: data.agency.sender, color: data.agency.color, heading: t('report.email.heading', vars), body, footer: t('report.email.footer', vars) })
       const slug = data.site.name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'site'
       const sent = await sendEmail({
         to: report.send_to, subject: t('report.email.subject', vars), ...mail, fromName: data.agency.sender,

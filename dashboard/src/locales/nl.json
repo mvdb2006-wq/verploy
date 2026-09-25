@@ -332,6 +332,10 @@
       "update_approval": {
         "title": "{count, plural, one {Update wacht} other {# updates wachten}} op je akkoord: {items}",
         "body": "Een grote versiesprong kan meer veranderen dan een gewone update. Verploy voert deze pas uit na jouw akkoord, en test ook dan eerst op een kopie van de site."
+      },
+      "update_approval_risky": {
+        "title": "{count, plural, one {Update wacht} other {# updates wachten}} op je akkoord: {items}",
+        "body": "Deze versie gaf op andere sites vaker problemen. Verploy voert hem pas uit na jouw akkoord, en test ook dan eerst op een kopie van de site."
       }
     },
     "sslError": {
@@ -777,7 +781,9 @@
       "stoppedNote": "tegengehouden of teruggedraaid",
       "attention": "Aandachtspunten",
       "attentionNote": "zie hieronder",
-      "attentionNone": "alles in orde"
+      "attentionNone": "alles in orde",
+      "fixed": "Lekken opgelost",
+      "fixedNote": "bekende beveiligingslekken"
     },
     "updates": {
       "title": "Updates in deze periode",
@@ -829,6 +835,24 @@
       "body": "Hierbij het onderhoudsrapport van {site} over {period}. Het volledige rapport zit als PDF in de bijlage.",
       "footer": "Dit rapport is verstuurd door {agency}.",
       "filename": "onderhoudsrapport"
+    },
+    "summary": {
+      "leadMonth": "In {month}",
+      "leadPeriod": "In deze periode",
+      "updates": "{count, plural, one {hielden we # update veilig bij} other {hielden we # updates veilig bij}}",
+      "fixed": "{count, plural, one {losten we # beveiligingslek op} other {losten we # beveiligingslekken op}}",
+      "caught": "{count, plural, one {vingen we # update met problemen op vóór die live ging} other {vingen we # updates met problemen op vóór ze live gingen}}",
+      "uptime": "was de website {percent} online",
+      "sentence": "{lead} {list}.",
+      "quiet": "{lead} hielden we de website in de gaten; er hoefde niets te worden bijgewerkt."
+    },
+    "security": {
+      "title": "Beveiliging",
+      "intro": "Bekende beveiligingslekken in WordPress, plugins en thema's die in deze periode zijn opgelost.",
+      "none": "In deze periode waren er geen bekende beveiligingslekken op te lossen.",
+      "count": "Lekken",
+      "severity": "Ernst",
+      "fixedIn": "Opgelost in"
     }
   },
   "reports": {
@@ -1244,5 +1268,10 @@
     "busy": "Er loopt al een update",
     "allBusy": "Op {count, plural, one {deze site} other {deze sites}} loopt al een update. Probeer het straks opnieuw.",
     "someBusy": "Op {count, plural, one {# site} other {# sites}} liep al een update; die volgt later."
+  },
+  "intel": {
+    "proven": "Elders zonder problemen op {count, plural, one {# site} other {# sites}}",
+    "risky": "Gaf elders problemen op {failed} van {total} sites",
+    "mixed": "Elders zonder problemen op {ok} van {total} sites"
   }
 }

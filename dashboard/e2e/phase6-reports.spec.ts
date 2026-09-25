@@ -81,6 +81,9 @@ test('rapport: klant in het Duits, logo, versturen naar de klant, downloaden', a
   expect(text).toContain('Bäckerei Schmidt')
   expect(text).toContain('Kunde: Bäckerei Schmidt GmbH')
   expect(text).toContain('Verfügbarkeit')
+  expect(text).toContain('Lücken geschlossen')                               // Wert der Wartung: geschlossene Sicherheitslücken
+  expect(text).toContain('Sicherheit')
+  expect(mail.text).toMatch(/(Im \S+|In diesem Zeitraum) (haben wir|war die Website)/)   // Zusammenfassung in einem Satz
   expect(text).toContain('Erstellt von Agentur Nord')
   expect(text.toLowerCase()).not.toContain('verploy')
 

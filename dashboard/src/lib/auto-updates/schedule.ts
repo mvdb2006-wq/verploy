@@ -8,6 +8,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, Json } from '@/lib/database.types'
 import type { RunItem } from '@/lib/run-items'
+import { intelMap } from '@/lib/updates/intel'
 import { isDue, inWindow, plan, type Component, type Frequency, type PastRun, type UpdateWindow } from './policy'
 
 type Admin = SupabaseClient<Database>
@@ -38,7 +39,13 @@ export async function runScheduledUpdates(admin: Admin, now = new Date()): Promi
     if (vErr) throw vErr
     const past: PastRun[] = (runs ?? []).map(r => ({ status: r.status, verdict: r.verdict, items: r.items as unknown as RunItem[] }))
     const vulnerable = new Set((vulns ?? []).map(v => `${v.component_type}:${v.component_slug}`))
-    const p = plan((comps ?? []) as Component[], past, vulnerable)
+    // Hoe deze versies elders gingen (over alle sites): een versie die elders vaak misging, wacht op akkoord.
+    const slugs = [...new Set((comps ?? []).map(x => x.slug))]
+    const { data: intel, error: iErr } = slugs.length
+      ? await admin.from('update_intel').select('type, slug, version, ok_sites, failed_sites').in('slug', slugs)
+      : { data: [], error: null }
+    if (iErr) throw iErr
+    const p = plan((comps ?? []) as Component[], past, vulnerable, intelMap(intel ?? []))
 
     const { error: aErr } = await admin.rpc('sync_update_approvals', { p_site: c.site_id, p_items: p.approvals as unknown as Json })
     if (aErr) throw aErr

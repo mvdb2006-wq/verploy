@@ -747,6 +747,33 @@ export type Database = {
         }
         Relationships: []
       }
+      update_intel: {
+        Row: {
+          type: string
+          slug: string
+          version: string
+          ok_sites: number
+          failed_sites: number
+          refreshed_at: string
+        }
+        Insert: {
+          type: string
+          slug: string
+          version: string
+          ok_sites?: number
+          failed_sites?: number
+          refreshed_at?: string
+        }
+        Update: {
+          type?: string
+          slug?: string
+          version?: string
+          ok_sites?: number
+          failed_sites?: number
+          refreshed_at?: string
+        }
+        Relationships: []
+      }
       update_run_events: {
         Row: {
           id: number
@@ -998,6 +1025,7 @@ export type Database = {
       pending_security_fixes: { Args: { p_limit?: number | null }; Returns: { site_id: string; items: Json }[] }
       record_run_outcome: { Args: { p_run: string | null }; Returns: undefined }
       record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
+      refresh_update_intel: { Args: Record<PropertyKey, never>; Returns: number }
       release_update_run: { Args: { p_run: string | null; p_worker: string | null; p_delay_seconds?: number | null }; Returns: undefined }
       remove_member: { Args: { p_user: string | null }; Returns: undefined }
       renew_update_run: { Args: { p_run: string | null; p_worker: string | null; p_lease_seconds?: number | null }; Returns: boolean }

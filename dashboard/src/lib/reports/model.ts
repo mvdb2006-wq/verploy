@@ -19,6 +19,28 @@ export interface ReportData {
     pendingUpdates: number
   }
   attention: { title: string; body: string; severity: 'warning' | 'critical' }[]
+  /** Bekende beveiligingslekken die in deze periode zijn opgelost, per onderdeel (optioneel voor oudere rapporten). */
+  security?: { fixed: FixedVuln[] }
+}
+
+export interface FixedVuln { name: string; count: number; severity: 'low' | 'medium' | 'high' | 'critical'; version: string | null; date: string }
+
+const SEV_ORDER = { low: 0, medium: 1, high: 2, critical: 3 } as const
+
+/** Opgeloste lekken per onderdeel: aantal, hoogste ernst, versie waarin het is opgelost en wanneer. */
+export function groupFixedVulns(rows: Array<{ component_type: string; component_slug: string; component_name: string; severity: string; fixed_version: string | null; resolved_at: string | null }>): FixedVuln[] {
+  const out = new Map<string, FixedVuln>()
+  for (const r of rows) {
+    if (!r.resolved_at) continue
+    const sev = (r.severity in SEV_ORDER ? r.severity : 'medium') as FixedVuln['severity']
+    const key = `${r.component_type}:${r.component_slug}`
+    const g = out.get(key)
+    if (!g) { out.set(key, { name: r.component_name, count: 1, severity: sev, version: r.fixed_version, date: r.resolved_at }); continue }
+    g.count++
+    if (SEV_ORDER[sev] > SEV_ORDER[g.severity]) g.severity = sev
+    if (r.resolved_at > g.date) g.date = r.resolved_at
+  }
+  return [...out.values()].sort((a, b) => SEV_ORDER[b.severity] - SEV_ORDER[a.severity] || a.date.localeCompare(b.date))
 }
 
 export interface OfflineAlert { opened_at: string; resolved_at: string | null; since: string | null }

@@ -4,6 +4,8 @@ import { getT } from '@/lib/i18n/server'
 import { agencyIsWritable, requireAgency } from '@/lib/session'
 import { groupUpdates } from '@/lib/updates/group'
 import type { MessageKey } from '@/lib/i18n/core'
+import { IntelBadge } from '@/components/IntelBadge'
+import { intelKey, intelMap } from '@/lib/updates/intel'
 import { UpdateEverywhere } from './update-everywhere'
 
 export async function generateMetadata() {
@@ -25,6 +27,11 @@ export default async function UpdatesPage() {
     busySites: new Set((active ?? []).map(r => r.site_id)),
     vulnerable: new Set((vulns ?? []).map(v => `${v.site_id}:${v.component_type}:${v.component_slug}`)),
   })
+  const slugs = [...new Set(groups.map(g => g.slug))]
+  const { data: intelRows } = slugs.length
+    ? await supabase.from('update_intel').select('type, slug, version, ok_sites, failed_sites').in('slug', slugs)
+    : { data: [] }
+  const intel = intelMap(intelRows ?? [])
   const writable = agencyIsWritable(session.agency)
 
   return (
@@ -48,6 +55,7 @@ export default async function UpdatesPage() {
                     {g.security && <span className="badge badge-danger ml-2">{t('bulk.security')}</span>}
                     {g.major && <span className="badge badge-warn ml-2">{t('bulk.major')}</span>}
                   </p>
+                  <p className="mt-1.5"><IntelBadge intel={intel.get(intelKey(g.type, g.slug, g.target))} /></p>
                 </div>
                 <UpdateEverywhere type={g.type} slug={g.slug} count={g.sites.length} disabled={!writable} />
               </div>

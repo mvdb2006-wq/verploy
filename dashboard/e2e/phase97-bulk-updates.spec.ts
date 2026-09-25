@@ -23,11 +23,21 @@ test('één knop per onderdeel: veilige update gestart voor precies dat onderdee
   await signupWithAgency(page, owner, `Alles ${run}`)
   const siteId = await addAndPairWordPress(page, context, 'Lab-WordPress', LAB_WP)
 
+  // Verploy leert van alle sites: hoe deze versie elders ging (hier vooraf ingevuld).
+  const c0 = db(); await c0.connect()
+  try {
+    await c0.query(`insert into public.update_intel (type, slug, version, ok_sites, failed_sites) values ('plugin', 'vp-lab-footer/vp-lab-footer.php', '1.1.0', 212, 0)
+                    on conflict (type, slug, version) do update set ok_sites = 212, failed_sites = 0`)
+  } finally { await c0.end() }
+  await page.goto(`/sites/${siteId}`)
+  await expect(page.locator('#updates').getByText('Elders zonder problemen op 212 sites')).toBeVisible()
+
   await page.getByRole('navigation', { name: 'Hoofdmenu' }).getByRole('link', { name: 'Updates' }).click()
   await expect(page.getByRole('heading', { name: 'Updates op al je sites' })).toBeVisible()
   const row = page.getByRole('listitem').filter({ hasText: 'Verploy Lab — vp-lab-footer' }).first()
   await expect(row.getByText('→ 1.1.0', { exact: true })).toBeVisible()
   await expect(row.getByText('1 site', { exact: false }).first()).toBeVisible()
+  await expect(row.getByText('Elders zonder problemen op 212 sites')).toBeVisible()
   await row.getByText('Welke sites').click()
   await expect(row.getByRole('link', { name: 'Lab-WordPress' })).toHaveAttribute('href', `/sites/${siteId}#updates`)
 
@@ -45,6 +55,15 @@ test('één knop per onderdeel: veilige update gestart voor precies dat onderdee
   await page.goto(`/sites/${siteId}/runs/${runId}`)
   await expect(page.locator('main').getByText('Live gezet', { exact: true }).first()).toBeVisible({ timeout: 6 * 60_000 })
   expect(wp('plugin', 'get', 'vp-lab-footer', '--field=version')).toBe('1.1.0')
+
+  // Herberekend uit de echte runs: deze site telt als "zonder problemen live gezet".
+  const c2 = db(); await c2.connect()
+  try {
+    await c2.query(`select public.refresh_update_intel()`)
+    const { rows } = await c2.query(`select ok_sites, failed_sites from public.update_intel where slug = 'vp-lab-footer/vp-lab-footer.php' and version = '1.1.0'`)
+    expect(rows[0].ok_sites).toBeGreaterThanOrEqual(1)
+    expect(rows[0].failed_sites).toBe(0)
+  } finally { await c2.end() }
 
   // Bijgewerkt: het onderdeel staat niet meer in de lijst.
   await expect.poll(async () => { await page.goto('/updates'); return page.getByRole('listitem').filter({ hasText: 'Verploy Lab — vp-lab-footer' }).count() }, { timeout: 60_000 }).toBe(0)

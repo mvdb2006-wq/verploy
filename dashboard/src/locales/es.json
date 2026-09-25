@@ -332,6 +332,10 @@
       "update_approval": {
         "title": "{count, plural, one {Actualización pendiente} other {# actualizaciones pendientes}} de tu aprobación: {items}",
         "body": "Un salto de versión mayor puede cambiar más que una actualización normal. Verploy solo la ejecuta con tu aprobación, y aun así la prueba primero en una copia del sitio."
+      },
+      "update_approval_risky": {
+        "title": "{count, plural, one {Actualización pendiente} other {# actualizaciones pendientes}} de tu aprobación: {items}",
+        "body": "Esta versión dio problemas con más frecuencia en otros sitios. Verploy solo la ejecuta con tu aprobación y, aun así, primero la prueba en una copia del sitio."
       }
     },
     "sslError": {
@@ -777,7 +781,9 @@
       "stoppedNote": "bloqueados o revertidos",
       "attention": "Puntos de atención",
       "attentionNote": "ver abajo",
-      "attentionNone": "todo en orden"
+      "attentionNone": "todo en orden",
+      "fixed": "Vulnerabilidades corregidas",
+      "fixedNote": "fallos de seguridad conocidos"
     },
     "updates": {
       "title": "Actualizaciones de este periodo",
@@ -829,6 +835,24 @@
       "body": "Adjuntamos el informe de mantenimiento de {site} correspondiente a {period}. El informe completo va adjunto en PDF.",
       "footer": "Este informe lo ha enviado {agency}.",
       "filename": "informe-de-mantenimiento"
+    },
+    "summary": {
+      "leadMonth": "En {month},",
+      "leadPeriod": "En este periodo,",
+      "updates": "{count, plural, one {aplicamos # actualización de forma segura} other {aplicamos # actualizaciones de forma segura}}",
+      "fixed": "{count, plural, one {corregimos # vulnerabilidad de seguridad} other {corregimos # vulnerabilidades de seguridad}}",
+      "caught": "{count, plural, one {detuvimos # actualización problemática antes de publicarla} other {detuvimos # actualizaciones problemáticas antes de publicarlas}}",
+      "uptime": "el sitio estuvo en línea el {percent} del tiempo",
+      "sentence": "{lead} {list}.",
+      "quiet": "{lead} vigilamos el sitio; no hubo nada que actualizar."
+    },
+    "security": {
+      "title": "Seguridad",
+      "intro": "Vulnerabilidades de seguridad conocidas en WordPress, plugins y temas corregidas en este periodo.",
+      "none": "En este periodo no hubo vulnerabilidades de seguridad conocidas que corregir.",
+      "count": "Vulnerabilidades",
+      "severity": "Gravedad",
+      "fixedIn": "Corregido en"
     }
   },
   "reports": {
@@ -1244,5 +1268,10 @@
     "busy": "Ya hay una actualización en curso",
     "allBusy": "Ya hay una actualización en curso en {count, plural, one {este sitio} other {estos sitios}}. Inténtalo en un momento.",
     "someBusy": "Ya había una actualización en curso en {count, plural, one {# sitio} other {# sitios}}; seguirá más tarde."
+  },
+  "intel": {
+    "proven": "Sin problemas en otros {count, plural, one {# sitio} other {# sitios}}",
+    "risky": "Dio problemas en {failed} de {total} sitios",
+    "mixed": "Sin problemas en {ok} de {total} sitios"
   }
 }

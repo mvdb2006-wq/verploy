@@ -281,3 +281,19 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - Zolang de code niet is ingevoerd (aal1 terwijl aal2 kan), stuurt de proxy elke app-pagina en elk app-formulier terug naar die stap.
 - **Eén klik in WP Admin vraagt aal2** (`start_wp_login` → `mfa_required`). Zonder 2FA blijft de knop een gewone link, met een hint om het aan te zetten. Zo geeft een gestolen Verploy-wachtwoord geen toegang tot WP Admin; dit was de openstaande bevinding uit de security-review.
 - **Telefoon kwijt:** via support@verploy.com, na controle; beheer gaat via Supabase. Herstelcodes volgen later als dat nodig blijkt.
+
+## 25-09 — Verploy leert van alle sites: hoe ging deze versie elders?
+- **Wat:** per onderdeel en versie telt Verploy op hoeveel sites de update zonder problemen live ging, en op hoeveel sites de versie zelf iets brak. Dat gebeurt over alle bureaus heen, maar alleen als getallen, nooit welke sites of bureaus. Een bureau ziet alleen cijfers van onderdelen die het zelf op een site heeft (RLS op `update_intel`).
+- **Wat telt als mislukt:** de update zelf mislukte of liet de testkopie crashen. Ook telt mee een run die werd tegengehouden of teruggedraaid terwijl dit het enige onderdeel was. Een licentie- of pakketprobleem, of een run met meerdere onderdelen, zegt niets over deze versie en telt niet mee. Per site telt één uitkomst, over de afgelopen 180 dagen.
+- **Vanaf 3 sites** geeft Verploy een oordeel: "zonder problemen" (0 mislukt), "gaf problemen" (minstens 2 en minstens een kwart mislukt), anders gemengd.
+- **Gebruik:**
+  - een label bij elke update, op de sitepagina en op "Updates";
+  - de automatische updates voeren een versie die elders vaak misging niet zelf uit, maar vragen akkoord in de inbox, met de reden erbij.
+- **Herberekening:** de worker herberekent elke 30 minuten (`refresh_update_intel`, alleen service role).
+
+## 25-09 — Maandrapport als verkoopinstrument: de waarde in één zin
+- **Bovenaan het rapport en in de e-mail:** "In augustus hielden we 34 updates veilig bij, losten we 3 beveiligingslekken op, vingen we 1 update met problemen op vóór die live ging en was de website 99,98% online."
+  - Alleen onderdelen met een waarde komen in de zin.
+  - Is de periode precies een kalendermaand, dan staat de naam van de maand erin.
+- **Nieuw:** een tegel "Lekken opgelost" in plaats van "Aandachtspunten"; die aandachtspunten staan nog steeds als eigen blok in het rapport. Daarnaast een blok "Beveiliging" met de opgeloste lekken per onderdeel: aantal, hoogste ernst, versie en datum.
+- Oudere rapportgegevens zonder `security` blijven werken.

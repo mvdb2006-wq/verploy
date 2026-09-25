@@ -38,6 +38,7 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
   const key = alert.type === 'php_eol' ? (alert.severity === 'critical' ? 'php_eol_past' : 'php_eol_soon')
     : alert.type === 'vulnerability' && p.autofix === true ? 'vulnerability_auto'
     : alert.type === 'update_blocked' && p.partial === true ? 'update_partial'
+    : alert.type === 'update_approval' && Array.isArray(p.items) && p.items.some(i => (i as { why?: unknown } | null)?.why === 'risky') ? 'update_approval_risky'
     : alert.type
   const diagnosis = alert.type.startsWith('update_') && typeof p.diagnosis === 'string' && p.diagnosis ? ` ${t('alerts.diagnosis', { text: p.diagnosis })}` : ''
   return {

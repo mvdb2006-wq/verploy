@@ -332,6 +332,10 @@
       "update_approval": {
         "title": "{count, plural, one {Mise à jour en attente} other {# mises à jour en attente}} de votre accord : {items}",
         "body": "Un saut de version majeure peut changer plus qu’une mise à jour courante. Verploy ne l’exécute qu’après votre accord, et la teste alors d’abord sur une copie du site."
+      },
+      "update_approval_risky": {
+        "title": "{count, plural, one {Mise à jour en attente} other {# mises à jour en attente}} de votre accord : {items}",
+        "body": "Cette version a plus souvent posé problème sur d’autres sites. Verploy ne l’installe qu’après ton accord, et la teste d’abord sur une copie du site."
       }
     },
     "sslError": {
@@ -777,7 +781,9 @@
       "stoppedNote": "bloqués ou annulés",
       "attention": "Points d’attention",
       "attentionNote": "voir ci-dessous",
-      "attentionNone": "tout est en ordre"
+      "attentionNone": "tout est en ordre",
+      "fixed": "Failles corrigées",
+      "fixedNote": "failles de sécurité connues"
     },
     "updates": {
       "title": "Mises à jour de la période",
@@ -829,6 +835,24 @@
       "body": "Veuillez trouver le rapport de maintenance de {site} pour la période {period}. Le rapport complet est joint au format PDF.",
       "footer": "Ce rapport a été envoyé par {agency}.",
       "filename": "rapport-de-maintenance"
+    },
+    "summary": {
+      "leadMonth": "En {month},",
+      "leadPeriod": "Sur cette période,",
+      "updates": "{count, plural, one {nous avons appliqué # mise à jour en toute sécurité} other {nous avons appliqué # mises à jour en toute sécurité}}",
+      "fixed": "{count, plural, one {nous avons corrigé # faille de sécurité} other {nous avons corrigé # failles de sécurité}}",
+      "caught": "{count, plural, one {nous avons intercepté # mise à jour problématique avant sa mise en ligne} other {nous avons intercepté # mises à jour problématiques avant leur mise en ligne}}",
+      "uptime": "le site a été en ligne {percent} du temps",
+      "sentence": "{lead} {list}.",
+      "quiet": "{lead} nous avons surveillé le site ; aucune mise à jour n’était nécessaire."
+    },
+    "security": {
+      "title": "Sécurité",
+      "intro": "Failles de sécurité connues de WordPress, des extensions et des thèmes corrigées sur cette période.",
+      "none": "Aucune faille de sécurité connue n’était à corriger sur cette période.",
+      "count": "Failles",
+      "severity": "Gravité",
+      "fixedIn": "Corrigé dans"
     }
   },
   "reports": {
@@ -1244,5 +1268,10 @@
     "busy": "Une mise à jour est déjà en cours",
     "allBusy": "Une mise à jour est déjà en cours sur {count, plural, one {ce site} other {ces sites}}. Réessayez dans un instant.",
     "someBusy": "Une mise à jour était déjà en cours sur {count, plural, one {# site} other {# sites}} ; elle suivra plus tard."
+  },
+  "intel": {
+    "proven": "Aucun problème ailleurs sur {count, plural, one {# site} other {# sites}}",
+    "risky": "A posé problème sur {failed} sites sur {total} ailleurs",
+    "mixed": "Aucun problème sur {ok} sites sur {total} ailleurs"
   }
 }

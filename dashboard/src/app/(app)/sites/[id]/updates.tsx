@@ -6,6 +6,8 @@ import { Alert } from '@/components/Alert'
 import { SubmitButton } from '@/components/SubmitButton'
 import { useI18n } from '@/lib/i18n/client'
 import type { MessageKey } from '@/lib/i18n/core'
+import { IntelBadge } from '@/components/IntelBadge'
+import { intelKey, type Intel } from '@/lib/updates/intel'
 import { startRun } from './actions'
 
 export interface Component {
@@ -19,12 +21,14 @@ export interface Component {
 }
 
 /** Componentenlijst; beschikbare updates zijn aan te vinken en veilig uit te voeren. */
-export function UpdatesPanel({ siteId, components, canRun, activeRunId, blockedReason }: {
+export function UpdatesPanel({ siteId, components, canRun, activeRunId, blockedReason, intel = {} }: {
   siteId: string
   components: Component[]
   canRun: boolean
   activeRunId: string | null
   blockedReason: string | null
+  /** Hoe de aangeboden versie elders ging, per intelKey. */
+  intel?: Record<string, Intel>
 }) {
   const { t } = useI18n()
   const [state, action] = useActionState(startRun, {})
@@ -92,7 +96,12 @@ export function UpdatesPanel({ siteId, components, canRun, activeRunId, blockedR
                     </span>
                   </label>
                   {updatable
-                    ? <span className="badge badge-warn">{t('siteDetail.updateTo', { version: c.latest_version! })}</span>
+                    ? (
+                      <span className="flex flex-wrap items-center gap-2">
+                        <IntelBadge intel={intel[intelKey(c.type, c.slug, c.latest_version!)]} />
+                        <span className="badge badge-warn">{t('siteDetail.updateTo', { version: c.latest_version! })}</span>
+                      </span>
+                    )
                     : <span className="text-xs text-muted">{t('siteDetail.upToDate')}</span>}
                 </li>
               )

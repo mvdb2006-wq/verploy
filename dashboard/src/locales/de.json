@@ -332,6 +332,10 @@
       "update_approval": {
         "title": "{count, plural, one {Update wartet} other {# Updates warten}} auf deine Zustimmung: {items}",
         "body": "Ein großer Versionssprung kann mehr verändern als ein normales Update. Verploy führt es erst nach deiner Zustimmung aus und testet auch dann zuerst auf einer Kopie der Website."
+      },
+      "update_approval_risky": {
+        "title": "{count, plural, one {Update wartet} other {# Updates warten}} auf deine Zustimmung: {items}",
+        "body": "Diese Version machte auf anderen Websites häufiger Probleme. Verploy führt sie erst nach deiner Freigabe aus und testet auch dann zuerst auf einer Kopie der Website."
       }
     },
     "sslError": {
@@ -777,7 +781,9 @@
       "stoppedNote": "gestoppt oder zurückgesetzt",
       "attention": "Hinweise",
       "attentionNote": "siehe unten",
-      "attentionNone": "alles in Ordnung"
+      "attentionNone": "alles in Ordnung",
+      "fixed": "Lücken geschlossen",
+      "fixedNote": "bekannte Sicherheitslücken"
     },
     "updates": {
       "title": "Updates in diesem Zeitraum",
@@ -829,6 +835,24 @@
       "body": "Anbei erhalten Sie den Wartungsbericht für {site} für den Zeitraum {period}. Den vollständigen Bericht finden Sie als PDF im Anhang.",
       "footer": "Dieser Bericht wurde von {agency} versendet.",
       "filename": "wartungsbericht"
+    },
+    "summary": {
+      "leadMonth": "Im {month}",
+      "leadPeriod": "In diesem Zeitraum",
+      "updates": "{count, plural, one {haben wir # Update sicher eingespielt} other {haben wir # Updates sicher eingespielt}}",
+      "fixed": "{count, plural, one {haben wir # Sicherheitslücke geschlossen} other {haben wir # Sicherheitslücken geschlossen}}",
+      "caught": "{count, plural, one {haben wir # fehlerhaftes Update vor der Veröffentlichung abgefangen} other {haben wir # fehlerhafte Updates vor der Veröffentlichung abgefangen}}",
+      "uptime": "war die Website zu {percent} online",
+      "sentence": "{lead} {list}.",
+      "quiet": "{lead} haben wir die Website überwacht; es musste nichts aktualisiert werden."
+    },
+    "security": {
+      "title": "Sicherheit",
+      "intro": "Bekannte Sicherheitslücken in WordPress, Plugins und Themes, die in diesem Zeitraum geschlossen wurden.",
+      "none": "In diesem Zeitraum gab es keine bekannten Sicherheitslücken zu schließen.",
+      "count": "Lücken",
+      "severity": "Schweregrad",
+      "fixedIn": "Behoben in"
     }
   },
   "reports": {
@@ -1244,5 +1268,10 @@
     "busy": "Es läuft bereits ein Update",
     "allBusy": "Auf {count, plural, one {dieser Website} other {diesen Websites}} läuft bereits ein Update. Versuche es gleich noch einmal.",
     "someBusy": "Auf {count, plural, one {# Website} other {# Websites}} lief bereits ein Update; es folgt später."
+  },
+  "intel": {
+    "proven": "Anderswo ohne Probleme auf {count, plural, one {# Website} other {# Websites}}",
+    "risky": "Machte anderswo Probleme auf {failed} von {total} Websites",
+    "mixed": "Anderswo ohne Probleme auf {ok} von {total} Websites"
   }
 }

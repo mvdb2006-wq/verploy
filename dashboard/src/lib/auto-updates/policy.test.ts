@@ -73,6 +73,15 @@ describe('eerdere pogingen', () => {
   })
 })
 
+describe('wat Verploy van alle sites weet', () => {
+  it('versie die elders vaak misging: niet zelf, eerst akkoord; bewezen versie: gewoon automatisch', () => {
+    const intel = new Map([['plugin:x/x.php:1.3.0', { ok: 5, failed: 3 }]])
+    expect(decide(comp(), [], intel)).toEqual({ kind: 'approval', why: 'risky' })
+    expect(decide(comp(), [], new Map([['plugin:x/x.php:1.3.0', { ok: 212, failed: 0 }]]))).toEqual({ kind: 'auto' })
+    expect(plan([comp()], [], new Set(), intel).approvals[0]!.why).toBe('risky')
+  })
+})
+
 describe('plan', () => {
   it('gewone updates samen, lekken voorop; grote sprongen als vraag', () => {
     const p = plan([

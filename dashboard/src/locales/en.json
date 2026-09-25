@@ -332,6 +332,10 @@
       "update_approval": {
         "title": "{count, plural, one {Update awaits} other {# updates await}} your approval: {items}",
         "body": "A major version jump can change more than a regular update. Verploy only runs it after your approval, and even then tests it on a copy of the site first."
+      },
+      "update_approval_risky": {
+        "title": "{count, plural, one {Update awaits} other {# updates await}} your approval: {items}",
+        "body": "This version caused problems on other sites more often. Verploy only runs it after your approval, and even then tests it on a copy of the site first."
       }
     },
     "sslError": {
@@ -777,7 +781,9 @@
       "stoppedNote": "blocked or rolled back",
       "attention": "Points of attention",
       "attentionNote": "see below",
-      "attentionNone": "all good"
+      "attentionNone": "all good",
+      "fixed": "Vulnerabilities fixed",
+      "fixedNote": "known security issues"
     },
     "updates": {
       "title": "Updates in this period",
@@ -829,6 +835,24 @@
       "body": "Please find the maintenance report for {site} covering {period}. The full report is attached as a PDF.",
       "footer": "This report was sent by {agency}.",
       "filename": "maintenance-report"
+    },
+    "summary": {
+      "leadMonth": "In {month},",
+      "leadPeriod": "In this period,",
+      "updates": "{count, plural, one {we safely applied # update} other {we safely applied # updates}}",
+      "fixed": "{count, plural, one {we fixed # security vulnerability} other {we fixed # security vulnerabilities}}",
+      "caught": "{count, plural, one {we caught # problematic update before it went live} other {we caught # problematic updates before they went live}}",
+      "uptime": "the website was {percent} online",
+      "sentence": "{lead} {list}.",
+      "quiet": "{lead} we kept an eye on the website; nothing needed updating."
+    },
+    "security": {
+      "title": "Security",
+      "intro": "Known security vulnerabilities in WordPress, plugins and themes that were fixed in this period.",
+      "none": "There were no known security vulnerabilities to fix in this period.",
+      "count": "Vulnerabilities",
+      "severity": "Severity",
+      "fixedIn": "Fixed in"
     }
   },
   "reports": {
@@ -1244,5 +1268,10 @@
     "busy": "An update is already running",
     "allBusy": "An update is already running on {count, plural, one {this site} other {these sites}}. Try again shortly.",
     "someBusy": "An update was already running on {count, plural, one {# site} other {# sites}}; it will follow later."
+  },
+  "intel": {
+    "proven": "No problems elsewhere on {count, plural, one {# site} other {# sites}}",
+    "risky": "Caused problems on {failed} of {total} sites elsewhere",
+    "mixed": "No problems on {ok} of {total} sites elsewhere"
   }
 }

@@ -27,6 +27,35 @@ export function duration(minutes: number, t: Translate): string {
   return h ? t('report.durationHm', { h, m }) : t('report.durationM', { m })
 }
 
+/** Is de periode precies één kalendermaand? Dan heet hij bij naam ("In augustus …"). */
+function monthName(d: ReportData, locale: Locale): string | null {
+  const [y, m, day] = d.period.start.split('-').map(Number) as [number, number, number]
+  if (day !== 1) return null
+  const last = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
+  if (d.period.end !== last) return null
+  return new Intl.DateTimeFormat(DATE_LOCALE_TAG[locale], { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15)))
+}
+
+/**
+ * De samenvatting in één zin, bovenaan het rapport en in de e-mail:
+ * "In augustus hielden we 34 updates veilig bij, losten we 3 beveiligingslekken op en was de website 99,98% online."
+ */
+export function reportSummary(d: ReportData, t: Translate, locale: Locale): string {
+  const updates = d.runs.filter(r => r.verdict === 'deployed').reduce((n, r) => n + r.items.length, 0)
+  const fixed = (d.security?.fixed ?? []).reduce((n, v) => n + v.count, 0)
+  const caught = d.runs.filter(r => r.verdict !== 'deployed').length
+  const clauses: string[] = []
+  if (updates) clauses.push(t('report.summary.updates', { count: updates }))
+  if (fixed) clauses.push(t('report.summary.fixed', { count: fixed }))
+  if (caught) clauses.push(t('report.summary.caught', { count: caught }))
+  if (d.uptime.percent !== null) clauses.push(t('report.summary.uptime', { percent: `${fmtNumber(d.uptime.percent, locale, d.uptime.percent === 100 ? 0 : 2)}%` }))
+  const month = monthName(d, locale)
+  const lead = month ? t('report.summary.leadMonth', { month }) : t('report.summary.leadPeriod')
+  if (!clauses.length) return t('report.summary.quiet', { lead })
+  const list = new Intl.ListFormat(DATE_LOCALE_TAG[locale], { style: 'long', type: 'conjunction' }).format(clauses)
+  return t('report.summary.sentence', { lead, list })
+}
+
 /**
  * Het rapport als zelfstandige HTML (voor Puppeteer → PDF). White-label: alleen de naam, het logo
  * en de kleur van het bureau; geen Verploy-branding.
@@ -36,11 +65,13 @@ export function renderReportHtml(d: ReportData, t: Translate, locale: Locale, op
   const period = t('report.period', { start: fmtDate(d.period.start, locale), end: fmtDate(d.period.end, locale) })
   const deployedItems = d.runs.filter(r => r.verdict === 'deployed').reduce((n, r) => n + r.items.length, 0)
   const stopped = d.runs.filter(r => r.verdict !== 'deployed').length
+  const fixedVulns = d.security?.fixed ?? []
+  const fixedCount = fixedVulns.reduce((n, v) => n + v.count, 0)
   const kpis = [
     { label: t('report.kpi.uptime'), value: d.uptime.percent === null ? '—' : `${fmtNumber(d.uptime.percent, locale, d.uptime.percent === 100 ? 0 : 2)}%`, note: t('report.kpi.uptimeNote') },
     { label: t('report.kpi.updates'), value: fmtNumber(deployedItems, locale), note: t('report.kpi.updatesNote') },
+    { label: t('report.kpi.fixed'), value: fmtNumber(fixedCount, locale), note: t('report.kpi.fixedNote') },
     { label: t('report.kpi.stopped'), value: fmtNumber(stopped, locale), note: t('report.kpi.stoppedNote') },
-    { label: t('report.kpi.attention'), value: fmtNumber(d.attention.length, locale), note: d.attention.length ? t('report.kpi.attentionNote') : t('report.kpi.attentionNone') },
   ]
   const h = d.health
   const healthRows: [string, string, 'ok' | 'warn' | 'bad' | 'none'][] = [
@@ -77,6 +108,7 @@ h1, h2, h3 { margin: 0; line-height: 1.2; }
 .title { margin: 22px 0 4px; font-size: 20pt; font-weight: 800; letter-spacing: -0.01em; }
 .subtitle { color: var(--muted); margin-bottom: 18px; }
 .subtitle a { color: inherit; text-decoration: none; }
+.summary { font-size: 12pt; line-height: 1.45; font-weight: 600; margin: 0 0 16px; max-width: 150mm; text-wrap: balance; }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px; }
 .kpi { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; break-inside: avoid; }
 .kpi .v { font-size: 17pt; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -119,6 +151,8 @@ tr { break-inside: avoid; }
 <h1 class="title">${esc(d.site.name)}</h1>
 <p class="subtitle"><a href="${esc(d.site.url)}">${esc(d.site.url.replace(/^https?:\/\//, ''))}</a>${d.site.client ? ` · ${esc(t('report.client'))}: ${esc(d.site.client)}` : ''}</p>
 
+<p class="summary">${esc(reportSummary(d, t, locale))}</p>
+
 <div class="kpis">
   ${kpis.map(k => `<div class="kpi"><div class="l">${esc(k.label)}</div><div class="v">${esc(k.value)}</div><div class="n">${esc(k.note)}</div></div>`).join('')}
 </div>
@@ -136,6 +170,24 @@ tr { break-inside: avoid; }
         <td class="mono">${esc(i.from ?? '—')} → ${esc(i.to ?? '—')}</td>
         <td>${idx === 0 ? `<span class="pill ${r.verdict}">${esc(verdictLabel(r.verdict))}</span>` : ''}</td>
       </tr>`).join('')).join('')}
+    </tbody>
+  </table>`}
+</section>
+
+<section class="keep">
+  <h2>${esc(t('report.security.title'))}</h2>
+  <p class="intro">${esc(t('report.security.intro'))}</p>
+  ${fixedVulns.length === 0 ? `<p class="empty">${esc(t('report.security.none'))}</p>` : `
+  <table>
+    <thead><tr><th>${esc(t('report.updates.component'))}</th><th>${esc(t('report.security.count'))}</th><th>${esc(t('report.security.severity'))}</th><th>${esc(t('report.security.fixedIn'))}</th><th>${esc(t('report.updates.date'))}</th></tr></thead>
+    <tbody>
+      ${fixedVulns.map(v => `<tr>
+        <td>${esc(v.name)}</td>
+        <td class="num">${esc(fmtNumber(v.count, locale))}</td>
+        <td><span class="pill ${v.severity === 'critical' || v.severity === 'high' ? 'bad' : 'warn'}">${esc(t(`security.severity.${v.severity}` as MessageKey))}</span></td>
+        <td class="mono">${esc(v.version ?? '—')}</td>
+        <td class="num">${esc(fmtDate(v.date, locale))}</td>
+      </tr>`).join('')}
     </tbody>
   </table>`}
 </section>

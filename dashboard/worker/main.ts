@@ -26,6 +26,8 @@ const LEASE_SECONDS = 120
 const MAINTENANCE_EVERY_MS = Number(process.env.WORKER_MAINTENANCE_MS ?? 5 * 60_000)
 const VULN_EVERY_MS = Number(process.env.WORKER_VULN_MS ?? 60_000)
 const SCHEDULE_EVERY_MS = Number(process.env.WORKER_SCHEDULE_MS ?? 5 * 60_000)
+/** Hoe vaak de cijfers "hoe ging deze update elders" opnieuw worden berekend. */
+const INTEL_EVERY_MS = Number(process.env.WORKER_INTEL_MS ?? 30 * 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
@@ -164,6 +166,7 @@ async function main() {
   let lastMaintenance = 0
   let lastVuln = 0
   let lastSchedule = 0
+  let lastIntel = 0
   let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
@@ -180,6 +183,12 @@ async function main() {
       await evaluateSites(admin)
         .then(r => { if (r.evaluated || r.autofixStarted || r.stale) log('vuln_evaluated', { ...r }) })
         .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
+    }
+    if (Date.now() - lastIntel > INTEL_EVERY_MS) {
+      lastIntel = Date.now()
+      const { data, error } = await admin.rpc('refresh_update_intel')
+      if (error) log('update_intel_failed', { error: error.message })
+      else log('update_intel', { versions: data })
     }
     if (Date.now() - lastSchedule > SCHEDULE_EVERY_MS) {
       lastSchedule = Date.now()

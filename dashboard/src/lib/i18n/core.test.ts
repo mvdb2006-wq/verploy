@@ -29,7 +29,7 @@ describe('i18n: alle vijf talen volledig', () => {
     const nl = flatten(MESSAGES.nl)
     // Teksten die in die taal écht identiek zijn aan het Nederlands.
     // Alleen variabelen en leestekens: in elke taal hetzelfde.
-    const placeholdersOnly = ['runs.reason.check.php_error', 'runs.events.item_updated', 'runs.events.item_failed', 'report.period', 'digest.line', 'digest.lineReason']
+    const placeholdersOnly = ['runs.reason.check.php_error', 'runs.events.item_updated', 'runs.events.item_failed', 'report.period', 'digest.line', 'digest.lineReason', 'report.summary.sentence']
     const identicalOk: Partial<Record<string, string[]>> = {
       en: ['dashboard.summary', 'bulk.sites', 'ops.security.affected', 'email.alertSubject', 'alerts.types.site_offline.title', 'report.health.pendingCount', ...placeholdersOnly],
       de: ['email.alertSubject', 'alerts.diagnosis', 'wpLogin.entry', ...placeholdersOnly], fr: ['email.alertSubject', 'ops.security.affected', 'bulk.sites', ...placeholdersOnly], es: ['email.alertSubject', ...placeholdersOnly],
