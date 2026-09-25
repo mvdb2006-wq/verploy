@@ -68,6 +68,7 @@ export default defineConfig({
         WORKER_MAINTENANCE_MS: '3600000',
         WORKER_VULN_MS: '2000',
         WORKER_SCHEDULE_MS: '3000',
+        WORKER_RECHECK_MS: '1000',
         WORDFENCE_API_KEY: 'wf_e2e_local',
         WORDFENCE_FEED_URL: `http://127.0.0.1:${MOCK_WORDFENCE_PORT}/api/intelligence/v3/vulnerabilities/production`,
         RESEND_API_KEY: 're_e2e_local',

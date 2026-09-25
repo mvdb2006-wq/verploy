@@ -298,3 +298,17 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
 - **Nieuw:** een tegel "Lekken opgelost" in plaats van "Aandachtspunten"; die aandachtspunten staan nog steeds als eigen blok in het rapport. Daarnaast een blok "Beveiliging" met de opgeloste lekken per onderdeel: aantal, hoogste ernst, versie en datum.
 - Oudere rapportgegevens zonder `security` blijven werken.
 - **Les bij de uitrol (25-09):** in productie krijgt de service role geen standaardrechten op nieuwe tabellen; lokaal wel. Elke nieuwe tabel die de worker leest of schrijft, krijgt daarom een expliciete `grant … to service_role` (hersteld met `20261007000100`).
+
+## 25-09 — Waarom updates werden teruggedraaid, en de oplossing
+- **Analyse van productie (18 rondes, 6 live):**
+  - Feel Good is drie keer tegengehouden of teruggedraaid op de beeldvergelijking. Oorzaak: de hero is een Slider Revolution-slider die bij elke lading een andere foto toont. Verder was er niets anders op de pagina.
+  - Visgilde "Nieuws & Acties": een lazy-loaded foto stond wel in de ene meting en niet in de andere.
+  - Eén keer `ERR_CONNECTION_CLOSED` direct na de update. Dat leidde meteen tot terugdraaien.
+  - Verder: betaalde plugins zonder downloadpakket (WPBakery, Master Slider, eerder Yoast Premium) en twee fouten uit de opstartfase.
+- **Oplossing:**
+  1. **Bekende sliders, carrousels, video's en ingesloten media worden in elke screenshot afgedekt** (`AUTO_MASKS`: Slider Revolution, Swiper, Slick, Owl, Master Slider, Elementor, WPBakery, Divi, YouTube/Vimeo/Maps). Verploy meet wel hun hoogte: verdwijnt of klapt zo'n blok in (<50%), dan zakt de check `moving` ("slider of carrousel is verdwenen").
+  2. **Afbeeldingen laden volledig vóór de screenshot:** lazy wordt eager, rustig scrollen en wachten tot elke afbeelding geladen en gedecodeerd is (max. 6 s).
+  3. **Een netwerkhapering** (`net::ERR_CONNECTION_*`, time-out) wordt tot twee keer opnieuw geprobeerd.
+  4. **Tweede meting vóór het oordeel:** een pagina die na de update afkeurt, wordt na 10 s opnieuw gemeten. Pas als ook die meting afkeurt, houdt Verploy de update tegen of draait hij terug. Dit vangt lege caches direct na een update op.
+- De bestaande herkenning van "vanzelf bewegend" (drie keer laden) blijft als vangnet voor onbekende sliders.
+- E2E `phase98` (Swiper wisselt van dia → live; update laat de slider verdwijnen → tegengehouden), `phase93` blijft groen.

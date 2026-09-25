@@ -479,6 +479,7 @@
         "landmarks": "{page} ({viewport}): onderdelen van de pagina zijn verdwenen ({missing}).",
         "content": "{page} ({viewport}) toont veel minder inhoud dan ervoor.",
         "visual": "{page} ({viewport}) ziet er {percent}% anders uit (toegestaan: {limit}%).",
+        "moving": "{page} ({viewport}): een slider of carrousel is verdwenen of ingeklapt (hoogte {before} → {after} px).",
         "login": "Het inlogformulier van WordPress werkt niet meer.",
         "form": "Formulier op {page} werkt niet meer na de update: {fnReason}.",
         "shop": "De webwinkel werkt niet meer na de update: {fnReason}."

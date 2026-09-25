@@ -479,6 +479,7 @@
         "landmarks": "{page} ({viewport}): han desaparecido partes de la página ({missing}).",
         "content": "{page} ({viewport}) muestra mucho menos contenido que antes.",
         "visual": "{page} ({viewport}) se ve un {percent} % distinta (permitido: {limit} %).",
+        "moving": "{page} ({viewport}): un slider o carrusel ha desaparecido o se ha contraído (altura {before} → {after} px).",
         "login": "El formulario de acceso de WordPress ya no funciona.",
         "form": "El formulario de {page} ya no funciona tras la actualización: {fnReason}.",
         "shop": "La tienda ya no funciona tras la actualización: {fnReason}."

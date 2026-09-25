@@ -104,7 +104,7 @@ async function download(ctx: RunContext, path: string): Promise<Buffer | null> {
 type Facts = Omit<PageCapture, 'screenshot' | 'url' | 'jsErrors' | 'status' | 'loadMs'>
 const factsOf = (c: PageCapture): Facts => ({
   error: c.error, phpError: c.phpError, failedResources: c.failedResources, landmarks: c.landmarks,
-  textLength: c.textLength, title: c.title, loginForm: c.loginForm,
+  textLength: c.textLength, title: c.title, loginForm: c.loginForm, ...(c.moving !== undefined ? { moving: c.moving } : {}),
 })
 
 interface StoredCapture { capture: PageCapture; screenshotPath: string | null }
@@ -122,6 +122,7 @@ async function loadPhase(ctx: RunContext, phase: Phase): Promise<Map<string, Sto
         url: r.page_url, status: r.http_status, loadMs: r.load_ms ?? 0, jsErrors: (r.js_errors ?? []) as string[],
         error: f.error ?? null, phpError: f.phpError ?? null, failedResources: f.failedResources ?? [],
         landmarks: (f.landmarks ?? []) as Landmark[], textLength: f.textLength ?? 0, title: f.title ?? '', loginForm: f.loginForm ?? null,
+        ...(typeof f.moving === 'number' ? { moving: f.moving } : {}),
         screenshot: null,
       },
     })
@@ -154,38 +155,45 @@ export async function testPhase(
     try {
       for (const t of targets.filter(x => x.viewports.includes(viewport))) {
         if (ctx.signal.aborted) throw new TransientSiteError('aborted', null)
-        const cap = await capturePage(context, t.url, { masks: ctx.site.test_masks, cookies, screenshot: t.shot })
+        const prev = before?.get(`${t.key}|${viewport}`)
+        const prevPng = prev?.screenshotPath && healthy(prev.capture) ? await download(ctx, prev.screenshotPath) : null
+        const opts = { masks: ctx.site.test_masks, cookies, screenshot: t.shot }
+        /** Eén meting van de pagina, en (als er een vorige fase is) de vergelijking daarmee. */
+        const measure = async () => {
+          const cap = await captureSteady(context, t.url, opts, ctx.signal)
+          let d: VisualDiff | null = null
+          const threshold = Number(ctx.site.diff_threshold)
+          if (prev && cap.screenshot && prevPng && healthy(cap)) {
+            d = visualDiff(prevPng, cap.screenshot)
+            if (d.ratio > threshold) d = await ignoreDynamic(context, t.url, prevPng, cap.screenshot, d, threshold, opts)
+          }
+          const outcomes = prev ? comparePage(prev.capture, cap, d ? { ratio: d.ratio, threshold, ignored: d.ignored } : null) : []
+          return { cap, d, outcomes, passed: prev ? outcomes.every(o => o.ok) : healthy(cap) }
+        }
+        let m = await measure()
+        // Afgekeurd na de update? Eerst nog één keer meten, na een korte pauze. Na een update zijn caches
+        // leeg en laadt de eerste keer soms half; een netwerkhapering of een trage afbeelding is geen fout.
+        if (prev && !m.passed) {
+          await sleep(RECHECK_DELAY_MS, ctx.signal)
+          const again = await measure()
+          if (again.passed || rank(again.outcomes) > rank(m.outcomes)) m = again
+        }
+        const cap = m.cap
         captures.set(`${t.key}|${viewport}`, cap)
         let screenshotPath: string | null = null
         let diffPath: string | null = null
-        let diffRatio: number | null = null
         if (cap.screenshot) {
           screenshotPath = artifactPath(ctx, phase, t.key, viewport)
           await upload(ctx, screenshotPath, cap.screenshot)
         }
-        let outcomes: CheckOutcome[] = []
-        let passed: boolean
-        const prev = before?.get(`${t.key}|${viewport}`)
-        if (before && prev) {
-          let visual: { ratio: number; threshold: number; ignored?: number } | null = null
-          if (cap.screenshot && prev.screenshotPath && healthy(prev.capture) && healthy(cap)) {
-            const prevPng = await download(ctx, prev.screenshotPath)
-            if (prevPng) {
-              const threshold = Number(ctx.site.diff_threshold)
-              let d = visualDiff(prevPng, cap.screenshot)
-              if (d.ratio > threshold) d = await ignoreDynamic(context, t.url, prevPng, cap.screenshot, d, threshold, { masks: ctx.site.test_masks, cookies })
-              diffRatio = d.ratio
-              visual = { ratio: d.ratio, threshold, ignored: d.ignored }
-              diffPath = artifactPath(ctx, phase, t.key, viewport, '-diff')
-              await upload(ctx, diffPath, d.diffPng)
-            }
-          }
-          outcomes = comparePage(prev.capture, cap, visual)
-          passed = outcomes.every(o => o.ok)
-          for (const o of outcomes.filter(x => !x.ok)) failures.push({ page: t.label || t.key, viewport, check: o })
-        } else {
-          passed = healthy(cap)
+        if (m.d) {
+          diffPath = artifactPath(ctx, phase, t.key, viewport, '-diff')
+          await upload(ctx, diffPath, m.d.diffPng)
         }
+        const diffRatio = m.d?.ratio ?? null
+        const outcomes: CheckOutcome[] = m.outcomes
+        const passed = m.passed
+        for (const o of outcomes.filter(x => !x.ok)) failures.push({ page: t.label || t.key, viewport, check: o })
         const { error } = await ctx.admin.from('test_results').upsert({
           agency_id: ctx.run.agency_id, run_id: ctx.run.id, phase, page_key: t.key, page_label: t.label, page_url: t.url,
           viewport, http_status: cap.status, load_ms: cap.loadMs, passed, checks: outcomes as unknown as Json,
@@ -199,6 +207,30 @@ export async function testPhase(
     }
   }
   return { failures, captures }
+}
+
+/** Pauze voor de tweede meting van een afgekeurde pagina. */
+const RECHECK_DELAY_MS = Number(process.env.WORKER_RECHECK_MS ?? 10_000)
+
+const sleep = (ms: number, signal: AbortSignal) => new Promise<void>((resolve, reject) => {
+  if (signal.aborted) return reject(new TransientSiteError('aborted', null))
+  const timer = setTimeout(resolve, ms)
+  signal.addEventListener('abort', () => { clearTimeout(timer); reject(new TransientSiteError('aborted', null)) }, { once: true })
+})
+
+/** Hoe "goed" een meting is: minder gezakte checks is beter (bij een tweede meting houden we de beste). */
+const rank = (outcomes: CheckOutcome[]) => -outcomes.filter(o => !o.ok).length
+
+/** Netwerkhaperingen (verbinding verbroken, time-out) zijn geen oordeel over de site: tot twee keer opnieuw. */
+const TRANSIENT = /net::ERR_(CONNECTION_(CLOSED|RESET|REFUSED|ABORTED|TIMED_OUT)|EMPTY_RESPONSE|NETWORK_CHANGED|TIMED_OUT|HTTP2_PROTOCOL_ERROR)|Timeout \d+ms exceeded/i
+
+async function captureSteady(context: BrowserContext, url: string, opts: Parameters<typeof capturePage>[2], signal: AbortSignal): Promise<PageCapture> {
+  let cap = await capturePage(context, url, opts)
+  for (let i = 0; i < 2 && cap.error && TRANSIENT.test(cap.error); i++) {
+    await sleep(5_000 * (i + 1), signal)
+    cap = await capturePage(context, url, opts)
+  }
+  return cap
 }
 
 /** Hoogstens zoveel van de pagina mag "vanzelf bewegend" zijn; daarboven vertrouwen we de meting niet. */

@@ -479,6 +479,7 @@
         "landmarks": "{page} ({viewport}): parts of the page disappeared ({missing}).",
         "content": "{page} ({viewport}) shows much less content than before.",
         "visual": "{page} ({viewport}) looks {percent}% different (allowed: {limit}%).",
+        "moving": "{page} ({viewport}): a slider or carousel disappeared or collapsed (height {before} → {after} px).",
         "login": "The WordPress login form no longer works.",
         "form": "The form on {page} no longer works after the update: {fnReason}.",
         "shop": "The shop no longer works after the update: {fnReason}."

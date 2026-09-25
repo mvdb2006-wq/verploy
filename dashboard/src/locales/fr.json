@@ -479,6 +479,7 @@
         "landmarks": "{page} ({viewport}) : des parties de la page ont disparu ({missing}).",
         "content": "{page} ({viewport}) affiche beaucoup moins de contenu qu’avant.",
         "visual": "{page} ({viewport}) est différente à {percent} % (autorisé : {limit} %).",
+        "moving": "{page} ({viewport}) : un diaporama ou carrousel a disparu ou s’est replié (hauteur {before} → {after} px).",
         "login": "Le formulaire de connexion WordPress ne fonctionne plus.",
         "form": "Le formulaire de {page} ne fonctionne plus après la mise à jour : {fnReason}.",
         "shop": "La boutique ne fonctionne plus après la mise à jour : {fnReason}."

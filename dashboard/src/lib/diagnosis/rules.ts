@@ -48,7 +48,7 @@ export function classifyFatal(message: string): Classified {
 
 const CHECK_CATEGORY: Record<string, string> = {
   reachable: 'http', http: 'http', php_error: 'fatal_unknown', js_errors: 'js', resources: 'resources',
-  landmarks: 'layout', content: 'layout', visual: 'visual', login: 'login',
+  landmarks: 'layout', content: 'layout', moving: 'layout', visual: 'visual', login: 'login',
 }
 
 function pickItem(e: Evidence, dir: string | null) {

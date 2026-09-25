@@ -2,7 +2,7 @@ import { PNG } from 'pngjs'
 import pixelmatch from 'pixelmatch'
 import type { Landmark, PageCapture } from './checks'
 
-export type CheckName = 'reachable' | 'http' | 'php_error' | 'js_errors' | 'resources' | 'landmarks' | 'content' | 'visual' | 'login' | 'form' | 'shop'
+export type CheckName = 'reachable' | 'http' | 'php_error' | 'js_errors' | 'resources' | 'landmarks' | 'content' | 'visual' | 'moving' | 'login' | 'form' | 'shop'
 export interface CheckOutcome { check: CheckName; ok: boolean; detail?: Record<string, string | number | string[]> }
 
 export interface VisualDiff { ratio: number; diffPng: Buffer; /** Deel van de pagina dat als "beweegt vanzelf" is genegeerd. */ ignored: number }
@@ -128,6 +128,10 @@ export function comparePage(before: PageCapture, after: PageCapture, visual: { r
     const contentOk = before.textLength < 200 || after.textLength >= before.textLength * 0.5
     out.push({ check: 'content', ok: contentOk, detail: { before: before.textLength, after: after.textLength } })
     if (before.loginForm) out.push({ check: 'login', ok: after.loginForm === true })
+    // Sliders en carrousels worden in de screenshot afgedekt; wel moeten ze er na de update nog staan.
+    if ((before.moving ?? 0) >= 150 && after.moving !== undefined) {
+      out.push({ check: 'moving', ok: after.moving >= before.moving! * 0.5, detail: { before: before.moving!, after: after.moving } })
+    }
   }
 
   if (visual) {
@@ -141,7 +145,7 @@ export function comparePage(before: PageCapture, after: PageCapture, visual: { r
 
 /** Eerste gezakte check, voor de samenvatting ("waarom tegengehouden"). */
 export function firstFailure(outcomes: CheckOutcome[]): CheckOutcome | null {
-  const order: CheckName[] = ['reachable', 'php_error', 'http', 'login', 'shop', 'form', 'landmarks', 'content', 'resources', 'js_errors', 'visual']
+  const order: CheckName[] = ['reachable', 'php_error', 'http', 'login', 'shop', 'form', 'landmarks', 'moving', 'content', 'resources', 'js_errors', 'visual']
   const failed = outcomes.filter(o => !o.ok)
   failed.sort((a, b) => order.indexOf(a.check) - order.indexOf(b.check))
   return failed[0] ?? null

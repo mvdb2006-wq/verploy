@@ -13,7 +13,8 @@ if ( PHP_SAPI !== 'cli' || $argc < 4 ) { fwrite( STDERR, "gebruik: lab-reset.php
 [ , $lab_wp_dir, $lab_dir, $lab_url ] = $argv; // let op: $wp is een WordPress-global
 $u = parse_url( $lab_url );
 $_SERVER['HTTP_HOST']   = $u['host'] . ( isset( $u['port'] ) ? ':' . $u['port'] : '' );
-$_SERVER['REQUEST_URI'] = '/';
+// Als pad het inlogscherm: een achtergebleven onderhoudsmodus (afgebroken run) blokkeert dat nooit, zodat de reset hem kan opruimen.
+$_SERVER['REQUEST_URI'] = '/wp-login.php';
 require rtrim( $lab_wp_dir, '/' ) . '/wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 require_once ABSPATH . 'wp-admin/includes/file.php';

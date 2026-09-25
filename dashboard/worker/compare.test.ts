@@ -40,6 +40,14 @@ describe('visualDiff', () => {
 })
 
 describe('comparePage', () => {
+  it('slider/carrousel: afgedekt in de screenshot, maar verdwenen of ingeklapt telt wel', () => {
+    const ok = comparePage(page({ moving: 730 }), page({ moving: 720 }), null).find(o => o.check === 'moving')
+    expect(ok).toEqual({ check: 'moving', ok: true, detail: { before: 730, after: 720 } })
+    const gone = comparePage(page({ moving: 730 }), page({ moving: 0 }), null)
+    expect(firstFailure(gone)).toMatchObject({ check: 'moving', ok: false })
+    expect(comparePage(page({ moving: 80 }), page({ moving: 0 }), null).some(o => o.check === 'moving')).toBe(false)   // te klein om te beoordelen
+    expect(comparePage(page(), page({ moving: 0 }), null).some(o => o.check === 'moving')).toBe(false)                // oude meting zonder hoogte
+  })
   it('niets veranderd: alles groen', () => {
     const out = comparePage(page(), page(), { ratio: 0.001, threshold: 0.02 })
     expect(out.every(o => o.ok)).toBe(true)

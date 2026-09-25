@@ -479,6 +479,7 @@
         "landmarks": "{page} ({viewport}): Teile der Seite sind verschwunden ({missing}).",
         "content": "{page} ({viewport}) zeigt deutlich weniger Inhalt als vorher.",
         "visual": "{page} ({viewport}) sieht zu {percent} % anders aus (zulässig: {limit} %).",
+        "moving": "{page} ({viewport}): ein Slider oder Karussell ist verschwunden oder zusammengeklappt (Höhe {before} → {after} px).",
         "login": "Das WordPress-Anmeldeformular funktioniert nicht mehr.",
         "form": "Das Formular auf {page} funktioniert nach dem Update nicht mehr: {fnReason}.",
         "shop": "Der Shop funktioniert nach dem Update nicht mehr: {fnReason}."

@@ -30,6 +30,8 @@ export interface PageCapture {
   textLength: number
   title: string
   loginForm: boolean | null
+  /** Totale zichtbare hoogte (px) van de bewegende blokken (AUTO_MASKS); om een verdwenen slider te zien. */
+  moving?: number
   screenshot: Buffer | null
 }
 
@@ -55,6 +57,24 @@ export function normalizeJsError(message: string): string {
     .trim()
     .slice(0, 300)
 }
+
+/**
+ * Delen die vanzelf veranderen (sliders, carrousels, video, kaarten, ingesloten video's). Die worden in
+ * elke screenshot afgedekt: een andere dia vóór en na de update is geen fout. Of zo'n blok er na de
+ * update nog staat (en niet is ingeklapt), controleert Verploy apart via de hoogte (`moving`).
+ */
+export const AUTO_MASKS = [
+  // Slider Revolution, Master Slider, LayerSlider, Smart Slider, MetaSlider, Soliloquy
+  'rs-module-wrap', 'sr7-module', '.rev_slider_wrapper', '.wpb_revslider_element', '.master-slider', '.ms-slider-wrapper',
+  '.ls-wp-container', '.ls-container', '.n2-section-smartslider', '.metaslider', '.soliloquy-container',
+  // Carrousel-bibliotheken
+  '.swiper', '.swiper-container', '.swiper-initialized', '.wpcp-carousel-wrapper', '.slick-slider', '.owl-carousel', '.flexslider', '.splide', '.glide', '.flickity-enabled', '.carousel',
+  // Paginabouwers
+  '.elementor-slides-wrapper', '.elementor-image-carousel-wrapper', '.elementor-background-slideshow', '.elementor-background-video-container',
+  '.vc_images_carousel', '.wpb_gallery_slides', '.vc_video-bg', '.et_pb_slider', '.fl-slideshow',
+  // Media en ingesloten inhoud
+  'video', 'iframe[src*="youtube"]', 'iframe[src*="youtu.be"]', 'iframe[src*="vimeo"]', 'iframe[src*="google.com/maps"]', 'iframe[src*="instagram"]',
+]
 
 const STABILIZE_CSS = `*,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;transition:none!important;caret-color:transparent!important;scroll-behavior:auto!important}`
 
@@ -92,18 +112,28 @@ export async function newContext(browser: Browser, viewport: Viewport, cookies: 
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => undefined)
   await page.addStyleTag({ content: STABILIZE_CSS }).catch(() => undefined)
-  // Lazy-loaded afbeeldingen laden door één keer naar beneden en terug te scrollen.
+  // Lazy-loaded afbeeldingen: alles in één keer laten laden, rustig naar beneden en terug scrollen, en dan
+  // wachten tot elke afbeelding in beeld echt geladen is. Anders mist de ene screenshot een foto die de
+  // andere wel heeft, en lijkt dat een verschil door de update.
   await page.evaluate(async (max) => {
-    const step = window.innerHeight
+    document.querySelectorAll('img[loading="lazy"]').forEach(i => i.setAttribute('loading', 'eager'))
+    const step = Math.max(200, Math.round(window.innerHeight / 2))
     for (let y = 0; y < Math.min(document.documentElement.scrollHeight, max); y += step) {
       window.scrollTo(0, y)
-      await new Promise(r => setTimeout(r, 60))
+      await new Promise(r => setTimeout(r, 120))
     }
     window.scrollTo(0, 0)
     await document.fonts?.ready
+    const deadline = Date.now() + 6_000
+    const pending = () => [...document.images].filter(i => {
+      const r = i.getBoundingClientRect()
+      return r.top + window.scrollY < max && r.width > 0 && r.height > 0 && !i.complete
+    })
+    while (pending().length && Date.now() < deadline) await new Promise(r => setTimeout(r, 150))
+    await Promise.all([...document.images].filter(i => i.complete && i.naturalWidth).map(i => i.decode().catch(() => undefined)))
   }, MAX_SHOT_HEIGHT).catch(() => undefined)
   await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => undefined)
-  await page.waitForTimeout(400)
+  await page.waitForTimeout(500)
 }
 
 /** Laadt één pagina en legt status, fouten, structuur en (optioneel) een screenshot vast. */
@@ -135,14 +165,26 @@ export async function capturePage(ctx: BrowserContext, url: string, opts: Captur
     const html = await page.content()
     result.phpError = detectPhpError(html)
     result.title = (await page.title()).slice(0, 200)
-    const facts = await page.evaluate((landmarks) => ({
-      present: Object.entries(landmarks).filter(([, sel]) => document.querySelector(sel)).map(([k]) => k),
-      text: (document.body?.innerText ?? '').replace(/\s+/g, ' ').trim().length,
-      login: document.querySelector('#loginform') !== null,
-    }), LANDMARKS)
+    const facts = await page.evaluate(({ landmarks, moving, max }) => {
+      // Alleen de buitenste bewegende blokken tellen (een slider in een slider niet dubbel).
+      const els = [...document.querySelectorAll<HTMLElement>(moving.join(','))]
+      const outer = els.filter(e => !els.some(o => o !== e && o.contains(e)))
+      const height = outer.reduce((n, e) => {
+        const r = e.getBoundingClientRect()
+        const top = r.top + window.scrollY
+        return top < max && r.width > 0 ? n + Math.max(0, Math.min(r.height, max - top)) : n
+      }, 0)
+      return {
+        present: Object.entries(landmarks).filter(([, sel]) => document.querySelector(sel)).map(([k]) => k),
+        text: (document.body?.innerText ?? '').replace(/\s+/g, ' ').trim().length,
+        login: document.querySelector('#loginform') !== null,
+        moving: Math.round(height),
+      }
+    }, { landmarks: LANDMARKS, moving: AUTO_MASKS, max: MAX_SHOT_HEIGHT })
     result.landmarks = facts.present as Landmark[]
     result.textLength = facts.text
     result.loginForm = facts.login
+    result.moving = facts.moving
     if (opts.screenshot) {
       const height = await page.evaluate(() => document.documentElement.scrollHeight)
       const width = page.viewportSize()?.width ?? 1280
@@ -152,7 +194,7 @@ export async function capturePage(ctx: BrowserContext, url: string, opts: Captur
         animations: 'disabled',
         caret: 'hide',
         scale: 'css',
-        mask: opts.masks.map(sel => page.locator(sel)),
+        mask: [...AUTO_MASKS, ...opts.masks].map(sel => page.locator(sel)),
         maskColor: '#FF00FF',
         timeout: 30_000,
       })
