@@ -106,7 +106,8 @@ test('scenario 2 — kapotte update wordt tegengehouden, niets live', async ({ p
   await waitForVerdict(page, 'Tegengehouden')
   await expect(page.getByRole('heading', { name: 'Niets live gezet' })).toBeVisible()
   await expect(page.getByText('Je live site is niet gewijzigd.')).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Naar WP Admin' })).toHaveAttribute('href', `${LAB_WP}/wp-admin/`)
+  // Connector 2.5: "Naar WP Admin" logt met één klik in (formulier naar Verploy).
+  await expect(page.getByRole('button', { name: 'Naar WP Admin' }).locator('xpath=ancestor::form')).toHaveAttribute('action', /\/sites\/[0-9a-f-]{36}\/wp-admin$/)
   await expect(page.getByText(/WordPress meldt een kritieke fout|PHP geeft een fatale fout|gaf HTTP 500/).first()).toBeVisible()
   // fase 5: diagnose met de schuldige plugin en de ontbrekende functie
   await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible()

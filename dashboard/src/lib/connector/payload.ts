@@ -37,6 +37,9 @@ export const heartbeatSchema = z.object({
   }),
   plugins: z.array(component.extend({ file: z.string().min(1).max(255) })).max(1000),
   themes: z.array(component.extend({ slug: z.string().min(1).max(255) })).max(200),
+  // Connector ≥ 2.5: beheerders (voor "Inloggen in WP Admin") en of dat op de site aan staat.
+  admins: z.array(z.object({ id: z.number().int().positive(), login: z.string().max(60), name: z.string().max(100) })).max(20).optional(),
+  sso: z.object({ enabled: z.boolean() }).optional(),
 })
 
 export type HeartbeatPayload = z.infer<typeof heartbeatSchema>
@@ -103,7 +106,7 @@ export function toRows(p: HeartbeatPayload): HeartbeatRows {
       memory_peak_mb: mb(p.server.memory_peak_bytes),
       disk_free_mb: mb(p.server.disk_free_bytes),
       db_size_mb: p.server.db_size_bytes === null ? null : Math.round((p.server.db_size_bytes / (1024 * 1024)) * 100) / 100,
-      raw: { site: p.site, server: p.server, wordpress: p.wordpress },
+      raw: { site: p.site, server: p.server, wordpress: p.wordpress, ...(p.admins ? { admins: p.admins } : {}), ...(p.sso ? { sso: p.sso } : {}) },
     },
     components: [
       { type: 'core', slug: 'wordpress', name: 'WordPress', version: p.wordpress.version,

@@ -3,7 +3,7 @@
  * Plugin Name:       Verploy Connector
  * Plugin URI:        https://app.verploy.com
  * Description:       Verbindt deze WordPress-site met Verploy: health-monitoring en veilige, geteste updates voor webbureaus.
- * Version:           2.4.0
+ * Version:           2.5.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Verploy
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'VERPLOY_VERSION', '2.4.0' );
+define( 'VERPLOY_VERSION', '2.5.0' );
 define( 'VERPLOY_PLUGIN_FILE', __FILE__ );
 define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 // Te overschrijven in wp-config.php voor lokale ontwikkeling en tests.
@@ -39,9 +39,11 @@ require_once VERPLOY_PLUGIN_DIR . 'includes/class-file-copier.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-table-copier.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-run-lock.php';
 require_once VERPLOY_PLUGIN_DIR . 'includes/class-run-engine.php';
+require_once VERPLOY_PLUGIN_DIR . 'includes/class-sso.php';
 
 Verploy_Heartbeat::init();
 Verploy_Rest_Endpoints::init();
+Verploy_Sso::init();
 add_action( 'init', array( 'Verploy_Run_Engine', 'maybe_block_request' ), 0 );
 if ( is_admin() ) {
 	Verploy_Admin::init();

@@ -3,6 +3,8 @@
  * indeling in de filters. Puur (geen I/O), zodat het met tests is vast te leggen.
  */
 import { computeUptime, type OfflineAlert } from '@/lib/reports/model'
+import { versionAtLeast } from '@/lib/runs'
+import { MIN_CONNECTOR_FOR_LOGIN } from '@/lib/wp-login/token'
 
 export type SiteFilter = 'all' | 'healthy' | 'attention' | 'offline' | 'updating' | 'vulnerable'
 export const SITE_FILTERS: SiteFilter[] = ['all', 'healthy', 'attention', 'offline', 'updating', 'vulnerable']
@@ -25,10 +27,13 @@ export interface SiteRow {
   alert: { severity: 'warning' | 'critical'; count: number } | null
   lastRun: { id: string; verdict: string; reasonKey: string | null; at: string } | null
   filters: SiteFilter[]
+  /** Met één klik inloggen in WP Admin (connector ≥ 2.5). */
+  wpLogin: boolean
 }
 
 export interface SiteInput {
   id: string; name: string; url: string; client_name: string | null; effective: string; paired_at: string | null
+  connector_version?: string | null; connection_status?: string
 }
 
 const RANK = { low: 1, medium: 2, high: 3, critical: 4 } as const
@@ -87,6 +92,7 @@ export function buildSiteRows(
     if (vulns > 0) filters.push('vulnerable')
     return {
       id: s.id, name: s.name, url: s.url, domain: domainOf(s.url), client: s.client_name, status: s.effective, updating, uptime,
+      wpLogin: s.connection_status === 'connected' && versionAtLeast(s.connector_version ?? null, MIN_CONNECTOR_FOR_LOGIN),
       updates: updates.get(s.id) ?? 0, vulns, vulnSeverity: vulnWorst.get(s.id) ?? null, alert, lastRun: lastRun.get(s.id) ?? null, filters,
     }
   })

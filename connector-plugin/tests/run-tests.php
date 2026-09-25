@@ -48,6 +48,23 @@ $h5 = array_change_key_case( Verploy_Signer::headers( 'andere-site-id-0000-0000-
 check( 'andere site-id wordt geweigerd', 'unknown_site' === Verploy_Signer::verify( $site, $secret, $h5, 'GET', '/verploy/v2/status', '' ) );
 check( 'ontbrekende headers worden geweigerd', 'missing_signature' === Verploy_Signer::verify( $site, $secret, array(), 'GET', '/x', '' ) );
 
+echo "Inloggen vanuit Verploy (SSO)\n";
+// Zelfde vector als dashboard/src/lib/wp-login/token.test.ts (onafhankelijk berekend met openssl).
+$sso_vec = 'eyJ2IjoxLCJzaXRlIjoiNWVlMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwiYXVkIjoiaHR0cHM6Ly9rbGFudC5leGFtcGxlIiwidXNlciI6MSwiYnkiOiJlaWdlbmFhckBleGFtcGxlLmNvbSIsIm5vbmNlIjoiMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYiLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MTcwMDAwMDA2MH0.5364afe76e61a542739e14304552364d0c2e8b066644c8f93a7c7b6f4c16508e';
+$ok = Verploy_Sso::verify( $sso_vec, $site, $secret, 1700000010, 'https://klant.example/' );
+check( 'testvector wordt geaccepteerd (binnen 60 s)', is_array( $ok ) && 1 === $ok['user'] && 'eigenaar@example.com' === $ok['by'], json_encode( $ok ) );
+check( 'na 60 s verlopen', 'expired' === Verploy_Sso::verify( $sso_vec, $site, $secret, 1700000061, 'https://klant.example' ) );
+check( 'ander secret geweigerd', 'bad_signature' === Verploy_Sso::verify( $sso_vec, $site, str_repeat( 'b', 64 ), 1700000010, 'https://klant.example' ) );
+check( 'andere site geweigerd', 'wrong_site' === Verploy_Sso::verify( $sso_vec, '5ee00000-0000-4000-8000-000000000002', $secret, 1700000010, 'https://klant.example' ) );
+check( 'aangepaste payload geweigerd', 'bad_signature' === Verploy_Sso::verify( 'eyJ2IjoxfQ' . substr( $sso_vec, strpos( $sso_vec, '.' ) ), $site, $secret, 1700000010, 'https://klant.example' ) );
+check( 'rommel geweigerd', 'malformed' === Verploy_Sso::verify( 'abc', $site, $secret ) && 'malformed' === Verploy_Sso::verify( array(), $site, $secret ) );
+check( 'kloon of testkopie op een ander adres: geweigerd', 'wrong_site' === Verploy_Sso::verify( $sso_vec, $site, $secret, 1700000010, 'https://staging.klant.example' ) );
+check( 'niet gekoppeld: geweigerd', 'not_connected' === Verploy_Sso::verify( $sso_vec, '', '', 1700000010 ) );
+$sso_long = rtrim( strtr( base64_encode( wp_json_encode( array( 'v' => 1, 'site' => $site, 'aud' => 'https://klant.example', 'user' => 1, 'by' => 'x@example.com', 'nonce' => str_repeat( 'a', 32 ), 'iat' => 1700000000, 'exp' => 1700003600 ) ) ), '+/', '-_' ), '=' );
+check( 'token dat langer dan 60 s geldig zou zijn: geweigerd', 'expired' === Verploy_Sso::verify( $sso_long . '.' . hash_hmac( 'sha256', 'sso|' . $sso_long, $secret ), $site, $secret, 1700000010, 'https://klant.example' ) );
+check( 'beheerderslijst: id en login', ! empty( Verploy_Sso::admins() ) && is_int( Verploy_Sso::admins()[0]['id'] ) );
+check( 'staat standaard aan', Verploy_Sso::enabled() );
+
 echo "Health collector\n";
 $p = Verploy_Health_Collector::collect();
 check( 'schema 2', 2 === $p['schema'] );
@@ -57,6 +74,7 @@ check( 'wordpress-versie ingevuld', get_bloginfo( 'version' ) === $p['wordpress'
 check( 'plugins bevat de connector zelf', in_array( 'verploy-connector/verploy-connector.php', wp_list_pluck( $p['plugins'], 'file' ), true ) );
 check( 'actief thema gemarkeerd', 1 === count( array_filter( $p['themes'], function ( $t ) { return $t['active']; } ) ) );
 check( 'payload is geldige JSON', false !== wp_json_encode( $p ) );
+check( 'heartbeat bevat beheerders en SSO-status', is_array( $p['admins'] ) && isset( $p['sso']['enabled'] ) );
 
 echo "REST\n";
 $server = rest_get_server();

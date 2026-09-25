@@ -1175,5 +1175,27 @@
       "label": "A short overview of last night, every morning at 07:00",
       "body": "What Verploy put live, what was held back and what is waiting for you. Only when there is something to report."
     }
+  },
+  "wpLogin": {
+    "button": "Log in to WP Admin",
+    "redirecting": "Logging you in as {user}…",
+    "continue": "Continue",
+    "title": "Log in to WP Admin",
+    "intro": "Owners and admins of your agency log in as a WordPress administrator with one click, without a password. Every login is recorded, here and on the site. The site owner can turn it off in WordPress (Settings → Verploy).",
+    "disabledOnSite": "Logging in from Verploy is turned off on this site (in WordPress, Settings → Verploy). The button then goes to the regular login screen.",
+    "asUser": "Log in as",
+    "firstAdmin": "First administrator ({login})",
+    "recent": "Recent logins",
+    "none": "Nobody has logged in this way yet.",
+    "entry": "{at}: {email} as {user}",
+    "errors": {
+      "forbidden": "Only owners and admins of the agency can log in with one click.",
+      "not_connected": "This site is not connected.",
+      "connector_outdated": "This requires Verploy Connector 2.5 or newer. Update the connector (automatic safe updates do this for you).",
+      "sso_disabled": "Logging in from Verploy is turned off on this site (in WordPress, Settings → Verploy).",
+      "no_admin": "Verploy does not know an administrator of this site yet. Try again after the next heartbeat (within 15 minutes).",
+      "rate_limited": "Too many logins in a short time. Try again in a few minutes.",
+      "failed": "Logging in did not work. Try again, or log in via WP Admin as usual."
+    }
   }
 }

@@ -113,7 +113,10 @@ test.describe.serial('Fase 2: registreren → bureau → site koppelen → data 
     await page.getByRole('button', { name: 'Offline 0' }).click()
     await expect(page.getByText('Geen sites gevonden.')).toBeVisible()
     await page.getByRole('button', { name: /^Alles 1$/ }).click()
-    await expect(page.getByRole('link', { name: 'WP Admin van Test-WordPress openen (nieuw tabblad)' })).toHaveAttribute('href', `${WP}/wp-admin/`)
+    // Connector ≥ 2.5: met één klik ingelogd (formulier naar Verploy, dat een eenmalig token naar de site stuurt).
+    const wpAdmin = page.getByRole('button', { name: 'WP Admin van Test-WordPress openen (nieuw tabblad)' })
+    await expect(wpAdmin).toBeVisible()
+    await expect(wpAdmin.locator('xpath=ancestor::form')).toHaveAttribute('action', /\/sites\/[0-9a-f-]{36}\/wp-admin$/)
     await page.getByRole('button', { name: /^Aandacht nodig 1$/ }).click()   // http-site: melding "geen HTTPS"
     await page.reload()                                              // filter blijft na herladen/terug
     await expect(page.getByRole('button', { name: /^Aandacht nodig 1$/ })).toHaveAttribute('aria-pressed', 'true')

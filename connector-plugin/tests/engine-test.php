@@ -148,5 +148,48 @@ $r = call( $base, '/verploy/v2/run/lock', array( 'run_id' => $other, 'ttl' => 60
 check( 'lock vrijgegeven', 200 === $r[0] );
 call( $base, '/verploy/v2/cleanup', array( 'run_id' => $other ) );
 
+
+echo "Inloggen vanuit Verploy (SSO) over HTTP\n";
+function sso_token( $claims ) {
+	global $secret;
+	$p = rtrim( strtr( base64_encode( json_encode( $claims ) ), '+/', '-_' ), '=' );
+	return $p . '.' . hash_hmac( 'sha256', 'sso|' . $p, $secret );
+}
+function sso_post( $url, $token, $method = 'POST' ) {
+	$c = curl_init( $url . '/wp-login.php?action=verploy_sso' );
+	curl_setopt_array( $c, array( CURLOPT_CUSTOMREQUEST => $method, CURLOPT_POSTFIELDS => 'POST' === $method ? http_build_query( array( 'token' => $token ) ) : null, CURLOPT_RETURNTRANSFER => 1, CURLOPT_HEADER => 1, CURLOPT_TIMEOUT => 30 ) );
+	$out = (string) curl_exec( $c );
+	return array( curl_getinfo( $c, CURLINFO_HTTP_CODE ), $out );
+}
+$claims = array( 'v' => 1, 'site' => $site, 'aud' => $base, 'user' => 1, 'by' => 'engine@example.com', 'nonce' => bin2hex( random_bytes( 16 ) ), 'iat' => time(), 'exp' => time() + 60 );
+$tok    = sso_token( $claims );
+$r      = sso_post( $base, $tok );
+check( 'geldig token: ingelogd en naar WP Admin', 302 === $r[0] && preg_match( '/^Location: .*\/wp-admin\/?\r?$/mi', $r[1] ) && false !== stripos( $r[1], 'wordpress_logged_in_' ), substr( $r[1], 0, 400 ) );
+$r = sso_post( $base, $tok );
+check( 'hetzelfde token nog eens: geweigerd (eenmalig)', 403 === $r[0] && false === stripos( $r[1], 'wordpress_logged_in_' ), (string) $r[0] );
+$r = sso_post( $base, sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ), 'iat' => time() - 120, 'exp' => time() - 60 ) ) ) );
+check( 'verlopen token: geweigerd', 403 === $r[0], (string) $r[0] );
+$r = sso_post( $base, sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ), 'user' => 999999 ) ) ) );
+check( 'onbekende gebruiker: geweigerd', 403 === $r[0], (string) $r[0] );
+$r = sso_post( $base, sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ) ) ) ), 'GET' );
+check( 'GET: geweigerd (alleen POST)', 403 === $r[0], (string) $r[0] );
+$bad = sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ) ) ) );
+$r   = sso_post( $base, substr( $bad, 0, -1 ) . ( '0' === substr( $bad, -1 ) ? '1' : '0' ) );
+check( 'vervalste handtekening: geweigerd', 403 === $r[0], (string) $r[0] );
+$r = sso_post( $base, sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ), 'aud' => 'https://kloon.example' ) ) ) );
+check( 'token voor een ander adres (kloon): geweigerd', 403 === $r[0], (string) $r[0] );
+$race = sso_token( array_merge( $claims, array( 'nonce' => bin2hex( random_bytes( 16 ) ) ) ) );
+$mh   = curl_multi_init();
+$hs   = array();
+for ( $i = 0; $i < 4; $i++ ) {
+	$c = curl_init( $base . '/wp-login.php?action=verploy_sso' );
+	curl_setopt_array( $c, array( CURLOPT_POSTFIELDS => http_build_query( array( 'token' => $race ) ), CURLOPT_RETURNTRANSFER => 1, CURLOPT_TIMEOUT => 30 ) );
+	curl_multi_add_handle( $mh, $c );
+	$hs[] = $c;
+}
+do { curl_multi_exec( $mh, $running ); curl_multi_select( $mh ); } while ( $running );
+$codes = array_map( function ( $c ) { return curl_getinfo( $c, CURLINFO_HTTP_CODE ); }, $hs );
+check( 'vier gelijktijdige pogingen met hetzelfde token: precies één lukt', 1 === count( array_filter( $codes, function ( $x ) { return 302 === $x; } ) ), json_encode( $codes ) );
+
 echo $fails ? "✘ $fails controle(s) mislukt\n" : "✔ alle controles geslaagd\n";
 exit( $fails ? 1 : 0 );

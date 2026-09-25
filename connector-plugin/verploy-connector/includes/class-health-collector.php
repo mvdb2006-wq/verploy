@@ -33,6 +33,9 @@ class Verploy_Health_Collector {
 			'wordpress'         => self::core(),
 			'plugins'           => self::plugins(),
 			'themes'            => self::themes(),
+			// Voor "Inloggen in WP Admin" vanuit Verploy: welke beheerders er zijn en of het aan staat.
+			'admins'            => Verploy_Sso::admins(),
+			'sso'               => array( 'enabled' => Verploy_Sso::enabled() ),
 		);
 	}
 

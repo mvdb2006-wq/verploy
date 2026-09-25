@@ -3,6 +3,7 @@ import type { MessageKey, Translate } from '@/lib/i18n/core'
 import { adviceFor, summarizeRun, type RunItem } from '@/lib/run-items'
 import { presentReason } from '@/lib/runs'
 import { cn } from '@/lib/cn'
+import { WpAdminLink } from '@/components/WpAdminLink'
 
 interface RunLike { status: string; verdict: string | null; reason_key: string | null; reason_params: unknown; items: unknown }
 
@@ -16,7 +17,7 @@ const list = (items: RunItem[]) => items.map(i => i.name).join(', ')
  * De uitkomst van een afgeronde veilige update in gewone taal: wat is gelukt, wat niet en waarom,
  * wat Verploy besloot, of de live site is geraakt, en wat (als er iets is) de gebruiker moet doen.
  */
-export function RunSummary({ t, run, siteUrl, hasDiagnosis }: { t: Translate; run: RunLike; siteUrl: string; hasDiagnosis: boolean }) {
+export function RunSummary({ t, run, siteId, siteUrl, wpLogin = false, hasDiagnosis }: { t: Translate; run: RunLike; siteId: string; siteUrl: string; wpLogin?: boolean; hasDiagnosis: boolean }) {
   if (run.status !== 'done' || !run.verdict) return null
   const items = (run.items ?? []) as RunItem[]
   const s = summarizeRun(items, run)
@@ -51,7 +52,6 @@ export function RunSummary({ t, run, siteUrl, hasDiagnosis }: { t: Translate; ru
   // Aanbevolen actie: per onderdeel dat aandacht vraagt; anders de diagnose (staat eronder) of niets.
   const advice = [...s.attention, ...s.skipped].slice(0, 4).map(i => t(`runs.advice.${adviceFor(i.staging)}` as MessageKey, { name: i.name }))
   const needsUser = advice.length > 0 || (run.verdict !== 'deployed' && run.verdict !== 'cancelled')
-  const wpAdmin = `${siteUrl.replace(/\/$/, '')}/wp-admin/`
 
   return (
     <section className={cn('rounded-(--radius-card) border px-5 py-4', TONE[tone])} aria-labelledby="summary-title" role="status">
@@ -72,9 +72,9 @@ export function RunSummary({ t, run, siteUrl, hasDiagnosis }: { t: Translate; ru
             : <p className="text-muted">{t('runs.advice.review', { name: list(s.heldBack.length ? s.heldBack : items) })}</p>}
         </div>
         {needsUser && (
-          <a href={wpAdmin} target="_blank" rel="noopener noreferrer" className="btn btn-ghost shrink-0">
+          <WpAdminLink siteId={siteId} siteUrl={siteUrl} sso={wpLogin} className="btn btn-ghost shrink-0">
             {t('runs.summary.openWpAdmin')} <ExternalLink size={14} aria-hidden />
-          </a>
+          </WpAdminLink>
         )}
       </div>
     </section>

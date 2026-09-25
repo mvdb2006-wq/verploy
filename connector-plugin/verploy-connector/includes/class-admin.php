@@ -18,6 +18,7 @@ class Verploy_Admin {
 		add_action( 'admin_post_verploy_pair', array( __CLASS__, 'handle_pair' ) );
 		add_action( 'admin_post_verploy_test', array( __CLASS__, 'handle_test' ) );
 		add_action( 'admin_post_verploy_disconnect', array( __CLASS__, 'handle_disconnect' ) );
+		add_action( 'admin_post_verploy_sso', array( __CLASS__, 'handle_sso' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'not_connected_notice' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( VERPLOY_PLUGIN_FILE ), array( __CLASS__, 'action_links' ) );
 	}
@@ -90,6 +91,14 @@ class Verploy_Admin {
 		self::done( 'success', __( 'Ontkoppeld. Deze site stuurt geen gegevens meer naar Verploy.', 'verploy-connector' ) );
 	}
 
+	public static function handle_sso() {
+		self::guard( 'verploy_sso' );
+		$on = ! empty( $_POST['verploy_sso_enabled'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce gecontroleerd in guard()
+		update_option( Verploy_Sso::OPT_ENABLED, $on ? '1' : '0', false );
+		Verploy_Heartbeat::send();
+		self::done( 'success', $on ? __( 'Inloggen vanuit Verploy staat aan.', 'verploy-connector' ) : __( 'Inloggen vanuit Verploy staat uit.', 'verploy-connector' ) );
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -126,6 +135,29 @@ class Verploy_Admin {
 					<?php wp_nonce_field( 'verploy_disconnect' ); ?>
 					<?php submit_button( __( 'Ontkoppelen', 'verploy-connector' ), 'delete', 'verploy_disconnect_submit', false ); ?>
 				</form>
+				<h2><?php esc_html_e( 'Inloggen vanuit Verploy', 'verploy-connector' ); ?></h2>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="verploy_sso">
+					<?php wp_nonce_field( 'verploy_sso' ); ?>
+					<p><label><input type="checkbox" name="verploy_sso_enabled" value="1" <?php checked( Verploy_Sso::enabled() ); ?>> <?php esc_html_e( 'Eigenaren en beheerders van je Verploy-bureau mogen met één klik als beheerder inloggen (zonder wachtwoord; elke login wordt hieronder vastgelegd). Let op: zo’n login slaat een 2FA-plugin van deze site over.', 'verploy-connector' ); ?></label></p>
+					<?php submit_button( __( 'Opslaan', 'verploy-connector' ), 'secondary', 'verploy_sso_submit', false ); ?>
+				</form>
+				<?php $verploy_recent = Verploy_Sso::recent(); ?>
+				<?php if ( $verploy_recent ) : ?>
+					<table class="widefat striped" style="max-width:720px;margin-top:12px">
+						<thead><tr><th><?php esc_html_e( 'Wanneer', 'verploy-connector' ); ?></th><th><?php esc_html_e( 'Wie (Verploy)', 'verploy-connector' ); ?></th><th><?php esc_html_e( 'Als', 'verploy-connector' ); ?></th><th>IP</th></tr></thead>
+						<tbody>
+						<?php foreach ( $verploy_recent as $verploy_row ) : ?>
+							<tr>
+								<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $verploy_row['time'] ) ); ?></td>
+								<td><?php echo esc_html( $verploy_row['by'] ); ?></td>
+								<td><?php echo esc_html( $verploy_row['user'] ); ?></td>
+								<td><?php echo esc_html( $verploy_row['ip'] ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+						</tbody>
+					</table>
+				<?php endif; ?>
 				<h2><?php esc_html_e( 'Opnieuw koppelen', 'verploy-connector' ); ?></h2>
 			<?php else : ?>
 				<p><?php esc_html_e( 'Maak in je Verploy-dashboard een koppelcode aan (Sites → deze site → Koppelcode maken) en plak hem hieronder.', 'verploy-connector' ); ?></p>

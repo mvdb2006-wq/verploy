@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { WpAdminLink } from '@/components/WpAdminLink'
 import { useMemo, useState } from 'react'
 import { ExternalLink, Search, ShieldAlert } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -105,11 +106,11 @@ export function SitesTable({ rows, initialFilter, initialQuery }: { rows: SiteRo
                   ) : '—'}
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <a href={`${s.url.replace(/\/$/, '')}/wp-admin/`} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-muted hover:text-accent"
-                    aria-label={t('sitesList.wpAdminFor', { site: s.name })}>
+                  <WpAdminLink siteId={s.id} siteUrl={s.url} sso={s.wpLogin}
+                    className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold whitespace-nowrap text-muted hover:text-accent"
+                    ariaLabel={t('sitesList.wpAdminFor', { site: s.name })}>
                     WP Admin <ExternalLink size={12} aria-hidden />
-                  </a>
+                  </WpAdminLink>
                 </td>
               </tr>
             ))}

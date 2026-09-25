@@ -1175,5 +1175,27 @@
       "label": "Chaque matin à 07:00, un bref récapitulatif de la nuit",
       "body": "Ce que Verploy a mis en ligne, ce qui a été bloqué et ce qui vous attend. Uniquement s’il y a quelque chose à signaler."
     }
+  },
+  "wpLogin": {
+    "button": "Se connecter à WP Admin",
+    "redirecting": "Connexion en tant que {user}…",
+    "continue": "Continuer",
+    "title": "Se connecter à WP Admin",
+    "intro": "Les propriétaires et administrateurs de votre agence se connectent en un clic comme administrateur WordPress, sans mot de passe. Chaque connexion est enregistrée, ici et sur le site. Le propriétaire du site peut la désactiver dans WordPress (Réglages → Verploy).",
+    "disabledOnSite": "La connexion depuis Verploy est désactivée sur ce site (dans WordPress, Réglages → Verploy). Le bouton mène alors à l’écran de connexion habituel.",
+    "asUser": "Se connecter en tant que",
+    "firstAdmin": "Premier administrateur ({login})",
+    "recent": "Dernières connexions",
+    "none": "Personne ne s’est encore connecté ainsi.",
+    "entry": "{at} : {email} en tant que {user}",
+    "errors": {
+      "forbidden": "Seuls les propriétaires et administrateurs de l’agence peuvent se connecter en un clic.",
+      "not_connected": "Ce site n’est pas connecté.",
+      "connector_outdated": "Cela nécessite Verploy Connector 2.5 ou plus récent. Mettez à jour le connecteur (les mises à jour sûres automatiques s’en chargent).",
+      "sso_disabled": "La connexion depuis Verploy est désactivée sur ce site (dans WordPress, Réglages → Verploy).",
+      "no_admin": "Verploy ne connaît pas encore d’administrateur de ce site. Réessayez après le prochain heartbeat (dans les 15 minutes).",
+      "rate_limited": "Trop de connexions en peu de temps. Réessayez dans quelques minutes.",
+      "failed": "La connexion a échoué. Réessayez, ou connectez-vous à WP Admin comme d’habitude."
+    }
   }
 }

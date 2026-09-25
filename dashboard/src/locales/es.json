@@ -1175,5 +1175,27 @@
       "label": "Cada mañana a las 07:00, un breve resumen de la noche",
       "body": "Lo que Verploy publicó, lo que se retuvo y lo que te espera. Solo si hay algo que contar."
     }
+  },
+  "wpLogin": {
+    "button": "Entrar en WP Admin",
+    "redirecting": "Iniciando sesión como {user}…",
+    "continue": "Continuar",
+    "title": "Entrar en WP Admin",
+    "intro": "Los propietarios y administradores de tu agencia entran con un clic como administrador de WordPress, sin contraseña. Cada acceso queda registrado, aquí y en el sitio. El propietario del sitio puede desactivarlo en WordPress (Ajustes → Verploy).",
+    "disabledOnSite": "El acceso desde Verploy está desactivado en este sitio (en WordPress, Ajustes → Verploy). El botón lleva entonces a la pantalla de acceso habitual.",
+    "asUser": "Entrar como",
+    "firstAdmin": "Primer administrador ({login})",
+    "recent": "Últimos accesos",
+    "none": "Nadie ha entrado así todavía.",
+    "entry": "{at}: {email} como {user}",
+    "errors": {
+      "forbidden": "Solo los propietarios y administradores de la agencia pueden entrar con un clic.",
+      "not_connected": "Este sitio no está conectado.",
+      "connector_outdated": "Se necesita Verploy Connector 2.5 o posterior. Actualiza el conector (las actualizaciones seguras automáticas lo hacen por ti).",
+      "sso_disabled": "El acceso desde Verploy está desactivado en este sitio (en WordPress, Ajustes → Verploy).",
+      "no_admin": "Verploy aún no conoce ningún administrador de este sitio. Inténtalo tras el próximo heartbeat (en 15 minutos).",
+      "rate_limited": "Demasiados accesos en poco tiempo. Inténtalo de nuevo en unos minutos.",
+      "failed": "No se pudo entrar. Inténtalo de nuevo o entra en WP Admin como siempre."
+    }
   }
 }

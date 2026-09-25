@@ -19,7 +19,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   const now = requestNow()
   const since30 = daysAgoIso(30, now)
   const [{ data: sites }, { data: updates }, { data: alerts }, { data: vulns }, { data: active }, { data: lastRuns }, { data: offline }] = await Promise.all([
-    supabase.from('sites').select('id, name, url, client_name, status, connection_status, last_heartbeat_at, paired_at').order('name'),
+    supabase.from('sites').select('id, name, url, client_name, status, connection_status, connector_version, last_heartbeat_at, paired_at').order('name'),
     supabase.from('site_components').select('site_id').eq('update_available', true),
     supabase.from('alerts').select('site_id, severity').eq('status', 'open').in('severity', ['warning', 'critical']),
     supabase.from('site_vulnerabilities').select('site_id, severity').eq('status', 'open'),

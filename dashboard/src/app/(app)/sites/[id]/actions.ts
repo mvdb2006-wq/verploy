@@ -104,3 +104,19 @@ export async function setSiteAutoUpdates(_: AutoState, form: FormData): Promise<
   revalidatePath(`/sites/${siteId}`)
   return {}
 }
+
+export interface WpLoginState { error?: string; saved?: boolean }
+
+/** Als welke WordPress-beheerder "Inloggen in WP Admin" inlogt (leeg = de eerste beheerder). Eigenaar/beheerder; RLS. */
+export async function setWpLoginUser(_: WpLoginState, form: FormData): Promise<WpLoginState> {
+  const t = await getT()
+  const siteId = String(form.get('site_id') ?? '')
+  const raw = String(form.get('wp_user_id') ?? '')
+  const user = raw === '' ? null : Number(raw)
+  if (user !== null && (!Number.isInteger(user) || user <= 0)) return { error: t('common.errorGeneric') }
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('sites').update({ wp_login_user_id: user }, { count: 'exact' }).eq('id', siteId)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath(`/sites/${siteId}`)
+  return { saved: true }
+}

@@ -13,6 +13,9 @@ import { PairingPanel } from './pairing'
 import { DeleteSite } from './delete'
 import { SiteAutoUpdates } from './auto-updates'
 import { UpdatesPanel } from './updates'
+import { WpLoginSettings, type WpAdmin } from './wp-login'
+import { WpAdminLink, wpLoginSupported } from '@/components/WpAdminLink'
+import { Alert } from '@/components/Alert'
 import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
 import { ClientReports } from './client-reports'
@@ -25,14 +28,15 @@ function memoryRaw(raw: unknown): string | null {
   return typeof server?.memory_limit === 'string' ? server.memory_limit : null
 }
 
-export default async function SitePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SitePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ wp_login?: string }> }) {
   const { id } = await params
+  const { wp_login: wpLoginError } = await searchParams
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   const session = await requireAgency()
   const [t, locale, supabase] = await Promise.all([getT(), getLocale(), createClient()])
   const { data: site } = await supabase.from('sites').select('*').eq('id', id).maybeSingle()
   if (!site) notFound()
-  const [{ data: snap }, { data: components }, { data: alerts }, { data: runs }, { data: vulns }, { data: feed }] = await Promise.all([
+  const [{ data: snap }, { data: components }, { data: alerts }, { data: runs }, { data: vulns }, { data: feed }, { data: wpLogins }] = await Promise.all([
     supabase.from('health_snapshots').select('memory_limit_mb, disk_free_mb, captured_at, raw').eq('site_id', id).order('id', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('site_components').select('type, slug, name, version, latest_version, update_available, active').eq('site_id', id)
       .order('update_available', { ascending: false }).order('active', { ascending: false }).order('type').order('name'),
@@ -43,6 +47,7 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
     supabase.from('site_vulnerabilities').select('vulnerability_id, component_type, component_slug, component_name, installed_version, fixed_version, fixable, severity, autofix_run_id')
       .eq('site_id', id).eq('status', 'open'),
     supabase.from('vulnerability_feed_state').select('fetched_at, attribution').eq('id', 1).maybeSingle(),
+    supabase.from('wp_logins').select('created_at, user_email, wp_user_login').eq('site_id', id).order('created_at', { ascending: false }).limit(5),
   ])
   const vulnIds = [...new Set((vulns ?? []).map(v => v.vulnerability_id))]
   const autofixRunIds = [...new Set((vulns ?? []).map(v => v.autofix_run_id).filter((x): x is string => Boolean(x)))]
@@ -95,6 +100,10 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
     },
   ]
   const status = effectiveStatus(site)
+  const rawSnap = (snap?.raw ?? {}) as { admins?: WpAdmin[]; sso?: { enabled?: boolean } }
+  const wpAdmins = Array.isArray(rawSnap.admins) ? rawSnap.admins : []
+  const wpLogin = site.connection_status === 'connected' && wpLoginSupported(site.connector_version) && wpAdmins.length > 0
+  const wpLoginOnSite = rawSnap.sso?.enabled !== false
   const connected = site.connection_status === 'connected'
   const manage = canManage(session.role)
   const activeRun = (runs ?? []).find(r => r.status !== 'done') ?? null
@@ -123,6 +132,13 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
               {site.url.replace(/^https?:\/\//, '')} <ExternalLink size={12} aria-hidden />
             </a>
             {site.client_name && <p className="mt-1 text-sm text-subtle">{t('siteDetail.client')}: {site.client_name}</p>}
+            {connected && (
+              <div className="mt-3">
+                <WpAdminLink siteId={site.id} siteUrl={site.url} sso={wpLogin && wpLoginOnSite && manage} className="btn btn-ghost px-3 py-1.5 text-sm">
+                  {wpLogin && wpLoginOnSite && manage ? t('wpLogin.button') : 'WP Admin'} <ExternalLink size={13} aria-hidden />
+                </WpAdminLink>
+              </div>
+            )}
           </div>
           <div className="text-right">
             <StatusBadge status={status} label={t(`site.status.${status}` as MessageKey)} />
@@ -135,6 +151,8 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
+
+      {wpLoginError && <Alert>{t(`wpLogin.errors.${['forbidden', 'not_connected', 'connector_outdated', 'sso_disabled', 'no_admin', 'rate_limited', 'insecure_url'].includes(wpLoginError) ? wpLoginError : 'failed'}` as MessageKey)}</Alert>}
 
       {!connected && manage && <PairingPanel siteId={site.id} connected={false} />}
 
@@ -196,6 +214,11 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
 
       <ClientReports siteId={site.id} clientName={site.client_name} clientEmail={site.client_email} reportLocale={site.report_locale}
         monthly={site.report_monthly} canEdit={manage} />
+
+      {wpLogin && manage && (
+        <WpLoginSettings siteId={site.id} admins={wpAdmins} chosen={site.wp_login_user_id} enabledOnSite={wpLoginOnSite} canEdit={manage}
+          recent={(wpLogins ?? []).map(l => ({ at: formatDate(l.created_at, locale, true), email: l.user_email, wpUser: l.wp_user_login }))} />
+      )}
 
       {connected && manage && (
         <TestSettings siteId={site.id} paths={site.test_paths} masks={site.test_masks} threshold={Number(site.diff_threshold)} />

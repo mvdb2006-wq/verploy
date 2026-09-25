@@ -9,10 +9,12 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-foreach ( array( 'verploy_site_id', 'verploy_secret', 'verploy_paired_at', 'verploy_last_heartbeat', 'verploy_api_key', 'verploy_last_heartbeat_legacy', 'verploy_run_lock', 'verploy_run_state', 'verploy_maintenance' ) as $verploy_option ) {
+foreach ( array( 'verploy_site_id', 'verploy_secret', 'verploy_paired_at', 'verploy_last_heartbeat', 'verploy_api_key', 'verploy_last_heartbeat_legacy', 'verploy_run_lock', 'verploy_run_state', 'verploy_maintenance', 'verploy_sso_enabled', 'verploy_sso_log' ) as $verploy_option ) {
 	delete_option( $verploy_option );
 }
 delete_transient( 'verploy_update_info' );
+global $wpdb;
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'verploy_sso_n_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- eenmalige inlognonces
 wp_clear_scheduled_hook( 'verploy_heartbeat' );
 
 // Tijdelijke run-bestanden en -tabellen (staging, backups, rollback-noodroute).

@@ -1175,5 +1175,27 @@
       "label": "Elke ochtend om 07:00 een kort overzicht van de afgelopen nacht",
       "body": "Wat Verploy live zette, wat is tegengehouden en wat op je wacht. Alleen als er iets te melden is."
     }
+  },
+  "wpLogin": {
+    "button": "Inloggen in WP Admin",
+    "redirecting": "Je wordt ingelogd als {user}…",
+    "continue": "Doorgaan",
+    "title": "Inloggen in WP Admin",
+    "intro": "Eigenaren en beheerders van je bureau loggen met één klik in als WordPress-beheerder, zonder wachtwoord. Elke login wordt vastgelegd, hier en op de site. De site-eigenaar kan het uitzetten in WordPress (Instellingen → Verploy).",
+    "disabledOnSite": "Op deze site staat inloggen vanuit Verploy uit (in WordPress, Instellingen → Verploy). De knop gaat dan naar het gewone inlogscherm.",
+    "asUser": "Inloggen als",
+    "firstAdmin": "Eerste beheerder ({login})",
+    "recent": "Laatste logins",
+    "none": "Nog niemand heeft zo ingelogd.",
+    "entry": "{at}: {email} als {user}",
+    "errors": {
+      "forbidden": "Alleen eigenaren en beheerders van het bureau kunnen met één klik inloggen.",
+      "not_connected": "Deze site is niet gekoppeld.",
+      "connector_outdated": "Hiervoor is Verploy Connector 2.5 of nieuwer nodig. Werk de connector bij (dat gaat vanzelf met automatische veilige updates).",
+      "sso_disabled": "Op deze site staat inloggen vanuit Verploy uit (in WordPress, Instellingen → Verploy).",
+      "no_admin": "Verploy kent nog geen beheerder van deze site. Probeer het na de volgende heartbeat (binnen 15 minuten) opnieuw.",
+      "rate_limited": "Te veel logins in korte tijd. Probeer het over een paar minuten opnieuw.",
+      "failed": "Inloggen is niet gelukt. Probeer het opnieuw, of log gewoon in via WP Admin."
+    }
   }
 }

@@ -1175,5 +1175,27 @@
       "label": "Jeden Morgen um 07:00 ein kurzer Überblick über die letzte Nacht",
       "body": "Was Verploy live gestellt hat, was zurückgehalten wurde und was auf dich wartet. Nur wenn es etwas zu melden gibt."
     }
+  },
+  "wpLogin": {
+    "button": "In WP Admin anmelden",
+    "redirecting": "Du wirst als {user} angemeldet…",
+    "continue": "Weiter",
+    "title": "In WP Admin anmelden",
+    "intro": "Inhaber und Admins deiner Agentur melden sich mit einem Klick als WordPress-Administrator an, ohne Passwort. Jede Anmeldung wird protokolliert, hier und auf der Website. Der Website-Inhaber kann es in WordPress abschalten (Einstellungen → Verploy).",
+    "disabledOnSite": "Auf dieser Website ist die Anmeldung aus Verploy abgeschaltet (in WordPress, Einstellungen → Verploy). Der Button führt dann zur normalen Anmeldeseite.",
+    "asUser": "Anmelden als",
+    "firstAdmin": "Erster Administrator ({login})",
+    "recent": "Letzte Anmeldungen",
+    "none": "Noch niemand hat sich so angemeldet.",
+    "entry": "{at}: {email} als {user}",
+    "errors": {
+      "forbidden": "Nur Inhaber und Admins der Agentur können sich mit einem Klick anmelden.",
+      "not_connected": "Diese Website ist nicht verbunden.",
+      "connector_outdated": "Dafür ist Verploy Connector 2.5 oder neuer nötig. Aktualisiere den Connector (automatische sichere Updates erledigen das).",
+      "sso_disabled": "Auf dieser Website ist die Anmeldung aus Verploy abgeschaltet (in WordPress, Einstellungen → Verploy).",
+      "no_admin": "Verploy kennt noch keinen Administrator dieser Website. Versuche es nach dem nächsten Heartbeat (innerhalb von 15 Minuten) erneut.",
+      "rate_limited": "Zu viele Anmeldungen in kurzer Zeit. Versuche es in ein paar Minuten erneut.",
+      "failed": "Die Anmeldung hat nicht geklappt. Versuche es erneut oder melde dich wie gewohnt in WP Admin an."
+    }
   }
 }

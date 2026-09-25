@@ -252,3 +252,23 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
 - **Precies één keer per dag:** `claim_daily_digests` claimt atomair (`digest_sent_at`, SKIP LOCKED), en elke mail heeft een idempotency key per bureau, dag en ontvanger. De periode loopt vanaf de vorige mail, maximaal 48 uur terug.
 - **Zonder e-mailprovider** (geen `RESEND_API_KEY`) wordt niets geclaimd. De mail begint vanzelf zodra Resend is ingesteld.
 - **Opbouw:** de mail wordt puur samengesteld in `src/lib/digest/build.ts` en is getest. De worker haalt de gegevens op. Migratie `20261004000000_daily_digest` bevat alleen toevoegingen.
+
+## 25-09 — Inloggen in WP Admin met één klik (connector 2.5): gebouwd volgens de eisen van 24-09, na een onafhankelijke review
+- **Stroom:**
+  1. Een eigenaar of beheerder van het bureau klikt op een formulier (POST, alleen van de eigen app: Sec-Fetch-Site/Origin).
+  2. `start_wp_login` controleert rol, koppeling, connector ≥ 2.5, https en of het op de site aan staat. Het kiest de beheerder: de per site gekozen beheerder, anders de eerste beheerder uit de laatste heartbeat. Het legt de login vast in `wp_logins` en geeft een willekeurige nonce terug.
+  3. De app ondertekent het token met het site-secret.
+  4. De browser post het token naar `wp-login.php?action=verploy_sso`. Het token komt nooit in een URL, logbestand of referrer.
+- **Token:** `base64url(JSON).hex(HMAC-SHA256(secret, "sso|"+payload))` met `site`, `aud` (adres van de site), `user`, `by`, `nonce`, `iat` en `exp`. Het is hooguit 60 s geldig. WordPress controleert de handtekening, de site, het adres (dus niet op een kloon), de geldigheid en dat de gebruiker `manage_options` heeft.
+- **Eenmalig, ook bij gelijktijdige verzoeken:** de nonce wordt atomair vastgelegd (`INSERT IGNORE` in de options-tabel), los van een object-cache. De engine-test stuurt vier verzoeken tegelijk en precies één lukt.
+- **Uitzetten en logboek:** nooit op een Verploy-testkopie. De site-eigenaar zet het uit onder Instellingen → Verploy, waar ook elke login staat (wie, als wie, wanneer, IP). Ook Verploy toont de laatste logins per site.
+- **Bewust geaccepteerd:**
+  - Zoals elke login zonder wachtwoord slaat dit een 2FA-plugin van de site over. Dat staat in de uitleg in WordPress en in de readme.
+  - De tegenmaatregel hoort aan de kant van Verploy: tweestapsverificatie voor Verploy-accounts, als volgende stap.
+  - Een beheerder van het bureau kan zichzelf een token geven en daarmee iemand anders stil in de eigen WordPress-site laten inloggen (login-CSRF). De impact is beperkt tot de eigen sites van dat bureau.
+- **Review:** onafhankelijk nagelopen vóór livegang. Opgelost uit die review:
+  - de race rond de nonce;
+  - tokens alleen via https;
+  - `aud` tegen kloons en testkopieën;
+  - `rel=noopener`;
+  - versievergelijking "2.5" = 2.5.0.

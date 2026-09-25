@@ -589,6 +589,7 @@ export type Database = {
           vulns_checked_seq: number | null
           vulns_checked_feed_at: string | null
           auto_updates: boolean
+          wp_login_user_id: number | null
         }
         Insert: {
           id?: string
@@ -624,6 +625,7 @@ export type Database = {
           vulns_checked_seq?: number | null
           vulns_checked_feed_at?: string | null
           auto_updates?: boolean
+          wp_login_user_id?: number | null
         }
         Update: {
           id?: string
@@ -659,6 +661,7 @@ export type Database = {
           vulns_checked_seq?: number | null
           vulns_checked_feed_at?: string | null
           auto_updates?: boolean
+          wp_login_user_id?: number | null
         }
         Relationships: []
       }
@@ -934,6 +937,40 @@ export type Database = {
         }
         Relationships: []
       }
+      wp_logins: {
+        Row: {
+          id: number
+          agency_id: string
+          site_id: string
+          user_id: string | null
+          user_email: string
+          wp_user_id: number
+          wp_user_login: string
+          nonce: string
+          created_at: string
+        }
+        Insert: {
+          agency_id: string
+          site_id: string
+          user_id?: string | null
+          user_email: string
+          wp_user_id: number
+          wp_user_login: string
+          nonce: string
+          created_at?: string
+        }
+        Update: {
+          agency_id?: string
+          site_id?: string
+          user_id?: string | null
+          user_email?: string
+          wp_user_id?: number
+          wp_user_login?: string
+          nonce?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
@@ -972,6 +1009,7 @@ export type Database = {
       sites_due_for_vulnerability_check: { Args: { p_limit?: number | null }; Returns: { site_id: string }[] }
       start_scheduled_update: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       start_security_fix: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
+      start_wp_login: { Args: { p_site: string | null }; Returns: { nonce: string; wp_user_id: number; wp_user_login: string; site_url: string; user_email: string }[] }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
       sync_site_vulnerabilities: { Args: { p_site: string | null; p_findings: Json | null; p_heartbeat_seq?: number | null; p_feed_at?: string | null }; Returns: number }
       sync_update_approvals: { Args: { p_site: string | null; p_items: Json | null }; Returns: undefined }

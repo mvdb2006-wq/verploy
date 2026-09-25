@@ -1,7 +1,7 @@
 /** Huidige release van Verploy Connector (direct-build), geserveerd door /api/v1/plugin/*. */
 export const CONNECTOR_RELEASE = {
-  version: '2.4.0',
-  file: 'verploy-connector-2.4.0.zip',
+  version: '2.5.0',
+  file: 'verploy-connector-2.5.0.zip',
   requiresWp: '5.8',
   testedWp: '7.1',
   requiresPhp: '7.4',

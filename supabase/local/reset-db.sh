@@ -20,4 +20,6 @@ P=(psql -h "$PG_HOST" -p "$PG_PORT" -U postgres -q -v ON_ERROR_STOP=1)
 for f in "$HERE"/../migrations/*.sql; do
   "${P[@]}" -d "$DB" -1 -f "$f"
 done
+# PostgREST moet de nieuwe functies en tabellen zien (anders: "not found in the schema cache").
+"${P[@]}" -d "$DB" -c "notify pgrst, 'reload schema'" >/dev/null
 echo "[reset-db] $DB klaar ($(ls "$HERE"/../migrations/*.sql | wc -l) migratie(s))"

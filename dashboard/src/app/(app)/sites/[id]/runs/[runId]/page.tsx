@@ -14,6 +14,7 @@ import { cn } from '@/lib/cn'
 import { AutoRefresh } from '@/components/AutoRefresh'
 import { CancelRun } from './cancel'
 import { RunSummary } from '@/components/runs/RunSummary'
+import { wpLoginSupported } from '@/components/WpAdminLink'
 import { itemOutcome, type ItemOutcome, type RunItem } from '@/lib/run-items'
 
 export async function generateMetadata() {
@@ -272,7 +273,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const { data: run } = await supabase.from('update_runs').select('*').eq('id', runId).eq('site_id', id).maybeSingle()
   if (!run) notFound()
   const [{ data: site }, { data: events }, { data: results }, { data: diagnosis }] = await Promise.all([
-    supabase.from('sites').select('id, name, url').eq('id', id).single(),
+    supabase.from('sites').select('id, name, url, connection_status, connector_version').eq('id', id).single(),
     supabase.from('update_run_events').select('id, step, level, message_key, params, created_at').eq('run_id', runId).order('id'),
     supabase.from('test_results').select('phase, page_key, page_label, page_url, viewport, http_status, passed, checks, screenshot_path, diff_path, diff_ratio, facts').eq('run_id', runId).order('id'),
     supabase.from('diagnoses').select('source, model, summary, cause, fix, culprit_name, confidence, evidence').eq('run_id', runId).maybeSingle(),
@@ -318,7 +319,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      {done && run.verdict && <RunSummary t={t} run={run} siteUrl={site?.url ?? ''} hasDiagnosis={Boolean(diagnosis)} />}
+      {done && run.verdict && <RunSummary t={t} run={run} siteId={id} siteUrl={site?.url ?? ''} wpLogin={site?.connection_status === 'connected' && wpLoginSupported(site?.connector_version)} hasDiagnosis={Boolean(diagnosis)} />}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
       {run.trigger === 'scheduled' && <Alert tone="info">{t('runs.detail.scheduledTrigger')}</Alert>}
