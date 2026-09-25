@@ -1200,7 +1200,34 @@
       "sso_disabled": "La connexion depuis Verploy est désactivée sur ce site (dans WordPress, Réglages → Verploy).",
       "no_admin": "Verploy ne connaît pas encore d’administrateur de ce site. Réessayez après le prochain heartbeat (dans les 15 minutes).",
       "rate_limited": "Trop de connexions en peu de temps. Réessayez dans quelques minutes.",
-      "failed": "La connexion a échoué. Réessayez, ou connectez-vous à WP Admin comme d’habitude."
-    }
+      "failed": "La connexion a échoué. Réessayez, ou connectez-vous à WP Admin comme d’habitude.",
+      "mfa_required": "La connexion en un clic nécessite l’authentification à deux facteurs. Activez-la dans Réglages → Mon compte."
+    },
+    "needsMfa": "Connexion en un clic ? Activez d’abord l’authentification à deux facteurs."
+  },
+  "mfa": {
+    "tab": "Mon compte",
+    "pageTitle": "Mon compte",
+    "emailTitle": "Adresse e-mail",
+    "title": "Authentification à deux facteurs",
+    "intro": "En plus de votre mot de passe, Verploy demande à la connexion un code d’une application sur votre téléphone (par exemple Google Authenticator, Microsoft Authenticator ou 1Password). Ainsi, personne ne peut accéder à vos sites avec votre seul mot de passe. Nécessaire pour la connexion en un clic à WP Admin.",
+    "offBody": "L’authentification à deux facteurs est désactivée.",
+    "enable": "Activer l’authentification à deux facteurs",
+    "on": "L’authentification à deux facteurs est activée",
+    "onBody": "À la connexion, Verploy demande un code de votre application après votre mot de passe.",
+    "disable": "Désactiver",
+    "step1": "Scannez le QR code avec votre application d’authentification.",
+    "step2": "Saisissez le code à 6 chiffres affiché dans l’application.",
+    "qrAlt": "QR code pour votre application d’authentification",
+    "manual": "Impossible de scanner ? Saisissez cette clé manuellement :",
+    "code": "Code de l’application",
+    "confirm": "Confirmer",
+    "errorStart": "L’activation a échoué. Veuillez réessayer.",
+    "errorCode": "Ce code est incorrect ou expiré. Essayez le dernier code de l’application.",
+    "errorDisable": "La désactivation a échoué. Reconnectez-vous avec votre code et réessayez.",
+    "loginTitle": "Code de votre application",
+    "loginSubtitle": "Saisissez le code à 6 chiffres de votre application d’authentification.",
+    "loginSubmit": "Se connecter",
+    "lost": "Téléphone perdu ? Contactez support@verploy.com ; après vérification, nous vous aiderons à récupérer l’accès."
   }
 }

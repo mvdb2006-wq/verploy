@@ -1200,7 +1200,34 @@
       "sso_disabled": "Auf dieser Website ist die Anmeldung aus Verploy abgeschaltet (in WordPress, Einstellungen → Verploy).",
       "no_admin": "Verploy kennt noch keinen Administrator dieser Website. Versuche es nach dem nächsten Heartbeat (innerhalb von 15 Minuten) erneut.",
       "rate_limited": "Zu viele Anmeldungen in kurzer Zeit. Versuche es in ein paar Minuten erneut.",
-      "failed": "Die Anmeldung hat nicht geklappt. Versuche es erneut oder melde dich wie gewohnt in WP Admin an."
-    }
+      "failed": "Die Anmeldung hat nicht geklappt. Versuche es erneut oder melde dich wie gewohnt in WP Admin an.",
+      "mfa_required": "Für die Anmeldung mit einem Klick ist die Zwei-Faktor-Authentifizierung nötig. Schalte sie unter Einstellungen → Mein Konto ein."
+    },
+    "needsMfa": "Mit einem Klick anmelden? Schalte zuerst die Zwei-Faktor-Authentifizierung ein."
+  },
+  "mfa": {
+    "tab": "Mein Konto",
+    "pageTitle": "Mein Konto",
+    "emailTitle": "E-Mail-Adresse",
+    "title": "Zwei-Faktor-Authentifizierung",
+    "intro": "Zusätzlich zu deinem Passwort fragt Verploy beim Anmelden nach einem Code aus einer App auf deinem Telefon (z. B. Google Authenticator, Microsoft Authenticator oder 1Password). So kommt niemand nur mit deinem Passwort an deine Websites. Erforderlich für die Anmeldung in WP Admin mit einem Klick.",
+    "offBody": "Die Zwei-Faktor-Authentifizierung ist aus.",
+    "enable": "Zwei-Faktor-Authentifizierung einschalten",
+    "on": "Die Zwei-Faktor-Authentifizierung ist an",
+    "onBody": "Beim Anmelden fragt Verploy nach deinem Passwort einen Code aus deiner App ab.",
+    "disable": "Ausschalten",
+    "step1": "Scanne den QR-Code mit deiner Authenticator-App.",
+    "step2": "Gib den 6-stelligen Code aus der App ein.",
+    "qrAlt": "QR-Code für deine Authenticator-App",
+    "manual": "Scannen klappt nicht? Gib diesen Schlüssel manuell ein:",
+    "code": "Code aus der App",
+    "confirm": "Bestätigen",
+    "errorStart": "Das Einschalten hat nicht geklappt. Bitte versuche es erneut.",
+    "errorCode": "Dieser Code ist falsch oder abgelaufen. Versuche den neuesten Code aus der App.",
+    "errorDisable": "Das Ausschalten hat nicht geklappt. Melde dich erneut mit deinem Code an und versuche es noch einmal.",
+    "loginTitle": "Code aus deiner App",
+    "loginSubtitle": "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
+    "loginSubmit": "Anmelden",
+    "lost": "Telefon verloren? Wende dich an support@verploy.com; nach einer Prüfung helfen wir dir weiter."
   }
 }

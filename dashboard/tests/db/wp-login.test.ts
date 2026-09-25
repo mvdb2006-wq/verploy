@@ -13,12 +13,17 @@ async function setup(db: Db, raw: Record<string, unknown> = { admins: ADMINS, ss
   await db.query(`insert into public.health_snapshots (agency_id, site_id, captured_at, raw) values ($1, $2, now(), $3)`, [a.id, site, JSON.stringify(raw)])
   return { a, site }
 }
+/** Ingelogd mét tweestapsverificatie (aal2), tenzij anders gezegd. */
+async function as(db: Db, who: { id: string; email?: string }, aal = 'aal2') {
+  await actAs(db, { role: 'authenticated', email: '', ...who })
+  await db.query(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: who.id, role: 'authenticated', email: who.email ?? '', aud: 'authenticated', aal })])
+}
 async function start(db: Db, who: { id: string; email?: string }, site: string) {
-  await actAs(db, { role: 'authenticated', ...who })
+  await as(db, who)
   try { return (await db.query(`select * from public.start_wp_login($1)`, [site])).rows[0] } finally { await asSuper(db) }
 }
-async function startError(db: Db, who: { id: string }, site: string) {
-  await actAs(db, { role: 'authenticated', ...who })
+async function startError(db: Db, who: { id: string }, site: string, aal = 'aal2') {
+  await as(db, who, aal)
   try { return (await expectError(db, `select * from public.start_wp_login('${site}')`)).message } finally { await asSuper(db) }
 }
 
@@ -43,6 +48,14 @@ describe('inloggen in WP Admin', () => {
       expect((await start(db, a.admin, site)).wp_user_login).toBe('klant')
       await db.query(`update public.sites set wp_login_user_id = 99 where id = $1`, [site])
       expect((await start(db, a.admin, site)).wp_user_login).toBe('bureau')
+    }))
+
+  it('zonder tweestapsverificatie in deze sessie (aal1): geweigerd', () =>
+    inTx(async db => {
+      const { a, site } = await setup(db)
+      expect(await startError(db, a.owner, site, 'aal1')).toContain('mfa_required')
+      const log = await db.query(`select count(*)::int n from public.wp_logins where site_id = $1`, [site])
+      expect(log.rows[0].n).toBe(0)
     }))
 
   it('lid, ander bureau of anoniem: geweigerd', () =>

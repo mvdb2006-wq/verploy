@@ -61,3 +61,15 @@ export async function sendHeartbeat(context: BrowserContext, wpUrl = WP) {
   await expect(wp.locator('.notice-success')).toContainText('Verbinding werkt')
   await wp.close()
 }
+
+/** Zet tweestapsverificatie aan via Instellingen → Mijn account en geeft de geheime sleutel terug. */
+export async function enableTwoFactor(page: Page): Promise<string> {
+  const { totp } = await import('./totp')
+  await page.goto('/settings/account')
+  await page.getByRole('button', { name: 'Tweestapsverificatie aanzetten' }).click()
+  const secret = (await page.getByTestId('mfa-secret').textContent())!.trim()
+  await page.getByLabel('Code uit de app').fill(totp(secret))
+  await page.getByRole('button', { name: 'Bevestigen' }).click()
+  await expect(page.getByText('Tweestapsverificatie staat aan')).toBeVisible()
+  return secret
+}

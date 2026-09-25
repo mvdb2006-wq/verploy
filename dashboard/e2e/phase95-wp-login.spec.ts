@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { LAB_DIR, LAB_WP, LAB_WP_DIR, db } from './support/env'
-import { addAndPairWordPress, signupWithAgency } from './support/flows'
+import { addAndPairWordPress, enableTwoFactor, signupWithAgency } from './support/flows'
 
 /**
  * "Inloggen in WP Admin" met één klik (connector 2.5), zonder wachtwoord:
@@ -26,6 +26,12 @@ test('één klik: ingelogd in WP Admin als de beheerder, vastgelegd in Verploy e
   await signupWithAgency(page, owner, `WP-login ${run}`)
   const siteId = await addAndPairWordPress(page, context, 'Lab-WordPress', LAB_WP)
   const adminLogin = wp('user', 'get', '1', '--field=user_login')
+
+  // Zonder tweestapsverificatie: gewone link en een hint (één klik vraagt 2FA in Verploy).
+  await page.goto(`/sites/${siteId}`)
+  await expect(page.getByRole('button', { name: 'Inloggen in WP Admin' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Met één klik inloggen? Zet eerst tweestapsverificatie aan.' })).toHaveAttribute('href', '/settings/account#two-factor')
+  await enableTwoFactor(page)
 
   await page.goto(`/sites/${siteId}`)
   const button = page.getByRole('button', { name: 'Inloggen in WP Admin' })

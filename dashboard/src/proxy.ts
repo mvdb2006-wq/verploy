@@ -48,6 +48,16 @@ export async function proxy(request: NextRequest) {
     url.search = path === '/' ? '' : `?next=${encodeURIComponent(path + request.nextUrl.search)}`
     return withLocale(NextResponse.redirect(url))
   }
+  // Tweestapsverificatie aan maar de code nog niet ingevoerd: eerst de tweede stap, ook voor API-routes van de app.
+  if (user && path !== '/login/2fa' && !path.startsWith('/api/') && !path.startsWith('/auth/')) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login/2fa'
+      url.search = path === '/' || path === '/login' ? '' : `?next=${encodeURIComponent(path + request.nextUrl.search)}`
+      return withLocale(NextResponse.redirect(url))
+    }
+  }
   if (user && (path === '/login' || path === '/signup')) {
     // Al ingelogd en een plan gekozen op verploy.com: meteen naar het abonnement, met dat plan voorgeselecteerd.
     const plan = path === '/signup' ? normalizePlanParam(request.nextUrl.searchParams.get('plan')) : null

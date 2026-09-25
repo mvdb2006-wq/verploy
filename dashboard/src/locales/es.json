@@ -1200,7 +1200,34 @@
       "sso_disabled": "El acceso desde Verploy está desactivado en este sitio (en WordPress, Ajustes → Verploy).",
       "no_admin": "Verploy aún no conoce ningún administrador de este sitio. Inténtalo tras el próximo heartbeat (en 15 minutos).",
       "rate_limited": "Demasiados accesos en poco tiempo. Inténtalo de nuevo en unos minutos.",
-      "failed": "No se pudo entrar. Inténtalo de nuevo o entra en WP Admin como siempre."
-    }
+      "failed": "No se pudo entrar. Inténtalo de nuevo o entra en WP Admin como siempre.",
+      "mfa_required": "Para entrar con un clic se necesita la verificación en dos pasos. Actívala en Ajustes → Mi cuenta."
+    },
+    "needsMfa": "¿Entrar con un clic? Activa primero la verificación en dos pasos."
+  },
+  "mfa": {
+    "tab": "Mi cuenta",
+    "pageTitle": "Mi cuenta",
+    "emailTitle": "Correo electrónico",
+    "title": "Verificación en dos pasos",
+    "intro": "Además de tu contraseña, Verploy te pide al iniciar sesión un código de una app en tu teléfono (por ejemplo Google Authenticator, Microsoft Authenticator o 1Password). Así nadie puede acceder a tus sitios solo con tu contraseña. Necesaria para entrar en WP Admin con un clic.",
+    "offBody": "La verificación en dos pasos está desactivada.",
+    "enable": "Activar la verificación en dos pasos",
+    "on": "La verificación en dos pasos está activada",
+    "onBody": "Al iniciar sesión, Verploy te pide un código de tu app después de la contraseña.",
+    "disable": "Desactivar",
+    "step1": "Escanea el código QR con tu app de autenticación.",
+    "step2": "Introduce el código de 6 dígitos que muestra la app.",
+    "qrAlt": "Código QR para tu app de autenticación",
+    "manual": "¿No puedes escanear? Introduce esta clave manualmente:",
+    "code": "Código de la app",
+    "confirm": "Confirmar",
+    "errorStart": "No se pudo activar. Inténtalo de nuevo.",
+    "errorCode": "Este código no es correcto o ha caducado. Prueba el código más reciente de la app.",
+    "errorDisable": "No se pudo desactivar. Vuelve a iniciar sesión con tu código e inténtalo otra vez.",
+    "loginTitle": "Código de tu app",
+    "loginSubtitle": "Introduce el código de 6 dígitos de tu app de autenticación.",
+    "loginSubmit": "Iniciar sesión",
+    "lost": "¿Has perdido el teléfono? Escribe a support@verploy.com; tras una comprobación te ayudamos a recuperar el acceso."
   }
 }

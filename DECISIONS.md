@@ -272,3 +272,12 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - `aud` tegen kloons en testkopieën;
   - `rel=noopener`;
   - versievergelijking "2.5" = 2.5.0.
+
+## 25-09 — Tweestapsverificatie voor Verploy-accounts; verplicht voor inloggen in WP Admin met één klik
+- **Techniek:** Supabase MFA met TOTP. Werkt met elke authenticator-app, zonder sms of extra dienst en zonder eigen opslag van geheimen.
+- **Aanzetten:** Instellingen → Mijn account. Daar scan je de QR-code en voer je één code in, die ook de huidige sessie bevestigt. Uitzetten kan alleen vanuit een bevestigde sessie; dat eist Supabase.
+- **Inloggen:**
+  - Na het wachtwoord volgt `/login/2fa`.
+  - Zolang de code niet is ingevoerd (aal1 terwijl aal2 kan), stuurt de proxy elke app-pagina en elk app-formulier terug naar die stap.
+- **Eén klik in WP Admin vraagt aal2** (`start_wp_login` → `mfa_required`). Zonder 2FA blijft de knop een gewone link, met een hint om het aan te zetten. Zo geeft een gestolen Verploy-wachtwoord geen toegang tot WP Admin; dit was de openstaande bevinding uit de security-review.
+- **Telefoon kwijt:** via support@verploy.com, na controle; beheer gaat via Supabase. Herstelcodes volgen later als dat nodig blijkt.

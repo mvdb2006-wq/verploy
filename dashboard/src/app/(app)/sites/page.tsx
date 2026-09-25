@@ -4,6 +4,7 @@ import { Alert } from '@/components/Alert'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { agencyIsWritable, canManage, requireAgency, trialDaysLeft } from '@/lib/session'
+import { mfaState } from '@/lib/mfa'
 import { daysAgoIso, effectiveStatus, formatRelative, requestNow } from '@/lib/format'
 import { SITE_FILTERS, buildSiteRows, type SiteFilter } from '@/lib/sites/list'
 import { SitesTable } from './SitesTable'
@@ -29,11 +30,13 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
     supabase.from('alerts').select('site_id, opened_at, resolved_at, params').eq('type', 'site_offline').or(`resolved_at.is.null,resolved_at.gte.${since30}`),
   ])
   const list = (sites ?? []).map(s => ({ ...s, effective: effectiveStatus(s, now) }))
+  // Eén klik in WP Admin: alleen eigenaar/beheerder met tweestapsverificatie in deze sessie.
+  const oneClick = canManage(session.role) && (await mfaState(supabase)).verified
   const rows = buildSiteRows(list, {
     updates: updates ?? [], alerts: alerts ?? [], vulns: vulns ?? [],
     activeRunSites: new Set((active ?? []).map(r => r.site_id)), lastRuns: lastRuns ?? [],
     offline: (offline ?? []).map(a => ({ site_id: a.site_id, opened_at: a.opened_at, resolved_at: a.resolved_at, since: (a.params as { since?: string } | null)?.since ?? null })),
-  }, now).map(r => ({ ...r, lastRunAgo: r.lastRun ? formatRelative(r.lastRun.at, locale, now) : null }))
+  }, now).map(r => ({ ...r, wpLogin: r.wpLogin && oneClick, lastRunAgo: r.lastRun ? formatRelative(r.lastRun.at, locale, now) : null }))
 
   const online = list.filter(s => s.effective === 'online').length
   const writable = agencyIsWritable(session.agency)

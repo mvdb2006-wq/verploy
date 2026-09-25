@@ -5,7 +5,7 @@ import { Alert } from '@/components/Alert'
 import { Field } from '@/components/Field'
 import { SubmitButton } from '@/components/SubmitButton'
 import { useI18n } from '@/lib/i18n/client'
-import { login, requestPasswordReset, signup, updatePassword, type FormState } from './actions'
+import { login, requestPasswordReset, signup, updatePassword, verifyTwoFactor, type FormState } from './actions'
 
 const initial: FormState = {}
 
@@ -87,6 +87,24 @@ export function UpdatePasswordForm() {
       </Field>
       <SubmitButton pendingLabel={t('common.saving')} className="w-full">{t('auth.reset.submit')}</SubmitButton>
       {state.ok && <Link href="/" className="btn btn-ghost w-full">{t('nav.sites')}</Link>}
+    </form>
+  )
+}
+
+export function TwoFactorForm({ next, factorId }: { next: string; factorId: string }) {
+  const { t } = useI18n()
+  const [state, action] = useActionState(verifyTwoFactor, initial)
+  return (
+    <form action={action} className="space-y-4" noValidate>
+      <input type="hidden" name="next" value={next} />
+      <input type="hidden" name="factor_id" value={factorId} />
+      {state.error && <Alert>{state.error}</Alert>}
+      <Field id="code" label={t('mfa.code')}>
+        <input id="code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} required autoFocus
+          className="input font-mono tracking-widest" />
+      </Field>
+      <SubmitButton pendingLabel={t('auth.login.submitting')}>{t('mfa.loginSubmit')}</SubmitButton>
+      <p className="text-xs text-subtle">{t('mfa.lost')}</p>
     </form>
   )
 }

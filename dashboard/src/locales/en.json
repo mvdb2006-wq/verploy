@@ -1200,7 +1200,34 @@
       "sso_disabled": "Logging in from Verploy is turned off on this site (in WordPress, Settings → Verploy).",
       "no_admin": "Verploy does not know an administrator of this site yet. Try again after the next heartbeat (within 15 minutes).",
       "rate_limited": "Too many logins in a short time. Try again in a few minutes.",
-      "failed": "Logging in did not work. Try again, or log in via WP Admin as usual."
-    }
+      "failed": "Logging in did not work. Try again, or log in via WP Admin as usual.",
+      "mfa_required": "One-click login requires two-factor authentication. Turn it on under Settings → My account."
+    },
+    "needsMfa": "Want one-click login? Turn on two-factor authentication first."
+  },
+  "mfa": {
+    "tab": "My account",
+    "pageTitle": "My account",
+    "emailTitle": "Email address",
+    "title": "Two-factor authentication",
+    "intro": "Besides your password, Verploy asks for a code from an app on your phone when you log in (for example Google Authenticator, Microsoft Authenticator or 1Password). That way nobody can reach your sites with just your password. Required for one-click login to WP Admin.",
+    "offBody": "Two-factor authentication is off.",
+    "enable": "Turn on two-factor authentication",
+    "on": "Two-factor authentication is on",
+    "onBody": "When you log in, Verploy asks for a code from your app after your password.",
+    "disable": "Turn off",
+    "step1": "Scan the QR code with your authenticator app.",
+    "step2": "Enter the 6-digit code shown in the app.",
+    "qrAlt": "QR code for your authenticator app",
+    "manual": "Can't scan? Enter this key manually:",
+    "code": "Code from the app",
+    "confirm": "Confirm",
+    "errorStart": "Turning on two-factor authentication failed. Please try again.",
+    "errorCode": "This code is incorrect or has expired. Try the latest code from the app.",
+    "errorDisable": "Turning it off failed. Log in again with your code and try once more.",
+    "loginTitle": "Code from your app",
+    "loginSubtitle": "Enter the 6-digit code from your authenticator app.",
+    "loginSubmit": "Log in",
+    "lost": "Lost your phone? Contact support@verploy.com; after a check we will help you get back in."
   }
 }

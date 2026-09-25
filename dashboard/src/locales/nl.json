@@ -1200,7 +1200,34 @@
       "sso_disabled": "Op deze site staat inloggen vanuit Verploy uit (in WordPress, Instellingen → Verploy).",
       "no_admin": "Verploy kent nog geen beheerder van deze site. Probeer het na de volgende heartbeat (binnen 15 minuten) opnieuw.",
       "rate_limited": "Te veel logins in korte tijd. Probeer het over een paar minuten opnieuw.",
-      "failed": "Inloggen is niet gelukt. Probeer het opnieuw, of log gewoon in via WP Admin."
-    }
+      "failed": "Inloggen is niet gelukt. Probeer het opnieuw, of log gewoon in via WP Admin.",
+      "mfa_required": "Voor inloggen met één klik is tweestapsverificatie nodig. Zet die aan bij Instellingen → Mijn account."
+    },
+    "needsMfa": "Met één klik inloggen? Zet eerst tweestapsverificatie aan."
+  },
+  "mfa": {
+    "tab": "Mijn account",
+    "pageTitle": "Mijn account",
+    "emailTitle": "E-mailadres",
+    "title": "Tweestapsverificatie",
+    "intro": "Naast je wachtwoord vraagt Verploy bij het inloggen een code uit een app op je telefoon (bijvoorbeeld Google Authenticator, Microsoft Authenticator of 1Password). Zo kan niemand met alleen je wachtwoord bij je sites. Nodig voor inloggen in WP Admin met één klik.",
+    "offBody": "Tweestapsverificatie staat uit.",
+    "enable": "Tweestapsverificatie aanzetten",
+    "on": "Tweestapsverificatie staat aan",
+    "onBody": "Bij het inloggen vraagt Verploy na je wachtwoord een code uit je app.",
+    "disable": "Uitzetten",
+    "step1": "Scan de QR-code met je authenticator-app.",
+    "step2": "Vul de code van 6 cijfers in die de app toont.",
+    "qrAlt": "QR-code voor je authenticator-app",
+    "manual": "Lukt scannen niet? Voer deze sleutel handmatig in:",
+    "code": "Code uit de app",
+    "confirm": "Bevestigen",
+    "errorStart": "Tweestapsverificatie aanzetten lukte niet. Probeer het opnieuw.",
+    "errorCode": "Deze code klopt niet of is verlopen. Probeer de nieuwste code uit de app.",
+    "errorDisable": "Uitzetten lukte niet. Log opnieuw in met je code en probeer het nog eens.",
+    "loginTitle": "Code uit je app",
+    "loginSubtitle": "Vul de code van 6 cijfers uit je authenticator-app in.",
+    "loginSubmit": "Inloggen",
+    "lost": "Telefoon kwijt? Neem contact op met support@verploy.com; we helpen je na controle weer op weg."
   }
 }

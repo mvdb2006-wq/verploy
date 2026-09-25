@@ -16,6 +16,7 @@ import { UpdatesPanel } from './updates'
 import { WpLoginSettings, type WpAdmin } from './wp-login'
 import { WpAdminLink, wpLoginSupported } from '@/components/WpAdminLink'
 import { Alert } from '@/components/Alert'
+import { mfaState } from '@/lib/mfa'
 import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
 import { ClientReports } from './client-reports'
@@ -104,6 +105,9 @@ export default async function SitePage({ params, searchParams }: { params: Promi
   const wpAdmins = Array.isArray(rawSnap.admins) ? rawSnap.admins : []
   const wpLogin = site.connection_status === 'connected' && wpLoginSupported(site.connector_version) && wpAdmins.length > 0
   const wpLoginOnSite = rawSnap.sso?.enabled !== false
+  // Eén klik vraagt tweestapsverificatie in Verploy; zonder die blijft het de gewone link, met een hint.
+  const mfa = wpLogin && canManage(session.role) ? await mfaState(supabase) : null
+  const oneClick = wpLogin && wpLoginOnSite && canManage(session.role) && Boolean(mfa?.verified)
   const connected = site.connection_status === 'connected'
   const manage = canManage(session.role)
   const activeRun = (runs ?? []).find(r => r.status !== 'done') ?? null
@@ -136,9 +140,14 @@ export default async function SitePage({ params, searchParams }: { params: Promi
             {site.client_name && <p className="mt-1 text-sm text-subtle">{t('siteDetail.client')}: {site.client_name}</p>}
             {connected && (
               <div className="mt-3">
-                <WpAdminLink siteId={site.id} siteUrl={site.url} sso={wpLogin && wpLoginOnSite && manage} className="btn btn-ghost px-3 py-1.5 text-sm">
-                  {wpLogin && wpLoginOnSite && manage ? t('wpLogin.button') : 'WP Admin'} <ExternalLink size={13} aria-hidden />
+                <WpAdminLink siteId={site.id} siteUrl={site.url} sso={oneClick} className="btn btn-ghost px-3 py-1.5 text-sm">
+                  {oneClick ? t('wpLogin.button') : 'WP Admin'} <ExternalLink size={13} aria-hidden />
                 </WpAdminLink>
+                {wpLogin && wpLoginOnSite && manage && !mfa?.verified && (
+                  <p className="mt-1.5 text-xs text-muted">
+                    <Link href="/settings/account#two-factor" className="text-accent hover:underline">{t('wpLogin.needsMfa')}</Link>
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -154,7 +163,7 @@ export default async function SitePage({ params, searchParams }: { params: Promi
         </div>
       </div>
 
-      {wpLoginError && <Alert>{t(`wpLogin.errors.${['forbidden', 'not_connected', 'connector_outdated', 'sso_disabled', 'no_admin', 'rate_limited', 'insecure_url'].includes(wpLoginError) ? wpLoginError : 'failed'}` as MessageKey)}</Alert>}
+      {wpLoginError && <Alert>{t(`wpLogin.errors.${['forbidden', 'not_connected', 'connector_outdated', 'sso_disabled', 'no_admin', 'rate_limited', 'insecure_url', 'mfa_required'].includes(wpLoginError) ? wpLoginError : 'failed'}` as MessageKey)}</Alert>}
 
       {!connected && manage && <PairingPanel siteId={site.id} connected={false} />}
 

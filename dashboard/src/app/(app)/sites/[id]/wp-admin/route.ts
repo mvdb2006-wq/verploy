@@ -18,7 +18,7 @@ function sameOrigin(req: NextRequest): boolean {
   try { return new URL(origin).host === host } catch { return false }
 }
 
-const KNOWN = ['forbidden', 'not_connected', 'connector_outdated', 'sso_disabled', 'no_admin', 'rate_limited', 'insecure_url']
+const KNOWN = ['forbidden', 'not_connected', 'connector_outdated', 'sso_disabled', 'no_admin', 'rate_limited', 'insecure_url', 'mfa_required']
 
 /**
  * "Inloggen in WP Admin": de database controleert rechten en kiest de beheerder (start_wp_login),

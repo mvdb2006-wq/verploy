@@ -24,6 +24,22 @@ export async function login(_: FormState, form: FormData): Promise<FormState> {
   if (error) {
     return { error: error.code === 'email_not_confirmed' ? t('auth.login.errorUnconfirmed') : t('auth.login.errorInvalid'), email: parsed.data.email }
   }
+  const next = safeNext(String(form.get('next') ?? ''), '/')
+  // Tweestapsverificatie aan: eerst de code uit de app.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') redirect(`/login/2fa${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`)
+  redirect(next)
+}
+
+/** Tweede stap: de code uit de authenticator-app (maakt de sessie aal2). */
+export async function verifyTwoFactor(_: FormState, form: FormData): Promise<FormState> {
+  const t = await getT()
+  const code = String(form.get('code') ?? '').replace(/\s/g, '')
+  const factorId = String(form.get('factor_id') ?? '')
+  if (!/^\d{6}$/.test(code) || !factorId) return { error: t('mfa.errorCode') }
+  const supabase = await createClient()
+  const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
+  if (error) return { error: t('mfa.errorCode') }
   redirect(safeNext(String(form.get('next') ?? ''), '/'))
 }
 

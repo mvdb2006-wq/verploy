@@ -15,6 +15,7 @@ import { AutoRefresh } from '@/components/AutoRefresh'
 import { CancelRun } from './cancel'
 import { RunSummary } from '@/components/runs/RunSummary'
 import { wpLoginSupported } from '@/components/WpAdminLink'
+import { mfaState } from '@/lib/mfa'
 import { itemOutcome, type ItemOutcome, type RunItem } from '@/lib/run-items'
 
 export async function generateMetadata() {
@@ -319,7 +320,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      {done && run.verdict && <RunSummary t={t} run={run} siteId={id} siteUrl={site?.url ?? ''} wpLogin={site?.connection_status === 'connected' && wpLoginSupported(site?.connector_version)} hasDiagnosis={Boolean(diagnosis)} />}
+      {done && run.verdict && <RunSummary t={t} run={run} siteId={id} siteUrl={site?.url ?? ''} wpLogin={site?.connection_status === 'connected' && wpLoginSupported(site?.connector_version) && (await mfaState(supabase)).verified} hasDiagnosis={Boolean(diagnosis)} />}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
       {run.trigger === 'scheduled' && <Alert tone="info">{t('runs.detail.scheduledTrigger')}</Alert>}
