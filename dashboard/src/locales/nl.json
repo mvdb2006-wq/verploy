@@ -325,6 +325,10 @@
       "update_partial": {
         "title": "Update vraagt aandacht: {items}",
         "body": "{deployed} van {total} updates zijn getest en live gezet; je site werkt normaal. De live versie van de rest is niet gewijzigd."
+      },
+      "update_approval": {
+        "title": "{count, plural, one {Update wacht} other {# updates wachten}} op je akkoord: {items}",
+        "body": "Een grote versiesprong kan meer veranderen dan een gewone update. Verploy voert deze pas uit na jouw akkoord, en test ook dan eerst op een kopie van de site."
       }
     },
     "sslError": {
@@ -496,6 +500,7 @@
       "beforeUpdate": "Vóór",
       "afterUpdate": "Na",
       "diff": "Verschil",
+      "dynamicIgnored": "Blauw in het verschilbeeld: delen die ook zonder update steeds veranderen (slider, video, wisselende foto's), {percent}% van de pagina. Die tellen niet mee.",
       "passed": "Geslaagd",
       "failed": "Gezakt",
       "loginPage": "Inlogpagina",
@@ -504,7 +509,8 @@
       "queueAhead": "Er {count, plural, one {staat nog # update} other {staan nog # updates}} vóór deze in de wachtrij. Verploy voert er een paar tegelijk uit; deze start zodra er plek is.",
       "queueNext": "Start binnen enkele seconden.",
       "queueRetry": "Verploy probeert het om {time} opnieuw.",
-      "outcome": "Uitkomst"
+      "outcome": "Uitkomst",
+      "scheduledTrigger": "Automatisch gestart door Verploy (geplande veilige update)."
     },
     "events": {
       "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",
@@ -542,7 +548,8 @@
       "functional_baseline": "Functionele nulmeting: {ok} van {total} tests werken (formulieren: {forms}, webwinkel: {shop}).",
       "functional_unsupported": "Formulieren en webwinkel niet getest: werk Verploy Connector bij naar 2.4 of nieuwer.",
       "functional_passed": "Functionele tests na de update: {ok} van {total} werken, niets is achteruitgegaan.",
-      "functional_failed": "Functionele tests na de update: werkt niet meer: {failed}."
+      "functional_failed": "Functionele tests na de update: werkt niet meer: {failed}.",
+      "queued_scheduled": "{count, plural, one {# update} other {# updates}} automatisch ingepland door Verploy (geplande veilige update)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1009,7 +1016,8 @@
       "empty": "Er lopen nu geen updates.",
       "queued": "In de wachtrij",
       "security": "Beveiligingslek",
-      "progress": "Voortgang van de update op {site}"
+      "progress": "Voortgang van de update op {site}",
+      "scheduled": "Gepland"
     },
     "inbox": {
       "title": "Wacht op jou",
@@ -1077,7 +1085,8 @@
       "alertOpened": "Melding: {title}",
       "alertResolved": "Opgelost: {title}",
       "auto": "automatisch",
-      "runAttention": "{items} vraagt aandacht"
+      "runAttention": "{items} vraagt aandacht",
+      "scheduled": "gepland"
     },
     "dur": {
       "d": "{n} d",
@@ -1108,5 +1117,41 @@
     "updating": "Wordt bijgewerkt",
     "noResults": "Geen sites gevonden.",
     "wpAdminFor": "WP Admin van {site} openen (nieuw tabblad)"
+  },
+  "autoUpdates": {
+    "title": "Automatische veilige updates",
+    "intro": "Verploy houdt je sites zelf bij, op een rustig moment. Elke update wordt eerst getest op een kopie van de site.",
+    "on": "Aan",
+    "onBody": "Verploy voert updates zelf veilig uit en vraagt alleen iets als het echt nodig is.",
+    "off": "Uit",
+    "offBody": "Je start updates zelf. Verploy test ze dan net zo veilig.",
+    "moment": "Moment",
+    "windows": {
+      "night": "Nacht (01:00–05:00)",
+      "morning": "Vroege ochtend (06:00–08:00)",
+      "evening": "Avond (20:00–23:00)"
+    },
+    "windowsShort": {
+      "night": "'s nachts",
+      "morning": "'s ochtends vroeg",
+      "evening": "'s avonds"
+    },
+    "frequency": "Hoe vaak",
+    "frequencies": {
+      "daily": "elke dag",
+      "weekly": "eens per week"
+    },
+    "timezone": "Tijden in jouw tijdzone ({timezone}).",
+    "how": "Gewone updates zet Verploy na een geslaagde test zelf live. Grote versiesprongen en nieuwe hoofdversies van WordPress vragen eerst één keer je akkoord in de inbox. Wat tegengehouden wordt, blijft staan tot jij ernaar kijkt. Lekken gaan altijd voor.",
+    "approveButton": "{count, plural, one {Veilig uitvoeren} other {Alle # veilig uitvoeren}}",
+    "site": {
+      "on": "Automatisch bijgewerkt: {moment}, {frequency}",
+      "off": "Deze site wordt nooit automatisch bijgewerkt",
+      "onBody": "Eerst getest op een kopie, pas daarna live.",
+      "offBody": "Uitzondering op de instelling van je bureau: je start updates voor deze site zelf.",
+      "settings": "Instellingen",
+      "exclude": "Nooit automatisch",
+      "include": "Weer automatisch"
+    }
   }
 }

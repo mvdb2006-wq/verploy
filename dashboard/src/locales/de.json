@@ -325,6 +325,10 @@
       "update_partial": {
         "title": "Update braucht Aufmerksamkeit: {items}",
         "body": "{deployed} von {total} Updates wurden getestet und live gesetzt; deine Website funktioniert normal. Die Live-Version der übrigen wurde nicht verändert."
+      },
+      "update_approval": {
+        "title": "{count, plural, one {Update wartet} other {# Updates warten}} auf deine Zustimmung: {items}",
+        "body": "Ein großer Versionssprung kann mehr verändern als ein normales Update. Verploy führt es erst nach deiner Zustimmung aus und testet auch dann zuerst auf einer Kopie der Website."
       }
     },
     "sslError": {
@@ -496,6 +500,7 @@
       "beforeUpdate": "Vorher",
       "afterUpdate": "Nachher",
       "diff": "Unterschied",
+      "dynamicIgnored": "Blau im Differenzbild: Bereiche, die sich auch ohne Update ständig ändern (Slider, Video, wechselnde Fotos), {percent} % der Seite. Sie zählen nicht mit.",
       "passed": "Bestanden",
       "failed": "Nicht bestanden",
       "loginPage": "Anmeldeseite",
@@ -504,7 +509,8 @@
       "queueAhead": "Vor diesem {count, plural, one {wartet noch # Update} other {warten noch # Updates}} in der Warteschlange. Verploy führt einige gleichzeitig aus; dieses startet, sobald Platz frei ist.",
       "queueNext": "Startet in wenigen Sekunden.",
       "queueRetry": "Verploy versucht es um {time} erneut.",
-      "outcome": "Ergebnis"
+      "outcome": "Ergebnis",
+      "scheduledTrigger": "Automatisch von Verploy gestartet (geplantes sicheres Update)."
     },
     "events": {
       "queued": "{count, plural, one {Update eingeplant} other {# Updates eingeplant}}.",
@@ -542,7 +548,8 @@
       "functional_baseline": "Funktionale Nullmessung: {ok} von {total} Tests funktionieren (Formulare: {forms}, Shop: {shop}).",
       "functional_unsupported": "Formulare und Shop nicht getestet: aktualisiere Verploy Connector auf 2.4 oder neuer.",
       "functional_passed": "Funktionale Tests nach dem Update: {ok} von {total} funktionieren, nichts hat sich verschlechtert.",
-      "functional_failed": "Funktionale Tests nach dem Update: funktioniert nicht mehr: {failed}."
+      "functional_failed": "Funktionale Tests nach dem Update: funktioniert nicht mehr: {failed}.",
+      "queued_scheduled": "{count, plural, one {# Update} other {# Updates}} automatisch von Verploy eingeplant (geplantes sicheres Update)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1009,7 +1016,8 @@
       "empty": "Gerade laufen keine Updates.",
       "queued": "In der Warteschlange",
       "security": "Sicherheitslücke",
-      "progress": "Fortschritt des Updates auf {site}"
+      "progress": "Fortschritt des Updates auf {site}",
+      "scheduled": "Geplant"
     },
     "inbox": {
       "title": "Wartet auf dich",
@@ -1077,7 +1085,8 @@
       "alertOpened": "Meldung: {title}",
       "alertResolved": "Behoben: {title}",
       "auto": "automatisch",
-      "runAttention": "{items} braucht Aufmerksamkeit"
+      "runAttention": "{items} braucht Aufmerksamkeit",
+      "scheduled": "geplant"
     },
     "dur": {
       "d": "{n} T",
@@ -1108,5 +1117,41 @@
     "updating": "Wird aktualisiert",
     "noResults": "Keine Websites gefunden.",
     "wpAdminFor": "WP Admin von {site} öffnen (neuer Tab)"
+  },
+  "autoUpdates": {
+    "title": "Automatische sichere Updates",
+    "intro": "Verploy hält deine Websites selbst aktuell, zu einer ruhigen Zeit. Jedes Update wird zuerst auf einer Kopie der Website getestet.",
+    "on": "An",
+    "onBody": "Verploy führt Updates selbst sicher aus und fragt nur, wenn es wirklich nötig ist.",
+    "off": "Aus",
+    "offBody": "Du startest Updates selbst. Verploy testet sie trotzdem genauso sicher.",
+    "moment": "Zeitpunkt",
+    "windows": {
+      "night": "Nachts (01:00–05:00)",
+      "morning": "Früh morgens (06:00–08:00)",
+      "evening": "Abends (20:00–23:00)"
+    },
+    "windowsShort": {
+      "night": "nachts",
+      "morning": "früh morgens",
+      "evening": "abends"
+    },
+    "frequency": "Wie oft",
+    "frequencies": {
+      "daily": "jeden Tag",
+      "weekly": "einmal pro Woche"
+    },
+    "timezone": "Zeiten in deiner Zeitzone ({timezone}).",
+    "how": "Normale Updates stellt Verploy nach einem erfolgreichen Test selbst live. Große Versionssprünge und neue WordPress-Hauptversionen brauchen einmal deine Zustimmung im Posteingang. Was zurückgehalten wird, bleibt stehen, bis du es dir ansiehst. Sicherheitslücken haben immer Vorrang.",
+    "approveButton": "{count, plural, one {Sicher ausführen} other {Alle # sicher ausführen}}",
+    "site": {
+      "on": "Automatisch aktualisiert: {moment}, {frequency}",
+      "off": "Diese Website wird nie automatisch aktualisiert",
+      "onBody": "Zuerst auf einer Kopie getestet, erst dann live.",
+      "offBody": "Ausnahme von der Einstellung deiner Agentur: Du startest Updates für diese Website selbst.",
+      "settings": "Einstellungen",
+      "exclude": "Nie automatisch",
+      "include": "Wieder automatisch"
+    }
   }
 }

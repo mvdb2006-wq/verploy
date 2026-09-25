@@ -11,6 +11,7 @@ import { AlertList } from '@/components/AlertList'
 import { SEVERITY_ORDER } from '@/lib/monitoring/present'
 import { PairingPanel } from './pairing'
 import { DeleteSite } from './delete'
+import { SiteAutoUpdates } from './auto-updates'
 import { UpdatesPanel } from './updates'
 import { TestSettings } from './test-settings'
 import { RunHistory } from './run-history'
@@ -182,6 +183,11 @@ export default async function SitePage({ params }: { params: Promise<{ id: strin
           autofix={Boolean(session.agency.security_autofix)}
           attribution={(feed?.attribution ?? {}) as { defiant?: Attribution; mitre?: Attribution }}
         />
+      )}
+
+      {connected && session.agency.auto_updates && (
+        <SiteAutoUpdates siteId={site.id} siteOn={site.auto_updates} window={session.agency.auto_update_window}
+          frequency={session.agency.auto_update_frequency} canEdit={manage} />
       )}
 
       <UpdatesPanel siteId={site.id} components={components ?? []} canRun={connected} activeRunId={activeRun?.id ?? null} blockedReason={blockedReason} />

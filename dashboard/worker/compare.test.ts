@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PNG } from 'pngjs'
-import { comparePage, firstFailure, healthy, visualDiff } from './compare'
+import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, visualDiff } from './compare'
 import { detectPhpError, normalizeJsError, type PageCapture } from './checks'
 
 function png(width: number, height: number, paint: (x: number, y: number) => [number, number, number] = () => [255, 255, 255]): Buffer {
@@ -91,5 +91,43 @@ describe('herkenning', () => {
   it('JS-fouten zonder URL’s en regelnummers', () => {
     expect(normalizeJsError('x is not a function at https://a.example/app.js?ver=1712345678:12:44'))
       .toBe('x is not a function at <url>')
+  })
+})
+
+describe('bewegende delen (slider, video) negeren', () => {
+  // 100×100 pagina; bovenin (y < 20) een "slider" die per lading een andere kleur heeft.
+  const page = (slide: [number, number, number], extra?: (x: number, y: number) => [number, number, number] | null) =>
+    png(100, 100, (x, y) => extra?.(x, y) ?? (y < 20 ? slide : [255, 255, 255]))
+  const red: [number, number, number] = [200, 30, 30]
+  const green: [number, number, number] = [30, 200, 30]
+  const blue: [number, number, number] = [30, 30, 200]
+
+  it('dynamicMask: markeert wat tussen twee ladingen van dezelfde pagina verschilt, met marge', () => {
+    const m = dynamicMask([page(green), page(blue)], 2)!
+    expect(m.mask[10 * 100 + 50]).toBe(1)          // in de slider
+    expect(m.mask[21 * 100 + 50]).toBe(1)          // marge eronder
+    expect(m.mask[60 * 100 + 50]).toBe(0)          // rest van de pagina
+    expect(maskCoverage(m)).toBeCloseTo(0.22, 2)
+    expect(dynamicMask([page(green)])).toBeNull()
+    expect(maskCoverage(dynamicMask([page(green), page(green)])!)).toBe(0)
+  })
+
+  it('alleen de slider wisselde: zonder masker 20% verschil, met masker 0% (blauw in het verschilbeeld)', () => {
+    const before = page(red)
+    const after = page(green)
+    expect(visualDiff(before, after).ratio).toBeCloseTo(0.2, 3)
+    const d = visualDiff(before, after, dynamicMask([after, page(blue)], 2))
+    expect(d.ratio).toBe(0)
+    expect(d.ignored).toBeCloseTo(0.22, 2)
+    const img = PNG.sync.read(d.diffPng)
+    expect([...img.data.subarray((10 * 100 + 50) * 4, (10 * 100 + 50) * 4 + 3)]).toEqual([120, 170, 255])
+  })
+
+  it('een echte wijziging buiten de slider blijft zichtbaar (en telt strenger mee)', () => {
+    const before = page(red)
+    const broken = (s: [number, number, number]) => page(s, (_x, y) => (y >= 50 && y < 60 ? [0, 0, 0] : null))
+    const after = broken(green)
+    const d = visualDiff(before, after, dynamicMask([after, broken(blue)], 2))
+    expect(d.ratio).toBeCloseTo(10 / 78, 2)            // 10 rijen van de 78 niet-bewegende rijen
   })
 })

@@ -113,6 +113,9 @@ function ComparisonTable({ t, runId, after, before, beforeLabel, afterLabel }: {
                         <Shot src={artifact(runId, x.a!.screenshot_path)} label={afterLabel} />
                         <Shot src={artifact(runId, x.a!.diff_path)} label={t('runs.detail.diff')} />
                       </div>
+                      {ignoredShare(x.a!.checks) > 0 && (
+                        <p className="mt-1.5 text-xs text-muted">{t('runs.detail.dynamicIgnored', { percent: Math.max(1, Math.round(ignoredShare(x.a!.checks) * 100)) })}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -255,6 +258,12 @@ function duration(from: string | null, to: string | null, locale: Locale): strin
   return new Intl.NumberFormat(locale).format(min) + ':' + String(sec).padStart(2, '0')
 }
 
+/** Deel van de pagina dat als "beweegt vanzelf" (slider, video) buiten de vergelijking bleef. */
+function ignoredShare(checks: unknown): number {
+  const v = Array.isArray(checks) ? (checks as Array<{ check?: string; detail?: { ignored?: unknown } }>).find(c => c.check === 'visual') : undefined
+  return typeof v?.detail?.ignored === 'number' ? v.detail.ignored : 0
+}
+
 export default async function RunPage({ params }: { params: Promise<{ id: string; runId: string }> }) {
   const { id, runId } = await params
   if (!/^[0-9a-f-]{36}$/i.test(id) || !/^[0-9a-f-]{36}$/i.test(runId)) notFound()
@@ -312,6 +321,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       {done && run.verdict && <RunSummary t={t} run={run} siteUrl={site?.url ?? ''} hasDiagnosis={Boolean(diagnosis)} />}
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
+      {run.trigger === 'scheduled' && <Alert tone="info">{t('runs.detail.scheduledTrigger')}</Alert>}
       {run.status === 'queued' && (
         <p className="rounded-(--radius-card) border border-border bg-surface px-5 py-3 text-sm text-muted" role="status">
           {retryWait ? t('runs.detail.queueRetry', { time: formatTime(run.not_before, locale) })

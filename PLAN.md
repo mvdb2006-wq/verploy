@@ -528,3 +528,12 @@ Plugin- en thema-updates zijn info (alleen in-app). Er gaat een e-mail uit voor 
 - De registratiepagina toont het plan uit `?plan=`, met prijs, aantal sites en de uitleg over de proefperiode. Het plan wordt bewaard bij het account, en de abonnementspagina zet het klaar ("Je koos Agency", "Agency afsluiten").
 - Engels als de bezoeker van verploy.com komt of `?lang=en` meegeeft. Die taal blijft gelden voor inloggen, onboarding en het bureau.
 - Tests: unit (plan geldig, ongeldig of ontbrekend; taal; checkout-prijs uit het plan) en E2E `phase71-signup-plan`, van registratie tot Stripe Checkout, in het Engels en het Nederlands, met een ongeldig plan en voor een gebruiker die al is ingelogd.
+
+## 25. Snelheid, bewegende delen en geplande veilige updates (25-09-2026)
+- **Productie sneller en zonder hangende pagina's:** Supabase-verzoeken hebben een tijdslimiet en lezen wordt opnieuw geprobeerd; de functies draaien in Ierland, naast de database. Pagina's laden in 0,4–0,7 s, waar dat eerder ~2 s was, soms met uitschieters van minuten.
+- **Bewegende delen:** een slider of achtergrondvideo houdt geen update meer tegen. Verploy laadt de pagina opnieuw en negeert wat vanzelf beweegt; in het verschilbeeld is dat blauw. E2E `phase93-dynamic-regions`: een banner die bij elke lading van kleur wisselt, plus een onschuldige update, gaat live.
+- **Geplande veilige updates:**
+  - In de instellingen: "Automatische veilige updates: Aan/Uit", een moment (nacht, vroege ochtend of avond) en een frequentie (elke dag of eens per week). Per site kan het uit met "Nooit automatisch".
+  - Gewone updates voert Verploy zelf veilig uit; grote versiesprongen worden één vraag in de inbox, met de knop "Veilig uitvoeren". Wat tegengehouden is, wordt niet steeds opnieuw geprobeerd; een tegengehouden groep wordt apart uitgezocht.
+  - In "Afgelopen 24 uur" staan de runs met "(gepland)".
+  - Tests: unit (moment, tijdzone, versiesprongen, eerdere pogingen, plan), database (standaard uit, uitzondering per site, trigger `scheduled`, vraag om akkoord, rechten) en E2E `phase94-scheduled-updates`. Die E2E loopt van aanzetten via een automatische livegang en een vraag om akkoord tot akkoord, livegang en "Nooit automatisch".

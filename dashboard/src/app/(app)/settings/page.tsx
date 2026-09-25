@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
 import { canManage, requireAgency } from '@/lib/session'
 import { formatDate } from '@/lib/format'
-import { AgencyForm, LogoForm, SecurityForm } from './form'
+import { AgencyForm, AutoUpdatesForm, LogoForm, SecurityForm } from './form'
 import { appVersion } from '@/lib/version'
 
 export async function generateMetadata() {
@@ -31,6 +31,8 @@ export default async function SettingsPage() {
         defaults={{ name: a.name, dashboard_locale: a.dashboard_locale, brand_color: a.brand_color, report_sender_name: a.report_sender_name ?? '' }}
       />
       <LogoForm hasLogo={Boolean(a.brand_logo_path)} disabled={!canManage(session.role)} />
+      <AutoUpdatesForm disabled={!canManage(session.role)}
+        defaults={{ on: a.auto_updates, window: a.auto_update_window, frequency: a.auto_update_frequency, timezone: a.timezone }} />
       <SecurityForm autofix={a.security_autofix} disabled={!canManage(session.role)} />
       <section className="card" aria-labelledby="plan-title">
         <h2 id="plan-title" className="font-bold">{t('settings.planTitle')}</h2>

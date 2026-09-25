@@ -325,6 +325,10 @@
       "update_partial": {
         "title": "Actualización requiere atención: {items}",
         "body": "{deployed} de {total} actualizaciones se probaron y publicaron; tu sitio funciona con normalidad. La versión publicada del resto no se ha modificado."
+      },
+      "update_approval": {
+        "title": "{count, plural, one {Actualización pendiente} other {# actualizaciones pendientes}} de tu aprobación: {items}",
+        "body": "Un salto de versión mayor puede cambiar más que una actualización normal. Verploy solo la ejecuta con tu aprobación, y aun así la prueba primero en una copia del sitio."
       }
     },
     "sslError": {
@@ -496,6 +500,7 @@
       "beforeUpdate": "Antes",
       "afterUpdate": "Después",
       "diff": "Diferencia",
+      "dynamicIgnored": "En azul en la imagen de diferencias: partes que cambian incluso sin actualización (slider, vídeo, fotos rotativas), {percent} % de la página. No se tienen en cuenta.",
       "passed": "Superada",
       "failed": "Fallida",
       "loginPage": "Página de acceso",
@@ -504,7 +509,8 @@
       "queueAhead": "Esperando a {count, plural, one {# otra actualización iniciada} other {# otras actualizaciones iniciadas}} antes. Verploy ejecuta varias a la vez; esta empezará en cuanto haya sitio.",
       "queueNext": "Empieza en unos segundos.",
       "queueRetry": "Verploy lo volverá a intentar a las {time}.",
-      "outcome": "Resultado"
+      "outcome": "Resultado",
+      "scheduledTrigger": "Iniciada automáticamente por Verploy (actualización segura programada)."
     },
     "events": {
       "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",
@@ -542,7 +548,8 @@
       "functional_baseline": "Medición funcional de referencia: funcionan {ok} de {total} pruebas (formularios: {forms}, tienda: {shop}).",
       "functional_unsupported": "Formularios y tienda no probados: actualiza Verploy Connector a la 2.4 o posterior.",
       "functional_passed": "Pruebas funcionales tras la actualización: funcionan {ok} de {total}, nada ha empeorado.",
-      "functional_failed": "Pruebas funcionales tras la actualización: ya no funciona: {failed}."
+      "functional_failed": "Pruebas funcionales tras la actualización: ya no funciona: {failed}.",
+      "queued_scheduled": "{count, plural, one {# actualización programada} other {# actualizaciones programadas}} automáticamente por Verploy (actualización segura programada)."
     },
     "itemOutcome": {
       "live": "Publicada",
@@ -1009,7 +1016,8 @@
       "empty": "No hay actualizaciones en curso.",
       "queued": "En cola",
       "security": "Vulnerabilidad",
-      "progress": "Progreso de la actualización en {site}"
+      "progress": "Progreso de la actualización en {site}",
+      "scheduled": "Programada"
     },
     "inbox": {
       "title": "Te espera",
@@ -1077,7 +1085,8 @@
       "alertOpened": "Aviso: {title}",
       "alertResolved": "Resuelto: {title}",
       "auto": "automático",
-      "runAttention": "{items} requiere atención"
+      "runAttention": "{items} requiere atención",
+      "scheduled": "programada"
     },
     "dur": {
       "d": "{n} d",
@@ -1108,5 +1117,41 @@
     "updating": "Actualizándose",
     "noResults": "No se encontraron sitios.",
     "wpAdminFor": "Abrir WP Admin de {site} (pestaña nueva)"
+  },
+  "autoUpdates": {
+    "title": "Actualizaciones seguras automáticas",
+    "intro": "Verploy mantiene tus sitios al día por sí solo, en un momento tranquilo. Cada actualización se prueba primero en una copia del sitio.",
+    "on": "Activado",
+    "onBody": "Verploy realiza las actualizaciones de forma segura y solo te pregunta cuando es realmente necesario.",
+    "off": "Desactivado",
+    "offBody": "Tú inicias las actualizaciones. Verploy las prueba con la misma seguridad.",
+    "moment": "Momento",
+    "windows": {
+      "night": "Noche (01:00–05:00)",
+      "morning": "Primera hora (06:00–08:00)",
+      "evening": "Tarde-noche (20:00–23:00)"
+    },
+    "windowsShort": {
+      "night": "por la noche",
+      "morning": "a primera hora",
+      "evening": "por la tarde-noche"
+    },
+    "frequency": "Frecuencia",
+    "frequencies": {
+      "daily": "cada día",
+      "weekly": "una vez por semana"
+    },
+    "timezone": "Horas en tu zona horaria ({timezone}).",
+    "how": "Las actualizaciones normales se publican automáticamente tras una prueba correcta. Los saltos de versión mayor y las nuevas versiones principales de WordPress piden tu aprobación una vez, en la bandeja de entrada. Lo que se retiene queda pendiente hasta que lo revises. Las vulnerabilidades siempre van primero.",
+    "approveButton": "{count, plural, one {Ejecutar con seguridad} other {Ejecutar las # con seguridad}}",
+    "site": {
+      "on": "Actualización automática: {moment}, {frequency}",
+      "off": "Este sitio nunca se actualiza automáticamente",
+      "onBody": "Primero se prueba en una copia; solo después se publica.",
+      "offBody": "Excepción a la configuración de tu agencia: tú inicias las actualizaciones de este sitio.",
+      "settings": "Ajustes",
+      "exclude": "Nunca automático",
+      "include": "De nuevo automático"
+    }
   }
 }

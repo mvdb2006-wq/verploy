@@ -49,7 +49,9 @@ export async function dispatchNotifications(
       body = `${t('email.alertIntro', siteVars)} ${explanation}`
     }
     const runId = (n.params as { run_id?: unknown } | null)?.run_id
-    const url = typeof runId === 'string' ? `${appUrl}/sites/${n.site_id}/runs/${runId}` : `${appUrl}/sites/${n.site_id}`
+    // Vraag om akkoord: naar de inbox, waar de knop "Veilig uitvoeren" staat.
+    const url = n.type === 'update_approval' ? `${appUrl}/inbox`
+      : typeof runId === 'string' ? `${appUrl}/sites/${n.site_id}/runs/${runId}` : `${appUrl}/sites/${n.site_id}`
     const mail = renderEmail({ heading, body, cta: t('email.alertCta'), url, footer: t('email.alertFooter', siteVars) })
     const results = await Promise.all(n.recipients.map(to => send({ to, subject, ...mail })))
     const ok = results.every(Boolean)

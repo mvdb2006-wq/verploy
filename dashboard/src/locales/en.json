@@ -325,6 +325,10 @@
       "update_partial": {
         "title": "Update needs attention: {items}",
         "body": "{deployed} of {total} updates were tested and deployed; your site works normally. The live version of the rest was not changed."
+      },
+      "update_approval": {
+        "title": "{count, plural, one {Update awaits} other {# updates await}} your approval: {items}",
+        "body": "A major version jump can change more than a regular update. Verploy only runs it after your approval, and even then tests it on a copy of the site first."
       }
     },
     "sslError": {
@@ -496,6 +500,7 @@
       "beforeUpdate": "Before",
       "afterUpdate": "After",
       "diff": "Difference",
+      "dynamicIgnored": "Blue in the difference image: parts that keep changing even without an update (slider, video, rotating photos), {percent}% of the page. They are not counted.",
       "passed": "Passed",
       "failed": "Failed",
       "loginPage": "Login page",
@@ -504,7 +509,8 @@
       "queueAhead": "Waiting for {count, plural, one {# other update} other {# other updates}} that started earlier. Verploy runs a few at a time; this one starts as soon as there’s room.",
       "queueNext": "Starting within a few seconds.",
       "queueRetry": "Verploy will try again at {time}.",
-      "outcome": "Outcome"
+      "outcome": "Outcome",
+      "scheduledTrigger": "Started automatically by Verploy (scheduled safe update)."
     },
     "events": {
       "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",
@@ -542,7 +548,8 @@
       "functional_baseline": "Functional baseline: {ok} of {total} tests work (forms: {forms}, shop: {shop}).",
       "functional_unsupported": "Forms and shop not tested: update Verploy Connector to 2.4 or newer.",
       "functional_passed": "Functional tests after the update: {ok} of {total} work, nothing regressed.",
-      "functional_failed": "Functional tests after the update: no longer working: {failed}."
+      "functional_failed": "Functional tests after the update: no longer working: {failed}.",
+      "queued_scheduled": "{count, plural, one {# update} other {# updates}} scheduled automatically by Verploy (scheduled safe update)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1009,7 +1016,8 @@
       "empty": "No updates are running right now.",
       "queued": "Queued",
       "security": "Security fix",
-      "progress": "Update progress on {site}"
+      "progress": "Update progress on {site}",
+      "scheduled": "Scheduled"
     },
     "inbox": {
       "title": "Waiting for you",
@@ -1077,7 +1085,8 @@
       "alertOpened": "Alert: {title}",
       "alertResolved": "Resolved: {title}",
       "auto": "automatic",
-      "runAttention": "{items} needs attention"
+      "runAttention": "{items} needs attention",
+      "scheduled": "scheduled"
     },
     "dur": {
       "d": "{n} d",
@@ -1108,5 +1117,41 @@
     "updating": "Updating",
     "noResults": "No sites found.",
     "wpAdminFor": "Open WP Admin of {site} (new tab)"
+  },
+  "autoUpdates": {
+    "title": "Automatic safe updates",
+    "intro": "Verploy keeps your sites up to date by itself, at a quiet time. Every update is tested on a copy of the site first.",
+    "on": "On",
+    "onBody": "Verploy runs updates safely on its own and only asks when it really has to.",
+    "off": "Off",
+    "offBody": "You start updates yourself. Verploy still tests them just as safely.",
+    "moment": "When",
+    "windows": {
+      "night": "Night (01:00–05:00)",
+      "morning": "Early morning (06:00–08:00)",
+      "evening": "Evening (20:00–23:00)"
+    },
+    "windowsShort": {
+      "night": "at night",
+      "morning": "early in the morning",
+      "evening": "in the evening"
+    },
+    "frequency": "How often",
+    "frequencies": {
+      "daily": "every day",
+      "weekly": "once a week"
+    },
+    "timezone": "Times in your time zone ({timezone}).",
+    "how": "Regular updates go live automatically after a successful test. Major version jumps and new major WordPress releases ask for your approval once, in the inbox. Anything that gets held back stays put until you look at it. Security fixes always come first.",
+    "approveButton": "{count, plural, one {Run safely} other {Run all # safely}}",
+    "site": {
+      "on": "Updated automatically: {moment}, {frequency}",
+      "off": "This site is never updated automatically",
+      "onBody": "Tested on a copy first, only then live.",
+      "offBody": "Exception to your agency's setting: you start updates for this site yourself.",
+      "settings": "Settings",
+      "exclude": "Never automatically",
+      "include": "Automatic again"
+    }
   }
 }

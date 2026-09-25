@@ -63,3 +63,24 @@ export async function fixComponent(_: FixState, form: FormData): Promise<FixStat
   if (started === 0) return { error: t('ops.inbox.startFailed', { count: Math.max(failed, 1) }) }
   return { ok: [t('ops.inbox.started', { count: started }), failed ? t('ops.inbox.startFailed', { count: failed }) : ''].filter(Boolean).join(' ') }
 }
+
+/**
+ * "Veilig uitvoeren" bij een vraag om akkoord (grote versiesprong): één gewone veilige update met precies
+ * die onderdelen. De onderdelen komen uit de melding zelf (RLS: alleen van het eigen bureau), niet uit het
+ * formulier; create_update_run controleert rechten, abonnement en of de update er nog is.
+ */
+export async function approveUpdates(_: FixState, form: FormData): Promise<FixState> {
+  await requireAgency()
+  const t = await getT()
+  const alertId = String(form.get('alert_id') ?? '')
+  if (!/^[0-9a-f-]{36}$/i.test(alertId)) return { error: t('common.errorGeneric') }
+  const supabase = await createClient()
+  const { data: alert } = await supabase.from('alerts').select('site_id, params').eq('id', alertId).eq('type', 'update_approval').eq('status', 'open').maybeSingle()
+  const items = ((alert?.params as { items?: Array<{ type?: unknown; slug?: unknown }> } | null)?.items ?? [])
+    .filter(i => typeof i.type === 'string' && typeof i.slug === 'string').map(i => ({ type: i.type as string, slug: i.slug as string }))
+  if (!alert || !items.length) return { error: t('common.errorGeneric') }
+  const { error } = await supabase.rpc('create_update_run', { p_site: alert.site_id, p_items: items })
+  revalidatePath('/', 'layout')
+  if (error) return { error: t('ops.inbox.startFailed', { count: 1 }) }
+  return { ok: t('ops.inbox.started', { count: 1 }) }
+}

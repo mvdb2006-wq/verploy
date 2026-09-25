@@ -1,11 +1,12 @@
 'use client'
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { Alert } from '@/components/Alert'
 import { Field } from '@/components/Field'
 import { SubmitButton } from '@/components/SubmitButton'
 import { LOCALES, type MessageKey } from '@/lib/i18n/core'
 import { useI18n } from '@/lib/i18n/client'
-import { saveAgency, saveLogo, saveSecurity } from './actions'
+import { saveAgency, saveAutoUpdates, saveLogo, saveSecurity } from './actions'
+import { FREQUENCIES, UPDATE_WINDOWS } from '@/lib/auto-updates/policy'
 
 export function AgencyForm({ defaults, disabled }: { defaults: { name: string; dashboard_locale: string; brand_color: string; report_sender_name: string }; disabled: boolean }) {
   const { t } = useI18n()
@@ -107,6 +108,71 @@ export function SecurityForm({ autofix, disabled }: { autofix: boolean; disabled
           </label>
         ))}
         <p className="text-xs text-subtle">{t('security.settings.note')}</p>
+        {!disabled && <SubmitButton pendingLabel={t('common.saving')}>{t('common.save')}</SubmitButton>}
+      </fieldset>
+    </form>
+  )
+}
+
+/**
+ * Automatische veilige updates. Extreem simpel: Aan/Uit en een moment. Wat automatisch kan, wat eerst
+ * akkoord nodig heeft en wat wordt tegengehouden, beslist Verploy zelf (zie de uitleg eronder).
+ */
+export function AutoUpdatesForm({ defaults, disabled }: {
+  defaults: { on: boolean; window: string; frequency: string; timezone: string }
+  disabled: boolean
+}) {
+  const { t } = useI18n()
+  const [state, action] = useActionState(saveAutoUpdates, {})
+  const [on, setOn] = useState(defaults.on)
+  const [browserTz, setBrowserTz] = useState('')
+  useEffect(() => { try { setBrowserTz(Intl.DateTimeFormat().resolvedOptions().timeZone ?? '') } catch { /* geen tijdzone */ } }, [])
+  const tz = browserTz || defaults.timezone
+  return (
+    <form action={action} className="card space-y-4" id="auto-updates" aria-labelledby="auto-updates-title">
+      <div>
+        <h2 id="auto-updates-title" className="font-bold">{t('autoUpdates.title')}</h2>
+        <p className="mt-1 text-sm text-muted">{t('autoUpdates.intro')}</p>
+      </div>
+      {state.error && <Alert>{state.error}</Alert>}
+      {state.ok && <Alert tone="ok">{state.ok}</Alert>}
+      <fieldset disabled={disabled} className="space-y-4">
+        <legend className="sr-only">{t('autoUpdates.title')}</legend>
+        <input type="hidden" name="timezone" value={browserTz} />
+        <div role="radiogroup" aria-label={t('autoUpdates.title')} className="grid gap-3 sm:grid-cols-2">
+          {([['on', true], ['off', false]] as const).map(([value, v]) => (
+            <label key={value} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+              <input type="radio" name="auto_updates" value={value} checked={on === v} onChange={() => setOn(v)}
+                className="mt-1 size-4 shrink-0 accent-(--color-accent)" />
+              <span>
+                <span className="block text-sm font-semibold">{t(value === 'on' ? 'autoUpdates.on' : 'autoUpdates.off')}</span>
+                <span className="block text-sm text-muted">{t(value === 'on' ? 'autoUpdates.onBody' : 'autoUpdates.offBody')}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+        {on && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field id="auto_update_window" label={t('autoUpdates.moment')}>
+              <select id="auto_update_window" name="auto_update_window" className="input" defaultValue={defaults.window}>
+                {UPDATE_WINDOWS.map(w => <option key={w} value={w}>{t(`autoUpdates.windows.${w}` as MessageKey)}</option>)}
+              </select>
+            </Field>
+            <Field id="auto_update_frequency" label={t('autoUpdates.frequency')}>
+              <select id="auto_update_frequency" name="auto_update_frequency" className="input" defaultValue={defaults.frequency}>
+                {FREQUENCIES.map(f => <option key={f} value={f}>{t(`autoUpdates.frequencies.${f}` as MessageKey)}</option>)}
+              </select>
+            </Field>
+          </div>
+        )}
+        {!on && (
+          <>
+            <input type="hidden" name="auto_update_window" value={defaults.window} />
+            <input type="hidden" name="auto_update_frequency" value={defaults.frequency} />
+          </>
+        )}
+        {on && <p className="text-xs text-subtle">{t('autoUpdates.timezone', { timezone: tz })}</p>}
+        <p className="text-sm text-muted">{t('autoUpdates.how')}</p>
         {!disabled && <SubmitButton pendingLabel={t('common.saving')}>{t('common.save')}</SubmitButton>}
       </fieldset>
     </form>

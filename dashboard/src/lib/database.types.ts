@@ -24,6 +24,10 @@ export type Database = {
           subscription_cancel_at_end: boolean
           stripe_synced_at: string | null
           security_autofix: boolean
+          auto_updates: boolean
+          auto_update_window: string
+          auto_update_frequency: string
+          timezone: string
         }
         Insert: {
           id?: string
@@ -44,6 +48,10 @@ export type Database = {
           subscription_cancel_at_end?: boolean
           stripe_synced_at?: string | null
           security_autofix?: boolean
+          auto_updates?: boolean
+          auto_update_window?: string
+          auto_update_frequency?: string
+          timezone?: string
         }
         Update: {
           id?: string
@@ -64,6 +72,10 @@ export type Database = {
           subscription_cancel_at_end?: boolean
           stripe_synced_at?: string | null
           security_autofix?: boolean
+          auto_updates?: boolean
+          auto_update_window?: string
+          auto_update_frequency?: string
+          timezone?: string
         }
         Relationships: []
       }
@@ -570,6 +582,7 @@ export type Database = {
           heartbeat_seq: number
           vulns_checked_seq: number | null
           vulns_checked_feed_at: string | null
+          auto_updates: boolean
         }
         Insert: {
           id?: string
@@ -604,6 +617,7 @@ export type Database = {
           heartbeat_seq?: number
           vulns_checked_seq?: number | null
           vulns_checked_feed_at?: string | null
+          auto_updates?: boolean
         }
         Update: {
           id?: string
@@ -638,6 +652,7 @@ export type Database = {
           heartbeat_seq?: number
           vulns_checked_seq?: number | null
           vulns_checked_feed_at?: string | null
+          auto_updates?: boolean
         }
         Relationships: []
       }
@@ -925,6 +940,7 @@ export type Database = {
       claim_alert_notifications: { Args: { p_limit?: number | null }; Returns: { alert_id: string; kind: string; type: string; severity: string; params: Json; opened_at: string; site_id: string; site_name: string; site_url: string; agency_name: string; locale: string; recipients: string[] }[] }
       claim_report: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['reports']['Row'][] }
       claim_update_run: { Args: { p_worker: string | null; p_lease_seconds?: number | null }; Returns: Database['public']['Tables']['update_runs']['Row'][] }
+      clear_update_approvals_outside_schedule: { Args: Record<PropertyKey, never>; Returns: number }
       complete_alert_notification: { Args: { p_alert: string | null; p_kind: string | null; p_sent: boolean | null }; Returns: undefined }
       complete_report: { Args: { p_report: string | null; p_worker: string | null; p_status: string | null; p_pdf_path?: string | null; p_pdf_bytes?: number | null; p_error?: string | null }; Returns: undefined }
       consume_pairing_code: { Args: { p_code_hash: string | null; p_secret_box: string | null; p_connector_version: string | null }; Returns: { site_id: string; agency_id: string; secret_version: number }[] }
@@ -943,12 +959,15 @@ export type Database = {
       renew_update_run: { Args: { p_run: string | null; p_worker: string | null; p_lease_seconds?: number | null }; Returns: boolean }
       request_report: { Args: { p_site: string | null; p_start: string | null; p_end: string | null; p_send?: boolean | null }; Returns: string }
       schedule_monthly_reports: { Args: Record<PropertyKey, never>; Returns: number }
+      scheduled_update_candidates: { Args: { p_limit?: number | null }; Returns: { site_id: string; agency_id: string; timezone: string; update_window: string; frequency: string; last_scheduled_at: string; busy: boolean }[] }
       set_plan_price: { Args: { p_plan: string | null; p_price: string | null }; Returns: undefined }
       set_stripe_customer: { Args: { p_agency: string | null; p_customer: string | null }; Returns: undefined }
       sites_due_for_vulnerability_check: { Args: { p_limit?: number | null }; Returns: { site_id: string }[] }
+      start_scheduled_update: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       start_security_fix: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       sweep_alerts: { Args: Record<PropertyKey, never>; Returns: number }
       sync_site_vulnerabilities: { Args: { p_site: string | null; p_findings: Json | null; p_heartbeat_seq?: number | null; p_feed_at?: string | null }; Returns: number }
+      sync_update_approvals: { Args: { p_site: string | null; p_items: Json | null }; Returns: undefined }
       update_member_role: { Args: { p_user: string | null; p_role: string | null }; Returns: undefined }
     }
     Enums: { [_ in never]: never }

@@ -10,6 +10,8 @@
 #   vp-lab-nopkg-addon 1.0.0 → 1.1.0 uitbreiding van vp-lab-nopkg       → verwacht: overgeslagen (afhankelijk)
 #   vp-lab-extra      1.0.0 → 1.1.0  onschuldige tekstwijziging        → verwacht: live, ook als nopkg faalt
 #   vp-lab-formbreak  1.0.0 → 1.1.0  CF7-formulieren versturen mislukt  → verwacht: tegengehouden (functionele test)
+#   vp-lab-slider     1.0.0 → 1.1.0  (aan met optie vp_lab_slider) banner met elke lading een andere kleur,
+#                                    zoals een slider of achtergrondvideo → verwacht: genegeerd, update gaat live
 #
 # Gebruik: build-lab.sh <uitvoermap> <publieke-repo-url>
 set -euo pipefail
@@ -50,6 +52,9 @@ plugin vp-lab-extra 1.1.0 "$(printf "$EXTRA" 'v1.1.0')"
 # de pagina er precies hetzelfde uitziet → alleen een functionele test ziet dit (verwacht: tegengehouden).
 plugin vp-lab-formbreak 1.0.0 '// 1.0.0 doet niets.'
 plugin vp-lab-formbreak 1.1.0 'add_action( '"'"'wpcf7_before_send_mail'"'"', function ( $form, &$abort ) { $abort = true; }, 10, 2 );'
+SLIDER='add_action( '"'"'wp_body_open'"'"', function () { if ( get_option( '"'"'vp_lab_slider'"'"' ) ) { printf( '"'"'<div class="vp-lab-slider" style="height:240px;background:hsl(%%d,70%%%%,50%%%%)"></div>'"'"', mt_rand( 0, 359 ) ); } } ); // %s'
+plugin vp-lab-slider 1.0.0 "$(printf "$SLIDER" 'v1.0.0')"
+plugin vp-lab-slider 1.1.0 "$(printf "$SLIDER" 'v1.1.0')"
 plugin vp-lab-nopkg 1.0.0 '// 1.0.0 doet niets.'
 plugin vp-lab-nopkg 1.1.0 '// 1.1.0 wordt nooit gepubliceerd (pakket ontbreekt).'
 plugin vp-lab-nopkg-addon 1.0.0 '// uitbreiding van vp-lab-nopkg.'
@@ -117,7 +122,7 @@ PHP
 sed -i "s#__REPO_URL__#${REPO_URL}#" "$OUT/src/vp-lab-updater/vp-lab-updater/vp-lab-updater.php"
 
 echo '{' > "$OUT/repo/manifest.json"; first=1
-for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed vp-lab-extra vp-lab-nopkg vp-lab-nopkg-addon vp-lab-formbreak; do
+for slug in vp-lab-footer vp-lab-fatal vp-lab-prod-only vp-lab-licensed vp-lab-extra vp-lab-nopkg vp-lab-nopkg-addon vp-lab-formbreak vp-lab-slider; do
   ( cd "$OUT/src/$slug-1.0.0" && zip -qrX "$OUT/install/$slug.zip" "$slug" )
   # vp-lab-nopkg: update aangeboden, maar het pakket bestaat niet (zoals een premium plugin zonder geldige licentie)
   [ "$slug" = vp-lab-nopkg ] || ( cd "$OUT/src/$slug-1.1.0" && zip -qrX "$OUT/repo/$slug-1.1.0.zip" "$slug" )

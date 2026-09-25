@@ -26,6 +26,11 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
     vars.deployed = Number(p.deployed ?? 0)
     vars.total = Number(p.total ?? 0)
   }
+  if (alert.type === 'update_approval') {
+    const items = Array.isArray(p.items) ? (p.items as Array<{ name?: unknown; to_version?: unknown }>) : []
+    vars.items = items.map(i => `${str(i.name)} ${str(i.to_version)}`.trim()).join(', ')
+    vars.count = items.length
+  }
   if (alert.type === 'vulnerability') {
     vars.items = Array.isArray(p.items) ? p.items.map(str).join(', ') : ''
     vars.severity = typeof p.max_severity === 'string' ? t(`security.severity.${p.max_severity}` as MessageKey) : ''

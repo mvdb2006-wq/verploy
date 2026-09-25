@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Browser } from 'playwright-core'
+import type { Browser, BrowserContext } from 'playwright-core'
 import type { Database, Json, Tables } from '@/lib/database.types'
 import { decryptSecret } from '@/lib/security/secretbox'
 import { keyMaterial } from '@/lib/security/keys'
 import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PackageResult, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
-import { comparePage, firstFailure, healthy, visualDiff, type CheckOutcome } from './compare'
+import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, visualDiff, type CheckOutcome, type VisualDiff } from './compare'
 import { compareFunctional, runFunctional, type FnFailure, type FnResult, type FunctionalTargets } from './functional'
 import { SKIPPED_DEPENDENCY, dependencyOrder, dependentsOf, isolatedFailure, stagingOk, type RunItem } from '@/lib/run-items'
 
@@ -167,13 +167,15 @@ export async function testPhase(
         let passed: boolean
         const prev = before?.get(`${t.key}|${viewport}`)
         if (before && prev) {
-          let visual: { ratio: number; threshold: number } | null = null
+          let visual: { ratio: number; threshold: number; ignored?: number } | null = null
           if (cap.screenshot && prev.screenshotPath && healthy(prev.capture) && healthy(cap)) {
             const prevPng = await download(ctx, prev.screenshotPath)
             if (prevPng) {
-              const d = visualDiff(prevPng, cap.screenshot)
+              const threshold = Number(ctx.site.diff_threshold)
+              let d = visualDiff(prevPng, cap.screenshot)
+              if (d.ratio > threshold) d = await ignoreDynamic(context, t.url, prevPng, cap.screenshot, d, threshold, { masks: ctx.site.test_masks, cookies })
               diffRatio = d.ratio
-              visual = { ratio: d.ratio, threshold: Number(ctx.site.diff_threshold) }
+              visual = { ratio: d.ratio, threshold, ignored: d.ignored }
               diffPath = artifactPath(ctx, phase, t.key, viewport, '-diff')
               await upload(ctx, diffPath, d.diffPng)
             }
@@ -197,6 +199,35 @@ export async function testPhase(
     }
   }
   return { failures, captures }
+}
+
+/** Hoogstens zoveel van de pagina mag "vanzelf bewegend" zijn; daarboven vertrouwen we de meting niet. */
+const MAX_DYNAMIC = 0.5
+
+/**
+ * Het beeld wijkt te veel af. Voordat dat een update tegenhoudt: bewegen die delen ook vanzelf?
+ * De pagina wordt (nog steeds ná de update) opnieuw geladen; wat tussen die ladingen al verschilt
+ * (slider, achtergrondvideo, wisselende foto's of logo's) telt niet mee. Een echte wijziging door de
+ * update blijft bij elke lading hetzelfde en wordt dus nog steeds gezien.
+ */
+async function ignoreDynamic(
+  context: BrowserContext, url: string, beforePng: Buffer, afterPng: Buffer, first: VisualDiff, threshold: number,
+  opts: { masks: string[]; cookies: { name: string; value: string; url: string }[] },
+): Promise<VisualDiff> {
+  const shots = [afterPng]
+  let best = first
+  for (let i = 0; i < 2; i++) {
+    const again = await capturePage(context, url, { masks: opts.masks, cookies: opts.cookies, screenshot: true })
+    if (!healthy(again) || !again.screenshot) break
+    shots.push(again.screenshot)
+    const mask = dynamicMask(shots)
+    if (!mask || maskCoverage(mask) === 0) continue
+    if (maskCoverage(mask) > MAX_DYNAMIC) return first
+    const d = visualDiff(beforePng, afterPng, mask)
+    if (d.ratio < best.ratio) best = d
+    if (d.ratio <= threshold) break
+  }
+  return best
 }
 
 function failureReason(failures: PhaseFailure[]): { key: string; params: Record<string, Json> } {

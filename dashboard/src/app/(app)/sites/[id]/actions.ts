@@ -90,3 +90,17 @@ export async function saveClientSettings(_: ClientState, form: FormData): Promis
   revalidatePath(`/sites/${siteId}`)
   return { saved: true }
 }
+
+export interface AutoState { error?: string }
+
+/** "Nooit automatisch" voor één site (of weer meedoen). Eigenaar/beheerder; RLS dwingt dat af. */
+export async function setSiteAutoUpdates(_: AutoState, form: FormData): Promise<AutoState> {
+  const t = await getT()
+  const siteId = String(form.get('site_id') ?? '')
+  const on = form.get('auto_updates') === 'on'
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('sites').update({ auto_updates: on }, { count: 'exact' }).eq('id', siteId)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath(`/sites/${siteId}`)
+  return {}
+}

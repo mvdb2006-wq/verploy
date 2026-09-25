@@ -9,6 +9,7 @@ import { formatDuration, runProgress, uniqueSites, type InboxItem, type SiteStat
 import type { ActiveRun, ActivityEntry } from '@/lib/operations/load'
 import { acknowledgeAlert } from '@/app/(app)/alerts/actions'
 import { FixButton } from './FixButton'
+import { ApproveUpdatesButton } from './ApproveUpdatesButton'
 import { cn } from '@/lib/cn'
 
 const SEVERITY_CLASS = { critical: 'badge-danger', high: 'badge-danger', medium: 'badge-warn', low: 'badge-muted' } as const
@@ -32,6 +33,7 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
           const a = item.alert
           const { title, body } = presentAlert(t, locale, a)
           const runId = a.type.startsWith('update_') ? (a.params as { run_id?: string } | null)?.run_id : undefined
+          const approval = a.type === 'update_approval'
           return (
             <li key={item.key} className="flex flex-wrap items-start gap-3 px-5 py-4">
               <Severity t={t} severity={item.severity} />
@@ -39,9 +41,10 @@ export function InboxList({ items, t, locale, now, limit }: { items: InboxItem[]
                 <SiteNames sites={[{ siteId: a.site_id, siteName: a.siteName }]} t={t} />
                 <p className="mt-0.5 text-sm font-semibold [overflow-wrap:anywhere]">{title}</p>
                 <p className="mt-0.5 text-sm text-muted">{body}</p>
-                <p className="mt-1 text-xs text-subtle">{t('ops.inbox.kind.problem')} · {waiting}</p>
+                <p className="mt-1 text-xs text-subtle">{t(approval ? 'ops.inbox.kind.decision' : 'ops.inbox.kind.problem')} · {waiting}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                {approval && <ApproveUpdatesButton alertId={a.id} count={Number((a.params as { count?: number } | null)?.count ?? 1)} />}
                 {runId && <Link href={`/sites/${a.site_id}/runs/${runId}`} className="btn btn-primary px-3 py-1.5 text-xs">{t('ops.inbox.viewRun')}</Link>}
                 <form action={acknowledgeAlert}>
                   <input type="hidden" name="id" value={a.id} />
@@ -106,6 +109,7 @@ export function ActiveRuns({ runs, t }: { runs: ActiveRun[]; t: Translate }) {
               <p className="min-w-0 text-sm font-semibold">
                 <Link href={`/sites/${r.siteId}/runs/${r.id}`} className="hover:text-accent">{r.siteName}</Link>
                 {r.trigger === 'security' && <span className="badge badge-warn ml-2 align-middle">{t('ops.running.security')}</span>}
+                {r.trigger === 'scheduled' && <span className="badge badge-muted ml-2 align-middle">{t('ops.running.scheduled')}</span>}
               </p>
               <span className="text-xs text-muted">{r.status === 'queued' ? t('ops.running.queued') : t(`runs.steps.${r.status}` as MessageKey)}</span>
             </div>
@@ -191,6 +195,7 @@ export function Activity({ entries, t, locale }: { entries: ActivityEntry[]; t: 
               <Link href={href} className="font-semibold hover:text-accent">{e.siteName}</Link>
               <span className="text-subtle"> · </span>{text}
               {e.kind === 'run' && e.trigger === 'security' && <span className="text-subtle"> ({t('ops.activity.auto')})</span>}
+              {e.kind === 'run' && e.trigger === 'scheduled' && <span className="text-subtle"> ({t('ops.activity.scheduled')})</span>}
             </p>
             {badge && <RunBadge {...badge} />}
           </li>

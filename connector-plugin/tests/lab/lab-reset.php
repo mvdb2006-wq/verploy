@@ -36,7 +36,7 @@ foreach ( (array) $wpdb->get_col( $wpdb->prepare( 'SELECT TABLE_NAME FROM inform
 	$wpdb->query( "DROP TABLE `$t`" );
 }
 
-$slugs = array( 'vp-lab-footer', 'vp-lab-fatal', 'vp-lab-prod-only', 'vp-lab-licensed', 'vp-lab-extra', 'vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-formbreak', 'vp-lab-probe', 'vp-lab-updater' );
+$slugs = array( 'vp-lab-footer', 'vp-lab-fatal', 'vp-lab-prod-only', 'vp-lab-licensed', 'vp-lab-extra', 'vp-lab-nopkg', 'vp-lab-nopkg-addon', 'vp-lab-formbreak', 'vp-lab-slider', 'vp-lab-probe', 'vp-lab-updater' );
 foreach ( $slugs as $slug ) {
 	$dir = WP_PLUGIN_DIR . '/' . $slug;
 	if ( is_dir( $dir ) ) { $GLOBALS['wp_filesystem']->delete( $dir, true ); }
@@ -52,6 +52,7 @@ if ( isset( $argv[4] ) ) {
 	$copied = copy_dir( rtrim( $argv[4], '/' ), $dest );
 	if ( is_wp_error( $copied ) ) { fwrite( STDERR, $copied->get_error_message() . "\n" ); exit( 1 ); }
 }
+delete_option( 'vp_lab_slider' );
 wp_clean_plugins_cache( true );
 $active = array_values( array_filter( (array) get_option( 'active_plugins', array() ), function ( $p ) { return 0 !== strpos( $p, 'vp-lab-' ); } ) );
 foreach ( $slugs as $slug ) { $active[] = "$slug/$slug.php"; }

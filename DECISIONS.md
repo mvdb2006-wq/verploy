@@ -218,3 +218,30 @@ Sommige MySQL-compatibele databases nemen bij `CREATE TABLE … LIKE` de prefixl
   - Anders geeft herkomst van verploy.com (Referer-origin; de site stuurt `strict-origin-when-cross-origin`) Engels, maar alleen als de bezoeker nog geen taalkeuze heeft.
   - De keuze gaat in de cookie `vp_locale` en daarna in de taal van het bureau.
   - Zonder context blijft de bestaande logica gelden (cookie, dan browsertaal).
+
+## 25-09 — Supabase-verzoeken: tijdslimiet, lezen opnieuw, functies naast de database
+In productie hingen pagina's soms minutenlang. Eén sitepagina deed er 4 minuten over, en andere verzoeken op dezelfde Vercel-instantie wachtten mee. Alle databasevragen waren al klaar, maar één verzoek bleef hangen op een hergebruikte keep-alive-verbinding die tijdens een pauze van de functie was weggevallen.
+- **Tijdslimiet:** elk Supabase-verzoek (server, proxy en admin) krijgt er een, via `resilientFetch`.
+- **Lezen (GET/HEAD):** wordt tot twee keer opnieuw geprobeerd na 8 s.
+- **Schrijven en RPC's:** worden nooit herhaald. De limiet is 30 s, voor de admin-client 120 s.
+- **Regio:** functies draaien in `dub1` (`vercel.json`), naast de database in eu-west-1 (Ierland). Tot nu toe was dat Washington.
+
+## 25-09 — Bewegende delen tellen niet mee in de beeldvergelijking
+Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% anders uit" op. Bij Feel Good TentEvent werd een onschuldige update daardoor zelfs teruggedraaid.
+- **Werkwijze:** als het beeld te veel afwijkt, laadt de worker dezelfde pagina (nog steeds ná de update) opnieuw, hoogstens twee keer. Wat tussen die ladingen al verschilt, beweegt vanzelf. Die pixels, met 12 px marge, tellen niet mee, en ook niet in de noemer, zodat de rest van de pagina even streng blijft.
+- **Een echte wijziging door de update blijft gezien**, want die is bij elke lading hetzelfde.
+- **Grens:** beweegt meer dan de helft van de pagina, dan vertrouwen we de meting niet en blijft de oorspronkelijke uitkomst staan.
+- **Zichtbaar:** in het verschilbeeld zijn de genegeerde delen blauw. Het run-detail vermeldt welk deel van de pagina dat was.
+- **Kosten:** alleen extra tijd als de vergelijking anders zou zakken. Geen migratie.
+
+## 25-09 — Geplande veilige updates: het bureau kiest Aan/Uit en een moment, Verploy beslist per update
+- **Instellingen:** per bureau `auto_updates` (standaard uit), een moment (nacht 01–05, vroege ochtend 06–08, avond 20–23) en een frequentie (elke dag of eens per week), in de tijdzone van wie het aanzet (uit de browser). Per site kan het uit met "Nooit automatisch" (`sites.auto_updates`).
+- **Beslissing per update** (`src/lib/auto-updates/policy.ts`, puur en getest):
+  - Gewone updates (patch/minor, WordPress-onderhoudsreleases, de connector zelf) gaan samen in één run, getest op een kopie en dan live. Lekken gaan voor. Hoogstens 20 per run.
+  - Een grote versiesprong (eerste getal omhoog), een WordPress-hoofdversie of een onleesbare versie leidt tot één vraag per site in de inbox (`update_approval`). Na akkoord volgt een gewone veilige update met precies die onderdelen.
+  - Wat door de update zelf is tegengehouden, of waarvan het pakket of de licentie ontbreekt, probeert Verploy niet opnieuw. De melding van die run staat al in de inbox.
+  - Een update die in een groep werd tegengehouden zonder dat vaststaat welke het was, gaat de volgende keer apart mee. Zulke herkansingen mogen binnen hetzelfde venster na elkaar, zodat een groep in één nacht is uitgezocht.
+  - Eerdere pogingen tellen 60 dagen mee.
+- **Waarom in de worker en niet in SQL:** versievergelijking en herkansingslogica zijn in TypeScript testbaar en worden gedeeld met de uitleg in het dashboard. De database bewaakt de randvoorwaarden (`start_scheduled_update` controleert opnieuw of het aan staat, en `app.insert_update_run` controleert abonnement, koppeling en connector) en legt de run vast met trigger `scheduled`.
+- **Geen extra toestand:** "vannacht al gedaan" volgt uit de laatste run met trigger `scheduled`. Een vraag om akkoord vervalt vanzelf als de update weg is, of als het bureau of de site niet meer meedoet.
+- **Migratie** `20261003000000_scheduled_updates` bevat alleen toevoegingen, met standaard uit. Betaalstatus en planlimieten blijven ongemoeid.

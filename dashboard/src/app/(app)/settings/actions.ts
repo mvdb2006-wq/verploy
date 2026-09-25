@@ -9,6 +9,7 @@ import { LOCALES } from '@/lib/i18n/core'
 import { env } from '@/lib/env'
 import { renderEmail, sendEmail } from '@/lib/email'
 import { createTranslator, isLocale, type MessageKey } from '@/lib/i18n/core'
+import { FREQUENCIES, UPDATE_WINDOWS, validTimezone } from '@/lib/auto-updates/policy'
 
 export interface SettingsState { error?: string; ok?: string }
 
@@ -41,6 +42,38 @@ export async function saveSecurity(_: SettingsState, form: FormData): Promise<Se
   if (mode !== 'approve' && mode !== 'auto') return { error: t('common.errorGeneric') }
   const supabase = await createClient()
   const { error, count } = await supabase.from('agencies').update({ security_autofix: mode === 'auto' }, { count: 'exact' }).eq('id', session.agency.id)
+  if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
+  revalidatePath('/', 'layout')
+  return { ok: t('common.saved') }
+}
+
+/**
+ * Automatische veilige updates: Aan/Uit, moment en frequentie (eigenaar/beheerder; RLS dwingt dat af).
+ * De tijdzone komt uit de browser van wie het aanzet (de tijden gelden dan "zoals jij ze leest").
+ */
+export async function saveAutoUpdates(_: SettingsState, form: FormData): Promise<SettingsState> {
+  const session = await requireAgency()
+  const t = await getT()
+  const parsed = z.object({
+    auto_updates: z.enum(['on', 'off']),
+    auto_update_window: z.enum(UPDATE_WINDOWS),
+    auto_update_frequency: z.enum(FREQUENCIES),
+    timezone: z.string().max(64).optional(),
+  }).safeParse({
+    auto_updates: form.get('auto_updates') === 'on' ? 'on' : 'off',
+    auto_update_window: form.get('auto_update_window'),
+    auto_update_frequency: form.get('auto_update_frequency'),
+    timezone: form.get('timezone') || undefined,
+  })
+  if (!parsed.success) return { error: t('common.errorGeneric') }
+  const tz = parsed.data.timezone && /^[A-Za-z_]+(\/[A-Za-z0-9_+-]+)*$/.test(parsed.data.timezone) && validTimezone(parsed.data.timezone) ? parsed.data.timezone : undefined
+  const supabase = await createClient()
+  const { error, count } = await supabase.from('agencies').update({
+    auto_updates: parsed.data.auto_updates === 'on',
+    auto_update_window: parsed.data.auto_update_window,
+    auto_update_frequency: parsed.data.auto_update_frequency,
+    ...(tz ? { timezone: tz } : {}),
+  }, { count: 'exact' }).eq('id', session.agency.id)
   if (error || count === 0) return { error: t(dbErrorKey(error, 'common.errorForbidden')) }
   revalidatePath('/', 'layout')
   return { ok: t('common.saved') }

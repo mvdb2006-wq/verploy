@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { runMaintenance } from '@/lib/monitoring/maintenance'
 import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { evaluateSites, refreshFeed } from '@/lib/vulnerabilities/feed'
+import { runScheduledUpdates } from '@/lib/auto-updates/schedule'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -23,6 +24,7 @@ const POLL_MS = Number(process.env.WORKER_POLL_MS ?? 5000)
 const LEASE_SECONDS = 120
 const MAINTENANCE_EVERY_MS = Number(process.env.WORKER_MAINTENANCE_MS ?? 5 * 60_000)
 const VULN_EVERY_MS = Number(process.env.WORKER_VULN_MS ?? 60_000)
+const SCHEDULE_EVERY_MS = Number(process.env.WORKER_SCHEDULE_MS ?? 5 * 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
@@ -160,6 +162,7 @@ async function main() {
 
   let lastMaintenance = 0
   let lastVuln = 0
+  let lastSchedule = 0
   let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
@@ -176,6 +179,12 @@ async function main() {
       await evaluateSites(admin)
         .then(r => { if (r.evaluated || r.autofixStarted || r.stale) log('vuln_evaluated', { ...r }) })
         .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
+    }
+    if (Date.now() - lastSchedule > SCHEDULE_EVERY_MS) {
+      lastSchedule = Date.now()
+      await runScheduledUpdates(admin)
+        .then(r => { if (r.started || r.cleared) log('scheduled_updates', { ...r }) })
+        .catch(e => log('scheduled_updates_failed', { error: (e as Error).message }))
     }
     if (Date.now() - lastMaintenance > MAINTENANCE_EVERY_MS) {
       lastMaintenance = Date.now()
