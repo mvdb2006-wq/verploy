@@ -1105,7 +1105,8 @@
       "attention": "Aandacht nodig",
       "offline": "Offline",
       "updating": "Wordt bijgewerkt",
-      "vulnerable": "Kwetsbaar"
+      "vulnerable": "Kwetsbaar",
+      "connector": "Connector verouderd"
     },
     "col": {
       "site": "Website",
@@ -1118,7 +1119,9 @@
     },
     "updating": "Wordt bijgewerkt",
     "noResults": "Geen sites gevonden.",
-    "wpAdminFor": "WP Admin van {site} openen (nieuw tabblad)"
+    "wpAdminFor": "WP Admin van {site} openen (nieuw tabblad)",
+    "connectorOutdated": "Connector verouderd",
+    "connectorTitle": "Verploy Connector {installed} → {latest}: bijwerken of downloaden op de sitepagina"
   },
   "autoUpdates": {
     "title": "Automatische veilige updates",

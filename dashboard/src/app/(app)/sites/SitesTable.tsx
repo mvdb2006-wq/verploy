@@ -44,7 +44,7 @@ export function SitesTable({ rows, initialFilter, initialQuery }: { rows: SiteRo
             className="input w-full pl-9" />
         </label>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('sitesList.filterLabel')}>
-          {SITE_FILTERS.map(f => (
+          {SITE_FILTERS.filter(f => f !== 'connector' || counts.connector > 0 || filter === 'connector').map(f => (
             <button key={f} type="button" aria-pressed={filter === f}
               onClick={() => { setFilter(f); remember(f, query) }}
               className={cn('rounded-full border px-3 py-1 text-xs font-semibold transition-colors',
@@ -75,6 +75,12 @@ export function SitesTable({ rows, initialFilter, initialQuery }: { rows: SiteRo
                 <td className="px-5 py-3">
                   <Link href={`/sites/${s.id}`} className="font-semibold hover:text-accent">{s.name}</Link>
                   <p className="font-mono text-xs text-subtle">{s.domain}{s.client ? <span className="font-sans"> · {s.client}</span> : null}</p>
+                  {s.connector && (
+                    <Link href={`/sites/${s.id}`} className="badge badge-warn mt-1 text-[11px]"
+                      title={t('sitesList.connectorTitle', { installed: s.connector.installed, latest: s.connector.latest })}>
+                      {t('sitesList.connectorOutdated')}
+                    </Link>
+                  )}
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex flex-wrap items-center gap-1.5">

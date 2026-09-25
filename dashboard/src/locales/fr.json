@@ -1105,7 +1105,8 @@
       "attention": "À vérifier",
       "offline": "Hors ligne",
       "updating": "Mise à jour en cours",
-      "vulnerable": "Vulnérables"
+      "vulnerable": "Vulnérables",
+      "connector": "Connecteur obsolète"
     },
     "col": {
       "site": "Site web",
@@ -1118,7 +1119,9 @@
     },
     "updating": "Mise à jour en cours",
     "noResults": "Aucun site trouvé.",
-    "wpAdminFor": "Ouvrir WP Admin de {site} (nouvel onglet)"
+    "wpAdminFor": "Ouvrir WP Admin de {site} (nouvel onglet)",
+    "connectorOutdated": "Connecteur obsolète",
+    "connectorTitle": "Verploy Connector {installed} → {latest} : mettre à jour ou télécharger sur la page du site"
   },
   "autoUpdates": {
     "title": "Mises à jour sûres automatiques",

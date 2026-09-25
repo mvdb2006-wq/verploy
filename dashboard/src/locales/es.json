@@ -1105,7 +1105,8 @@
       "attention": "Requieren atención",
       "offline": "Sin conexión",
       "updating": "Actualizándose",
-      "vulnerable": "Vulnerables"
+      "vulnerable": "Vulnerables",
+      "connector": "Conector desactualizado"
     },
     "col": {
       "site": "Sitio web",
@@ -1118,7 +1119,9 @@
     },
     "updating": "Actualizándose",
     "noResults": "No se encontraron sitios.",
-    "wpAdminFor": "Abrir WP Admin de {site} (pestaña nueva)"
+    "wpAdminFor": "Abrir WP Admin de {site} (pestaña nueva)",
+    "connectorOutdated": "Conector desactualizado",
+    "connectorTitle": "Verploy Connector {installed} → {latest}: actualizar o descargar en la página del sitio"
   },
   "autoUpdates": {
     "title": "Actualizaciones seguras automáticas",

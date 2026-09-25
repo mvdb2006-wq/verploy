@@ -1105,7 +1105,8 @@
       "attention": "Needs attention",
       "offline": "Offline",
       "updating": "Updating",
-      "vulnerable": "Vulnerable"
+      "vulnerable": "Vulnerable",
+      "connector": "Connector outdated"
     },
     "col": {
       "site": "Website",
@@ -1118,7 +1119,9 @@
     },
     "updating": "Updating",
     "noResults": "No sites found.",
-    "wpAdminFor": "Open WP Admin of {site} (new tab)"
+    "wpAdminFor": "Open WP Admin of {site} (new tab)",
+    "connectorOutdated": "Connector outdated",
+    "connectorTitle": "Verploy Connector {installed} → {latest}: update or download on the site page"
   },
   "autoUpdates": {
     "title": "Automatic safe updates",

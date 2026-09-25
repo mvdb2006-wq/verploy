@@ -5,9 +5,10 @@
 import { computeUptime, type OfflineAlert } from '@/lib/reports/model'
 import { versionAtLeast } from '@/lib/runs'
 import { MIN_CONNECTOR_FOR_LOGIN } from '@/lib/wp-login/token'
+import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 
-export type SiteFilter = 'all' | 'healthy' | 'attention' | 'offline' | 'updating' | 'vulnerable'
-export const SITE_FILTERS: SiteFilter[] = ['all', 'healthy', 'attention', 'offline', 'updating', 'vulnerable']
+export type SiteFilter = 'all' | 'healthy' | 'attention' | 'offline' | 'updating' | 'vulnerable' | 'connector'
+export const SITE_FILTERS: SiteFilter[] = ['all', 'healthy', 'attention', 'offline', 'updating', 'vulnerable', 'connector']
 
 export interface SiteRow {
   id: string
@@ -29,6 +30,8 @@ export interface SiteRow {
   filters: SiteFilter[]
   /** Met één klik inloggen in WP Admin (connector ≥ 2.5). */
   wpLogin: boolean
+  /** Alleen als de connector achterloopt: geïnstalleerde en nieuwste versie. */
+  connector: { installed: string; latest: string } | null
 }
 
 export interface SiteInput {
@@ -51,6 +54,7 @@ export function buildSiteRows(
     offline: Array<OfflineAlert & { site_id: string }>
   },
   now = Date.now(),
+  opts: { latestConnector: string } = { latestConnector: CONNECTOR_RELEASE.version },
 ): SiteRow[] {
   const count = <T extends { site_id: string }>(xs: T[]) => xs.reduce((m, x) => m.set(x.site_id, (m.get(x.site_id) ?? 0) + 1), new Map<string, number>())
   const updates = count(data.updates)
@@ -90,9 +94,13 @@ export function buildSiteRows(
     else filters.push('healthy')
     if (updating) filters.push('updating')
     if (vulns > 0) filters.push('vulnerable')
+    const latest = opts.latestConnector
+    const connector = s.connection_status === 'connected' && s.connector_version && !versionAtLeast(s.connector_version, latest.split('.').map(Number))
+      ? { installed: s.connector_version, latest } : null
+    if (connector) filters.push('connector')
     return {
       id: s.id, name: s.name, url: s.url, domain: domainOf(s.url), client: s.client_name, status: s.effective, updating, uptime,
-      wpLogin: s.connection_status === 'connected' && versionAtLeast(s.connector_version ?? null, MIN_CONNECTOR_FOR_LOGIN),
+      wpLogin: s.connection_status === 'connected' && versionAtLeast(s.connector_version ?? null, MIN_CONNECTOR_FOR_LOGIN), connector,
       updates: updates.get(s.id) ?? 0, vulns, vulnSeverity: vulnWorst.get(s.id) ?? null, alert, lastRun: lastRun.get(s.id) ?? null, filters,
     }
   })

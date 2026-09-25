@@ -49,7 +49,12 @@ test(`Verploy Connector 2.3.0 → ${RELEASE} via een veilige update`, async ({ p
   expect(wp('plugin', 'get', 'verploy-connector', '--field=version')).toBe('2.3.0')
   await signupWithAgency(page, owner, `Zelfupdate ${run}`)
   siteId = await addAndPairWordPress(page, context, 'Lab-WordPress', LAB_WP)
-  await page.reload()
+  // Sitesoverzicht: alleen deze site krijgt het label, en er is een filter voor.
+  await page.goto('/sites')
+  const row = page.getByRole('row').filter({ hasText: 'Lab-WordPress' })
+  await expect(row.getByRole('link', { name: 'Connector verouderd' })).toHaveAttribute('title', `Verploy Connector 2.3.0 → ${RELEASE}: bijwerken of downloaden op de sitepagina`)
+  await expect(page.getByRole('button', { name: /^Connector verouderd 1$/ })).toBeVisible()
+  await page.goto(`/sites/${siteId}`)
   // Oudere connector: bij de versie staat een downloadlink naar de nieuwste zip, en een verwijzing naar veilig bijwerken.
   const download = page.getByRole('link', { name: `${RELEASE} downloaden` })
   await expect(download).toHaveAttribute('href', '/api/v1/plugin/download')
@@ -67,6 +72,9 @@ test(`Verploy Connector 2.3.0 → ${RELEASE} via een veilige update`, async ({ p
   await expect(page).toHaveURL(new RegExp(`/sites/${siteId}/runs/[0-9a-f-]{36}`))
   await expect(page.locator('main').getByText('Live gezet', { exact: true }).first()).toBeVisible({ timeout: 8 * 60_000 })
   expect(wp('plugin', 'get', 'verploy-connector', '--field=version')).toBe(RELEASE)
+  // Bijgewerkt: het label en het filter verdwijnen (na de heartbeat van de nieuwe versie).
+  await expect.poll(async () => { await page.goto('/sites'); return page.getByRole('link', { name: 'Connector verouderd' }).count() }, { timeout: 60_000 }).toBe(0)
+  await expect(page.getByRole('button', { name: /^Connector verouderd/ })).toHaveCount(0)
   // De nieuwe connector stuurt meteen een heartbeat: het dashboard kent de nieuwe versie.
   await expect.poll(async () => {
     const c = db(); await c.connect()

@@ -7,6 +7,18 @@ const site = (id: string, over: Partial<{ name: string; url: string; client_name
 const empty = { updates: [], alerts: [], vulns: [], activeRunSites: new Set<string>(), lastRuns: [], offline: [] }
 
 describe('buildSiteRows', () => {
+  it('connector verouderd: alleen gekoppelde sites met een oudere versie, met beide versies', () => {
+    const c = (id: string, v: string | null, status = 'connected') => ({ ...site(id), connector_version: v, connection_status: status })
+    const rows = buildSiteRows([c('oud', '2.4.0'), c('nieuw', '2.5.0'), c('kort', '2.5'), c('los', '2.3.0', 'awaiting_pairing'), c('geen', null)], empty, NOW, { latestConnector: '2.5.0' })
+    const by = Object.fromEntries(rows.map(r => [r.id, r]))
+    expect(by.oud!.connector).toEqual({ installed: '2.4.0', latest: '2.5.0' })
+    expect(by.oud!.filters).toContain('connector')
+    for (const id of ['nieuw', 'kort', 'los', 'geen']) {
+      expect(by[id]!.connector).toBeNull()
+      expect(by[id]!.filters).not.toContain('connector')
+    }
+  })
+
   it('deelt sites in: gezond, aandacht, offline, wordt bijgewerkt, kwetsbaar', () => {
     const rows = buildSiteRows([
       site('a'), site('b'), site('c', { effective: 'offline' }), site('d', { effective: 'pending', paired_at: null }), site('e'),
