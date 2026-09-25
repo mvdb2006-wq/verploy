@@ -3,7 +3,7 @@
  * Plugin Name:       Verploy Connector
  * Plugin URI:        https://app.verploy.com
  * Description:       Verbindt deze WordPress-site met Verploy: health-monitoring en veilige, geteste updates voor webbureaus.
- * Version:           2.5.2
+ * Version:           2.5.3
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Verploy
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'VERPLOY_VERSION', '2.5.2' );
+define( 'VERPLOY_VERSION', '2.5.3' );
 define( 'VERPLOY_PLUGIN_FILE', __FILE__ );
 define( 'VERPLOY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 // Te overschrijven in wp-config.php voor lokale ontwikkeling en tests.

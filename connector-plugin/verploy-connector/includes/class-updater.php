@@ -18,6 +18,31 @@ class Verploy_Updater {
 		add_filter( 'plugins_api',                           [ __CLASS__, 'plugin_info' ], 10, 3 );
 	}
 
+	/**
+	 * Vergeet wat bekend was over updates en kijk opnieuw (ook bij wordpress.org), zodat een nieuwe versie
+	 * van deze plugin meteen zichtbaar is in plaats van pas na 12 uur. Gebruikt als Verploy meldt dat er een
+	 * nieuwe versie is, en vlak voordat Verploy deze plugin zelf bijwerkt.
+	 */
+	public static function refresh() {
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+		delete_transient( self::CACHE_KEY );
+		delete_site_transient( 'update_plugins' );
+		wp_update_plugins();
+	}
+
+	/** Verploy meldt (in het antwoord op de heartbeat) welke versie de nieuwste is. */
+	public static function maybe_refresh_for( $latest ) {
+		if ( ! is_string( $latest ) || ! preg_match( '/^[0-9]+(\.[0-9]+){1,3}$/', $latest ) || ! version_compare( $latest, VERPLOY_VERSION, '>' ) ) {
+			return false;
+		}
+		if ( get_option( 'verploy_refreshed_for' ) === $latest ) {
+			return false;   // al gedaan voor deze versie; niet bij elke heartbeat opnieuw
+		}
+		update_option( 'verploy_refreshed_for', $latest, false );
+		self::refresh();
+		return true;
+	}
+
 	private static function fetch_info() {
 		$cached = get_transient( self::CACHE_KEY );
 		if ( $cached !== false ) return $cached;

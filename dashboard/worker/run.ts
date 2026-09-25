@@ -210,6 +210,10 @@ export async function testPhase(
   return { failures, captures }
 }
 
+/** Een run met alleen de Verploy Connector (uitrol van een nieuwe versie). */
+const CONNECTOR_SLUG = 'verploy-connector/verploy-connector.php'
+const connectorOnly = (run: Run) => items(run).length > 0 && items(run).every(i => i.slug === CONNECTOR_SLUG)
+
 /** Per onderdeel waarom de update niet lukte (voor de melding in de inbox en de ochtendmail). */
 const failuresOf = (list: RunItem[]): Json =>
   list.filter(i => i.failure).map(i => ({ name: i.name, slug: i.slug, kind: i.failure!.kind, message: i.failure!.message })) as unknown as Json
@@ -548,8 +552,11 @@ export async function step(ctx: RunContext): Promise<Transition> {
 
     case 'deploy_snapshot': {
       await ctx.client.lock(prod, 7200)
-      await ctx.client.maintenance(prod, true, 1800)
-      await event(ctx, 'deploy_snapshot', 'run.maintenance.on')
+      // Alleen de Verploy Connector zelf: geen onderhoudsmelding voor bezoekers (verandert niets aan de voorkant).
+      if (!connectorOnly(run)) {
+        await ctx.client.maintenance(prod, true, 1800)
+        await event(ctx, 'deploy_snapshot', 'run.maintenance.on')
+      }
       // Nieuwe nulmeting vlak vóór de update (onder onderhoud): zo telt tussentijds gewijzigde inhoud niet als fout.
       const bypass = [{ name: 'verploy_bypass', value: ctx.client.bypassToken(), url: prod }]
       await testPhase(ctx, 'production_before', prod, st.pages ?? [], bypass, null)
@@ -559,7 +566,7 @@ export async function step(ctx: RunContext): Promise<Transition> {
     }
 
     case 'deploy_apply': {
-      await ctx.client.maintenance(prod, true, 1800)
+      if (!connectorOnly(run)) await ctx.client.maintenance(prod, true, 1800)
       const { list, failed } = await applyAll(ctx, prod, 'production')
       if (failed) {
         return { next: 'rollback', items: list, state: {

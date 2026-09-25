@@ -109,7 +109,7 @@ export function ActiveRuns({ runs, t }: { runs: ActiveRun[]; t: Translate }) {
               <p className="min-w-0 text-sm font-semibold">
                 <Link href={`/sites/${r.siteId}/runs/${r.id}`} className="hover:text-accent">{r.siteName}</Link>
                 {r.trigger === 'security' && <span className="badge badge-warn ml-2 align-middle">{t('ops.running.security')}</span>}
-                {r.trigger === 'scheduled' && <span className="badge badge-muted ml-2 align-middle">{t('ops.running.scheduled')}</span>}
+                {(r.trigger === 'scheduled' || r.trigger === 'connector') && <span className="badge badge-muted ml-2 align-middle">{t(r.trigger === 'connector' ? 'ops.running.connector' : 'ops.running.scheduled')}</span>}
               </p>
               <span className="text-xs text-muted">{r.status === 'queued' ? t('ops.running.queued') : t(`runs.steps.${r.status}` as MessageKey)}</span>
             </div>
@@ -195,7 +195,7 @@ export function Activity({ entries, t, locale }: { entries: ActivityEntry[]; t: 
               <Link href={href} className="font-semibold hover:text-accent">{e.siteName}</Link>
               <span className="text-subtle"> · </span>{text}
               {e.kind === 'run' && e.trigger === 'security' && <span className="text-subtle"> ({t('ops.activity.auto')})</span>}
-              {e.kind === 'run' && e.trigger === 'scheduled' && <span className="text-subtle"> ({t('ops.activity.scheduled')})</span>}
+              {e.kind === 'run' && (e.trigger === 'scheduled' || e.trigger === 'connector') && <span className="text-subtle"> ({t(e.trigger === 'connector' ? 'ops.activity.connector' : 'ops.activity.scheduled')})</span>}
             </p>
             {badge && <RunBadge {...badge} />}
           </li>

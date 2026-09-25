@@ -518,7 +518,8 @@
       "queueNext": "Start binnen enkele seconden.",
       "queueRetry": "Verploy probeert het om {time} opnieuw.",
       "outcome": "Uitkomst",
-      "scheduledTrigger": "Automatisch gestart door Verploy (geplande veilige update)."
+      "scheduledTrigger": "Automatisch gestart door Verploy (geplande veilige update).",
+      "connectorTrigger": "Automatisch gestart door Verploy: een nieuwe versie van de Verploy Connector, veilig uitgerold (eerst op een testkopie). Bezoekers merken er niets van; er komt geen onderhoudsmelding."
     },
     "events": {
       "queued": "{count, plural, one {Update ingepland} other {# updates ingepland}}.",
@@ -557,7 +558,8 @@
       "functional_unsupported": "Formulieren en webwinkel niet getest: werk Verploy Connector bij naar 2.4 of nieuwer.",
       "functional_passed": "Functionele tests na de update: {ok} van {total} werken, niets is achteruitgegaan.",
       "functional_failed": "Functionele tests na de update: werkt niet meer: {failed}.",
-      "queued_scheduled": "{count, plural, one {# update} other {# updates}} automatisch ingepland door Verploy (geplande veilige update)."
+      "queued_scheduled": "{count, plural, one {# update} other {# updates}} automatisch ingepland door Verploy (geplande veilige update).",
+      "queued_connector": "Verploy Connector {version} automatisch ingepland door Verploy (nieuwe versie)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1061,7 +1063,8 @@
       "queued": "In de wachtrij",
       "security": "Beveiligingslek",
       "progress": "Voortgang van de update op {site}",
-      "scheduled": "Gepland"
+      "scheduled": "Gepland",
+      "connector": "Connector"
     },
     "inbox": {
       "title": "Wacht op jou",
@@ -1130,7 +1133,8 @@
       "alertResolved": "Opgelost: {title}",
       "auto": "automatisch",
       "runAttention": "{items} vraagt aandacht",
-      "scheduled": "gepland"
+      "scheduled": "gepland",
+      "connector": "connector"
     },
     "dur": {
       "d": "{n} d",

@@ -4,7 +4,7 @@ import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { authenticateSigned } from '@/lib/connector/auth'
 import { heartbeatSchema, toRows } from '@/lib/connector/payload'
 import { json, readBody } from '@/lib/connector/http'
-import { HEARTBEAT_INTERVAL_SECONDS } from '@/lib/connector/release'
+import { CONNECTOR_RELEASE, HEARTBEAT_INTERVAL_SECONDS } from '@/lib/connector/release'
 import { sameSite } from '@/lib/url'
 
 export const dynamic = 'force-dynamic'
@@ -45,5 +45,6 @@ export async function POST(req: Request) {
   after(async () => {
     try { await dispatchNotifications(admin, { limit: 10 }) } catch (e) { console.error('[heartbeat] meldingen versturen mislukt', e) }
   })
-  return json({ ok: true, next_heartbeat_in: HEARTBEAT_INTERVAL_SECONDS })
+  // connector_latest: vanaf 2.5.3 kijkt de plugin dan meteen of er een update is (i.p.v. na 12 uur).
+  return json({ ok: true, next_heartbeat_in: HEARTBEAT_INTERVAL_SECONDS, connector_latest: CONNECTOR_RELEASE.version })
 }

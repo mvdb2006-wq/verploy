@@ -320,3 +320,13 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - in de inbox en de ochtendmail (`reason_params.failures`).
 - **Connector 2.5.1:** geeft bij een fout ook de extra gegevens van WordPress door, bijvoorbeeld "Download failed. **Unauthorized**". Zonder die HTTP-reden is een licentieprobleem niet te onderscheiden van een haperende server.
 - Oude runs hebben geen logboek; daar staat alleen de status.
+
+## 26-09 — Nieuwe Verploy Connector binnen een minuut uitgerold
+- **Waarom het traag was:** de connector vroeg maar eens per 12 uur aan Verploy of er een nieuwe versie was (cache), en WordPress zelf keek twee keer per dag. Pas daarna kon de nachtelijke update hem oppakken. Klikken op "Opnieuw controleren" hielp daardoor ook niet altijd.
+- **Nu, vanaf connector 2.5.3:**
+  1. Elk antwoord op een heartbeat bevat `connector_latest`. Is die nieuwer, dan wist de connector zijn cache, kijkt meteen opnieuw en meldt het binnen enkele seconden.
+  2. De worker roept elke minuut `start_connector_updates(<release>)` aan. Die start per achterlopende site met 2.5.3 of nieuwer een veilige update van alleen de connector (trigger `connector`), los van het updatemoment van het bureau. De connector is de verbinding met Verploy zelf.
+  3. Werkt de connector zichzelf bij, dan haalt hij altijd verse gegevens op, zonder cache.
+  4. Een run met alleen de connector zet geen onderhoudsmodus aan: aan de voorkant verandert niets. De testkopie, de tests en rollback blijven zoals ze zijn.
+- **Grenzen:** niet als er al een run loopt; hooguit eens per 6 uur en 3 keer per versie per site. Mislukt het, dan volgt de gewone melding en kan je het altijd handmatig doen.
+- **Overgang:** sites onder 2.5.3 kunnen dit nog niet. Die krijgen 2.5.3 via de gewone (nachtelijke) update, of je uploadt hem eenmalig zelf. Daarna gaat het vanzelf.

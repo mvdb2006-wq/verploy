@@ -288,7 +288,7 @@ PHP;
 			if ( $to && version_compare( $from, $to, '>=' ) ) {
 				return self::item_result( $item, true, $from, $from, 'already_current', '' );
 			}
-			wp_update_plugins();
+			self::check_plugin_updates( $slug );
 			$updates = get_site_transient( 'update_plugins' );
 			if ( ! isset( $updates->response[ $slug ] ) ) {
 				return self::item_result( $item, false, $from, null, 'no_update_available', '' );
@@ -389,7 +389,7 @@ PHP;
 		$to   = isset( $item['to_version'] ) ? (string) $item['to_version'] : '';
 		$offer = null;
 		if ( 'plugin' === $type ) {
-			wp_update_plugins();
+			self::check_plugin_updates( $slug );
 			$updates = get_site_transient( 'update_plugins' );
 			if ( isset( $updates->response[ $slug ] ) ) {
 				$r     = $updates->response[ $slug ];
@@ -478,6 +478,15 @@ PHP;
 		$now = wp_get_theme( $slug )->get( 'Version' );
 		$ok  = ! is_wp_error( $result ) && $result && version_compare( $now, $from, '>' );
 		return self::item_result( $item, $ok, $from, $now, $ok ? 'updated' : 'update_failed', $skin->log() );
+	}
+
+	/** Zoekt naar updates; voor deze plugin zelf altijd vers (zonder de cache van 12 uur). */
+	private static function check_plugin_updates( $slug ) {
+		if ( class_exists( 'Verploy_Updater' ) && Verploy_Updater::PLUGIN_SLUG === $slug ) {
+			Verploy_Updater::refresh();
+			return;
+		}
+		wp_update_plugins();
 	}
 
 	private static function item_result( array $item, $ok, $from, $to, $status, $log ) {

@@ -95,6 +95,10 @@ class Verploy_Heartbeat {
 			),
 			false
 		);
+		// Nieuwe versie van deze plugin? Direct opnieuw kijken en meteen melden, zodat Verploy hem kan uitrollen.
+		if ( ! is_wp_error( $result ) && isset( $result['connector_latest'] ) && class_exists( 'Verploy_Updater' ) && Verploy_Updater::maybe_refresh_for( $result['connector_latest'] ) ) {
+			self::soon();
+		}
 		return is_wp_error( $result ) ? $result : true;
 	}
 }

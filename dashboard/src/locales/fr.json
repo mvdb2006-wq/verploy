@@ -518,7 +518,8 @@
       "queueNext": "Démarrage dans quelques secondes.",
       "queueRetry": "Verploy réessaiera à {time}.",
       "outcome": "Résultat",
-      "scheduledTrigger": "Lancée automatiquement par Verploy (mise à jour sûre planifiée)."
+      "scheduledTrigger": "Lancée automatiquement par Verploy (mise à jour sûre planifiée).",
+      "connectorTrigger": "Lancé automatiquement par Verploy : une nouvelle version du Verploy Connector, déployée en toute sécurité (testée d’abord sur une copie). Les visiteurs ne remarquent rien ; aucun message de maintenance."
     },
     "events": {
       "queued": "{count, plural, one {Mise à jour planifiée} other {# mises à jour planifiées}}.",
@@ -557,7 +558,8 @@
       "functional_unsupported": "Formulaires et boutique non testés : mettez Verploy Connector à jour vers 2.4 ou plus récent.",
       "functional_passed": "Tests fonctionnels après la mise à jour : {ok} sur {total} fonctionnent, aucune régression.",
       "functional_failed": "Tests fonctionnels après la mise à jour : ne fonctionne plus : {failed}.",
-      "queued_scheduled": "{count, plural, one {# mise à jour planifiée} other {# mises à jour planifiées}} automatiquement par Verploy (mise à jour sûre planifiée)."
+      "queued_scheduled": "{count, plural, one {# mise à jour planifiée} other {# mises à jour planifiées}} automatiquement par Verploy (mise à jour sûre planifiée).",
+      "queued_connector": "Verploy Connector {version} planifié automatiquement par Verploy (nouvelle version)."
     },
     "itemOutcome": {
       "live": "En ligne",
@@ -1061,7 +1063,8 @@
       "queued": "En file d’attente",
       "security": "Faille de sécurité",
       "progress": "Progression de la mise à jour sur {site}",
-      "scheduled": "Planifiée"
+      "scheduled": "Planifiée",
+      "connector": "Connecteur"
     },
     "inbox": {
       "title": "Vous attend",
@@ -1130,7 +1133,8 @@
       "alertResolved": "Résolu : {title}",
       "auto": "automatique",
       "runAttention": "{items} à vérifier",
-      "scheduled": "planifiée"
+      "scheduled": "planifiée",
+      "connector": "connecteur"
     },
     "dur": {
       "d": "{n} j",

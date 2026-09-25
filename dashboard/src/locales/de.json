@@ -518,7 +518,8 @@
       "queueNext": "Startet in wenigen Sekunden.",
       "queueRetry": "Verploy versucht es um {time} erneut.",
       "outcome": "Ergebnis",
-      "scheduledTrigger": "Automatisch von Verploy gestartet (geplantes sicheres Update)."
+      "scheduledTrigger": "Automatisch von Verploy gestartet (geplantes sicheres Update).",
+      "connectorTrigger": "Automatisch von Verploy gestartet: eine neue Version des Verploy Connectors, sicher ausgerollt (zuerst auf einer Kopie getestet). Besucher merken nichts; es gibt keinen Wartungshinweis."
     },
     "events": {
       "queued": "{count, plural, one {Update eingeplant} other {# Updates eingeplant}}.",
@@ -557,7 +558,8 @@
       "functional_unsupported": "Formulare und Shop nicht getestet: aktualisiere Verploy Connector auf 2.4 oder neuer.",
       "functional_passed": "Funktionale Tests nach dem Update: {ok} von {total} funktionieren, nichts hat sich verschlechtert.",
       "functional_failed": "Funktionale Tests nach dem Update: funktioniert nicht mehr: {failed}.",
-      "queued_scheduled": "{count, plural, one {# Update} other {# Updates}} automatisch von Verploy eingeplant (geplantes sicheres Update)."
+      "queued_scheduled": "{count, plural, one {# Update} other {# Updates}} automatisch von Verploy eingeplant (geplantes sicheres Update).",
+      "queued_connector": "Verploy Connector {version} automatisch von Verploy eingeplant (neue Version)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1061,7 +1063,8 @@
       "queued": "In der Warteschlange",
       "security": "Sicherheitslücke",
       "progress": "Fortschritt des Updates auf {site}",
-      "scheduled": "Geplant"
+      "scheduled": "Geplant",
+      "connector": "Connector"
     },
     "inbox": {
       "title": "Wartet auf dich",
@@ -1130,7 +1133,8 @@
       "alertResolved": "Behoben: {title}",
       "auto": "automatisch",
       "runAttention": "{items} braucht Aufmerksamkeit",
-      "scheduled": "geplant"
+      "scheduled": "geplant",
+      "connector": "connector"
     },
     "dur": {
       "d": "{n} T",

@@ -11,6 +11,7 @@ import { dispatchNotifications } from '@/lib/monitoring/notify'
 import { evaluateSites, refreshFeed } from '@/lib/vulnerabilities/feed'
 import { runScheduledUpdates } from '@/lib/auto-updates/schedule'
 import { sendDailyDigests } from '@/lib/digest/send'
+import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -28,6 +29,8 @@ const VULN_EVERY_MS = Number(process.env.WORKER_VULN_MS ?? 60_000)
 const SCHEDULE_EVERY_MS = Number(process.env.WORKER_SCHEDULE_MS ?? 5 * 60_000)
 /** Hoe vaak de cijfers "hoe ging deze update elders" opnieuw worden berekend. */
 const INTEL_EVERY_MS = Number(process.env.WORKER_INTEL_MS ?? 30 * 60_000)
+/** Hoe snel een nieuwe Verploy Connector wordt uitgerold op sites die achterlopen. */
+const CONNECTOR_EVERY_MS = Number(process.env.WORKER_CONNECTOR_MS ?? 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
@@ -167,6 +170,7 @@ async function main() {
   let lastVuln = 0
   let lastSchedule = 0
   let lastIntel = 0
+  let lastConnector = 0
   let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
@@ -183,6 +187,12 @@ async function main() {
       await evaluateSites(admin)
         .then(r => { if (r.evaluated || r.autofixStarted || r.stale) log('vuln_evaluated', { ...r }) })
         .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
+    }
+    if (Date.now() - lastConnector > CONNECTOR_EVERY_MS) {
+      lastConnector = Date.now()
+      const { data, error } = await admin.rpc('start_connector_updates', { p_version: CONNECTOR_RELEASE.version, p_limit: 20 })
+      if (error) log('connector_rollout_failed', { error: error.message })
+      else if (data) log('connector_rollout', { started: data, version: CONNECTOR_RELEASE.version })
     }
     if (Date.now() - lastIntel > INTEL_EVERY_MS) {
       lastIntel = Date.now()

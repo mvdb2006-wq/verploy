@@ -518,7 +518,8 @@
       "queueNext": "Starting within a few seconds.",
       "queueRetry": "Verploy will try again at {time}.",
       "outcome": "Outcome",
-      "scheduledTrigger": "Started automatically by Verploy (scheduled safe update)."
+      "scheduledTrigger": "Started automatically by Verploy (scheduled safe update).",
+      "connectorTrigger": "Started automatically by Verploy: a new version of the Verploy Connector, rolled out safely (tested on a copy first). Visitors notice nothing; there is no maintenance notice."
     },
     "events": {
       "queued": "{count, plural, one {Update scheduled} other {# updates scheduled}}.",
@@ -557,7 +558,8 @@
       "functional_unsupported": "Forms and shop not tested: update Verploy Connector to 2.4 or newer.",
       "functional_passed": "Functional tests after the update: {ok} of {total} work, nothing regressed.",
       "functional_failed": "Functional tests after the update: no longer working: {failed}.",
-      "queued_scheduled": "{count, plural, one {# update} other {# updates}} scheduled automatically by Verploy (scheduled safe update)."
+      "queued_scheduled": "{count, plural, one {# update} other {# updates}} scheduled automatically by Verploy (scheduled safe update).",
+      "queued_connector": "Verploy Connector {version} scheduled automatically by Verploy (new version)."
     },
     "itemOutcome": {
       "live": "Live",
@@ -1061,7 +1063,8 @@
       "queued": "Queued",
       "security": "Security fix",
       "progress": "Update progress on {site}",
-      "scheduled": "Scheduled"
+      "scheduled": "Scheduled",
+      "connector": "Connector"
     },
     "inbox": {
       "title": "Waiting for you",
@@ -1130,7 +1133,8 @@
       "alertResolved": "Resolved: {title}",
       "auto": "automatic",
       "runAttention": "{items} needs attention",
-      "scheduled": "scheduled"
+      "scheduled": "scheduled",
+      "connector": "connector"
     },
     "dur": {
       "d": "{n} d",

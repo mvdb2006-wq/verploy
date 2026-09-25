@@ -4,7 +4,7 @@ Tags:              maintenance, updates, monitoring, agency, staging
 Requires at least: 5.8
 Tested up to:      7.1
 Requires PHP:      7.4
-Stable tag:        2.5.2
+Stable tag:        2.5.3
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,9 @@ Verploy sends your browser to this site with a signed login token (HMAC-SHA256 w
 All Verploy settings, staging copies and backups are removed.
 
 == Changelog ==
+
+= 2.5.3 =
+* New versions of this plugin are picked up within a minute: Verploy reports the latest version with every heartbeat, and the plugin then checks for the update immediately instead of waiting up to 12 hours. Verploy can then roll out the new version as a safe update right away.
 
 = 2.5.2 =
 * The Verploy settings page shows the installed version.

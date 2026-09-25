@@ -1035,6 +1035,7 @@ export type Database = {
       set_plan_price: { Args: { p_plan: string | null; p_price: string | null }; Returns: undefined }
       set_stripe_customer: { Args: { p_agency: string | null; p_customer: string | null }; Returns: undefined }
       sites_due_for_vulnerability_check: { Args: { p_limit?: number | null }; Returns: { site_id: string }[] }
+      start_connector_updates: { Args: { p_version: string | null; p_limit?: number | null }; Returns: number }
       start_scheduled_update: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       start_security_fix: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
       start_wp_login: { Args: { p_site: string | null }; Returns: { nonce: string; wp_user_id: number; wp_user_login: string; site_url: string; user_email: string }[] }

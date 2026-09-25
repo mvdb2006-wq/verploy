@@ -326,6 +326,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       {!done && run.cancel_requested && <Alert tone="info">{t('runs.detail.cancelling')}</Alert>}
       {run.trigger === 'security' && <Alert tone="info">{t('runs.detail.securityTrigger')}</Alert>}
       {run.trigger === 'scheduled' && <Alert tone="info">{t('runs.detail.scheduledTrigger')}</Alert>}
+      {run.trigger === 'connector' && <Alert tone="info">{t('runs.detail.connectorTrigger')}</Alert>}
       {run.status === 'queued' && (
         <p className="rounded-(--radius-card) border border-border bg-surface px-5 py-3 text-sm text-muted" role="status">
           {retryWait ? t('runs.detail.queueRetry', { time: formatTime(run.not_before, locale) })

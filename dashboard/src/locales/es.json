@@ -518,7 +518,8 @@
       "queueNext": "Empieza en unos segundos.",
       "queueRetry": "Verploy lo volverá a intentar a las {time}.",
       "outcome": "Resultado",
-      "scheduledTrigger": "Iniciada automáticamente por Verploy (actualización segura programada)."
+      "scheduledTrigger": "Iniciada automáticamente por Verploy (actualización segura programada).",
+      "connectorTrigger": "Iniciado automáticamente por Verploy: una nueva versión del Verploy Connector, desplegada de forma segura (probada antes en una copia). Los visitantes no notan nada; no hay aviso de mantenimiento."
     },
     "events": {
       "queued": "{count, plural, one {Actualización programada} other {# actualizaciones programadas}}.",
@@ -557,7 +558,8 @@
       "functional_unsupported": "Formularios y tienda no probados: actualiza Verploy Connector a la 2.4 o posterior.",
       "functional_passed": "Pruebas funcionales tras la actualización: funcionan {ok} de {total}, nada ha empeorado.",
       "functional_failed": "Pruebas funcionales tras la actualización: ya no funciona: {failed}.",
-      "queued_scheduled": "{count, plural, one {# actualización programada} other {# actualizaciones programadas}} automáticamente por Verploy (actualización segura programada)."
+      "queued_scheduled": "{count, plural, one {# actualización programada} other {# actualizaciones programadas}} automáticamente por Verploy (actualización segura programada).",
+      "queued_connector": "Verploy Connector {version} programado automáticamente por Verploy (nueva versión)."
     },
     "itemOutcome": {
       "live": "Publicada",
@@ -1061,7 +1063,8 @@
       "queued": "En cola",
       "security": "Vulnerabilidad",
       "progress": "Progreso de la actualización en {site}",
-      "scheduled": "Programada"
+      "scheduled": "Programada",
+      "connector": "Conector"
     },
     "inbox": {
       "title": "Te espera",
@@ -1130,7 +1133,8 @@
       "alertResolved": "Resuelto: {title}",
       "auto": "automático",
       "runAttention": "{items} requiere atención",
-      "scheduled": "programada"
+      "scheduled": "programada",
+      "connector": "conector"
     },
     "dur": {
       "d": "{n} d",
