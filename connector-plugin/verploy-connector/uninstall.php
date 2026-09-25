@@ -9,7 +9,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-foreach ( array( 'verploy_site_id', 'verploy_secret', 'verploy_paired_at', 'verploy_last_heartbeat', 'verploy_api_key', 'verploy_last_heartbeat_legacy', 'verploy_run_lock', 'verploy_run_state', 'verploy_maintenance', 'verploy_sso_enabled', 'verploy_sso_log' ) as $verploy_option ) {
+foreach ( array( 'verploy_site_id', 'verploy_secret', 'verploy_paired_at', 'verploy_last_heartbeat', 'verploy_api_key', 'verploy_last_heartbeat_legacy', 'verploy_run_lock', 'verploy_run_state', 'verploy_maintenance', 'verploy_sso_enabled', 'verploy_sso_log', 'verploy_version_seen' ) as $verploy_option ) {
 	delete_option( $verploy_option );
 }
 delete_transient( 'verploy_update_info' );

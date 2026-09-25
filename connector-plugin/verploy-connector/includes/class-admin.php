@@ -109,6 +109,7 @@ class Verploy_Admin {
 		?>
 		<div class="wrap">
 			<h1>Verploy</h1>
+			<p><strong><?php esc_html_e( 'Versie:', 'verploy-connector' ); ?></strong> <?php echo esc_html( VERPLOY_VERSION ); ?></p>
 			<?php if ( is_array( $notice ) ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?>"><p><?php echo esc_html( $notice['message'] ); ?></p></div>
 			<?php endif; ?>
