@@ -1,3 +1,4 @@
+import { failureKind } from '@/lib/updates/failure'
 import type { Locale, MessageKey, Translate } from '@/lib/i18n/core'
 import { formatDate } from '@/lib/format'
 import { presentReason } from '@/lib/runs'
@@ -44,8 +45,8 @@ export function presentAlert(t: Translate, locale: Locale, alert: AlertLike): { 
   // Waarom een onderdeel niet kon worden bijgewerkt (licentie, schrijfrechten, …), met wat je eraan doet.
   const rp = (p.reason_params ?? {}) as { failures?: unknown }
   const failures = alert.type.startsWith('update_') && Array.isArray(rp.failures)
-    ? (rp.failures as Array<{ name?: unknown; kind?: unknown }>).filter(f => typeof f.kind === 'string' && FAILURE_KINDS.has(f.kind as string)).slice(0, 3)
-      .map(f => ` ${str(f.name)}: ${t(`runs.failure.${f.kind as string}` as MessageKey)}`).join('')
+    ? (rp.failures as Array<{ name?: unknown; kind?: unknown; message?: unknown }>).filter(f => typeof f.kind === 'string' && FAILURE_KINDS.has(f.kind as string)).slice(0, 3)
+      .map(f => ` ${str(f.name)}: ${t(`runs.failure.${failureKind({ kind: f.kind as string, message: typeof f.message === 'string' ? f.message : null })}` as MessageKey)}`).join('')
     : ''
   return {
     title: t(`alerts.types.${key}.title` as MessageKey, vars),

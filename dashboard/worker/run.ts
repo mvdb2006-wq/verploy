@@ -212,7 +212,7 @@ export async function testPhase(
 
 /** Per onderdeel waarom de update niet lukte (voor de melding in de inbox en de ochtendmail). */
 const failuresOf = (list: RunItem[]): Json =>
-  list.filter(i => i.failure).map(i => ({ name: i.name, kind: i.failure!.kind })) as unknown as Json
+  list.filter(i => i.failure).map(i => ({ name: i.name, kind: i.failure!.kind, message: i.failure!.message })) as unknown as Json
 
 /** Pauze voor de tweede meting van een afgekeurde pagina. */
 const RECHECK_DELAY_MS = Number(process.env.WORKER_RECHECK_MS ?? 10_000)

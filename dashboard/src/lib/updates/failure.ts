@@ -14,10 +14,10 @@ const RULES: [FailureKind, RegExp][] = [
   ['disk_space', /disk space|no space left|schijfruimte/i],
   ['requirements', /requires (at least )?(php|wordpress)|minimum (php|wordpress)|php version .* (required|needed)|vereist (php|wordpress)/i],
   ['license', /licen[sc]e|purchase code|aankoopcode|activate (the|your) (plugin|product|theme)|not (been )?activated|registrat|subscription|abonnement|\b(401|403)\b|unauthori[sz]ed|forbidden/i],
-  ['no_package', /update package not available|package not available|no package|geen (update)?pakket|pakket niet beschikbaar|not found|niet gevonden|\b404\b/i],
+  ['no_package', /update package not available|package not available|no package|geen (update)?pakket|pakket niet beschikbaar|not found|niet gevonden|\b404\b|invalid url|url (is )?ongeldig|opgegeven url/i],
   ['permissions', /could not (create|copy|remove|move|delete)|unable to (create|copy|remove|move|delete)|not writable|permission denied|(kon|kan) .*niet (aanmaken|kopiëren|verwijderen|verplaatsen)|niet beschrijfbaar|geen toestemming/i],
   ['folder_exists', /destination folder already exists|doelmap bestaat al/i],
-  ['bad_package', /incompatible archive|pclzip|not a valid zip|no valid plugins were found|no valid themes|the package could not be installed|incompatibel archief|ongeldig/i],
+  ['bad_package', /incompatible archive|pclzip|not a valid zip|no valid plugins were found|no valid themes|the package could not be installed|incompatibel archief|ongeldig (zip|archief|pakket)|geen geldige (plugin|thema)/i],
   ['download', /download failed|could not resolve|timed out|curl error|ssl|http error|connection (refused|reset)|download(en)? mislukt/i],
 ]
 
@@ -44,4 +44,13 @@ export function explainFailure(log: string | null | undefined): Failure {
   const text = lines.join('\n')
   const kind = RULES.find(([, re]) => re.test(text))?.[0] ?? 'unknown'
   return { kind, message: keyLine(lines) }
+}
+
+/**
+ * De oorzaak om te tonen: opnieuw afgeleid uit de bewaarde melding (zodat betere herkenning ook voor
+ * oudere runs geldt), anders wat de worker destijds vastlegde.
+ */
+export function failureKind(f: { kind: string; message: string | null }): FailureKind {
+  const again = f.message ? explainFailure(f.message).kind : 'unknown'
+  return again !== 'unknown' ? again : (RULES.some(([k]) => k === f.kind) ? f.kind as FailureKind : 'unknown')
 }

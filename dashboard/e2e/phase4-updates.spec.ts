@@ -168,7 +168,7 @@ test('scenario 5 — één update zonder pakket: apart gezet, afhankelijke overg
   await expect(page.getByText('Vraagt aandacht', { exact: true })).toBeVisible()
   await expect(page.getByText('Overgeslagen', { exact: true })).toBeVisible()
   // Waarom: in gewone taal met wat je eraan doet, plus de letterlijke melding van WordPress.
-  await expect(page.getByText('De maker van de plugin gaf geen downloadbestand.', { exact: false })).toBeVisible()
+  await expect(page.getByText('De maker van de plugin gaf geen downloadbestand.', { exact: false }).first()).toBeVisible()
   await expect(page.getByText(/WordPress meldde: .*Not Found/)).toBeVisible()
   // live: extra bijgewerkt, nopkg en addon ongewijzigd
   const html = await (await fetch(`${LAB_WP}/`)).text()

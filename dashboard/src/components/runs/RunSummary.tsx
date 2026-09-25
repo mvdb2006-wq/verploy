@@ -3,6 +3,7 @@ import type { MessageKey, Translate } from '@/lib/i18n/core'
 import { adviceFor, summarizeRun, type RunItem } from '@/lib/run-items'
 import { presentReason } from '@/lib/runs'
 import { cn } from '@/lib/cn'
+import { failureKind } from '@/lib/updates/failure'
 import { WpAdminLink } from '@/components/WpAdminLink'
 
 interface RunLike { status: string; verdict: string | null; reason_key: string | null; reason_params: unknown; items: unknown }
@@ -50,7 +51,10 @@ export function RunSummary({ t, run, siteId, siteUrl, wpLogin = false, hasDiagno
     : t('runs.summary.liveUntouched')
 
   // Aanbevolen actie: per onderdeel dat aandacht vraagt; anders de diagnose (staat eronder) of niets.
-  const advice = [...s.attention, ...s.skipped].slice(0, 4).map(i => t(`runs.advice.${adviceFor(i.staging)}` as MessageKey, { name: i.name }))
+  // Is de oorzaak bekend (logboek van WordPress), dan die uitleg; anders het advies op basis van de status.
+  const advice = [...s.attention, ...s.skipped].slice(0, 4).map(i => i.failure && failureKind(i.failure) !== 'unknown'
+    ? `${i.name}: ${t(`runs.failure.${failureKind(i.failure)}` as MessageKey)}`
+    : t(`runs.advice.${adviceFor(i.staging)}` as MessageKey, { name: i.name }))
   const needsUser = advice.length > 0 || (run.verdict !== 'deployed' && run.verdict !== 'cancelled')
 
   return (

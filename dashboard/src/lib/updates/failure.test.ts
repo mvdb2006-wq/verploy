@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { explainFailure, redact } from './failure'
+import { explainFailure, failureKind, redact } from './failure'
 
 describe('explainFailure', () => {
   it('betaalde plugin zonder geactiveerde licentie (WPBakery, Envato)', () => {
@@ -24,6 +24,16 @@ describe('explainFailure', () => {
     expect(explainFailure('Fout: Kon map niet aanmaken.').kind).toBe('permissions')
     expect(explainFailure('Fout: Incompatibel archief.').kind).toBe('bad_package')
     expect(explainFailure('Fout: Downloaden mislukt. cURL error 28').kind).toBe('download')
+  })
+  it('lege download-URL (premium plugin zonder licentie, zoals WPBakery op Feel Good)', () => {
+    expect(explainFailure('Fout: Download failed. De opgegeven URL is ongeldig.')).toEqual({ kind: 'no_package', message: 'Download failed. De opgegeven URL is ongeldig.' })
+    expect(explainFailure('Error: Download failed. Invalid URL Provided.').kind).toBe('no_package')
+    expect(explainFailure('Error: To receive automatic updates license activation is required.').kind).toBe('license')
+  })
+  it('oudere runs: de oorzaak wordt opnieuw afgeleid uit de bewaarde melding', () => {
+    expect(failureKind({ kind: 'bad_package', message: 'Download failed. De opgegeven URL is ongeldig.' })).toBe('no_package')
+    expect(failureKind({ kind: 'permissions', message: null })).toBe('permissions')
+    expect(failureKind({ kind: 'nonsense', message: 'iets vaags' })).toBe('unknown')
   })
   it('onbekend: de letterlijke laatste regel; leeg: niets', () => {
     expect(explainFailure('Something odd happened')).toEqual({ kind: 'unknown', message: 'Something odd happened' })
