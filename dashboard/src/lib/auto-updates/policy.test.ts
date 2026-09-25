@@ -66,6 +66,11 @@ describe('eerdere pogingen', () => {
     expect(decide(comp(), [run([item({ staging: 'updated', production: 'updated' })], 'rolled_back')])).toEqual({ kind: 'held', why: 'failed' })
     expect(decide(comp(), [run([item({ staging: 'updated' }), item({ slug: 'y/y.php', staging: 'updated' })], 'blocked')])).toEqual({ kind: 'retry_alone' })
   })
+  it('grote versiesprong die in een groep werd teruggedraaid: nog steeds eerst akkoord, geen automatische herkansing', () => {
+    const major = comp({ version: '2.7.11', latest_version: '3.0.0' })
+    const group = run([item({ from_version: '2.7.11', to_version: '3.0.0', staging: 'updated', production: 'updated' }), item({ slug: 'y/y.php', staging: 'updated', production: 'updated' })], 'rolled_back')
+    expect(decide(major, [group])).toEqual({ kind: 'approval', why: 'major' })
+  })
 })
 
 describe('plan', () => {

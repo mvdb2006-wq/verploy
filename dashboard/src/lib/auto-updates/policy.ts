@@ -97,9 +97,11 @@ export function decide(c: Component, past: PastRun[]): Decision {
     .map(i => ({ outcome: itemOutcome(i, r), alone: r.items.length === 1 })))
   if (tries.some(t => t.outcome === 'attention')) return { kind: 'held', why: 'attention' }
   if (tries.some(t => FAILED.includes(t.outcome) && t.alone)) return { kind: 'held', why: 'failed' }
-  if (tries.some(t => FAILED.includes(t.outcome))) return { kind: 'retry_alone' }
+  // Een grote versiesprong doet Verploy nooit zelf, ook niet als herkansing.
   const why = approvalReason(c)
-  return why ? { kind: 'approval', why } : { kind: 'auto' }
+  if (why) return { kind: 'approval', why }
+  if (tries.some(t => FAILED.includes(t.outcome))) return { kind: 'retry_alone' }
+  return { kind: 'auto' }
 }
 
 export interface Plan {
