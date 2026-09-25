@@ -183,7 +183,9 @@
     "dangerBody": "Removes the site and all its data from Verploy. The plugin on the site will stop reporting.",
     "deleteConfirm": "Type the site name ({name}) to confirm.",
     "deleteButton": "Permanently delete site",
-    "unlimited": "Unlimited"
+    "unlimited": "Unlimited",
+    "connectorDownload": "Download {version}",
+    "connectorSafeUpdate": "or update safely"
   },
   "settings": {
     "title": "Agency settings",

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ExternalLink } from 'lucide-react'
+import { Download, ExternalLink } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
@@ -112,6 +112,8 @@ export default async function SitePage({ params, searchParams }: { params: Promi
     : !agencyIsWritable(session.agency) ? t('runs.errorReadOnly')
     : null
 
+  const connectorOutdated = Boolean(site.connector_version) && !versionAtLeast(site.connector_version, CONNECTOR_RELEASE.version.split('.').map(Number))
+  const connectorOffered = (components ?? []).some(c => c.slug === 'verploy-connector/verploy-connector.php' && c.update_available)
   const facts: Array<[string, string]> = [
     [t('siteDetail.wordpress'), site.wp_version ?? '—'],
     [t('siteDetail.php'), site.php_version ?? '—'],
@@ -186,6 +188,14 @@ export default async function SitePage({ params, searchParams }: { params: Promi
             <div key={label} className="bg-surface px-5 py-4">
               <dt className="text-xs font-semibold text-muted">{label}</dt>
               <dd className="mt-1.5 font-mono text-lg font-bold tabular-nums">{value}</dd>
+              {label === t('siteDetail.connector') && connectorOutdated && (
+                <dd className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                  <a href="/api/v1/plugin/download" className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">
+                    <Download size={12} aria-hidden /> {t('siteDetail.connectorDownload', { version: CONNECTOR_RELEASE.version })}
+                  </a>
+                  {connectorOffered && <a href="#updates" className="text-muted hover:text-text hover:underline">{t('siteDetail.connectorSafeUpdate')}</a>}
+                </dd>
+              )}
             </div>
           ))}
         </dl>

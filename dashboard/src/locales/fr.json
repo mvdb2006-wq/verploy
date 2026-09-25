@@ -183,7 +183,9 @@
     "dangerBody": "Supprime le site et toutes ses données de Verploy. L'extension sur le site cessera ensuite d'envoyer des données.",
     "deleteConfirm": "Saisissez le nom du site ({name}) pour confirmer.",
     "deleteButton": "Supprimer définitivement le site",
-    "unlimited": "Illimitée"
+    "unlimited": "Illimitée",
+    "connectorDownload": "Télécharger la {version}",
+    "connectorSafeUpdate": "ou mettre à jour en toute sécurité"
   },
   "settings": {
     "title": "Paramètres de l'agence",

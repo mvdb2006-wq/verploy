@@ -50,6 +50,13 @@ test(`Verploy Connector 2.3.0 → ${RELEASE} via een veilige update`, async ({ p
   await signupWithAgency(page, owner, `Zelfupdate ${run}`)
   siteId = await addAndPairWordPress(page, context, 'Lab-WordPress', LAB_WP)
   await page.reload()
+  // Oudere connector: bij de versie staat een downloadlink naar de nieuwste zip, en een verwijzing naar veilig bijwerken.
+  const download = page.getByRole('link', { name: `${RELEASE} downloaden` })
+  await expect(download).toHaveAttribute('href', '/api/v1/plugin/download')
+  const zip = await page.request.get('/api/v1/plugin/download')
+  expect(zip.status()).toBe(200)
+  expect(zip.headers()['content-disposition']).toContain(`verploy-connector-${RELEASE}.zip`)
+  await expect(page.getByRole('link', { name: 'of veilig bijwerken' })).toHaveAttribute('href', '#updates')
   const box = page.getByRole('checkbox', { name: /Verploy Connector/ })
   await expect(box).toBeVisible()
   for (const b of await page.getByRole('checkbox').all()) {

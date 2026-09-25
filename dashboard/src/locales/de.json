@@ -183,7 +183,9 @@
     "dangerBody": "Entfernt die Website und alle zugehörigen Daten aus Verploy. Das Plugin auf der Website sendet danach keine Daten mehr.",
     "deleteConfirm": "Gib zur Bestätigung den Namen der Website ({name}) ein.",
     "deleteButton": "Website endgültig löschen",
-    "unlimited": "Unbegrenzt"
+    "unlimited": "Unbegrenzt",
+    "connectorDownload": "{version} herunterladen",
+    "connectorSafeUpdate": "oder sicher aktualisieren"
   },
   "settings": {
     "title": "Agentur-Einstellungen",

@@ -183,7 +183,9 @@
     "dangerBody": "Verwijdert de site en alle gegevens ervan uit Verploy. De plugin op de site stopt daarna met rapporteren.",
     "deleteConfirm": "Typ de naam van de site ({name}) om te bevestigen.",
     "deleteButton": "Site definitief verwijderen",
-    "unlimited": "Onbeperkt"
+    "unlimited": "Onbeperkt",
+    "connectorDownload": "{version} downloaden",
+    "connectorSafeUpdate": "of veilig bijwerken"
   },
   "settings": {
     "title": "Bureau-instellingen",
