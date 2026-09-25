@@ -635,8 +635,8 @@
       }
     },
     "failure": {
-      "license": "Cette extension ne peut être mise à jour qu’avec une licence activée. Active-la dans WP Admin (pour WPBakery : WPBakery → Product License ; si elle est fournie avec ton thème, mets-la à jour via une mise à jour du thème).",
-      "no_package": "L’éditeur de l’extension n’a fourni aucun fichier. En général, la licence n’est pas (ou plus) active sur ce site ; vérifie-la dans WP Admin.",
+      "license": "Cette extension ne peut être mise à jour qu’avec une licence activée.",
+      "no_package": "L’éditeur de l’extension n’a fourni aucun fichier. En général, la licence n’est pas (ou plus) active sur ce site.",
       "download": "Le téléchargement de la mise à jour a échoué. Pour une extension payante, cela signifie généralement que la licence n’est pas active sur ce site ; sinon le serveur de l’éditeur n’a pas bien répondu et Verploy réessaiera au prochain passage.",
       "permissions": "WordPress n’a pas pu remplacer les fichiers (droits d’écriture sur le serveur). Demande à ton hébergeur de vérifier les droits de wp-content.",
       "folder_exists": "Un dossier d’une mise à jour interrompue était encore présent. WordPress le nettoie normalement ; si cela échoue encore, supprime le dossier dans wp-content/upgrade.",
@@ -645,7 +645,10 @@
       "disk_space": "L’espace disque du serveur est insuffisant pour décompresser la mise à jour. Libère de l’espace ou demande-en plus à ton hébergeur.",
       "unknown": "WordPress n’a pas pu installer la mise à jour.",
       "said": "WordPress a indiqué : {message}",
-      "why": "Pourquoi ?"
+      "why": "Pourquoi ?",
+      "ownLicence": "Tu as ta propre licence ? Active-la dans WP Admin, dans les réglages de l’extension ; Verploy fera ensuite la mise à jour en toute sécurité la nuit suivante.",
+      "ownLicenceAt": "Tu as ta propre licence ? Active-la dans WP Admin sous {place} ; Verploy fera ensuite la mise à jour en toute sécurité la nuit suivante.",
+      "themeBundled": "L’extension est fournie avec ton thème (fréquent avec WPBakery et Slider Revolution) ? La mise à jour arrive alors avec une mise à jour du thème ; si le thème ne se met pas à jour tout seul, récupère la dernière version chez l’éditeur du thème."
     }
   },
   "diagnosis": {

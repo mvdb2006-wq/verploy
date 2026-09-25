@@ -635,8 +635,8 @@
       }
     },
     "failure": {
-      "license": "Este plugin solo se puede actualizar con una licencia activada. Actívala en WP Admin (en WPBakery: WPBakery → Product License; si viene con tu tema, actualízalo mediante una actualización del tema).",
-      "no_package": "El autor del plugin no proporcionó ningún archivo. Normalmente la licencia no está (o ya no está) activa en este sitio; compruébala en WP Admin.",
+      "license": "Este plugin solo se puede actualizar con una licencia activada.",
+      "no_package": "El autor del plugin no proporcionó ningún archivo. Normalmente significa que la licencia no está (o ya no está) activa en este sitio.",
       "download": "La descarga de la actualización falló. En un plugin de pago suele significar que la licencia no está activa en este sitio; si no, el servidor del autor no respondió bien y Verploy lo volverá a intentar en la próxima ronda.",
       "permissions": "WordPress no pudo reemplazar los archivos (permisos de escritura en el servidor). Pide a tu proveedor de hosting que revise los permisos de wp-content.",
       "folder_exists": "Seguía existiendo una carpeta de una actualización interrumpida. WordPress suele limpiarla; si vuelve a fallar, elimina la carpeta en wp-content/upgrade.",
@@ -645,7 +645,10 @@
       "disk_space": "No hay suficiente espacio en disco en el servidor para descomprimir la actualización. Libera espacio o pide más a tu proveedor de hosting.",
       "unknown": "WordPress no pudo instalar la actualización.",
       "said": "WordPress indicó: {message}",
-      "why": "¿Por qué?"
+      "why": "¿Por qué?",
+      "ownLicence": "¿Tienes tu propia licencia? Actívala en WP Admin, en los ajustes del plugin; Verploy hará la actualización de forma segura la noche siguiente.",
+      "ownLicenceAt": "¿Tienes tu propia licencia? Actívala en WP Admin en {place}; Verploy hará la actualización de forma segura la noche siguiente.",
+      "themeBundled": "¿El plugin viene con tu tema (frecuente con WPBakery y Slider Revolution)? Entonces la actualización llega con una actualización del tema; si el tema no se actualiza solo, descarga la última versión del autor del tema."
     }
   },
   "diagnosis": {

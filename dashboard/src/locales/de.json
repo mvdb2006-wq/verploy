@@ -635,8 +635,8 @@
       }
     },
     "failure": {
-      "license": "Dieses Plugin lässt sich nur mit aktivierter Lizenz aktualisieren. Aktiviere sie in WP Admin (bei WPBakery: WPBakery → Product License; kam es mit deinem Theme, aktualisierst du es über ein Theme-Update).",
-      "no_package": "Der Hersteller hat keine Download-Datei geliefert. Meist ist die Lizenz auf dieser Website nicht (mehr) aktiv; prüfe sie in WP Admin.",
+      "license": "Dieses Plugin lässt sich nur mit aktivierter Lizenz aktualisieren.",
+      "no_package": "Der Hersteller hat keine Download-Datei geliefert. Meist heißt das, dass die Lizenz auf dieser Website nicht (mehr) aktiv ist.",
       "download": "Der Download des Updates ist fehlgeschlagen. Bei einem kostenpflichtigen Plugin heißt das meist, dass die Lizenz auf dieser Website nicht aktiv ist; sonst antwortete der Server des Herstellers nicht richtig und Verploy versucht es in der nächsten Runde erneut.",
       "permissions": "WordPress durfte die Dateien nicht ersetzen (Schreibrechte auf dem Server). Lass deinen Hoster die Rechte von wp-content prüfen.",
       "folder_exists": "Ein Ordner eines früheren, abgebrochenen Updates war noch vorhanden. WordPress räumt ihn normalerweise selbst auf; klappt es wieder nicht, lösche den Ordner in wp-content/upgrade.",
@@ -645,7 +645,10 @@
       "disk_space": "Auf dem Server ist zu wenig Speicherplatz, um das Update zu entpacken. Schaffe Platz oder bitte deinen Hoster um mehr.",
       "unknown": "WordPress konnte das Update nicht installieren.",
       "said": "WordPress meldete: {message}",
-      "why": "Warum?"
+      "why": "Warum?",
+      "ownLicence": "Hast du eine eigene Lizenz? Aktiviere sie in WP Admin in den Einstellungen des Plugins; Verploy führt das Update dann in der nächsten Nacht sicher aus.",
+      "ownLicenceAt": "Hast du eine eigene Lizenz? Aktiviere sie in WP Admin unter {place}; Verploy führt das Update dann in der nächsten Nacht sicher aus.",
+      "themeBundled": "Kam das Plugin mit deinem Theme (häufig bei WPBakery und Slider Revolution)? Dann kommt das Update mit einem Theme-Update; aktualisiert sich das Theme nicht selbst, hol dir die neueste Version beim Theme-Hersteller."
     }
   },
   "diagnosis": {

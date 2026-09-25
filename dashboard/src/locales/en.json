@@ -635,8 +635,8 @@
       }
     },
     "failure": {
-      "license": "This plugin can only be updated with an activated licence. Activate it in WP Admin (for WPBakery: WPBakery → Product License; if it came with your theme, update it through a theme update).",
-      "no_package": "The plugin's maker did not provide a download. Usually the licence is not (or no longer) active on this site; check it in WP Admin.",
+      "license": "This plugin can only be updated with an activated licence.",
+      "no_package": "The plugin's maker did not provide a download. This usually means the licence is not (or no longer) active on this site.",
       "download": "Downloading the update failed. For a paid plugin this usually means the licence is not active on this site; otherwise the maker's server did not respond properly and Verploy will try again in the next round.",
       "permissions": "WordPress was not allowed to replace the files (file permissions on the server). Ask your hosting provider to check the permissions of wp-content.",
       "folder_exists": "A folder from an earlier, interrupted update was still there. WordPress normally cleans it up; if it fails again, delete the folder in wp-content/upgrade.",
@@ -645,7 +645,10 @@
       "disk_space": "There is not enough disk space on the server to unpack the update. Free up space or ask your hosting provider for more.",
       "unknown": "WordPress could not install the update.",
       "said": "WordPress said: {message}",
-      "why": "Why?"
+      "why": "Why?",
+      "ownLicence": "Do you have your own licence? Activate it in WP Admin in the plugin's settings; Verploy will then run the update safely the next night.",
+      "ownLicenceAt": "Do you have your own licence? Activate it in WP Admin under {place}; Verploy will then run the update safely the next night.",
+      "themeBundled": "Did the plugin come with your theme (common with WPBakery and Slider Revolution)? Then the update comes with a theme update; if the theme does not update itself, get the latest version from the theme's maker."
     }
   },
   "diagnosis": {

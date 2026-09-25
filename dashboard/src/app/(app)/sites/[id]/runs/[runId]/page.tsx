@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { failureKind } from '@/lib/updates/failure'
+import { failureAdvice } from '@/lib/updates/failure-text'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Check, Circle, CircleDashed, LoaderCircle, Stethoscope, X } from 'lucide-react'
@@ -358,7 +358,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                     <tr>
                       <td colSpan={5} className="px-5 pb-3 pt-0">
                         <p className="rounded-md bg-warn/5 px-3 py-2 text-xs text-text">
-                          <span className="font-semibold">{t('runs.failure.why')}</span> {t(`runs.failure.${failureKind(i.failure)}` as MessageKey)}
+                          <span className="font-semibold">{t('runs.failure.why')}</span> {failureAdvice(t, i.failure, i.slug)}
                           {i.failure.message && <span className="mt-1 block font-mono text-[11px] text-muted">{t('runs.failure.said', { message: i.failure.message })}</span>}
                         </p>
                       </td>

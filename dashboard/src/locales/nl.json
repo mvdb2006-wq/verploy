@@ -635,8 +635,8 @@
       }
     },
     "failure": {
-      "license": "De plugin mag alleen met een geactiveerde licentie worden bijgewerkt. Activeer de licentie in WP Admin (bij WPBakery: WPBakery → Product License; zit hij bij je thema, dan werk je hem bij via een thema-update).",
-      "no_package": "De maker van de plugin gaf geen downloadbestand. Meestal is de licentie niet (meer) actief op deze site; controleer die in WP Admin.",
+      "license": "Deze plugin mag alleen met een geactiveerde licentie worden bijgewerkt.",
+      "no_package": "De maker van de plugin gaf geen downloadbestand. Meestal betekent dit dat de licentie niet (meer) actief is op deze site.",
       "download": "Het downloaden van de update lukte niet. Bij een betaalde plugin betekent dit meestal dat de licentie niet actief is op deze site; anders reageerde de server van de maker niet goed en probeert Verploy het bij de volgende ronde opnieuw.",
       "permissions": "WordPress mocht de bestanden niet vervangen (schrijfrechten op de server). Laat je hostingpartij de rechten van wp-content controleren.",
       "folder_exists": "Er stond nog een map van een eerdere, afgebroken update. Die ruimt WordPress normaal zelf op; lukt het de volgende keer weer niet, verwijder dan de map in wp-content/upgrade.",
@@ -645,7 +645,10 @@
       "disk_space": "Er is te weinig schijfruimte op de server om de update uit te pakken. Maak ruimte vrij of vraag je hostingpartij om meer ruimte.",
       "unknown": "WordPress kon de update niet installeren.",
       "said": "WordPress meldde: {message}",
-      "why": "Waarom?"
+      "why": "Waarom?",
+      "ownLicence": "Heb je een eigen licentie? Activeer die dan in WP Admin bij de instellingen van de plugin; daarna voert Verploy de update de volgende nacht zelf veilig uit.",
+      "ownLicenceAt": "Heb je een eigen licentie? Activeer die dan in WP Admin onder {place}; daarna voert Verploy de update de volgende nacht zelf veilig uit.",
+      "themeBundled": "Zit de plugin bij je thema (dat zie je vaak bij WPBakery en Slider Revolution)? Dan komt de update mee met een update van het thema; werkt het thema zichzelf niet bij, haal dan de nieuwste versie op bij de maker van het thema."
     }
   },
   "diagnosis": {

@@ -42,7 +42,7 @@ describe('presentAlert', () => {
   it('update vraagt aandacht: waarom (licentie) en wat je eraan doet', () => {
     const r = presentAlert(nl, 'nl', { type: 'update_blocked', severity: 'warning', params: { partial: true, deployed: 11, total: 12, items: ['WPBakery Page Builder'],
       reason_key: 'run.reason.partial', reason_params: { failures: [{ name: 'WPBakery Page Builder', kind: 'license' }, { name: 'X', kind: 'bogus' }] } } })
-    expect(r.body).toContain('WPBakery Page Builder: De plugin mag alleen met een geactiveerde licentie worden bijgewerkt.')
+    expect(r.body).toContain('WPBakery Page Builder: Deze plugin mag alleen met een geactiveerde licentie worden bijgewerkt.')
     expect(r.body).not.toContain('bogus')
   })
   it('update tegengehouden: de status staat in gewone taal, niet als code', () => {
