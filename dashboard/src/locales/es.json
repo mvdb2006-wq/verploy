@@ -1294,5 +1294,23 @@
     "proven": "Sin problemas en otros {count, plural, one {# sitio} other {# sitios}}",
     "risky": "Dio problemas en {failed} de {total} sitios",
     "mixed": "Sin problemas en {ok} de {total} sitios"
+  },
+  "accountDelete": {
+    "title": "Eliminar agencia y cuenta",
+    "body": "Elimina {name} de Verploy de forma definitiva. No se puede deshacer.",
+    "whatData": "Se borran todos los sitios, actualizaciones, capturas, informes, avisos y ajustes.",
+    "whatTeam": "{count, plural, one {También se elimina la cuenta de # miembro del equipo.} other {También se eliminan las cuentas de # miembros del equipo.}}",
+    "whatSubscription": "Tu suscripción termina de inmediato; no habrá más facturas. Las facturas anteriores se conservan en Stripe (obligación legal).",
+    "whatNoSubscription": "No hay ninguna suscripción de pago.",
+    "whatConnector": "El Verploy Connector de tus sitios deja de informar; después elimina tú el plugin en WP Admin.",
+    "confirm": "Escribe {name} para confirmar",
+    "button": "Eliminar todo definitivamente",
+    "pending": "Eliminando…",
+    "ownerOnly": "Solo el propietario de la agencia puede eliminarla.",
+    "confirmMismatch": "Escribe exactamente {name} para confirmar.",
+    "runActive": "Todavía hay una actualización en curso. Espera a que termine y vuelve a intentarlo.",
+    "error": "No se pudo eliminar. Inténtalo de nuevo o escribe a support@verploy.com.",
+    "done": "Tu agencia y tu cuenta se han eliminado. Gracias por usar Verploy.",
+    "memberNote": "¿Quieres que se elimine tu cuenta? Pide al propietario de tu agencia que te quite del equipo o escribe a support@verploy.com."
   }
 }

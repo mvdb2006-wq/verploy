@@ -43,6 +43,15 @@ function readBody(req) {
 async function storage(req, res, url) {
   // Privé-buckets: zonder service role geen toegang (net als zonder storage-policies in Supabase).
   if (roleOf(req) !== 'service_role') return json(res, 403, { statusCode: '403', error: 'Unauthorized', message: 'new row violates row-level security policy' })
+  // Lijst (één niveau, zoals Supabase: mappen hebben id null).
+  const lm = req.method === 'POST' && url.pathname.match(/^\/storage\/v1\/object\/list\/([^/]+)$/)
+  if (lm) {
+    const { prefix = '', limit = 100, offset = 0 } = JSON.parse((await readBody(req)).toString() || '{}')
+    const dir = prefix ? safePath(lm[1], prefix.replace(/\/$/, '')) : (/^[a-z0-9-]+$/.test(lm[1]) ? path.join(STORAGE_DIR, lm[1]) : null)
+    if (!dir || !fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return json(res, 200, [])
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).filter(e => !e.name.endsWith('.meta')).sort((a, b) => a.name.localeCompare(b.name))
+    return json(res, 200, entries.slice(offset, offset + limit).map(e => ({ name: e.name, id: e.isDirectory() ? null : crypto.createHash('md5').update(path.join(dir, e.name)).digest('hex'), metadata: e.isDirectory() ? null : {} })))
+  }
   const m = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)(?:\/(.+))?$/)
   if (!m) return json(res, 404, { message: 'not supported by local storage stand-in' })
   const bucket = m[1]; const key = m[2] ? decodeURIComponent(m[2]) : ''

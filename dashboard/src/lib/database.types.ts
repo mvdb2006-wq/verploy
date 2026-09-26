@@ -302,6 +302,88 @@ export type Database = {
         }
         Relationships: []
       }
+      ops_alert_state: {
+        Row: {
+          key: string
+          detail: string | null
+          first_seen: string
+          last_notified: string | null
+          active: boolean
+        }
+        Insert: {
+          key: string
+          detail?: string | null
+          first_seen?: string
+          last_notified?: string | null
+          active?: boolean
+        }
+        Update: {
+          key?: string
+          detail?: string | null
+          first_seen?: string
+          last_notified?: string | null
+          active?: boolean
+        }
+        Relationships: []
+      }
+      ops_config: {
+        Row: {
+          id: boolean
+          alert_email: string | null
+          app_url: string
+          cron_token: string
+        }
+        Insert: {
+          id?: boolean
+          alert_email?: string | null
+          app_url?: string
+          cron_token?: string
+        }
+        Update: {
+          id?: boolean
+          alert_email?: string | null
+          app_url?: string
+          cron_token?: string
+        }
+        Relationships: []
+      }
+      ops_events: {
+        Row: {
+          id: number
+          source: string
+          kind: string
+          detail: string | null
+          created_at: string
+        }
+        Insert: {
+          source: string
+          kind: string
+          detail?: string | null
+          created_at?: string
+        }
+        Update: {
+          source?: string
+          kind?: string
+          detail?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ops_heartbeats: {
+        Row: {
+          worker_id: string
+          seen_at: string
+        }
+        Insert: {
+          worker_id: string
+          seen_at?: string
+        }
+        Update: {
+          worker_id?: string
+          seen_at?: string
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           id: string
@@ -665,6 +747,28 @@ export type Database = {
         }
         Relationships: []
       }
+      storage_purges: {
+        Row: {
+          id: number
+          bucket: string
+          prefix: string
+          created_at: string
+          attempts: number
+        }
+        Insert: {
+          bucket: string
+          prefix: string
+          created_at?: string
+          attempts?: number
+        }
+        Update: {
+          bucket?: string
+          prefix?: string
+          created_at?: string
+          attempts?: number
+        }
+        Relationships: []
+      }
       stripe_events: {
         Row: {
           id: string
@@ -1018,9 +1122,12 @@ export type Database = {
       create_agency: { Args: { p_name: string | null }; Returns: string }
       create_pairing_code: { Args: { p_site: string | null }; Returns: string }
       create_update_run: { Args: { p_site: string | null; p_items: Json | null }; Returns: string }
+      delete_agency: { Args: { p_confirm: string | null }; Returns: { user_id: string }[] }
       ingest_heartbeat: { Args: { p_site: string | null; p_snapshot: Json | null; p_components: Json | null }; Returns: number }
       invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
+      ops_problems: { Args: Record<PropertyKey, never>; Returns: { key: string; detail: string }[] }
+      ops_prune: { Args: Record<PropertyKey, never>; Returns: undefined }
       peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
       pending_security_fixes: { Args: { p_limit?: number | null }; Returns: { site_id: string; items: Json }[] }
       record_run_outcome: { Args: { p_run: string | null }; Returns: undefined }

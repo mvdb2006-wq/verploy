@@ -17,6 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <h1 className="text-2xl font-extrabold tracking-tight">{t('auth.login.title')}</h1>
       <p className="mt-1 mb-8 text-sm text-muted">{t('auth.login.subtitle')}</p>
       {sp.error === 'link' && <Alert className="mb-4">{t('auth.linkInvalid')}</Alert>}
+      {sp.deleted === '1' && <Alert tone="ok" className="mb-4">{t('accountDelete.done')}</Alert>}
       <LoginForm next={next} defaultEmail={sp.email} />
       <p className="mt-8 text-sm text-muted">
         {t('auth.login.noAccount')}{' '}

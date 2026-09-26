@@ -366,3 +366,10 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
 - **Stripe live (26-09):** `plans.stripe_price_id` in productie gevuld met de live prijzen (solo, studio, agency, scale); env in Vercel (Production) gezet door Martijn.
   - `STRIPE_SECRET_KEY` is een restricted key (`rk_live_`). De code controleert nergens op `sk_`; de Stripe-SDK accepteert beide.
   - Kortingscode FOUNDING40 werkt via `allow_promotion_codes` in Checkout.
+- **Alarm voor de beheerder (26-09):** tot nu toe merkte niemand het als de worker stilviel of een webhook faalde.
+  - Supabase zelf (pg_cron + pg_net) roept elke 5 minuten `/api/cron/ops` aan, met een token uit `ops_config`. Dat staat los van de worker, dus ook een dode worker wordt gemeld. Geen Vercel-env nodig; de job draait alleen als `ops_config.alert_email` is ingevuld.
+  - Controles (`ops_problems`): geen levensteken van de worker in 10 min (`ops_heartbeats`, elke minuut), runs die 30 min in de wachtrij staan of een uur niet verder komen, geen enkele heartbeat van sites in 45 min, en fouten van de worker (`*_failed`/`*_crashed` in de log) of de Stripe-webhook (`ops_events`).
+  - Mail alleen bij een verandering: nieuw, herinnering na 6 uur, en "opgelost". Fouten sluiten stil. Mislukt het mailen (Resend nog niet ingesteld), dan telt het niet als gemeld en wordt het de volgende keer opnieuw geprobeerd.
+- **Bureau en account verwijderen (26-09):** onder Mijn account, alleen voor de eigenaar, bevestigen met de naam van het bureau; niet tijdens een lopende update.
+  - Volgorde: eerst het Stripe-abonnement direct stoppen (geen nieuwe factuur; oude facturen blijven bij Stripe), dan het bureau met alles (cascade), dan de accounts van alle teamleden. Een webhook voor een verwijderd bureau geeft `no_agency` in plaats van een fout.
+  - Bestanden: triggers zetten bij het verwijderen van een run, rapport of bureau de map in `storage_purges`; de worker ruimt die op. Dat geldt nu ook voor "site verwijderen" (screenshots bleven eerder achter).

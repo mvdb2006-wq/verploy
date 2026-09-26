@@ -1294,5 +1294,23 @@
     "proven": "No problems elsewhere on {count, plural, one {# site} other {# sites}}",
     "risky": "Caused problems on {failed} of {total} sites elsewhere",
     "mixed": "No problems on {ok} of {total} sites elsewhere"
+  },
+  "accountDelete": {
+    "title": "Delete agency and account",
+    "body": "Permanently deletes {name} from Verploy. This cannot be undone.",
+    "whatData": "All sites, updates, screenshots, reports, alerts and settings are erased.",
+    "whatTeam": "{count, plural, one {The account of # team member is deleted too.} other {The accounts of # team members are deleted too.}}",
+    "whatSubscription": "Your subscription stops immediately; no further invoice is sent. Past invoices stay with Stripe (legal retention).",
+    "whatNoSubscription": "There is no paid subscription.",
+    "whatConnector": "The Verploy Connector on your sites stops reporting; remove the plugin yourself in WP Admin afterwards.",
+    "confirm": "Type {name} to confirm",
+    "button": "Delete everything permanently",
+    "pending": "Deleting…",
+    "ownerOnly": "Only the agency owner can delete it.",
+    "confirmMismatch": "Type exactly {name} to confirm.",
+    "runActive": "An update is still running. Wait until it has finished and try again.",
+    "error": "Deleting failed. Try again or email support@verploy.com.",
+    "done": "Your agency and account have been deleted. Thank you for using Verploy.",
+    "memberNote": "Want your account deleted? Ask your agency owner to remove you from the team, or email support@verploy.com."
   }
 }

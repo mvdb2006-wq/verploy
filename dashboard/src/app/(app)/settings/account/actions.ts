@@ -1,6 +1,9 @@
 'use server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { stripe } from '@/lib/billing/stripe'
 import { getT } from '@/lib/i18n/server'
 import { requireAgency } from '@/lib/session'
 
@@ -49,4 +52,53 @@ export async function disable2fa(_: DisableState, form: FormData): Promise<Disab
   await supabase.auth.refreshSession()
   revalidatePath('/', 'layout')
   return {}
+}
+
+export interface DeleteAgencyState { error?: string }
+
+/**
+ * Bureau en account verwijderen (alleen de eigenaar). Eerst het Stripe-abonnement direct stoppen, dan het
+ * bureau met alle sites, runs, rapporten en meldingen; de bestanden in Storage ruimt de worker op. Daarna
+ * worden de accounts van iedereen in het team verwijderd. Facturen blijven bij Stripe (bewaarplicht).
+ */
+export async function deleteAgency(_: DeleteAgencyState, form: FormData): Promise<DeleteAgencyState> {
+  const session = await requireAgency()
+  const t = await getT()
+  if (session.role !== 'owner') return { error: t('accountDelete.ownerOnly') }
+  const confirm = String(form.get('confirm') ?? '').trim()
+  if (confirm !== session.agency.name) return { error: t('accountDelete.confirmMismatch', { name: session.agency.name }) }
+
+  const admin = createAdminClient()
+  const { count } = await admin.from('update_runs').select('id', { count: 'exact', head: true })
+    .eq('agency_id', session.agency.id).neq('status', 'done')
+  if (count) return { error: t('accountDelete.runActive') }
+
+  const subId = session.agency.stripe_subscription_id
+  if (subId) {
+    const s = stripe()
+    if (!s) return { error: t('accountDelete.error') }
+    try {
+      await s.subscriptions.cancel(subId)
+    } catch (err) {
+      // Al gestopt of niet meer bekend bij Stripe: dan is er niets meer te stoppen.
+      if ((err as { code?: string }).code !== 'resource_missing') {
+        console.error('[account] abonnement stoppen mislukt', (err as Error).message)
+        return { error: t('accountDelete.error') }
+      }
+    }
+  }
+
+  const supabase = await createClient()
+  const { data: users, error } = await supabase.rpc('delete_agency', { p_confirm: confirm })
+  if (error) {
+    return { error: /run_active/.test(error.message) ? t('accountDelete.runActive')
+      : /confirm_mismatch/.test(error.message) ? t('accountDelete.confirmMismatch', { name: session.agency.name })
+      : t('accountDelete.error') }
+  }
+  for (const u of users ?? []) {
+    const { error: dErr } = await admin.auth.admin.deleteUser(u.user_id)
+    if (dErr) console.error('[account] gebruiker verwijderen mislukt', u.user_id, dErr.message)
+  }
+  await supabase.auth.signOut().catch(() => undefined)
+  redirect('/login?deleted=1')
 }

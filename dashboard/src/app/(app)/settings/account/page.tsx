@@ -3,6 +3,7 @@ import { getT } from '@/lib/i18n/server'
 import { requireAgency } from '@/lib/session'
 import { mfaState } from '@/lib/mfa'
 import { TwoFactor } from './two-factor'
+import { DeleteAgency } from './delete-agency'
 
 export async function generateMetadata() {
   return { title: (await getT())('mfa.pageTitle') }
@@ -12,7 +13,11 @@ export async function generateMetadata() {
 export default async function AccountPage() {
   const session = await requireAgency()
   const [t, supabase] = await Promise.all([getT(), createClient()])
-  const mfa = await mfaState(supabase)
+  const owner = session.role === 'owner'
+  const [mfa, members] = await Promise.all([
+    mfaState(supabase),
+    owner ? supabase.from('agency_members').select('user_id', { count: 'exact', head: true }).then(r => r.count ?? 1) : Promise.resolve(1),
+  ])
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-extrabold tracking-tight">{t('mfa.pageTitle')}</h1>
@@ -27,6 +32,9 @@ export default async function AccountPage() {
         </div>
         <TwoFactor enabled={mfa.enabled} factorId={mfa.factorId} />
       </section>
+      {owner
+        ? <DeleteAgency name={session.agency.name} members={members} subscribed={Boolean(session.agency.stripe_subscription_id)} />
+        : <p className="text-sm text-muted">{t('accountDelete.memberNote')}</p>}
     </div>
   )
 }

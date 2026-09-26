@@ -57,6 +57,8 @@ export async function handleStripeEvent(admin: Admin, event: Stripe.Event): Prom
       p_status: event.type === 'customer.subscription.deleted' ? 'canceled' : f.status,
       p_period_end: f.periodEnd, p_cancel_at_end: f.cancelAtEnd,
     })
+    // Bureau intussen verwijderd (account verwijderen stopt eerst het abonnement): niets meer te doen.
+    if (error && /agency_not_found/.test(error.message)) return 'no_agency'
     if (error) throw error
     return data ? 'applied' : 'duplicate_or_stale'
   }

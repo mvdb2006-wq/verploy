@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, outcome })
   } catch (err) {
     console.error('[stripe] verwerken mislukt', event.id, event.type, (err as Error).message)
+    // Naar het alarm van de beheerder (Stripe probeert het zelf nog een paar dagen opnieuw).
+    await createAdminClient().from('ops_events')
+      .insert({ source: 'stripe', kind: 'webhook_failed', detail: `${event.type} ${event.id}: ${(err as Error).message}`.slice(0, 500) })
+      .then(() => undefined, () => undefined)
     return NextResponse.json({ error: 'processing_failed' }, { status: 500 })
   }
 }

@@ -1294,5 +1294,23 @@
     "proven": "Aucun problème ailleurs sur {count, plural, one {# site} other {# sites}}",
     "risky": "A posé problème sur {failed} sites sur {total} ailleurs",
     "mixed": "Aucun problème sur {ok} sites sur {total} ailleurs"
+  },
+  "accountDelete": {
+    "title": "Supprimer l’agence et le compte",
+    "body": "Supprime définitivement {name} de Verploy. Cette action est irréversible.",
+    "whatData": "Tous les sites, mises à jour, captures d’écran, rapports, alertes et paramètres sont effacés.",
+    "whatTeam": "{count, plural, one {Le compte de # membre de l’équipe est aussi supprimé.} other {Les comptes de # membres de l’équipe sont aussi supprimés.}}",
+    "whatSubscription": "Votre abonnement s’arrête immédiatement ; aucune nouvelle facture n’est émise. Les factures précédentes restent chez Stripe (conservation légale).",
+    "whatNoSubscription": "Aucun abonnement payant n’est en cours.",
+    "whatConnector": "Le Verploy Connector de vos sites cesse de transmettre ; supprimez ensuite l’extension vous-même dans WP Admin.",
+    "confirm": "Saisissez {name} pour confirmer",
+    "button": "Tout supprimer définitivement",
+    "pending": "Suppression…",
+    "ownerOnly": "Seul le propriétaire de l’agence peut la supprimer.",
+    "confirmMismatch": "Saisissez exactement {name} pour confirmer.",
+    "runActive": "Une mise à jour est encore en cours. Attendez qu’elle soit terminée, puis réessayez.",
+    "error": "La suppression a échoué. Réessayez ou écrivez à support@verploy.com.",
+    "done": "Votre agence et votre compte ont été supprimés. Merci d’avoir utilisé Verploy.",
+    "memberNote": "Vous souhaitez supprimer votre compte ? Demandez au propriétaire de votre agence de vous retirer de l’équipe, ou écrivez à support@verploy.com."
   }
 }

@@ -1294,5 +1294,23 @@
     "proven": "Anderswo ohne Probleme auf {count, plural, one {# Website} other {# Websites}}",
     "risky": "Machte anderswo Probleme auf {failed} von {total} Websites",
     "mixed": "Anderswo ohne Probleme auf {ok} von {total} Websites"
+  },
+  "accountDelete": {
+    "title": "Agentur und Konto löschen",
+    "body": "Löscht {name} endgültig aus Verploy. Das kann nicht rückgängig gemacht werden.",
+    "whatData": "Alle Websites, Updates, Screenshots, Berichte, Meldungen und Einstellungen werden gelöscht.",
+    "whatTeam": "{count, plural, one {Das Konto von # Teammitglied wird ebenfalls gelöscht.} other {Die Konten von # Teammitgliedern werden ebenfalls gelöscht.}}",
+    "whatSubscription": "Dein Abonnement endet sofort; es folgt keine weitere Rechnung. Frühere Rechnungen bleiben bei Stripe gespeichert (gesetzliche Aufbewahrungspflicht).",
+    "whatNoSubscription": "Es läuft kein bezahltes Abonnement.",
+    "whatConnector": "Der Verploy Connector auf deinen Websites meldet nichts mehr; entferne das Plugin danach selbst im WP Admin.",
+    "confirm": "Gib {name} ein, um zu bestätigen",
+    "button": "Alles endgültig löschen",
+    "pending": "Wird gelöscht…",
+    "ownerOnly": "Nur der Inhaber der Agentur kann sie löschen.",
+    "confirmMismatch": "Gib genau {name} ein, um zu bestätigen.",
+    "runActive": "Es läuft noch ein Update. Warte, bis es fertig ist, und versuche es dann erneut.",
+    "error": "Löschen hat nicht geklappt. Versuche es erneut oder schreibe an support@verploy.com.",
+    "done": "Deine Agentur und dein Konto wurden gelöscht. Danke, dass du Verploy genutzt hast.",
+    "memberNote": "Möchtest du dein Konto löschen lassen? Bitte den Inhaber deiner Agentur, dich aus dem Team zu entfernen, oder schreibe an support@verploy.com."
   }
 }

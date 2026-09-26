@@ -14,6 +14,8 @@ import { sendDailyDigests } from '@/lib/digest/send'
 import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 import { compactArtifacts } from './artifacts'
 import { wakeQuietSites } from './wake'
+import { purgeStorage } from './purge'
+import { isOpsError, opsReporter } from './ops'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -40,8 +42,11 @@ const WAKE_EVERY_MS = Number(process.env.WORKER_WAKE_MS ?? 5 * 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
-const log = (msg: string, extra: Record<string, unknown> = {}) =>
+let ops: ReturnType<typeof opsReporter> | null = null
+const log = (msg: string, extra: Record<string, unknown> = {}) => {
   console.log(JSON.stringify({ t: new Date().toISOString(), worker: WORKER_ID, msg, ...extra }))
+  if (isOpsError(msg)) ops?.error(msg, extra.error ?? extra)   // naar het alarm van de beheerder
+}
 
 let stopping = false
 let browser: Browser | null = null
@@ -166,6 +171,7 @@ function startHealthServer(port: number) {
 
 async function main() {
   const admin = createAdminClient()
+  ops = opsReporter(() => admin, WORKER_ID)
   if (process.env.WORKER_HEALTH_PORT || process.env.PORT) startHealthServer(Number(process.env.WORKER_HEALTH_PORT || process.env.PORT))
   log('started', { poll_ms: POLL_MS, concurrency: CONCURRENCY })
   const stop = () => { stopping = true; log('stopping') }
@@ -180,8 +186,16 @@ async function main() {
   let lastCompact = 0
   let lastWake = 0
   let feedBusy = false
+  let lastPurge = 0
   while (!stopping) {
     lastLoopAt = Date.now()
+    ops.beat()
+    if (Date.now() - lastPurge > COMPACT_EVERY_MS) {
+      lastPurge = Date.now()
+      await purgeStorage(admin)
+        .then(r => { if (r.prefixes || r.failed) log(r.failed ? 'storage_purge_partly_failed' : 'storage_purged', { ...r }) })
+        .catch(e => log('storage_purge_failed', { error: (e as Error).message }))
+    }
     if (Date.now() - lastVuln > VULN_EVERY_MS) {
       lastVuln = Date.now()
       // De feed is groot (minuten): op de achtergrond, zodat updates niet hoeven te wachten.

@@ -1294,5 +1294,23 @@
     "proven": "Elders zonder problemen op {count, plural, one {# site} other {# sites}}",
     "risky": "Gaf elders problemen op {failed} van {total} sites",
     "mixed": "Elders zonder problemen op {ok} van {total} sites"
+  },
+  "accountDelete": {
+    "title": "Bureau en account verwijderen",
+    "body": "Verwijdert {name} definitief uit Verploy. Dit kan niet ongedaan worden gemaakt.",
+    "whatData": "Alle sites, updates, screenshots, rapporten, meldingen en instellingen worden gewist.",
+    "whatTeam": "{count, plural, one {Het account van # teamlid wordt ook verwijderd.} other {De accounts van # teamleden worden ook verwijderd.}}",
+    "whatSubscription": "Je abonnement stopt direct; er volgt geen nieuwe factuur. Eerdere facturen blijven bij Stripe bewaard (wettelijke bewaarplicht).",
+    "whatNoSubscription": "Er loopt geen betaald abonnement.",
+    "whatConnector": "De Verploy Connector op je sites stopt met rapporteren; verwijder de plugin daarna zelf in WP Admin.",
+    "confirm": "Typ {name} om te bevestigen",
+    "button": "Alles definitief verwijderen",
+    "pending": "Bezig met verwijderen…",
+    "ownerOnly": "Alleen de eigenaar van het bureau kan het verwijderen.",
+    "confirmMismatch": "Typ precies {name} om te bevestigen.",
+    "runActive": "Er loopt nog een update. Wacht tot die klaar is en probeer het dan opnieuw.",
+    "error": "Verwijderen lukte niet. Probeer het opnieuw of mail support@verploy.com.",
+    "done": "Je bureau en account zijn verwijderd. Bedankt dat je Verploy hebt gebruikt.",
+    "memberNote": "Wil je je account laten verwijderen? Vraag de eigenaar van je bureau om je uit het team te halen, of mail support@verploy.com."
   }
 }
