@@ -13,6 +13,7 @@ import { runScheduledUpdates } from '@/lib/auto-updates/schedule'
 import { sendDailyDigests } from '@/lib/digest/send'
 import { CONNECTOR_RELEASE } from '@/lib/connector/release'
 import { compactArtifacts } from './artifacts'
+import { wakeQuietSites } from './wake'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -34,6 +35,8 @@ const INTEL_EVERY_MS = Number(process.env.WORKER_INTEL_MS ?? 30 * 60_000)
 const CONNECTOR_EVERY_MS = Number(process.env.WORKER_CONNECTOR_MS ?? 60_000)
 /** Hoe vaak afgeronde runs worden omgezet naar JPEG en oude beelden opgeruimd. */
 const COMPACT_EVERY_MS = Number(process.env.WORKER_COMPACT_MS ?? 10 * 60_000)
+/** Hoe vaak rustige sites (heartbeat uitgebleven) worden aangetikt via wp-cron.php. */
+const WAKE_EVERY_MS = Number(process.env.WORKER_WAKE_MS ?? 5 * 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
@@ -175,6 +178,7 @@ async function main() {
   let lastIntel = 0
   let lastConnector = 0
   let lastCompact = 0
+  let lastWake = 0
   let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
@@ -198,6 +202,12 @@ async function main() {
       await compactArtifacts(admin, getBrowser)
         .then(r => { if (r.runs || r.expired) log('artifacts_compacted', { ...r }) })
         .catch(e => log('artifacts_compact_failed', { error: (e as Error).message }))
+    }
+    if (Date.now() - lastWake > WAKE_EVERY_MS) {
+      lastWake = Date.now()
+      await wakeQuietSites(admin)
+        .then(r => { if (r.sites) log('sites_woken', { ...r }) })
+        .catch(e => log('sites_wake_failed', { error: (e as Error).message }))
     }
     if (Date.now() - lastConnector > CONNECTOR_EVERY_MS) {
       lastConnector = Date.now()

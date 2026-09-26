@@ -354,3 +354,12 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
 ## 26-09 — Versienummer van de app bijgewerkt (2.4.0 → 2.5.0)
 - Het nummer in de zijbalk en onder Instellingen komt uit `dashboard/package.json` en was sinds 24-09 niet meer verhoogd, terwijl er daarna veel bij is gekomen. De build-code ernaast (commit) klopte wel altijd.
 - Afspraak: bij elke uitrol met nieuwe functies gaat de minor omhoog (2.6.0, …); bij alleen reparaties de patch (2.5.1, …). Het versienummer van de app staat los van dat van de connector (nu 2.5.3).
+
+## 26-09 — "0 updates" na een update en te lage uptime bij rustige sites
+- **"0 updates":** na elke update (door Verploy of in WP Admin) wist WordPress zijn lijst met beschikbare updates. De heartbeat meldde daarna "geen updates" tot WordPress uit zichzelf weer keek, tot 12 uur later. Dat zag je bij Zeelte Transport.
+  - Worker: aan het eind van elke run laat Verploy WordPress opnieuw kijken, via het pakket-eindpunt met een onderdeel dat niet bestaat. Dat is alleen de controle, geen download, en werkt vanaf connector 2.3.
+  - Connector 2.5.4: de heartbeat haalt de lijst zelf opnieuw op als die leeg is.
+- **Uptime 71% bij Zeelte:** WordPress voert geplande taken (ook de heartbeat) alleen uit bij bezoek. Op een rustige site bleef de heartbeat 45–90 minuten uit en telde dat als offline, terwijl de site gewoon werkte.
+  - Worker (`wake.ts`, elke 5 min): sites zonder heartbeat in de laatste 17 minuten worden aangetikt via `wp-cron.php`, zoals WordPress dat zelf doet.
+  - Ligt de site echt plat, dan blijft de heartbeat uit en telt het terecht als offline.
+  - Oude, onterechte onderbrekingen blijven in de berekening van 30 dagen staan tot ze eruit vallen.

@@ -78,8 +78,30 @@ class Verploy_Health_Collector {
 		);
 	}
 
+	/**
+	 * De lijst met beschikbare updates van WordPress, zo nodig eerst opnieuw opgehaald. Na elke update
+	 * (in WP Admin of door Verploy) wist WordPress die lijst; zonder opnieuw kijken zou de heartbeat dan
+	 * "geen updates" melden tot WordPress uit zichzelf weer kijkt (tot 12 uur later).
+	 *
+	 * @param string $kind 'plugins' of 'themes'.
+	 */
+	private static function update_list( $kind ) {
+		$key     = 'update_' . $kind;
+		$updates = get_site_transient( $key );
+		if ( ! is_object( $updates ) || empty( $updates->last_checked ) || ! isset( $updates->checked ) || array() === $updates->checked ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+			if ( 'plugins' === $kind ) {
+				wp_update_plugins();
+			} else {
+				wp_update_themes();
+			}
+			$updates = get_site_transient( $key );
+		}
+		return $updates;
+	}
+
 	private static function plugins() {
-		$updates = get_site_transient( 'update_plugins' );
+		$updates = self::update_list( 'plugins' );
 		$out     = array();
 		foreach ( get_plugins() as $file => $data ) {
 			$new   = ( is_object( $updates ) && isset( $updates->response[ $file ]->new_version ) ) ? self::clean_version( $updates->response[ $file ]->new_version ) : null;
@@ -96,7 +118,7 @@ class Verploy_Health_Collector {
 	}
 
 	private static function themes() {
-		$updates = get_site_transient( 'update_themes' );
+		$updates = self::update_list( 'themes' );
 		$active  = get_stylesheet();
 		$out     = array();
 		foreach ( wp_get_themes() as $slug => $theme ) {

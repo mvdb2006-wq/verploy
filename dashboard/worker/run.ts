@@ -344,6 +344,13 @@ const state = (run: Run) => (run.step_state ?? {}) as StepState
 const toCleanup = (verdict: Verdict, reason?: { key: string; params: Record<string, Json> }): Transition =>
   ({ next: 'cleanup', state: { pending_verdict: verdict, ...(reason ? { pending_reason: reason } : {}) } })
 
+/** Laat WordPress opnieuw naar plugin- en thema-updates kijken (connector 2.3+; fouten tellen niet). */
+async function refreshUpdateLists(ctx: RunContext, base: string): Promise<void> {
+  for (const item of [{ type: 'plugin', slug: 'verploy-refresh/verploy-refresh.php' }, { type: 'theme', slug: 'verploy-refresh' }]) {
+    await ctx.client.fetchPackage(base, { ...item, to_version: null }).catch(() => undefined)
+  }
+}
+
 /** Pakket via de live site; een connector ouder dan 2.3 kent dit nog niet (404). */
 async function fetchPackage(ctx: RunContext, item: Item): Promise<PackageResult | { ok: false; status: 'connector_outdated' }> {
   try {
@@ -655,6 +662,10 @@ export async function step(ctx: RunContext): Promise<Transition> {
         if (run.attempt < run.max_attempts) throw err
         await event(ctx, 'cleanup', 'run.cleanup.failed', { error: (err as Error).message.slice(0, 200) }, 'warning')
       }
+      // WordPress wist na een update zijn lijst met beschikbare updates. Opnieuw laten kijken (via het
+      // pakket-eindpunt met een onderdeel dat niet bestaat: alleen de controle, geen download), anders meldt
+      // de site "geen updates" tot WordPress zelf weer kijkt. Connector 2.5.4+ doet dit ook zelf.
+      await refreshUpdateLists(ctx, prod)
       // Nieuwe heartbeat: het dashboard toont meteen de nieuwe versies.
       await ctx.client.heartbeatNow(prod).catch(() => undefined)
       const verdict = st.pending_verdict ?? 'error'
