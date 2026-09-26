@@ -88,6 +88,19 @@ export function dynamicMask(pngs: Buffer[], margin = 12): DynamicMask | null {
   return { width, height, mask }
 }
 
+/** Beide maskers samen (op de gemeenschappelijke grootte); null als er geen is. */
+export function unionMask(a: DynamicMask | null, b: DynamicMask | null): DynamicMask | null {
+  if (!a) return b
+  if (!b) return a
+  const width = Math.min(a.width, b.width)
+  const height = Math.min(a.height, b.height)
+  const mask = new Uint8Array(width * height)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) mask[y * width + x] = a.mask[y * a.width + x]! | b.mask[y * b.width + x]!
+  }
+  return { width, height, mask }
+}
+
 /** Deel van de pagina dat de maskering beslaat. */
 export function maskCoverage(m: DynamicMask): number {
   let n = 0

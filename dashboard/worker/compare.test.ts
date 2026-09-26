@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PNG } from 'pngjs'
-import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, visualDiff } from './compare'
+import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, unionMask, visualDiff } from './compare'
 import { detectPhpError, normalizeJsError, type PageCapture } from './checks'
 
 function png(width: number, height: number, paint: (x: number, y: number) => [number, number, number] = () => [255, 255, 255]): Buffer {
@@ -137,5 +137,28 @@ describe('bewegende delen (slider, video) negeren', () => {
     const after = broken(green)
     const d = visualDiff(before, after, dynamicMask([after, broken(blue)], 2))
     expect(d.ratio).toBeCloseTo(10 / 78, 2)            // 10 rijen van de 78 niet-bewegende rijen
+  })
+})
+
+describe('unionMask en een tweede nulmeting', () => {
+  // Pagina 100x100: bovenste helft een foto (rood), onderste helft tekst (wit). In de eerste nulmeting
+  // was de foto nog niet geladen (grijs); in de tweede nulmeting en na de update wel.
+  const photo = (x: number, y: number): [number, number, number] => (y < 50 ? [200, 30, 30] : [255, 255, 255])
+  const missing = (x: number, y: number): [number, number, number] => (y < 50 ? [238, 238, 238] : [255, 255, 255])
+  it('verschil dat al tussen twee nulmetingen bestond, telt niet mee', () => {
+    const before = png(100, 100, missing), alt = png(100, 100, photo), after = png(100, 100, photo)
+    expect(visualDiff(before, after).ratio).toBeGreaterThan(0.4)
+    const base = dynamicMask([before, alt])!
+    expect(visualDiff(before, after, base).ratio).toBe(0)
+  })
+  it('een echte wijziging buiten dat deel blijft zichtbaar; maskers samenvoegen', () => {
+    const before = png(100, 100, missing), alt = png(100, 100, photo)
+    const broken = png(100, 100, (x, y) => (y < 50 ? [200, 30, 30] : y > 80 ? [0, 0, 0] : [255, 255, 255]))
+    const base = dynamicMask([before, alt], 0)!
+    expect(visualDiff(before, broken, base).ratio).toBeGreaterThan(0.3)
+    const u = unionMask(base, { width: 100, height: 100, mask: new Uint8Array(100 * 100).fill(1, 9000) })!
+    expect(maskCoverage(u)).toBeCloseTo(0.6, 2)
+    expect(unionMask(null, base)).toBe(base)
+    expect(unionMask(null, null)).toBeNull()
   })
 })

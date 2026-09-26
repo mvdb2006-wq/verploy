@@ -5,7 +5,7 @@ import { decryptSecret } from '@/lib/security/secretbox'
 import { keyMaterial } from '@/lib/security/keys'
 import { SiteClient, SiteRejectedError, TransientSiteError, type Diagnostics, type PackageResult, type PageTarget } from './site-client'
 import { capturePage, newContext, type Landmark, type PageCapture, type Viewport } from './checks'
-import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, visualDiff, type CheckOutcome, type VisualDiff } from './compare'
+import { comparePage, dynamicMask, firstFailure, healthy, maskCoverage, unionMask, visualDiff, type CheckOutcome, type DynamicMask, type VisualDiff } from './compare'
 import { compareFunctional, runFunctional, type FnFailure, type FnResult, type FunctionalTargets } from './functional'
 import { explainFailure } from '@/lib/updates/failure'
 import { SKIPPED_DEPENDENCY, dependencyOrder, dependentsOf, isolatedFailure, stagingOk, type RunItem } from '@/lib/run-items'
@@ -68,6 +68,8 @@ export interface RunContext {
   browser: () => Promise<Browser>
   cancelled: () => boolean
   signal: AbortSignal
+  /** Per onderdeel (type:slug) of het actief is op de site; onbekend = niet in de map. */
+  active?: Map<string, boolean>
 }
 
 export async function loadContext(admin: Admin, run: Run, browser: () => Promise<Browser>, cancelled: () => boolean, signal: AbortSignal): Promise<RunContext> {
@@ -77,7 +79,9 @@ export async function loadContext(admin: Admin, run: Run, browser: () => Promise
   const { data: cred } = await admin.from('site_credentials').select('secret_ciphertext').eq('site_id', run.site_id).single()
   if (!cred?.secret_ciphertext) throw new RunFailure('run.reason.not_connected')
   const secret = decryptSecret(cred.secret_ciphertext, keyMaterial())
-  return { admin, run, site, client: new SiteClient(site.id, secret, run.id), browser, cancelled, signal }
+  const { data: comps } = await admin.from('site_components').select('type, slug, active').eq('site_id', run.site_id)
+  const active = new Map((comps ?? []).map(c => [`${c.type}:${c.slug}`, c.active]))
+  return { admin, run, site, client: new SiteClient(site.id, secret, run.id), browser, cancelled, signal, active }
 }
 
 // ── Opslag ────────────────────────────────────────────────────────────────────
@@ -106,6 +110,7 @@ type Facts = Omit<PageCapture, 'screenshot' | 'url' | 'jsErrors' | 'status' | 'l
 const factsOf = (c: PageCapture): Facts => ({
   error: c.error, phpError: c.phpError, failedResources: c.failedResources, landmarks: c.landmarks,
   textLength: c.textLength, title: c.title, loginForm: c.loginForm, ...(c.moving !== undefined ? { moving: c.moving } : {}),
+  ...(c.themes ? { themes: c.themes } : {}),
 })
 
 interface StoredCapture { capture: PageCapture; screenshotPath: string | null }
@@ -124,6 +129,7 @@ async function loadPhase(ctx: RunContext, phase: Phase): Promise<Map<string, Sto
         error: f.error ?? null, phpError: f.phpError ?? null, failedResources: f.failedResources ?? [],
         landmarks: (f.landmarks ?? []) as Landmark[], textLength: f.textLength ?? 0, title: f.title ?? '', loginForm: f.loginForm ?? null,
         ...(typeof f.moving === 'number' ? { moving: f.moving } : {}),
+        ...(Array.isArray(f.themes) ? { themes: f.themes as string[] } : {}),
         screenshot: null,
       },
     })
@@ -144,6 +150,7 @@ export async function testPhase(
   cookies: { name: string; value: string; url: string }[], compareTo: Phase | null,
 ): Promise<{ failures: PhaseFailure[]; captures: Map<string, PageCapture> }> {
   const before = compareTo ? await loadPhase(ctx, compareTo) : null
+  const visualGate = before ? affectsFrontEnd(items(ctx.run), ctx.active, [...before.values()].flatMap(b => b.capture.themes ?? [])) : true
   const browser = await ctx.browser()
   const failures: PhaseFailure[] = []
   const captures = new Map<string, PageCapture>()
@@ -158,15 +165,20 @@ export async function testPhase(
         if (ctx.signal.aborted) throw new TransientSiteError('aborted', null)
         const prev = before?.get(`${t.key}|${viewport}`)
         const prevPng = prev?.screenshotPath && healthy(prev.capture) ? await download(ctx, prev.screenshotPath) : null
+        // Tweede nulmeting (als die er is): wat al tussen twee ladingen vóór de update verschilde (een foto die de
+        // ene keer nog niet geladen was, een galerij die anders viel), telt niet als verschil door de update.
+        const prevAlt = prevPng && compareTo ? await download(ctx, artifactPath(ctx, compareTo, t.key, viewport, '-alt')) : null
+        let baseMask: DynamicMask | null = prevPng && prevAlt ? dynamicMask([prevPng, prevAlt]) : null
+        if (baseMask && maskCoverage(baseMask) > MAX_DYNAMIC) baseMask = null
         const opts = { masks: ctx.site.test_masks, cookies, screenshot: t.shot }
         /** Eén meting van de pagina, en (als er een vorige fase is) de vergelijking daarmee. */
         const measure = async () => {
           const cap = await captureSteady(context, t.url, opts, ctx.signal)
           let d: VisualDiff | null = null
           const threshold = Number(ctx.site.diff_threshold)
-          if (prev && cap.screenshot && prevPng && healthy(cap)) {
-            d = visualDiff(prevPng, cap.screenshot)
-            if (d.ratio > threshold) d = await ignoreDynamic(context, t.url, prevPng, cap.screenshot, d, threshold, opts)
+          if (prev && visualGate && cap.screenshot && prevPng && healthy(cap)) {
+            d = visualDiff(prevPng, cap.screenshot, baseMask)
+            if (d.ratio > threshold) d = await ignoreDynamic(context, t.url, prevPng, cap.screenshot, d, threshold, opts, baseMask)
           }
           const outcomes = prev ? comparePage(prev.capture, cap, d ? { ratio: d.ratio, threshold, ignored: d.ignored } : null) : []
           return { cap, d, outcomes, passed: prev ? outcomes.every(o => o.ok) : healthy(cap) }
@@ -186,6 +198,11 @@ export async function testPhase(
         if (cap.screenshot) {
           screenshotPath = artifactPath(ctx, phase, t.key, viewport)
           await upload(ctx, screenshotPath, cap.screenshot)
+          // Nulmeting waar later mee vergeleken wordt: nog een keer laden, zodat we weten wat vanzelf verschilt.
+          if (!compareTo && (phase === 'staging_before' || phase === 'production_before') && healthy(cap)) {
+            const again = await captureSteady(context, t.url, opts, ctx.signal)
+            if (again.screenshot && healthy(again)) await upload(ctx, artifactPath(ctx, phase, t.key, viewport, '-alt'), again.screenshot)
+          }
         }
         if (m.d) {
           diffPath = artifactPath(ctx, phase, t.key, viewport, '-diff')
@@ -208,6 +225,21 @@ export async function testPhase(
     }
   }
   return { failures, captures }
+}
+
+/**
+ * Kan deze update de voorkant veranderen? Een niet-actieve plugin of een thema dat de site niet gebruikt
+ * (ook niet als parent-thema) wordt niet geladen: een beeldverschil komt dan nooit door de update, dus telt
+ * de beeldvergelijking niet mee. De andere controles (bereikbaar, PHP-fouten, inhoud, …) blijven gewoon.
+ */
+export function affectsFrontEnd(list: { type: string; slug: string }[], active: Map<string, boolean> | undefined, themesInUse: string[]): boolean {
+  if (!active) return true
+  const used = new Set(themesInUse)
+  return list.some(i => {
+    if (i.type === 'plugin') return active.get(`plugin:${i.slug}`) !== false
+    if (i.type === 'theme') return active.get(`theme:${i.slug}`) !== false || used.has(i.slug) || !themesInUse.length
+    return true
+  })
 }
 
 /** Een run met alleen de Verploy Connector (uitrol van een nieuwe versie). */
@@ -254,6 +286,7 @@ const MAX_DYNAMIC = 0.5
 async function ignoreDynamic(
   context: BrowserContext, url: string, beforePng: Buffer, afterPng: Buffer, first: VisualDiff, threshold: number,
   opts: { masks: string[]; cookies: { name: string; value: string; url: string }[] },
+  baseMask: DynamicMask | null = null,
 ): Promise<VisualDiff> {
   const shots = [afterPng]
   let best = first
@@ -261,7 +294,7 @@ async function ignoreDynamic(
     const again = await capturePage(context, url, { masks: opts.masks, cookies: opts.cookies, screenshot: true })
     if (!healthy(again) || !again.screenshot) break
     shots.push(again.screenshot)
-    const mask = dynamicMask(shots)
+    const mask = unionMask(dynamicMask(shots), baseMask)
     if (!mask || maskCoverage(mask) === 0) continue
     if (maskCoverage(mask) > MAX_DYNAMIC) return first
     const d = visualDiff(beforePng, afterPng, mask)

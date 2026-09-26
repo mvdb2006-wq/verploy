@@ -330,3 +330,15 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   4. Een run met alleen de connector zet geen onderhoudsmodus aan: aan de voorkant verandert niets. De testkopie, de tests en rollback blijven zoals ze zijn.
 - **Grenzen:** niet als er al een run loopt; hooguit eens per 6 uur en 3 keer per versie per site. Mislukt het, dan volgt de gewone melding en kan je het altijd handmatig doen.
 - **Overgang:** sites onder 2.5.3 kunnen dit nog niet. Die krijgen 2.5.3 via de gewone (nachtelijke) update, of je uploadt hem eenmalig zelf. Daarna gaat het vanzelf.
+
+## 26-09 — Eerste nacht met automatische updates: drie oorzaken van onterecht terugdraaien opgelost
+- **Wat er gebeurde:**
+  - Visgilde: Site Kit ging live. Twenty Twenty-Five (een niet-actief thema) werd teruggedraaid op "Nieuws & Acties".
+  - Zeelte Transport: Permalink Manager en Twenty Twenty-Four gingen live. Meta Box en One Click Demo Import werden tegengehouden, Twenty Twenty-Five en een groep met de connector werden teruggedraaid, telkens op de pagina "Foto's".
+  - In de verschilbeelden verandert niets door de update. In de nulmeting ontbraken foto's in een lazy-loaded galerij (masonry), waardoor de galerij anders viel.
+- **Oplossing:**
+  1. **Lazy loading:** echte foto's uit `data-src`/`data-lazy-src`/`data-srcset`/`data-bg` direct zelf inladen, lazy-klassen weghalen en wachten tot de galerij stilstaat (hoogte en fotoposities twee keer gelijk).
+  2. **Tweede nulmeting:** elke pagina in `staging_before`/`production_before` wordt twee keer vastgelegd (`-alt`). Wat al tussen die twee verschilt, telt niet als verschil door de update (samen met de bestaande herkenning van bewegende delen na de update).
+  3. **Niet-actieve onderdelen:** een niet-actieve plugin of een thema dat de site niet laadt (ook niet als parent-thema, afgeleid uit de CSS- en JS-bestanden op de pagina) kan de voorkant niet veranderen. De beeldvergelijking telt dan niet mee; de andere controles blijven.
+- **Prijs:** een run duurt ongeveer 1 minuut langer (extra nulmeting).
+- E2E `phase99` (lazy-loaded galerij), unit-tests `unionMask`/`affectsFrontEnd`; `phase4`, `phase93` en `phase98` blijven groen.

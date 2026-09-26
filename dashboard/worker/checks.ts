@@ -32,6 +32,8 @@ export interface PageCapture {
   loginForm: boolean | null
   /** Totale zichtbare hoogte (px) van de bewegende blokken (AUTO_MASKS); om een verdwenen slider te zien. */
   moving?: number
+  /** Thema-mappen waar de pagina bestanden uit laadt (actief thema én een eventueel parent-thema). */
+  themes?: string[]
   screenshot: Buffer | null
 }
 
@@ -116,7 +118,22 @@ async function settle(page: Page): Promise<void> {
   // wachten tot elke afbeelding in beeld echt geladen is. Anders mist de ene screenshot een foto die de
   // andere wel heeft, en lijkt dat een verschil door de update.
   await page.evaluate(async (max) => {
-    document.querySelectorAll('img[loading="lazy"]').forEach(i => i.setAttribute('loading', 'eager'))
+    // Lazy-load-scripts (lazysizes, WP Rocket, Autoptimize, a3, Jetpack, …) zetten de echte afbeelding pas bij
+    // het scrollen in src. Die zetten we zelf meteen, anders heeft de ene meting een foto die de andere mist.
+    const pick = (el: Element, names: string[]) => names.map(n => el.getAttribute(n)).find(v => v && !v.startsWith('data:image/svg'))
+    document.querySelectorAll('img').forEach(i => {
+      const src = pick(i, ['data-lazy-src', 'data-src', 'data-original', 'data-lazy', 'data-orig-src'])
+      const set = pick(i, ['data-lazy-srcset', 'data-srcset'])
+      if (src && i.getAttribute('src') !== src) i.setAttribute('src', src)
+      if (set) i.setAttribute('srcset', set)
+      i.setAttribute('loading', 'eager')
+      if (i.classList.contains('lazyload') || i.classList.contains('lazy')) { i.classList.remove('lazyload', 'lazy', 'lazyloading'); i.classList.add('lazyloaded', 'loaded') }
+    })
+    document.querySelectorAll('source[data-srcset]').forEach(s => s.setAttribute('srcset', s.getAttribute('data-srcset')!))
+    document.querySelectorAll<HTMLElement>('[data-bg],[data-background-image],[data-bg-image]').forEach(e => {
+      const bg = e.getAttribute('data-bg') || e.getAttribute('data-background-image') || e.getAttribute('data-bg-image')
+      if (bg && !e.style.backgroundImage) e.style.backgroundImage = bg.startsWith('url(') ? bg : `url("${bg}")`
+    })
     const step = Math.max(200, Math.round(window.innerHeight / 2))
     for (let y = 0; y < Math.min(document.documentElement.scrollHeight, max); y += step) {
       window.scrollTo(0, y)
@@ -131,6 +148,15 @@ async function settle(page: Page): Promise<void> {
     })
     while (pending().length && Date.now() < deadline) await new Promise(r => setTimeout(r, 150))
     await Promise.all([...document.images].filter(i => i.complete && i.naturalWidth).map(i => i.decode().catch(() => undefined)))
+    // Galerijen (masonry, justified) schuiven nog als de laatste foto's binnen zijn: wachten tot alles stilstaat.
+    const shape = () => `${document.documentElement.scrollHeight}|` + [...document.images].slice(0, 200).map(i => { const r = i.getBoundingClientRect(); return `${Math.round(r.top)},${Math.round(r.left)},${Math.round(r.width)}` }).join(';')
+    let last = shape()
+    for (let n = 0, still = 0; n < 12 && still < 2; n++) {
+      await new Promise(r => setTimeout(r, 300))
+      const now = shape()
+      still = now === last ? still + 1 : 0
+      last = now
+    }
   }, MAX_SHOT_HEIGHT).catch(() => undefined)
   await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => undefined)
   await page.waitForTimeout(500)
@@ -179,12 +205,16 @@ export async function capturePage(ctx: BrowserContext, url: string, opts: Captur
         text: (document.body?.innerText ?? '').replace(/\s+/g, ' ').trim().length,
         login: document.querySelector('#loginform') !== null,
         moving: Math.round(height),
+        themes: [...new Set([...document.querySelectorAll('link[href],script[src]')]
+          .map(e => (e.getAttribute('href') || e.getAttribute('src') || '').match(/\/wp-content\/themes\/([^/?#]+)\//)?.[1])
+          .filter((x): x is string => Boolean(x)))].slice(0, 10),
       }
     }, { landmarks: LANDMARKS, moving: AUTO_MASKS, max: MAX_SHOT_HEIGHT })
     result.landmarks = facts.present as Landmark[]
     result.textLength = facts.text
     result.loginForm = facts.login
     result.moving = facts.moving
+    result.themes = facts.themes
     if (opts.screenshot) {
       const height = await page.evaluate(() => document.documentElement.scrollHeight)
       const width = page.viewportSize()?.width ?? 1280
