@@ -17,6 +17,8 @@ const filesUnder = (dir: string): string[] => !fs.existsSync(dir) ? []
 test('alarm: fout in de Stripe-webhook → één mail naar de beheerder', async ({ request }) => {
   const c = db(); await c.connect()
   try {
+    // Registratiemeldingen van eerdere tests gaan via dezelfde route: die tellen hier niet mee.
+    await c.query(`update public.signup_notices set sent_at = now() where sent_at is null`)
     await c.query(`delete from public.ops_events; delete from public.ops_alert_state; update public.ops_config set alert_email = 'ops@example.test'`)
     const token = (await c.query(`select cron_token from public.ops_config`)).rows[0].cron_token as string
     expect((await request.post('/api/cron/ops', { headers: { authorization: 'Bearer nope' } })).status()).toBe(401)

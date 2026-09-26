@@ -7,6 +7,7 @@ import { getT } from '@/lib/i18n/server'
 import { safeNext } from '@/lib/safe-next'
 import { publicPlans } from '@/lib/billing/public-plans'
 import { pickPlan } from '@/lib/signup-intent'
+import { reportAuthMailFailure } from '@/lib/ops/auth-mail'
 
 export interface FormState { error?: string; ok?: string; email?: string }
 
@@ -65,6 +66,7 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
     },
   })
   if (error) {
+    await reportAuthMailFailure('signup', error)
     if (error.code === 'signup_disabled') return { error: t('auth.signup.errorClosed') }
     if (error.code === 'user_already_exists') return { error: t('auth.signup.errorExists') }
     if (error.code === 'weak_password') return { error: t('auth.signup.errorWeak') }
@@ -81,9 +83,10 @@ export async function requestPasswordReset(_: FormState, form: FormData): Promis
   const value = String(form.get('email') ?? '').trim().toLowerCase()
   if (!email.safeParse(value).success) return { error: t('team.errorEmail') }
   const supabase = await createClient()
-  await supabase.auth.resetPasswordForEmail(value, {
+  const { error } = await supabase.auth.resetPasswordForEmail(value, {
     redirectTo: `${env().NEXT_PUBLIC_APP_URL}/auth/callback?next=/auth/update-password`,
   })
+  await reportAuthMailFailure('password_reset', error)   // alleen voor het alarm; de gebruiker ziet hetzelfde
   // Altijd dezelfde melding: verraadt niet of er een account bestaat.
   return { ok: t('auth.forgot.sent', { email: value }) }
 }

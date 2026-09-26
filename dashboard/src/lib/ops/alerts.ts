@@ -39,6 +39,8 @@ const LABELS: Record<string, string> = {
   worker_down: 'De worker draait niet (updates, rapporten en controles staan stil)',
   runs_stuck: 'Updates blijven hangen',
   heartbeats_silent: 'Er komen geen heartbeats meer binnen van de sites',
+  'error:app:auth_mail_failed': 'Supabase kan geen bevestigings- of resetmails versturen (SMTP)',
+  'error:app:auth_mail_rate_limited': 'Mailimiet van Supabase bereikt: bevestigings- of resetmails worden geweigerd',
 }
 export function problemLabel(key: string): string {
   if (LABELS[key]) return LABELS[key]!
