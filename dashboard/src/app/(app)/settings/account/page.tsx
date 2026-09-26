@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getT } from '@/lib/i18n/server'
 import { requireAgency } from '@/lib/session'
 import { mfaState } from '@/lib/mfa'
+import type { MessageKey } from '@/lib/i18n/core'
 import { TwoFactor } from './two-factor'
 import { DeleteAgency } from './delete-agency'
 
@@ -24,6 +25,11 @@ export default async function AccountPage() {
       <section className="card space-y-2" aria-labelledby="account-email">
         <h2 id="account-email" className="font-bold">{t('mfa.emailTitle')}</h2>
         <p className="font-mono text-sm">{session.user.email}</p>
+      </section>
+      <section className="card space-y-1" aria-labelledby="account-role">
+        <h2 id="account-role" className="font-bold">{t('team.yourRole')}</h2>
+        <p className="text-sm" data-testid="account-role"><strong>{t(`team.role.${session.role}` as MessageKey)}</strong> <span className="text-muted">· {session.agency.name}</span></p>
+        <p className="text-sm text-muted">{t(`team.roleExplain.${session.role}` as MessageKey)}</p>
       </section>
       <section className="card space-y-4" id="two-factor" aria-labelledby="two-factor-title">
         <div>

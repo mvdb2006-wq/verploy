@@ -230,7 +230,14 @@
     "leave": "Abandonar la agencia",
     "errorLastOwner": "Una agencia debe tener al menos un propietario.",
     "errorAlreadyMember": "Esta persona ya es miembro de tu agencia.",
-    "errorEmail": "Introduce un correo electrónico válido."
+    "errorEmail": "Introduce un correo electrónico válido.",
+    "yourRole": "Tu rol",
+    "ownerBadge": "Propietario",
+    "roleExplain": {
+      "owner": "Gestionas todo, incluidos el equipo y la suscripción.",
+      "admin": "Gestionas los sitios y puedes invitar a miembros del equipo, pero no la suscripción.",
+      "member": "Puedes verlo todo, pero no cambiar nada."
+    }
   },
   "email": {
     "inviteSubject": "Invitación a {agency} en Verploy",
@@ -963,7 +970,8 @@
       "cancels": "Termina el {date}",
       "past_due": "El último pago falló. Stripe lo volverá a intentar; actualiza tus datos de pago.",
       "canceled": "Cancelada. La monitorización continúa, pero para nuevos sitios y actualizaciones hace falta una suscripción.",
-      "comped": "Cuenta gratuita"
+      "comped": "Cuenta gratuita",
+      "compedLimit": "Cuenta gratuita · hasta {count} sitios"
     },
     "cancel": "Cancelar suscripción",
     "cancelHint": "La suscripción sigue hasta el final del periodo pagado.",

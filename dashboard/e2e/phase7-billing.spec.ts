@@ -119,7 +119,7 @@ test('opzeggen aan het einde van de periode, weer doorgaan, en beëindigd = alle
   await expect(page.getByText('Opzegging doorgegeven.')).toBeVisible()
   await sendSubscriptionEvent(page, 'customer.subscription.updated', { price: PRICES.agency, cancelAtEnd: true })
   await page.reload()
-  await expect(page.getByText(/^Stopt op /)).toBeVisible()
+  await expect(page.getByText(/· Stopt op /)).toBeVisible()
   await page.getByRole('button', { name: 'Toch doorgaan' }).click()
   await expect(page.getByText('Het abonnement loopt weer door.')).toBeVisible()
 
@@ -152,4 +152,22 @@ test('alleen de eigenaar mag het abonnement wijzigen (beheerder ziet geen knoppe
   await page.goto('/settings/billing')
   await expect(page.getByText('Alleen de eigenaar van het bureau kan het abonnement wijzigen.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Overstappen|Kiezen|Abonnement opzeggen/ })).toHaveCount(0)
+})
+
+test('gratis account: één status, geen "Huidig"; rol zichtbaar op Team en Mijn account', async ({ page }) => {
+  await login(page, owner)
+  const c = db(); await c.connect()
+  try {
+    await c.query(`update public.agencies set plan_status = 'comped', plan_id = 'scale', stripe_subscription_id = null where id = $1`, [agencyId])
+  } finally { await c.end() }
+  await page.goto('/settings/billing')
+  await expect(page.getByText('Gratis account · tot 120 sites')).toBeVisible()
+  await expect(page.getByText('Huidig', { exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Kiezen' })).toHaveCount(0)
+
+  await page.goto('/settings/team')
+  await expect(page.getByTestId('your-role')).toContainText('Jouw rol: Eigenaar')
+  await expect(page.getByRole('listitem').filter({ hasText: owner.email }).getByText('Eigenaar', { exact: true })).toBeVisible()
+  await page.goto('/settings/account')
+  await expect(page.getByTestId('account-role')).toContainText('Eigenaar')
 })

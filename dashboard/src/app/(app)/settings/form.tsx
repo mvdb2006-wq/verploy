@@ -126,6 +126,8 @@ export function AutoUpdatesForm({ defaults, disabled }: {
   const [state, action] = useActionState(saveAutoUpdates, {})
   const [on, setOn] = useState(defaults.on)
   const [browserTz, setBrowserTz] = useState('')
+  // Tijdzone van de browser is pas na het laden bekend (anders verschilt de server-HTML van de client).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { try { setBrowserTz(Intl.DateTimeFormat().resolvedOptions().timeZone ?? '') } catch { /* geen tijdzone */ } }, [])
   const tz = browserTz || defaults.timezone
   return (

@@ -230,7 +230,14 @@
     "leave": "Quitter l'agence",
     "errorLastOwner": "Une agence doit avoir au moins un propriétaire.",
     "errorAlreadyMember": "Cette personne est déjà membre de votre agence.",
-    "errorEmail": "Saisissez une adresse e-mail valide."
+    "errorEmail": "Saisissez une adresse e-mail valide.",
+    "yourRole": "Votre rôle",
+    "ownerBadge": "Propriétaire",
+    "roleExplain": {
+      "owner": "Vous gérez tout, y compris l’équipe et l’abonnement.",
+      "admin": "Vous gérez les sites et pouvez inviter des membres, mais pas l’abonnement.",
+      "member": "Vous pouvez tout consulter, mais rien modifier."
+    }
   },
   "email": {
     "inviteSubject": "Invitation à rejoindre {agency} sur Verploy",
@@ -963,7 +970,8 @@
       "cancels": "Se termine le {date}",
       "past_due": "Le dernier paiement a échoué. Stripe va réessayer ; mettez à jour vos informations de paiement.",
       "canceled": "Résilié. La surveillance continue, mais un abonnement est nécessaire pour de nouveaux sites et des mises à jour.",
-      "comped": "Compte gratuit"
+      "comped": "Compte gratuit",
+      "compedLimit": "Compte gratuit · jusqu’à {count} sites"
     },
     "cancel": "Résilier l’abonnement",
     "cancelHint": "L’abonnement continue jusqu’à la fin de la période payée.",

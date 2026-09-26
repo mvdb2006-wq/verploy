@@ -26,6 +26,10 @@ export default async function TeamPage() {
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight">{t('team.title')}</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">{t('team.roleHelp')}</p>
+        <p className="mt-3 text-sm" data-testid="your-role">
+          <span className="text-muted">{t('team.yourRole')}:</span> <strong>{t(`team.role.${session.role}` as MessageKey)}</strong>
+          <span className="text-muted"> · {t(`team.roleExplain.${session.role}` as MessageKey)}</span>
+        </p>
       </div>
 
       <section className="rounded-(--radius-card) border border-border bg-surface" aria-labelledby="members-title">
@@ -36,8 +40,12 @@ export default async function TeamPage() {
             return (
               <li key={m.user_id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{m.email} {self && <span className="text-subtle">{t('team.you')}</span>}</p>
-                  <p className="text-xs text-muted">{t(`team.role.${m.role}` as MessageKey)}</p>
+                  <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                    <span className="truncate">{m.email}</span>
+                    {self && <span className="text-subtle">{t('team.you')}</span>}
+                    {m.role === 'owner' && <span className="badge badge-ok">{t('team.ownerBadge')}</span>}
+                  </p>
+                  {m.role !== 'owner' && <p className="text-xs text-muted">{t(`team.role.${m.role}` as MessageKey)}</p>}
                 </div>
                 {(isOwner || self) && !(m.role === 'owner' && ownerCount === 1) && <MemberActions userId={m.user_id} role={m.role} self={self} isOwner={isOwner} />}
               </li>

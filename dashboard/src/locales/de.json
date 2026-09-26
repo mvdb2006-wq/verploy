@@ -230,7 +230,14 @@
     "leave": "Agentur verlassen",
     "errorLastOwner": "Eine Agentur braucht mindestens einen Inhaber.",
     "errorAlreadyMember": "Diese Person ist bereits Mitglied deiner Agentur.",
-    "errorEmail": "Gib eine gültige E-Mail-Adresse ein."
+    "errorEmail": "Gib eine gültige E-Mail-Adresse ein.",
+    "yourRole": "Deine Rolle",
+    "ownerBadge": "Inhaber",
+    "roleExplain": {
+      "owner": "Du verwaltest alles, auch das Team und das Abonnement.",
+      "admin": "Du verwaltest Websites und kannst Teammitglieder einladen, aber nicht das Abonnement.",
+      "member": "Du kannst alles ansehen, aber nichts ändern."
+    }
   },
   "email": {
     "inviteSubject": "Einladung zu {agency} auf Verploy",
@@ -963,7 +970,8 @@
       "cancels": "Endet am {date}",
       "past_due": "Die letzte Zahlung ist fehlgeschlagen. Stripe versucht es erneut; bitte aktualisiere deine Zahlungsdaten.",
       "canceled": "Gekündigt. Das Monitoring läuft weiter, aber für neue Websites und Updates ist ein Abo nötig.",
-      "comped": "Kostenloses Konto"
+      "comped": "Kostenloses Konto",
+      "compedLimit": "Kostenloses Konto · bis zu {count} Websites"
     },
     "cancel": "Abo kündigen",
     "cancelHint": "Das Abo läuft bis zum Ende des bezahlten Zeitraums weiter.",

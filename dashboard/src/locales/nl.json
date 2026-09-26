@@ -230,7 +230,14 @@
     "leave": "Bureau verlaten",
     "errorLastOwner": "Een bureau moet minstens één eigenaar hebben.",
     "errorAlreadyMember": "Deze persoon is al lid van je bureau.",
-    "errorEmail": "Vul een geldig e-mailadres in."
+    "errorEmail": "Vul een geldig e-mailadres in.",
+    "yourRole": "Jouw rol",
+    "ownerBadge": "Eigenaar",
+    "roleExplain": {
+      "owner": "Je beheert alles, inclusief het team en het abonnement.",
+      "admin": "Je beheert sites en kunt teamleden uitnodigen, maar niet het abonnement.",
+      "member": "Je kunt alles bekijken, maar niets wijzigen."
+    }
   },
   "email": {
     "inviteSubject": "Uitnodiging voor {agency} op Verploy",
@@ -963,7 +970,8 @@
       "cancels": "Stopt op {date}",
       "past_due": "De laatste betaling is mislukt. Stripe probeert het opnieuw; werk je betaalgegevens bij.",
       "canceled": "Opgezegd. Monitoring loopt door, maar voor nieuwe sites en updates is een abonnement nodig.",
-      "comped": "Gratis account"
+      "comped": "Gratis account",
+      "compedLimit": "Gratis account · tot {count} sites"
     },
     "cancel": "Abonnement opzeggen",
     "cancelHint": "Het abonnement loopt door tot het einde van de betaalde periode.",

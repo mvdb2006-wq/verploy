@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale, getT } from '@/lib/i18n/server'
-import { agencyIsWritable, requireAgency } from '@/lib/session'
+import { requireAgency } from '@/lib/session'
 import { formatDate } from '@/lib/format'
 import { DATE_LOCALE_TAG } from '@/lib/i18n/core'
 import { billingEnabled } from '@/lib/billing/stripe'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/cn'
 import { CancelToggle, PlanButton } from './forms'
 import { openPortal } from './actions'
 import { pickPlan } from '@/lib/signup-intent'
+import { billingState, currentPlanId, planAction } from '@/lib/billing/state'
 
 export async function generateMetadata() {
   return { title: (await getT())('billing.title') }
@@ -24,21 +25,27 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const a = session.agency
   const owner = session.role === 'owner'
   const enabled = billingEnabled()
-  const subscribed = Boolean(a.stripe_subscription_id) && (a.plan_status === 'active' || a.plan_status === 'past_due')
+  // Eén bron van waarheid voor de banner, de markering "Huidig" en de knoppen (zie lib/billing/state.ts).
+  const state = billingState(a, plans ?? [])
+  const current = currentPlanId(state)
+  const action = planAction(state)
+  const subscribed = current !== null
   const money = (cents: number, currency: string) => new Intl.NumberFormat(DATE_LOCALE_TAG[locale], { style: 'currency', currency: currency.toUpperCase(), maximumFractionDigits: 0 }).format(cents / 100)
-  const trialOver = a.plan_status === 'trialing' && !agencyIsWritable(a)
+  const planName = (id: string) => plans?.find(p => p.id === id)?.name ?? id
   // Het plan dat de gebruiker op verploy.com koos (?plan=, of bewaard bij zijn account bij registratie):
   // alleen een voorselectie, getoetst aan de openbare plannen. Niet bij een lopend of gratis abonnement.
-  const intended = !subscribed && a.plan_status !== 'comped'
+  const intended = action === 'checkout'
     ? pickPlan(planParam, plans ?? []) ?? pickPlan(session.user.user_metadata?.intended_plan, plans ?? [])
     : null
-  const status = a.plan_status === 'comped' ? t('billing.status.comped')
-    : a.plan_status === 'trialing' ? (trialOver ? t('billing.status.trialEnded') : t('billing.status.trialing', { date: formatDate(a.trial_ends_at, locale) }))
-    : a.plan_status === 'past_due' ? t('billing.status.past_due')
-    : a.plan_status === 'canceled' ? t('billing.status.canceled')
-    : a.subscription_cancel_at_end && a.subscription_period_end ? t('billing.status.cancels', { date: formatDate(a.subscription_period_end, locale) })
-    : a.subscription_period_end ? `${t('billing.status.active')} · ${t('billing.status.renews', { date: formatDate(a.subscription_period_end, locale) })}`
-    : t('billing.status.active')
+  const status = state.kind === 'comped'
+    ? (state.sitesLimit ? t('billing.status.compedLimit', { count: state.sitesLimit }) : t('billing.status.comped'))
+    : state.kind === 'trial' ? t('billing.status.trialing', { date: formatDate(state.endsAt, locale) })
+    : state.kind === 'trial_ended' ? t('billing.status.trialEnded')
+    : state.kind === 'past_due' ? `${planName(state.planId)} · ${t('billing.status.past_due')}`
+    : state.kind === 'canceled' ? t('billing.status.canceled')
+    : state.kind === 'cancels' ? `${planName(state.planId)} · ${t('billing.status.cancels', { date: formatDate(state.endsAt, locale) })}`
+    : `${planName(state.planId)} · ${t('billing.status.active')}${state.renewsAt ? ` · ${t('billing.status.renews', { date: formatDate(state.renewsAt, locale) })}` : ''}`
+  const warn = state.kind === 'past_due' || state.kind === 'canceled' || state.kind === 'trial_ended'
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -48,7 +55,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         <p className="mt-1 text-sm text-muted">{t('billing.intro')}</p>
       </div>
       {checkout === 'success' && <Alert tone="ok">{t('billing.success')}</Alert>}
-      <Alert tone={a.plan_status === 'past_due' || a.plan_status === 'canceled' || trialOver ? 'warn' : 'info'}>{status}</Alert>
+      <Alert tone={warn ? 'warn' : 'info'}>{status}</Alert>
       {!enabled && <Alert tone="info">{t('billing.notConfigured')}</Alert>}
       {enabled && !owner && <p className="text-sm text-muted">{t('billing.ownerOnly')}</p>}
 
@@ -64,21 +71,21 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(plans ?? []).map(p => {
-          const current = p.id === a.plan_id && (subscribed || a.plan_status === 'comped')
+          const isCurrent = p.id === current
           const chosen = intended?.id === p.id
           return (
-            <section key={p.id} className={cn('flex flex-col rounded-(--radius-card) border bg-surface p-5', current || chosen ? 'border-accent' : 'border-border')} aria-labelledby={`plan-${p.id}`} data-chosen={chosen || undefined}>
+            <section key={p.id} className={cn('flex flex-col rounded-(--radius-card) border bg-surface p-5', isCurrent || chosen ? 'border-accent' : 'border-border')} aria-labelledby={`plan-${p.id}`} data-chosen={chosen || undefined}>
               <div className="flex items-center justify-between gap-2">
                 <h2 id={`plan-${p.id}`} className="font-bold">{p.name}</h2>
-                {current && <span className="badge badge-ok"><Check size={12} aria-hidden /> {t('billing.currentBadge')}</span>}
+                {isCurrent && <span className="badge badge-ok"><Check size={12} aria-hidden /> {t('billing.currentBadge')}</span>}
                 {chosen && <span className="badge badge-ok">{t('billing.intended.badge')}</span>}
               </div>
               <p className="mt-3 text-3xl font-extrabold tabular-nums">{money(p.price_cents, p.currency)}</p>
               <p className="text-xs text-muted">{t('billing.perMonth')}</p>
               <p className="mt-3 text-sm">{t('billing.sites', { count: p.sites_limit })}</p>
               <div className="mt-auto pt-5">
-                {enabled && owner && !current && a.plan_status !== 'comped' && (
-                  <PlanButton plan={p.id} mode={subscribed ? 'change' : 'checkout'} label={subscribed ? t('billing.switch') : t('billing.choose')} />
+                {enabled && owner && !isCurrent && action && (
+                  <PlanButton plan={p.id} mode={action} label={action === 'change' ? t('billing.switch') : t('billing.choose')} />
                 )}
               </div>
             </section>

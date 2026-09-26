@@ -230,7 +230,14 @@
     "leave": "Leave agency",
     "errorLastOwner": "An agency must have at least one owner.",
     "errorAlreadyMember": "This person is already a member of your agency.",
-    "errorEmail": "Enter a valid email address."
+    "errorEmail": "Enter a valid email address.",
+    "yourRole": "Your role",
+    "ownerBadge": "Owner",
+    "roleExplain": {
+      "owner": "You manage everything, including the team and the subscription.",
+      "admin": "You manage sites and can invite team members, but not the subscription.",
+      "member": "You can view everything, but not change anything."
+    }
   },
   "email": {
     "inviteSubject": "Invitation to {agency} on Verploy",
@@ -963,7 +970,8 @@
       "cancels": "Ends on {date}",
       "past_due": "The last payment failed. Stripe will try again; please update your payment details.",
       "canceled": "Cancelled. Monitoring continues, but new sites and updates require a subscription.",
-      "comped": "Free account"
+      "comped": "Free account",
+      "compedLimit": "Free account · up to {count} sites"
     },
     "cancel": "Cancel subscription",
     "cancelHint": "The subscription continues until the end of the paid period.",
