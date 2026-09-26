@@ -12,6 +12,7 @@ import { evaluateSites, refreshFeed } from '@/lib/vulnerabilities/feed'
 import { runScheduledUpdates } from '@/lib/auto-updates/schedule'
 import { sendDailyDigests } from '@/lib/digest/send'
 import { CONNECTOR_RELEASE } from '@/lib/connector/release'
+import { compactArtifacts } from './artifacts'
 import { env } from '@/lib/env'
 import { SiteRejectedError, TransientSiteError } from './site-client'
 import { diagnoseRun } from './diagnose'
@@ -31,6 +32,8 @@ const SCHEDULE_EVERY_MS = Number(process.env.WORKER_SCHEDULE_MS ?? 5 * 60_000)
 const INTEL_EVERY_MS = Number(process.env.WORKER_INTEL_MS ?? 30 * 60_000)
 /** Hoe snel een nieuwe Verploy Connector wordt uitgerold op sites die achterlopen. */
 const CONNECTOR_EVERY_MS = Number(process.env.WORKER_CONNECTOR_MS ?? 60_000)
+/** Hoe vaak afgeronde runs worden omgezet naar JPEG en oude beelden opgeruimd. */
+const COMPACT_EVERY_MS = Number(process.env.WORKER_COMPACT_MS ?? 10 * 60_000)
 /** Aantal update-runs tegelijk (altijd op verschillende sites; de database staat er één per site toe). */
 const CONCURRENCY = Math.max(1, Number(process.env.WORKER_CONCURRENCY ?? 2))
 
@@ -171,6 +174,7 @@ async function main() {
   let lastSchedule = 0
   let lastIntel = 0
   let lastConnector = 0
+  let lastCompact = 0
   let feedBusy = false
   while (!stopping) {
     lastLoopAt = Date.now()
@@ -187,6 +191,13 @@ async function main() {
       await evaluateSites(admin)
         .then(r => { if (r.evaluated || r.autofixStarted || r.stale) log('vuln_evaluated', { ...r }) })
         .catch(e => log('vuln_evaluate_failed', { error: (e as Error).message }))
+    }
+    // Alleen als er niets draait: het omzetten gebruikt dezelfde browser als de tests.
+    if (Date.now() - lastCompact > COMPACT_EVERY_MS && active.size === 0) {
+      lastCompact = Date.now()
+      await compactArtifacts(admin, getBrowser)
+        .then(r => { if (r.runs || r.expired) log('artifacts_compacted', { ...r }) })
+        .catch(e => log('artifacts_compact_failed', { error: (e as Error).message }))
     }
     if (Date.now() - lastConnector > CONNECTOR_EVERY_MS) {
       lastConnector = Date.now()

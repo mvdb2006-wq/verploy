@@ -342,3 +342,11 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   3. **Niet-actieve onderdelen:** een niet-actieve plugin of een thema dat de site niet laadt (ook niet als parent-thema, afgeleid uit de CSS- en JS-bestanden op de pagina) kan de voorkant niet veranderen. De beeldvergelijking telt dan niet mee; de andere controles blijven.
 - **Prijs:** een run duurt ongeveer 1 minuut langer (extra nulmeting).
 - E2E `phase99` (lazy-loaded galerij), unit-tests `unionMask`/`affectsFrontEnd`; `phase4`, `phase93` en `phase98` blijven groen.
+
+## 26-09 — Opslag van screenshots beperkt
+- **Probleem:** na 3 dagen met 5 sites stond er 2,5 GB in `run-artifacts`, terwijl het gratis Supabase-plan 1 GB heeft. De tweede nulmeting verdubbelt dat nog.
+- **Oplossing (worker, elke 10 minuten, alleen als er geen run loopt):**
+  - Afgeronde runs worden omgezet naar JPEG (kwaliteit 0,72, via de canvas van Chromium, dus geen extra native pakket), nieuwste runs eerst. De tweede nulmetingen (`-alt`) worden verwijderd.
+  - Na 60 dagen (`WORKER_ARTIFACT_DAYS`) verdwijnen de beelden van een run helemaal. Uitkomst, metingen en tijdlijn blijven bewaard.
+- Tijdens een run blijven de beelden PNG, omdat de pixelvergelijking verliesvrij moet zijn.
+- De route `/artifacts` geeft het juiste content-type (jpeg of png). E2E `phase99` controleert de omzetting.

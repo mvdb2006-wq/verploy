@@ -69,4 +69,15 @@ test('lazy-loaded fotogalerij + onschuldige update → geen verschil, live gezet
       expect(Number(r.diff_ratio)).toBeLessThanOrEqual(0.02)        // alleen de gewijzigde footerregel; de galerij (≈45% van de pagina) is gelijk
     }
   } finally { await c.end() }
+
+  // Opslag: na afloop worden de beelden JPEG (≈5× kleiner) en verdwijnt de tweede nulmeting; de pagina toont ze gewoon.
+  const c2 = db(); await c2.connect()
+  try {
+    await expect.poll(async () => (await c2.query(`select count(*)::int n from public.test_results where run_id = $1 and (screenshot_path like '%.png' or diff_path like '%.png')`, [runId])).rows[0].n, { timeout: 90_000 }).toBe(0)
+    const { rows } = await c2.query(`select screenshot_path from public.test_results where run_id = $1 and phase = 'production_before' and screenshot_path is not null limit 1`, [runId])
+    expect(rows[0].screenshot_path).toMatch(/\.jpg$/)
+    const res = await page.request.get(`/artifacts/${runId}?p=${encodeURIComponent(rows[0].screenshot_path)}`)
+    expect(res.status()).toBe(200)
+    expect(res.headers()['content-type']).toBe('image/jpeg')
+  } finally { await c2.end() }
 })

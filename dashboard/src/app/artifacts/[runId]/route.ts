@@ -20,6 +20,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ runI
   const { data, error } = await createAdminClient().storage.from('run-artifacts').download(path)
   if (error || !data) return new NextResponse(null, { status: 404 })
   return new NextResponse(Buffer.from(await data.arrayBuffer()), {
-    headers: { 'content-type': 'image/png', 'cache-control': 'private, max-age=86400, immutable', 'x-content-type-options': 'nosniff' },
+    headers: { 'content-type': path.endsWith('.jpg') ? 'image/jpeg' : 'image/png', 'cache-control': 'private, max-age=86400, immutable', 'x-content-type-options': 'nosniff' },
   })
 }
