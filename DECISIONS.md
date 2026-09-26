@@ -350,3 +350,7 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - Na 60 dagen (`WORKER_ARTIFACT_DAYS`) verdwijnen de beelden van een run helemaal. Uitkomst, metingen en tijdlijn blijven bewaard.
 - Tijdens een run blijven de beelden PNG, omdat de pixelvergelijking verliesvrij moet zijn.
 - De route `/artifacts` geeft het juiste content-type (jpeg of png). E2E `phase99` controleert de omzetting.
+
+## 26-09 — Versienummer van de app bijgewerkt (2.4.0 → 2.5.0)
+- Het nummer in de zijbalk en onder Instellingen komt uit `dashboard/package.json` en was sinds 24-09 niet meer verhoogd, terwijl er daarna veel bij is gekomen. De build-code ernaast (commit) klopte wel altijd.
+- Afspraak: bij elke uitrol met nieuwe functies gaat de minor omhoog (2.6.0, …); bij alleen reparaties de patch (2.5.1, …). Het versienummer van de app staat los van dat van de connector (nu 2.5.3).
