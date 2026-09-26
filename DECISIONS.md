@@ -363,3 +363,6 @@ Sliders, achtergrondvideo's en wisselende foto's leverden valse "ziet er X% ande
   - Worker (`wake.ts`, elke 5 min): sites zonder heartbeat in de laatste 17 minuten worden aangetikt via `wp-cron.php`, zoals WordPress dat zelf doet.
   - Ligt de site echt plat, dan blijft de heartbeat uit en telt het terecht als offline.
   - Oude, onterechte onderbrekingen blijven in de berekening van 30 dagen staan tot ze eruit vallen.
+- **Stripe live (26-09):** `plans.stripe_price_id` in productie gevuld met de live prijzen (solo, studio, agency, scale); env in Vercel (Production) gezet door Martijn.
+  - `STRIPE_SECRET_KEY` is een restricted key (`rk_live_`). De code controleert nergens op `sk_`; de Stripe-SDK accepteert beide.
+  - Kortingscode FOUNDING40 werkt via `allow_promotion_codes` in Checkout.
