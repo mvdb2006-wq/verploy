@@ -36,6 +36,33 @@ test('alarm: fout in de Stripe-webhook → één mail naar de beheerder', async 
   }
 })
 
+test('nieuwe registratie → interne melding naar het team (met gekozen plan)', async ({ page, request }) => {
+  const email = `nieuw-${run}@example.test`
+  await page.goto('/signup?plan=agency')
+  await page.getByLabel('E-mailadres').fill(email)
+  await page.getByLabel('Wachtwoord').fill('correct-horse-battery')
+  await page.getByRole('button', { name: 'Account aanmaken' }).click()
+  await expect(page).toHaveURL(/\/onboarding/)
+  const c = db(); await c.connect()
+  try {
+    await c.query(`update public.signup_notices set sent_at = now() where email <> $1 and sent_at is null`, [email])   // oudere testregistraties niet mailen
+    await c.query(`update public.ops_config set alert_email = 'team@example.test'`)
+    const token = (await c.query(`select cron_token from public.ops_config`)).rows[0].cron_token as string
+    await clearMails()
+    const r = await (await request.post('/api/cron/ops', { headers: { authorization: `Bearer ${token}` } })).json()
+    expect(r.signups).toEqual({ pending: 1, sent: 1 })
+    const again = await (await request.post('/api/cron/ops', { headers: { authorization: `Bearer ${token}` } })).json()
+    expect(again.signups).toEqual({ pending: 0, sent: 0 })
+    const mails = (await sentMails()).filter(m => m.to.includes('team@example.test'))
+    expect(mails).toHaveLength(1)
+    expect(mails[0]!.subject).toBe(`New Verploy signup: ${email}`)
+    expect(mails[0]!.text).toContain('Intended plan: agency')
+  } finally {
+    await c.query(`update public.ops_config set alert_email = null; delete from public.ops_alert_state`)
+    await c.end()
+  }
+})
+
 test('bureau en account verwijderen: alles weg, ook de bestanden', async ({ page }) => {
   const who = { email: `weg-${run}@example.test`, password: 'correct-horse-battery' }
   const name = `Weg ${run}`

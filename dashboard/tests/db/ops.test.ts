@@ -82,3 +82,34 @@ describe('bureau verwijderen', () => {
       expect(rows.every(r => r.bucket === 'run-artifacts')).toBe(true)
     }))
 })
+
+describe('melding bij een nieuwe registratie', () => {
+  it('elke nieuwe gebruiker komt in de wachtrij, met plan, bevestiging en bureau', () =>
+    inTx(async db => {
+      const a = await seedAgency(db, 'nieuw')
+      await db.query(`update auth.users set raw_user_meta_data = '{"intended_plan":"agency"}', email_confirmed_at = now() where id = $1`, [a.owner.id])
+      await actAs(db, { role: 'service_role' })
+      const rows = (await db.query(`select * from public.pending_signup_notices(50) where user_id = any($1)`, [[a.owner.id, a.member.id]])).rows
+      await asSuper(db)
+      expect(rows).toHaveLength(2)
+      const owner = rows.find(r => r.user_id === a.owner.id)!
+      expect(owner).toMatchObject({ email: a.owner.email, agency_name: 'Bureau nieuw' })
+      // Het plan staat bij het aanmaken in de metadata; hier pas achteraf gezet, dus nog leeg in de wachtrij.
+      expect(owner.intended_plan).toBeNull()
+      expect(owner.confirmed).toBe(true)
+      await db.query(`update public.signup_notices set sent_at = now() where user_id = $1`, [a.owner.id])
+      await actAs(db, { role: 'service_role' })
+      expect((await db.query(`select count(*)::int n from public.pending_signup_notices(50) where user_id = $1`, [a.owner.id])).rows[0].n).toBe(0)
+      await asSuper(db)
+    }))
+
+  it('plan uit de metadata bij het aanmaken; klanten kunnen de wachtrij niet lezen', () =>
+    inTx(async db => {
+      const id = (await db.query(`insert into auth.users (id, email, raw_user_meta_data, aud, role) values (gen_random_uuid(), 'plan@example.test', '{"intended_plan":"solo"}', 'authenticated', 'authenticated') returning id`)).rows[0].id
+      expect((await db.query(`select intended_plan from public.signup_notices where user_id = $1`, [id])).rows[0].intended_plan).toBe('solo')
+      const a = await seedAgency(db, 'nieuw-rls')
+      await actAs(db, { role: 'authenticated', id: a.owner.id, email: a.owner.email })
+      expect((await expectError(db, `select * from public.signup_notices`)).code).toBe('42501')
+      expect((await expectError(db, `select * from public.pending_signup_notices(5)`)).code).toBe('42501')
+    }))
+})

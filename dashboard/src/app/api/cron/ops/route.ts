@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkOps } from '@/lib/ops/alerts'
+import { sendSignupNotices } from '@/lib/ops/signups'
 import { sendEmail } from '@/lib/email'
 import { json } from '@/lib/connector/http'
 import { env } from '@/lib/env'
@@ -25,7 +26,10 @@ async function handle(req: Request) {
   const ok = (config?.cron_token && same(given, `Bearer ${config.cron_token}`)) || (secret && same(given, `Bearer ${secret}`))
   if (!ok) return json({ error: 'unauthorized' }, 401)
   const result = await checkOps(admin, (to, mail) => sendEmail({ to, ...mail, idempotencyKey: `ops-${to}-${Math.floor(Date.now() / 60_000)}` }))
-  return json({ ok: true, ...result })
+  // Nieuwe registraties: los van het alarm, zodat een fout in het ene het andere niet tegenhoudt.
+  const signups = await sendSignupNotices(admin, (to, mail, key) => sendEmail({ to, ...mail, idempotencyKey: key }))
+    .catch(e => { console.error('[ops] registratiemeldingen mislukt', (e as Error).message); return { pending: 0, sent: 0 } })
+  return json({ ok: true, ...result, signups })
 }
 export const POST = handle
 export const GET = handle

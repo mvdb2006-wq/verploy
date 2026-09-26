@@ -501,6 +501,33 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_notices: {
+        Row: {
+          user_id: string
+          email: string
+          intended_plan: string | null
+          created_at: string
+          sent_at: string | null
+          attempts: number
+        }
+        Insert: {
+          user_id: string
+          email: string
+          intended_plan?: string | null
+          created_at?: string
+          sent_at?: string | null
+          attempts?: number
+        }
+        Update: {
+          user_id?: string
+          email?: string
+          intended_plan?: string | null
+          created_at?: string
+          sent_at?: string | null
+          attempts?: number
+        }
+        Relationships: []
+      }
       site_components: {
         Row: {
           agency_id: string
@@ -1130,6 +1157,7 @@ export type Database = {
       ops_prune: { Args: Record<PropertyKey, never>; Returns: undefined }
       peek_invitation: { Args: { p_token: string | null }; Returns: { agency_name: string; email: string; role: string; valid: boolean }[] }
       pending_security_fixes: { Args: { p_limit?: number | null }; Returns: { site_id: string; items: Json }[] }
+      pending_signup_notices: { Args: { p_limit?: number | null }; Returns: { user_id: string; email: string; intended_plan: string; created_at: string; attempts: number; confirmed: boolean; agency_name: string; invited: boolean }[] }
       record_run_outcome: { Args: { p_run: string | null }; Returns: undefined }
       record_site_checks: { Args: { p_site: string | null; p_ssl_valid: boolean | null; p_ssl_expires_at: string | null; p_ssl_issuer: string | null; p_ssl_error: string | null; p_domain_expires_at: string | null; p_domain_error: string | null; p_domain_checked: boolean | null }; Returns: undefined }
       refresh_update_intel: { Args: Record<PropertyKey, never>; Returns: number }

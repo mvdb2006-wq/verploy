@@ -1,0 +1,8 @@
+{
+  "confirmation": "Confirm your email address",
+  "invite": "You've been invited to Verploy",
+  "magic_link": "Your Verploy sign-in link",
+  "email_change": "Confirm your new email address",
+  "recovery": "Reset your Verploy password",
+  "reauthentication": "Your Verploy verification code"
+}
