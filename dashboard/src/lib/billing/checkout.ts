@@ -7,6 +7,9 @@ import type Stripe from 'stripe'
  * EM Hosting & Design is zelf de verkoper (geen Stripe Managed Payments): btw via Stripe Tax, prijzen
  * exclusief btw. 21% in Nederland; verlegd bij een EU-bedrijf met geldig btw-nummer (tax_id_collection).
  */
+/** Onderaan elke factuur: Verploy is de handelsnaam, EM Hosting & Design de verkoper (verplichte gegevens). */
+export const INVOICE_FOOTER = 'Verploy is een handelsnaam van EM Hosting & Design · Oesterstraat 50, 4691 KT Tholen · KvK 56914792 · btw NL001735443B26 · team@verploy.com'
+
 export function checkoutSessionParams(o: {
   agencyId: string; customer: string; plan: { id: string; stripe_price_id: string }; locale: Stripe.Checkout.SessionCreateParams.Locale; appUrl: string
 }): Stripe.Checkout.SessionCreateParams {

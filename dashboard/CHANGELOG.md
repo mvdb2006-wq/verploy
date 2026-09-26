@@ -7,7 +7,8 @@ voor een breuk. De bovenste versie hier moet gelijk zijn aan `version` in packag
 ## 2.6.0 — 26-09-2026
 - Jouw rol zichtbaar onder Mijn account en op Team; de eigenaar gemarkeerd in de ledenlijst.
 - Abonnement: één status (gratis, proef of betaald plan); "Huidig" alleen bij een lopend Stripe-abonnement.
-- Betalen: EM Hosting & Design is zelf verkoper (Managed Payments uit), btw via Stripe Tax.
+- Betalen: EM Hosting & Design is zelf verkoper (Managed Payments uit), btw via Stripe Tax; op elke factuur
+  "Verploy is een handelsnaam van EM Hosting & Design" met KvK en btw-nummer.
 - Alarm voor de beheerder (worker, vastgelopen runs, heartbeats, Stripe-webhook, mislukte auth-mails).
 - Melding naar het team bij elke nieuwe registratie.
 - Bureau en account verwijderen; bestanden in Storage worden opgeruimd (ook na site verwijderen).

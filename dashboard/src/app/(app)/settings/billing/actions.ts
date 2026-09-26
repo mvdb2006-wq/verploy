@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/billing/stripe'
 import { env } from '@/lib/env'
-import { checkoutSessionParams } from '@/lib/billing/checkout'
+import { checkoutSessionParams, INVOICE_FOOTER } from '@/lib/billing/checkout'
 
 export interface BillingState { error?: string; ok?: string }
 
@@ -48,11 +48,13 @@ export async function startCheckout(_: BillingState, form: FormData): Promise<Bi
   try {
     let customer = session.agency.stripe_customer_id
     if (!customer) {
-      const created = await s.customers.create({ email: session.user.email, name: session.agency.name, metadata: { agency_id: session.agency.id } },
+      const created = await s.customers.create({ email: session.user.email, name: session.agency.name, metadata: { agency_id: session.agency.id }, invoice_settings: { footer: INVOICE_FOOTER } },
         { idempotencyKey: `customer-${session.agency.id}` })
       customer = created.id
       const { error } = await createAdminClient().rpc('set_stripe_customer', { p_agency: session.agency.id, p_customer: customer })
       if (error) throw error
+    } else {
+      await s.customers.update(customer, { invoice_settings: { footer: INVOICE_FOOTER } })   // ook voor klanten van vóór deze voettekst
     }
     const checkout = await s.checkout.sessions.create(checkoutSessionParams({
       agencyId: session.agency.id, customer, plan: { id: plan.id, stripe_price_id: plan.stripe_price_id! },
