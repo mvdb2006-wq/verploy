@@ -1320,5 +1320,87 @@
     "error": "La suppression a échoué. Réessayez ou écrivez à support@verploy.com.",
     "done": "Votre agence et votre compte ont été supprimés. Merci d’avoir utilisé Verploy.",
     "memberNote": "Vous souhaitez supprimer votre compte ? Demandez au propriétaire de votre agence de vous retirer de l’équipe, ou écrivez à support@verploy.com."
+  },
+  "admin": {
+    "nav": "Clients",
+    "title": "Clients",
+    "intro": "Toutes les agences qui utilisent Verploy, avec formule, statut de paiement et utilisation. Visible uniquement par vous, en tant qu’exploitant de Verploy. Montants hors TVA.",
+    "updated": "Données Stripe récupérées {time}.",
+    "stripeUnavailable": "Stripe était injoignable ; formule et statut proviennent de l’application (via le webhook Stripe), sans dernière facture ni remise.",
+    "kpi": {
+      "paying": "Clients payants",
+      "trials": "En essai",
+      "trialsEnding": "{count, plural, =0 {aucun ne se termine cette semaine} one {# se termine cette semaine} other {# se terminent cette semaine}}",
+      "late": "En retard",
+      "mrr": "MRR",
+      "stopped": "Résiliés ce mois-ci",
+      "noAgency": "Inscrits sans agence"
+    },
+    "status": {
+      "trial": "Essai jusqu’au {date}",
+      "trial_ended": "Essai expiré",
+      "active": "Actif",
+      "late": "En retard",
+      "cancels": "Résilié (en cours)",
+      "stopped": "Arrêté",
+      "free": "Gratuit"
+    },
+    "filterAll": "Tous les statuts",
+    "planAll": "Toutes les formules",
+    "search": "Rechercher une agence ou un e-mail",
+    "export": "Exporter en CSV",
+    "col": {
+      "agency": "Agence",
+      "plan": "Formule",
+      "status": "Statut",
+      "payment": "Dernière facture",
+      "next": "Prochaine facture",
+      "sites": "Sites",
+      "since": "Client depuis",
+      "mrr": "MRR"
+    },
+    "sort": "Trier",
+    "sortBy": {
+      "since": "Client depuis",
+      "mrr": "MRR",
+      "next": "Prochaine facture",
+      "status": "Statut"
+    },
+    "none": "Aucun client trouvé.",
+    "invoice": {
+      "paid": "Payée",
+      "open": "Ouverte",
+      "uncollectible": "Échouée",
+      "void": "Annulée",
+      "draft": "Brouillon"
+    },
+    "retry": "{attempts, plural, one {# tentative} other {# tentatives}}, prochaine tentative {date}",
+    "discount": "{name} : {percent} % de remise",
+    "loose": {
+      "title": "Inscrits, sans agence",
+      "intro": "Comptes créés mais sans agence (pour l’instant).",
+      "confirmed": "Confirmé",
+      "unconfirmed": "Pas encore confirmé",
+      "plan": "Formule choisie : {plan}",
+      "none": "Tous les inscrits ont aussi une agence."
+    },
+    "detail": {
+      "back": "Retour aux clients",
+      "account": "Compte",
+      "members": "Équipe",
+      "sites": "Sites",
+      "billing": "Abonnement",
+      "owner": "Propriétaire",
+      "locale": "Langue",
+      "created": "Créé",
+      "lastSignIn": "Dernière connexion",
+      "never": "jamais",
+      "openStripe": "Voir dans Stripe",
+      "openInvoice": "Voir la facture",
+      "noStripe": "Pas encore de client Stripe (aucun paiement lancé).",
+      "period": "Période en cours jusqu’au {date}",
+      "usage": "{used} sur {limit} sites",
+      "noSites": "Aucun site pour l’instant."
+    }
   }
 }

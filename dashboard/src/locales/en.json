@@ -1320,5 +1320,87 @@
     "error": "Deleting failed. Try again or email support@verploy.com.",
     "done": "Your agency and account have been deleted. Thank you for using Verploy.",
     "memberNote": "Want your account deleted? Ask your agency owner to remove you from the team, or email support@verploy.com."
+  },
+  "admin": {
+    "nav": "Customers",
+    "title": "Customers",
+    "intro": "Every agency using Verploy, with plan, payment status and usage. Only visible to you as the Verploy operator. Amounts exclude VAT.",
+    "updated": "Stripe data fetched {time}.",
+    "stripeUnavailable": "Stripe could not be reached; plan and status come from the app (via the Stripe webhook), without latest invoice and discount.",
+    "kpi": {
+      "paying": "Paying customers",
+      "trials": "In trial",
+      "trialsEnding": "{count, plural, =0 {none ending this week} one {# ends this week} other {# end this week}}",
+      "late": "Overdue",
+      "mrr": "MRR",
+      "stopped": "Cancelled this month",
+      "noAgency": "Signed up without agency"
+    },
+    "status": {
+      "trial": "Trial until {date}",
+      "trial_ended": "Trial expired",
+      "active": "Active",
+      "late": "Overdue",
+      "cancels": "Cancelled (running out)",
+      "stopped": "Stopped",
+      "free": "Free"
+    },
+    "filterAll": "All statuses",
+    "planAll": "All plans",
+    "search": "Search agency or email",
+    "export": "Export CSV",
+    "col": {
+      "agency": "Agency",
+      "plan": "Plan",
+      "status": "Status",
+      "payment": "Latest invoice",
+      "next": "Next invoice",
+      "sites": "Sites",
+      "since": "Customer since",
+      "mrr": "MRR"
+    },
+    "sort": "Sort",
+    "sortBy": {
+      "since": "Customer since",
+      "mrr": "MRR",
+      "next": "Next invoice",
+      "status": "Status"
+    },
+    "none": "No customers found.",
+    "invoice": {
+      "paid": "Paid",
+      "open": "Open",
+      "uncollectible": "Failed",
+      "void": "Voided",
+      "draft": "Draft"
+    },
+    "retry": "{attempts, plural, one {# attempt} other {# attempts}}, next attempt {date}",
+    "discount": "{name}: {percent}% off",
+    "loose": {
+      "title": "Signed up, no agency yet",
+      "intro": "Accounts that were created but have no agency (yet).",
+      "confirmed": "Confirmed",
+      "unconfirmed": "Not confirmed yet",
+      "plan": "Chosen plan: {plan}",
+      "none": "Everyone who signed up also has an agency."
+    },
+    "detail": {
+      "back": "Back to customers",
+      "account": "Account",
+      "members": "Team",
+      "sites": "Sites",
+      "billing": "Subscription",
+      "owner": "Owner",
+      "locale": "Language",
+      "created": "Created",
+      "lastSignIn": "Last signed in",
+      "never": "never",
+      "openStripe": "View in Stripe",
+      "openInvoice": "View invoice",
+      "noStripe": "No Stripe customer yet (no payment started).",
+      "period": "Current period until {date}",
+      "usage": "{used} of {limit} sites",
+      "noSites": "No sites yet."
+    }
   }
 }

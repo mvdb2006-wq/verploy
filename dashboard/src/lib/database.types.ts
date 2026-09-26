@@ -417,6 +417,21 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_admins: {
+        Row: {
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           id: string
@@ -1134,6 +1149,9 @@ export type Database = {
     Functions: {
       accept_invitation: { Args: { p_token: string | null }; Returns: string }
       acknowledge_alert: { Args: { p_alert: string | null }; Returns: undefined }
+      admin_customer: { Args: { p_agency: string | null }; Returns: Json }
+      admin_customers: { Args: Record<PropertyKey, never>; Returns: { id: string; name: string; created_at: string; locale: string; owner_email: string; members: number; last_sign_in_at: string; plan_id: string; plan_name: string; price_cents: number; sites_limit: number; plan_status: string; trial_ends_at: string; period_end: string; cancel_at_end: boolean; stripe_customer_id: string; stripe_subscription_id: string; stripe_synced_at: string; sites: number; sites_connected: number }[] }
+      admin_loose_users: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; created_at: string; confirmed: boolean; last_sign_in_at: string; intended_plan: string }[] }
       advance_update_run: { Args: { p_run: string | null; p_worker: string | null; p_status: string | null; p_step_state?: Json | null; p_verdict?: string | null; p_reason_key?: string | null; p_reason_params?: Json | null; p_items?: Json | null }; Returns: undefined }
       agency_owner_email: { Args: { p_agency: string | null }; Returns: string }
       apply_stripe_subscription: { Args: { p_event_id: string | null; p_event_type: string | null; p_event_created: string | null; p_agency: string | null; p_customer: string | null; p_subscription: string | null; p_price: string | null; p_status: string | null; p_period_end: string | null; p_cancel_at_end: boolean | null }; Returns: boolean }
@@ -1152,6 +1170,7 @@ export type Database = {
       delete_agency: { Args: { p_confirm: string | null }; Returns: { user_id: string }[] }
       ingest_heartbeat: { Args: { p_site: string | null; p_snapshot: Json | null; p_components: Json | null }; Returns: number }
       invite_member: { Args: { p_email: string | null; p_role: string | null }; Returns: string }
+      is_platform_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
       list_members: { Args: Record<PropertyKey, never>; Returns: { user_id: string; email: string; role: string; created_at: string }[] }
       ops_problems: { Args: Record<PropertyKey, never>; Returns: { key: string; detail: string }[] }
       ops_prune: { Args: Record<PropertyKey, never>; Returns: undefined }

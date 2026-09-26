@@ -1320,5 +1320,87 @@
     "error": "No se pudo eliminar. Inténtalo de nuevo o escribe a support@verploy.com.",
     "done": "Tu agencia y tu cuenta se han eliminado. Gracias por usar Verploy.",
     "memberNote": "¿Quieres que se elimine tu cuenta? Pide al propietario de tu agencia que te quite del equipo o escribe a support@verploy.com."
+  },
+  "admin": {
+    "nav": "Clientes",
+    "title": "Clientes",
+    "intro": "Todas las agencias que usan Verploy, con plan, estado de pago y uso. Solo lo ves tú como operador de Verploy. Importes sin IVA.",
+    "updated": "Datos de Stripe obtenidos {time}.",
+    "stripeUnavailable": "No se pudo contactar con Stripe; plan y estado vienen de la aplicación (vía el webhook de Stripe), sin última factura ni descuento.",
+    "kpi": {
+      "paying": "Clientes de pago",
+      "trials": "En prueba",
+      "trialsEnding": "{count, plural, =0 {ninguna termina esta semana} one {# termina esta semana} other {# terminan esta semana}}",
+      "late": "Con retraso",
+      "mrr": "MRR",
+      "stopped": "Cancelados este mes",
+      "noAgency": "Registrados sin agencia"
+    },
+    "status": {
+      "trial": "Prueba hasta el {date}",
+      "trial_ended": "Prueba vencida",
+      "active": "Activo",
+      "late": "Con retraso",
+      "cancels": "Cancelado (hasta fin de periodo)",
+      "stopped": "Detenido",
+      "free": "Gratis"
+    },
+    "filterAll": "Todos los estados",
+    "planAll": "Todos los planes",
+    "search": "Buscar agencia o correo",
+    "export": "Exportar CSV",
+    "col": {
+      "agency": "Agencia",
+      "plan": "Plan",
+      "status": "Estado",
+      "payment": "Última factura",
+      "next": "Próxima factura",
+      "sites": "Sitios",
+      "since": "Cliente desde",
+      "mrr": "MRR"
+    },
+    "sort": "Ordenar",
+    "sortBy": {
+      "since": "Cliente desde",
+      "mrr": "MRR",
+      "next": "Próxima factura",
+      "status": "Estado"
+    },
+    "none": "No se encontraron clientes.",
+    "invoice": {
+      "paid": "Pagada",
+      "open": "Pendiente",
+      "uncollectible": "Fallida",
+      "void": "Anulada",
+      "draft": "Borrador"
+    },
+    "retry": "{attempts, plural, one {# intento} other {# intentos}}, próximo intento {date}",
+    "discount": "{name}: {percent} % de descuento",
+    "loose": {
+      "title": "Registrados, aún sin agencia",
+      "intro": "Cuentas creadas que (aún) no tienen agencia.",
+      "confirmed": "Confirmado",
+      "unconfirmed": "Aún sin confirmar",
+      "plan": "Plan elegido: {plan}",
+      "none": "Todos los registrados tienen también una agencia."
+    },
+    "detail": {
+      "back": "Volver a clientes",
+      "account": "Cuenta",
+      "members": "Equipo",
+      "sites": "Sitios",
+      "billing": "Suscripción",
+      "owner": "Propietario",
+      "locale": "Idioma",
+      "created": "Creada",
+      "lastSignIn": "Último acceso",
+      "never": "nunca",
+      "openStripe": "Ver en Stripe",
+      "openInvoice": "Ver factura",
+      "noStripe": "Aún no es cliente de Stripe (no se inició ningún pago).",
+      "period": "Periodo actual hasta el {date}",
+      "usage": "{used} de {limit} sitios",
+      "noSites": "Aún no hay sitios."
+    }
   }
 }

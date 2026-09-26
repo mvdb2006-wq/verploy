@@ -113,3 +113,26 @@ describe('melding bij een nieuwe registratie', () => {
       expect((await expectError(db, `select * from public.pending_signup_notices(5)`)).code).toBe('42501')
     }))
 })
+
+describe('klantoverzicht (platformbeheerder)', () => {
+  it('alleen een platformbeheerder ziet alle bureaus en losse aanmeldingen', () =>
+    inTx(async db => {
+      const a = await seedAgency(db, 'klant')
+      await actAs(db, { role: 'authenticated', id: a.owner.id, email: a.owner.email })
+      expect((await db.query(`select public.is_platform_admin() v`)).rows[0].v).toBe(false)
+      expect((await expectError(db, `select * from public.admin_customers()`)).code).toBe('42501')
+      expect((await expectError(db, `select * from public.admin_loose_users()`)).code).toBe('42501')
+      expect((await expectError(db, `select public.admin_customer($1)`, [a.id])).code).toBe('42501')
+      await asSuper(db)
+      await db.query(`insert into public.platform_admins (user_id) values ($1)`, [a.owner.id])
+      const loose = (await db.query(`insert into auth.users (id, email, aud, role) values (gen_random_uuid(), 'los@example.test', 'authenticated', 'authenticated') returning id`)).rows[0].id
+      await actAs(db, { role: 'authenticated', id: a.owner.id, email: a.owner.email })
+      const rows = (await db.query(`select * from public.admin_customers() where id = $1`, [a.id])).rows
+      expect(rows[0]).toMatchObject({ name: 'Bureau klant', owner_email: a.owner.email, members: 3, sites: 2, plan_id: 'studio' })
+      expect((await db.query(`select email from public.admin_loose_users() where user_id = $1`, [loose])).rows).toEqual([{ email: 'los@example.test' }])
+      const detail = (await db.query(`select public.admin_customer($1) d`, [a.id])).rows[0].d
+      expect(detail.members).toHaveLength(3)
+      expect(detail.sites).toHaveLength(2)
+      await asSuper(db)
+    }))
+})

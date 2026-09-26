@@ -1320,5 +1320,87 @@
     "error": "Verwijderen lukte niet. Probeer het opnieuw of mail support@verploy.com.",
     "done": "Je bureau en account zijn verwijderd. Bedankt dat je Verploy hebt gebruikt.",
     "memberNote": "Wil je je account laten verwijderen? Vraag de eigenaar van je bureau om je uit het team te halen, of mail support@verploy.com."
+  },
+  "admin": {
+    "nav": "Klanten",
+    "title": "Klanten",
+    "intro": "Alle bureaus die Verploy gebruiken, met plan, betaalstatus en gebruik. Alleen zichtbaar voor jou als beheerder van Verploy. Bedragen exclusief btw.",
+    "updated": "Stripe-gegevens opgehaald {time}.",
+    "stripeUnavailable": "Stripe was niet bereikbaar; plan en status komen uit de app (via de Stripe-webhook), zonder laatste factuur en korting.",
+    "kpi": {
+      "paying": "Betalende klanten",
+      "trials": "In proef",
+      "trialsEnding": "{count, plural, =0 {geen die deze week aflopen} one {# loopt deze week af} other {# lopen deze week af}}",
+      "late": "Te laat",
+      "mrr": "MRR",
+      "stopped": "Opgezegd deze maand",
+      "noAgency": "Aangemeld zonder bureau"
+    },
+    "status": {
+      "trial": "Proef t/m {date}",
+      "trial_ended": "Proef verlopen",
+      "active": "Actief",
+      "late": "Te laat",
+      "cancels": "Opgezegd (loopt af)",
+      "stopped": "Gestopt",
+      "free": "Gratis"
+    },
+    "filterAll": "Alle statussen",
+    "planAll": "Alle plannen",
+    "search": "Zoek op bureau of e-mail",
+    "export": "CSV exporteren",
+    "col": {
+      "agency": "Bureau",
+      "plan": "Plan",
+      "status": "Status",
+      "payment": "Laatste factuur",
+      "next": "Volgende factuur",
+      "sites": "Sites",
+      "since": "Klant sinds",
+      "mrr": "MRR"
+    },
+    "sort": "Sorteren",
+    "sortBy": {
+      "since": "Klant sinds",
+      "mrr": "MRR",
+      "next": "Volgende factuur",
+      "status": "Status"
+    },
+    "none": "Geen klanten gevonden.",
+    "invoice": {
+      "paid": "Betaald",
+      "open": "Openstaand",
+      "uncollectible": "Mislukt",
+      "void": "Geannuleerd",
+      "draft": "Concept"
+    },
+    "retry": "{attempts, plural, one {# poging} other {# pogingen}}, volgende poging {date}",
+    "discount": "{name}: {percent}% korting",
+    "loose": {
+      "title": "Aangemeld, nog geen bureau",
+      "intro": "Accounts die wel zijn aangemaakt, maar (nog) geen bureau hebben.",
+      "confirmed": "Bevestigd",
+      "unconfirmed": "Nog niet bevestigd",
+      "plan": "Gekozen plan: {plan}",
+      "none": "Iedereen die zich aanmeldde, heeft ook een bureau."
+    },
+    "detail": {
+      "back": "Terug naar klanten",
+      "account": "Account",
+      "members": "Team",
+      "sites": "Sites",
+      "billing": "Abonnement",
+      "owner": "Eigenaar",
+      "locale": "Taal",
+      "created": "Aangemaakt",
+      "lastSignIn": "Laatst ingelogd",
+      "never": "nooit",
+      "openStripe": "Bekijk in Stripe",
+      "openInvoice": "Factuur bekijken",
+      "noStripe": "Nog geen Stripe-klant (geen betaling gestart).",
+      "period": "Huidige periode tot {date}",
+      "usage": "{used} van {limit} sites",
+      "noSites": "Nog geen sites."
+    }
   }
 }

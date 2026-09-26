@@ -1,17 +1,19 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, Globe, Inbox, LayoutDashboard, LogOut, Settings, ShieldCheck, RefreshCw } from 'lucide-react'
+import { FileText, Globe, Inbox, LayoutDashboard, LogOut, Settings, ShieldCheck, RefreshCw, Users } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { signOut } from '../(auth)/actions'
 
-export function Sidebar({ agencyName, email, labels, inboxCount, version }: {
+export function Sidebar({ agencyName, email, labels, inboxCount, version, isAdmin = false }: {
   agencyName: string
   email: string
   inboxCount: number
   version: string
-  labels: { overview: string; inbox: string; sites: string; updates: string; security: string; reports: string; settings: string; signOut: string; agency: string; mainNav: string; version: string }
+  /** Beheerder van Verploy: extra menu-item Klanten. */
+  isAdmin?: boolean
+  labels: { overview: string; inbox: string; sites: string; updates: string; security: string; reports: string; settings: string; signOut: string; agency: string; mainNav: string; version: string; customers: string }
 }) {
   const path = usePathname()
   const nav = [
@@ -22,6 +24,7 @@ export function Sidebar({ agencyName, email, labels, inboxCount, version }: {
     { href: '/security', label: labels.security, icon: ShieldCheck, active: path.startsWith('/security'), count: 0 },
     { href: '/reports', label: labels.reports, icon: FileText, active: path.startsWith('/reports'), count: 0 },
     { href: '/settings', label: labels.settings, icon: Settings, active: path.startsWith('/settings'), count: 0 },
+    ...(isAdmin ? [{ href: '/admin/customers', label: labels.customers, icon: Users, active: path.startsWith('/admin'), count: 0 }] : []),
   ]
   return (
     <aside className="flex shrink-0 flex-col border-b border-border bg-surface md:sticky md:top-0 md:h-dvh md:w-60 md:border-r md:border-b-0">

@@ -4,6 +4,11 @@ Bij elke uitrol gaat het versienummer omhoog (semver): patch voor een fix, minor
 voor een breuk. De bovenste versie hier moet gelijk zijn aan `version` in package.json (de test
 `src/lib/version.test.ts` bewaakt dat). In de app staat onderin de zijbalk "Verploy x.y.z · <build>".
 
+## 2.7.0 — 26-09-2026
+- Klantoverzicht voor de beheerder van Verploy (menu "Klanten", alleen voor platformbeheerders): alle bureaus met
+  plan, status (proef, actief, te laat, opgezegd, gestopt, gratis), laatste factuur, MRR, sites; zoeken, filteren,
+  sorteren, CSV-export, detail per klant met link naar Stripe; aanmeldingen zonder bureau apart.
+
 ## 2.6.0 — 26-09-2026
 - Jouw rol zichtbaar onder Mijn account en op Team; de eigenaar gemarkeerd in de ledenlijst.
 - Abonnement: één status (gratis, proef of betaald plan); "Huidig" alleen bij een lopend Stripe-abonnement.

@@ -1320,5 +1320,87 @@
     "error": "Löschen hat nicht geklappt. Versuche es erneut oder schreibe an support@verploy.com.",
     "done": "Deine Agentur und dein Konto wurden gelöscht. Danke, dass du Verploy genutzt hast.",
     "memberNote": "Möchtest du dein Konto löschen lassen? Bitte den Inhaber deiner Agentur, dich aus dem Team zu entfernen, oder schreibe an support@verploy.com."
+  },
+  "admin": {
+    "nav": "Kunden",
+    "title": "Kunden",
+    "intro": "Alle Agenturen, die Verploy nutzen, mit Tarif, Zahlungsstatus und Nutzung. Nur für dich als Betreiber von Verploy sichtbar. Beträge ohne MwSt.",
+    "updated": "Stripe-Daten abgerufen {time}.",
+    "stripeUnavailable": "Stripe war nicht erreichbar; Tarif und Status stammen aus der App (über den Stripe-Webhook), ohne letzte Rechnung und Rabatt.",
+    "kpi": {
+      "paying": "Zahlende Kunden",
+      "trials": "In der Testphase",
+      "trialsEnding": "{count, plural, =0 {keine endet diese Woche} one {# endet diese Woche} other {# enden diese Woche}}",
+      "late": "Überfällig",
+      "mrr": "MRR",
+      "stopped": "Diesen Monat gekündigt",
+      "noAgency": "Registriert ohne Agentur"
+    },
+    "status": {
+      "trial": "Testphase bis {date}",
+      "trial_ended": "Testphase abgelaufen",
+      "active": "Aktiv",
+      "late": "Überfällig",
+      "cancels": "Gekündigt (läuft aus)",
+      "stopped": "Beendet",
+      "free": "Kostenlos"
+    },
+    "filterAll": "Alle Status",
+    "planAll": "Alle Tarife",
+    "search": "Agentur oder E-Mail suchen",
+    "export": "CSV exportieren",
+    "col": {
+      "agency": "Agentur",
+      "plan": "Tarif",
+      "status": "Status",
+      "payment": "Letzte Rechnung",
+      "next": "Nächste Rechnung",
+      "sites": "Websites",
+      "since": "Kunde seit",
+      "mrr": "MRR"
+    },
+    "sort": "Sortieren",
+    "sortBy": {
+      "since": "Kunde seit",
+      "mrr": "MRR",
+      "next": "Nächste Rechnung",
+      "status": "Status"
+    },
+    "none": "Keine Kunden gefunden.",
+    "invoice": {
+      "paid": "Bezahlt",
+      "open": "Offen",
+      "uncollectible": "Fehlgeschlagen",
+      "void": "Storniert",
+      "draft": "Entwurf"
+    },
+    "retry": "{attempts, plural, one {# Versuch} other {# Versuche}}, nächster Versuch {date}",
+    "discount": "{name}: {percent}% Rabatt",
+    "loose": {
+      "title": "Registriert, noch keine Agentur",
+      "intro": "Konten, die angelegt wurden, aber (noch) keine Agentur haben.",
+      "confirmed": "Bestätigt",
+      "unconfirmed": "Noch nicht bestätigt",
+      "plan": "Gewählter Tarif: {plan}",
+      "none": "Alle Registrierten haben auch eine Agentur."
+    },
+    "detail": {
+      "back": "Zurück zu den Kunden",
+      "account": "Konto",
+      "members": "Team",
+      "sites": "Websites",
+      "billing": "Abonnement",
+      "owner": "Inhaber",
+      "locale": "Sprache",
+      "created": "Angelegt",
+      "lastSignIn": "Zuletzt angemeldet",
+      "never": "nie",
+      "openStripe": "In Stripe ansehen",
+      "openInvoice": "Rechnung ansehen",
+      "noStripe": "Noch kein Stripe-Kunde (keine Zahlung gestartet).",
+      "period": "Aktueller Zeitraum bis {date}",
+      "usage": "{used} von {limit} Websites",
+      "noSites": "Noch keine Websites."
+    }
   }
 }
